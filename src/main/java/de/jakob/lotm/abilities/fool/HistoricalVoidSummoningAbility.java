@@ -90,6 +90,7 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
 
         canBeCopied = false;
         canBeUsedByNPC = false;
+        cannotBeStolen = true;
     }
 
     @Override

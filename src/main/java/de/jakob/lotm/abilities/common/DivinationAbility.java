@@ -38,6 +38,7 @@ public class DivinationAbility extends SelectableAbility {
 
         canBeCopied = false;
         canBeUsedByNPC = false;
+        cannotBeStolen = true;
     }
 
     @Override

@@ -2,7 +2,7 @@ package de.jakob.lotm.abilities.error;
 
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.SelectableAbility;
-import de.jakob.lotm.abilities.error.handler.AbilityTheftHandler;
+import de.jakob.lotm.abilities.error.handler.TheftHandler;
 import de.jakob.lotm.damage.ModDamageTypes;
 import de.jakob.lotm.rendering.effectRendering.EffectManager;
 import de.jakob.lotm.util.BeyonderData;
@@ -94,7 +94,7 @@ public class MundaneConceptualTheft extends SelectableAbility {
 
         EffectManager.playEffect(EffectManager.Effect.CONCEPTUAL_THEFT, target.getX(), target.getEyeY(), target.getZ(), serverLevel, entity);
 
-        if(BeyonderData.isBeyonder(target) && AbilityTheftHandler.doesTheftFail(entity, target, random)) {
+        if(BeyonderData.isBeyonder(target) && TheftHandler.doesTheftFail(entity, target, random)) {
             AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.mundane_conceptual_theft.theft_failed").withColor(0x4742c9));
             return;
         }
