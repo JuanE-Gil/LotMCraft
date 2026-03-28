@@ -357,7 +357,6 @@
   "ability.lotmcraft.grafting.resisted": "The target's Sequence is too high to be Grafted",
   "ability.lotmcraft.grafting.no_target": "No Target found",
 
-
   "lotmcraft.midnight_poem_ability": "Midnight Poem",
   "lotmcraft.midnight_poem_ability.description": "Recite a poem related to night to either put them to sleep or attack",
   "ability.lotmcraft.midnight_poem.lullaby": "Lullaby",
@@ -617,7 +616,6 @@
   "lotmcraft.identity_avatar_ability": "Identity Avatar",
   "lotmcraft.identity_avatar_ability.description": "Split of Virtual Persona and weave it into an Avatar",
 
-
   "lotmcraft.psyche_storm_ability": "Psyche Storm",
   "lotmcraft.psyche_storm_ability.description": " Create an area of effect that cause your enemies to loose control",
   "lotmcraft.calamity_attraction_ability": "Calamity Attraction",
@@ -703,6 +701,11 @@
   "lotmcraft.conceptual_theft_ability.description": "Steal Concepts, Steal Day, making it Night, or Steal Night, making it Day. You can also steal an Area and save it in your inventory",
   "ability.lotmcraft.conceptual_theft.day_night": "Steal Day/Night",
   "ability.lotmcraft.conceptual_theft.area": "Steal Area",
+  "ability.lotmcraft.conceptual_theft.digestion": "Steal Digestion",
+  "ability.lotmcraft.conceptual_theft.sanity": "Steal Sanity",
+  "ability.lotmcraft.conceptual_theft.no_target": "Target is not found",
+  "ability.lotmcraft.conceptual_theft.failed.digestion": "Failed to steal digestion",
+  "ability.lotmcraft.conceptual_theft.failed.sanity": "Failed to steal sanity",
   "lotmcraft.time_manipulation_ability": "Time Manipulation",
   "lotmcraft.time_manipulation_ability.description": "Manipulate Time in an area in certain ways",
   "ability.lotmcraft.time_manipulation.stop_time": "Stop Time",

@@ -2,7 +2,8 @@
   "type": "neoforge:remove_spawns",
   "biomes": [
     "minecraft:mushroom_fields",
-    "minecraft:deep_dark"
+    "minecraft:deep_dark",
+    "terralith:mirage_isles"
   ],
   "entity_types": "lotmcraft:beyonder_npc"
 }

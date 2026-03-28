@@ -17,6 +17,7 @@ public class CycleOfFateAbility extends SelectableAbility {
         super(id, 1);
         canBeCopied = false;
         canBeUsedByNPC = false;
+        cannotBeStolen = true;
     }
 
     @Override
