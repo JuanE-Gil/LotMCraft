@@ -254,8 +254,9 @@ public class TimeChangeEntity extends Entity {
                 player.getAbilities().mayfly = false;
                 player.getAbilities().flying = false;
                 player.getAbilities().instabuild = false;
-                var pos = player.position();
-                player.teleportTo(pos.x(), pos.y(), pos.z());
+
+                player.setDeltaMovement(new Vec3(0, 0, 0));
+                player.hurtMarked = true;
             }
         }
     }
