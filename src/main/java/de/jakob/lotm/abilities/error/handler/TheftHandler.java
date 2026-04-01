@@ -436,10 +436,9 @@ public class TheftHandler {
     }
 
     public static float getSeqDifferenceMultiplier(int userSeq, int targetSeq){
-        float diff = targetSeq - userSeq;
-        diff = diff < 0 ? 0 : diff;
-
-        return 0.05f + 0.05f * diff;
+        int diff = Math.abs(targetSeq - userSeq);
+        float multiplier = 1.0f - diff * 0.15f;
+        return Math.max(0.1f, multiplier);
     }
 
     public static void performSanityTheft(LivingEntity entity, LivingEntity target, Random random){
@@ -454,16 +453,18 @@ public class TheftHandler {
         }
 
         float sanityToSteal = getSeqDifferenceMultiplier(BeyonderData.getSequence(entity), BeyonderData.getSequence(target))
-                + (float) (BeyonderData.getMultiplier(entity) / 20);
+                * (float) (BeyonderData.getMultiplier(entity) / 20);
 
         var targetSanity = target.getData(ModAttachments.SANITY_COMPONENT);
         var entitySanity = entity.getData(ModAttachments.SANITY_COMPONENT);
 
-        float tarSanVal = targetSanity.getSanity();
-        float userSanVal = entitySanity.getSanity();
+        float targetSanityValue = targetSanity.getSanity();
+        float userSanityValue = entitySanity.getSanity();
 
-        targetSanity.setSanityAndSync(Math.max(tarSanVal - sanityToSteal, 0.0f), target);
-        entitySanity.setSanityAndSync(Math.max(userSanVal + sanityToSteal, 1.0f), entity);
+        LOTMCraft.LOGGER.info("sanSt: {}, tar: {}, user: {}", sanityToSteal, targetSanityValue, userSanityValue);
+
+        targetSanity.setSanityAndSync(Math.max(targetSanityValue - sanityToSteal, 0.0f), target);
+        entitySanity.setSanityAndSync(Math.max(userSanityValue + (sanityToSteal/2.0f), 1.0f), entity);
     }
 
     public static void performDigestionTheft(LivingEntity entity, LivingEntity target, Random random){
@@ -471,6 +472,7 @@ public class TheftHandler {
             AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.ability_theft.not_beyonder").withColor(0x6d32a8));
             return;
         }
+
 
         if (doesTheftFail(entity, target, random) || !(target instanceof ServerPlayer)) {
             AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.conceptual_theft.failed.digestion").withColor(0x6d32a8));
@@ -480,13 +482,13 @@ public class TheftHandler {
         int userSeq = BeyonderData.getSequence(entity);
         int targetSeq = BeyonderData.getSequence(target);
 
-        float digestionToSteal = getSeqDifferenceMultiplier(userSeq, targetSeq)
-                + (float) (BeyonderData.getMultiplier(entity) / 20);
+        float baseDigestion = (float)(BeyonderData.getMultiplier(entity) / 20);
+        float multiplier = getSeqDifferenceMultiplier(userSeq, targetSeq);
+        float digestionToSteal = baseDigestion * multiplier;
 
-        BeyonderData.digest((ServerPlayer) target, (-digestionToSteal), false);
+        LOTMCraft.LOGGER.info("base: {}, mult: {}, ds: {}", baseDigestion, multiplier, digestionToSteal);
 
-        int diff = Math.min(targetSeq - userSeq, 0)/10;
-
-        BeyonderData.digest((ServerPlayer) entity, (digestionToSteal * (0.1f + diff)), false);
+        BeyonderData.digest((ServerPlayer) target, -digestionToSteal, false);
+        BeyonderData.digest((ServerPlayer) entity, (digestionToSteal/2.0f), false);
     }
 }
