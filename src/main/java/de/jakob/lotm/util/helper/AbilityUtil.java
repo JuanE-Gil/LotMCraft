@@ -231,7 +231,8 @@ public class AbilityUtil {
         }
 
         // Still check these even for support abilities
-        if (DeceitAbility.cannotBeTargeted.contains(target.getUUID())) {
+        if (DeceitAbility.cannotBeTargeted.contains(target.getUUID()) &&
+                BeyonderData.getSequence(source) > BeyonderData.getSequence(target)) {
             return false;
         }
 
