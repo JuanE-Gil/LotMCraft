@@ -9,7 +9,7 @@
   "spawners": [
     {
       "type": "lotmcraft:spirit_bizarro_bane",
-      "weight": 5,
+      "weight": 20,
       "minCount": 1,
       "maxCount": 5,
       "category": "creature"

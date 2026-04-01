@@ -1,10 +1,13 @@
 package de.jakob.lotm.abilities.abyss;
 
+import de.jakob.lotm.abilities.core.AbilityUsedEvent;
 import de.jakob.lotm.abilities.core.SelectableAbility;
+import de.jakob.lotm.abilities.core.interaction.InteractionHandler;
 import de.jakob.lotm.entity.ModEntities;
 import de.jakob.lotm.entity.custom.AvatarEntity;
 import de.jakob.lotm.rendering.effectRendering.EffectManager;
 import de.jakob.lotm.util.BeyonderData;
+import de.jakob.lotm.util.data.Location;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.AllyUtil;
 import de.jakob.lotm.util.helper.DamageLookup;
@@ -22,6 +25,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.common.NeoForge;
 import org.joml.Vector3f;
 
 import java.util.*;
@@ -33,6 +37,7 @@ public class DemonicSpellsAbility extends SelectableAbility {
 
     public DemonicSpellsAbility(String id) {
         super(id, 3f);
+        postsUsedAbilityEventManually = true;
     }
 
     @Override
@@ -78,18 +83,25 @@ public class DemonicSpellsAbility extends SelectableAbility {
         double swampRadius = 15;
         double damage = DamageLookup.lookupDamage(4, 0.7) * multiplier(entity);
 
-        AbilityUtil.damageNearbyEntities(level, entity, swampRadius, damage, swampCenter, true, false);
+        ServerScheduler.scheduleForDuration(0, 20, 20 * 8, () -> {
+            if(InteractionHandler.isInteractionPossible(new Location(swampCenter, level), "purification", BeyonderData.getSequence(entity))) {
+                return;
+            }
 
-        AbilityUtil.getNearbyEntities(entity, level, swampCenter, swampRadius)
-                .stream()
-                .filter(target -> AbilityUtil.mayDamage(entity, target) && !AllyUtil.isAlly(target, entity.getUUID()))
-                .forEach(target -> {
-                    target.addEffect(new MobEffectInstance(MobEffects.POISON, 20 * 6, 2, false, false));
-                    target.addEffect(new MobEffectInstance(MobEffects.WITHER, 20 * 4, 1, false, false));
-                    target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20 * 4, 2, false, false));
-                });
+            AbilityUtil.damageNearbyEntities(level, entity, swampRadius, damage, swampCenter, true, false);
+
+            AbilityUtil.getNearbyEntities(entity, level, swampCenter, swampRadius)
+                    .stream()
+                    .filter(target -> AbilityUtil.mayDamage(entity, target) && !AllyUtil.isAlly(target, entity.getUUID()))
+                    .forEach(target -> {
+                        target.addEffect(new MobEffectInstance(MobEffects.POISON, 20 * 6, 2, false, false));
+                        target.addEffect(new MobEffectInstance(MobEffects.WITHER, 20 * 4, 1, false, false));
+                        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20 * 4, 2, false, false));
+                    });
+        }, null, level, () -> AbilityUtil.getTimeInArea(entity, new Location(swampCenter, level)));
 
         EffectManager.playEffect(EffectManager.Effect.ACID_SWAMP, swampCenter.x, swampCenter.y, swampCenter.z, level);
+        NeoForge.EVENT_BUS.post(new AbilityUsedEvent(level, swampCenter, entity, this, new String[]{"poison"}, swampRadius, 20 * 8));
     }
 
     private void castFilthyIllusion(ServerLevel level, LivingEntity entity) {
@@ -112,6 +124,12 @@ public class DemonicSpellsAbility extends SelectableAbility {
             if (e instanceof Mob mob && mob.getTarget() != null
                     && mob.getTarget().getUUID().equals(entity.getUUID())) {
                 mob.setTarget(clone);
+            }
+        });
+
+        ServerScheduler.scheduleForDuration(0, 5, 20 * 8, () -> {
+            if(clone.isAlive() && InteractionHandler.isInteractionPossible(new Location(clone.position(), level), "light_strong", BeyonderData.getSequence(entity))) {
+                clone.discard();
             }
         });
 

@@ -1,7 +1,10 @@
 package de.jakob.lotm.abilities.abyss;
 
 import de.jakob.lotm.abilities.core.ToggleAbility;
+import de.jakob.lotm.abilities.core.interaction.InteractionHandler;
 import de.jakob.lotm.attachments.ModAttachments;
+import de.jakob.lotm.util.BeyonderData;
+import de.jakob.lotm.util.data.Location;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.ParticleUtil;
 import net.minecraft.core.particles.DustParticleOptions;
@@ -57,6 +60,12 @@ public class MindFogAbility extends ToggleAbility {
             double z = entity.getZ() + Math.sin(angle) * distance;
             DustParticleOptions particle = random.nextBoolean() ? fogDust : fogDustFaint;
             ParticleUtil.spawnParticles(serverLevel, particle, new Vec3(x, entity.getY() + 1, z), 1, 0.2, 0.02);
+        }
+
+        if (InteractionHandler.isInteractionPossible(new Location(entity.position(), level), "purification", BeyonderData.getSequence(entity)) ||
+            InteractionHandler.isInteractionPossible(new Location(entity.position(), level), "calming", BeyonderData.getSequence(entity))) {
+            cancel(serverLevel, entity);
+            return;
         }
 
         AbilityUtil.getNearbyEntities(entity, serverLevel, entity.position(), fogRadius)

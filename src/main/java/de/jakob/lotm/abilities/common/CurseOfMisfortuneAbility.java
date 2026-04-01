@@ -1,6 +1,7 @@
 package de.jakob.lotm.abilities.common;
 
 import de.jakob.lotm.abilities.core.Ability;
+import de.jakob.lotm.abilities.core.AbilityUsedEvent;
 import de.jakob.lotm.effect.ModEffects;
 import de.jakob.lotm.rendering.effectRendering.EffectManager;
 import de.jakob.lotm.util.helper.AbilityUtil;
@@ -13,6 +14,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.common.NeoForge;
 import org.joml.Vector3f;
 
 import java.util.HashMap;
@@ -21,7 +23,8 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class CurseOfMisfortuneAbility extends Ability {
     public CurseOfMisfortuneAbility(String id) {
-        super(id, 10);
+        super(id, 10, "unluck");
+        postsUsedAbilityEventManually = true;
     }
 
     @Override
@@ -72,5 +75,6 @@ public class CurseOfMisfortuneAbility extends Ability {
             return; // Full resistance – curse has no meaningful effect
         }
         target.addEffect(new MobEffectInstance(ModEffects.UNLUCK, 20 * 60 * 17, amplifier));
+        NeoForge.EVENT_BUS.post(new AbilityUsedEvent(serverLevel, target.position(), entity, target, this, interactionFlags, interactionRadius, interactionCacheTicks));
     }
 }

@@ -1,5 +1,6 @@
 package de.jakob.lotm.abilities.abyss;
 
+import de.jakob.lotm.abilities.core.AbilityUsedEvent;
 import de.jakob.lotm.abilities.core.SelectableAbility;
 import de.jakob.lotm.entity.custom.ability_entities.MeteorEntity;
 import de.jakob.lotm.rendering.effectRendering.EffectManager;
@@ -16,6 +17,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -84,6 +86,8 @@ public class FlamesOfTheAbyssAbility extends SelectableAbility {
                 serverLevel.addFreshEntity(meteor);
             }, serverLevel);
         }
+
+        NeoForge.EVENT_BUS.post(new AbilityUsedEvent((ServerLevel) level, targetPos, entity, this, new String[]{"explosion", "burning"}, 12, 20 * 10));
     }
 
     // ── Spell 2: Pillars of the Abyss ────────────────────────────────────────
@@ -124,5 +128,7 @@ public class FlamesOfTheAbyssAbility extends SelectableAbility {
                 EffectManager.playEffect(EffectManager.Effect.ABYSS_PILLAR, px, entity.getY(), pz, serverLevel);
             }
         }, serverLevel);
+
+        NeoForge.EVENT_BUS.post(new AbilityUsedEvent((ServerLevel) level, entity.position(), entity, this, new String[]{"corruption", "burning"}, 7, 20 * 3));
     }
 }

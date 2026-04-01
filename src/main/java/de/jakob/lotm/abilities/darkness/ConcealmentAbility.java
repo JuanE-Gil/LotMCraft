@@ -59,11 +59,6 @@ public class ConcealmentAbility extends SelectableAbility {
         }
     }
 
-    private static boolean isPreventedByWingsOfLight(LivingEntity entity) {
-        ToggleAbility wingsOfLight = (ToggleAbility) LOTMCraft.abilityHandler.getById("wings_of_light_ability");
-        return wingsOfLight != null && wingsOfLight.isActiveForEntity(entity);
-    }
-
     private void enterConcealedArea(Level level, LivingEntity entity) {
         if(!(level instanceof ServerLevel serverLevel)) {
             return;

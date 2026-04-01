@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@EventBusSubscriber(modid = LOTMCraft.MOD_ID)
+@EventBusSubscriber(modid = LOTMCraft.MOD_ID) // TODO: Rework, right now its pretty much only a loss of control and defiling seed is better
 public class MaliceSeedAbility extends Ability {
 
     // target UUID -> growth level (0-10)

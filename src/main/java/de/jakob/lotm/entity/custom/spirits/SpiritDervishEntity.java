@@ -196,7 +196,7 @@ public class SpiritDervishEntity extends Animal {
                         if (this.attackStep > 1) {
                             for(int i = 0; i < 2; ++i) {
                                 Vec3 spiritBallPos = this.dervish.position().offsetRandom(dervish.random, 1.5f);
-                                Vec3 spiritBallDir = livingentity.position().add(0, .5, 0).subtract(spiritBallPos).normalize();
+                                Vec3 spiritBallDir = livingentity.getEyePosition().subtract(spiritBallPos).normalize();
                                 SpiritBallEntity spiritBall = new SpiritBallEntity(this.dervish.level(), this.dervish, (float) this.dervish.getAttributeValue(Attributes.ATTACK_DAMAGE), spiritBallDir, 9);
                                 spiritBall.setPos(spiritBallPos);
                                 this.dervish.level().addFreshEntity(spiritBall);

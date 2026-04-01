@@ -20,6 +20,10 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import java.util.HashSet;
 import java.util.UUID;
 
+/**
+ * Interaction Flags that exist so far:
+ * "freezing", "burning", "purification", "drought", "light_source", "light_weak", "light_strong", "explosion", "poison", "calming", "water", "water_strong"
+ */
 @EventBusSubscriber(modid = LOTMCraft.MOD_ID)
 public class InteractionHandler {
 
