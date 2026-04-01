@@ -52,9 +52,13 @@ public class SealedArtifactHandler {
         String pathway = characteristic.getPathway();
         int sequence = characteristic.getSequence();
 
+        return createSealedArtifactData(pathway, sequence, baseItem);
+    }
+
+    public static SealedArtifactData createSealedArtifactData(String pathway, Integer sequence, String baseItem) {
         // Get 1-3 random abilities
         List<Ability> abilities = selectRandomAbilities(pathway, sequence);
-        
+
         // Create negative effect
         List<NegativeEffect> negativeEffect = NegativeEffect.createRandom(pathway, sequence, RANDOM, baseItem);
 

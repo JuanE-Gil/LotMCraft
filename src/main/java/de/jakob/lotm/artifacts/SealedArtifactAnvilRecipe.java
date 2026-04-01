@@ -55,11 +55,18 @@ public class SealedArtifactAnvilRecipe {
         result.set(ModDataComponents.SEALED_ARTIFACT_BASE_TYPE, baseType);
 
         // Generate sealed artifact data
-        SealedArtifactData data = SealedArtifactHandler.createSealedArtifactData(characteristic, baseType);
-        result.set(ModDataComponents.SEALED_ARTIFACT_DATA, data);
-        
+        //SealedArtifactData data = SealedArtifactHandler.createSealedArtifactData(characteristic, baseType);
+        //result.set(ModDataComponents.SEALED_ARTIFACT_DATA, data);
+
         // Initialize selected ability index
         result.set(ModDataComponents.SEALED_ARTIFACT_SELECTED, 0);
+
+        result.set(ModDataComponents.SEALED_ARTIFACT_BASE_TYPE, baseType);
+
+        result.set(ModDataComponents.SEALED_ARTIFACT_GENERATED_SEQ, characteristic.getSequence());
+        result.set(ModDataComponents.SEALED_ARTIFACT_GENERATED_PATH, characteristic.getPathway());
+
+        result.set(ModDataComponents.SEALED_ARTIFACT_GENERATED, false);
 
         // Set the result
         event.setOutput(result);
@@ -76,4 +83,5 @@ public class SealedArtifactAnvilRecipe {
         // Material cost is handled automatically by the anvil
         event.setMaterialCost(1);
     }
+
 }

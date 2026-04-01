@@ -9,8 +9,10 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AnvilMenu;
 import net.minecraft.world.item.Item;
@@ -75,6 +77,27 @@ public class SealedArtifactItem extends Item {
         addAbilityList(tooltipComponents, data);
         addDivider(tooltipComponents);
         addNegativeEffects(tooltipComponents, data);
+    }
+
+    @Override
+    public void inventoryTick(ItemStack stack, Level level, Entity entity, int slot, boolean selected){
+        if (level.isClientSide) return;
+
+        if (!(entity instanceof ServerPlayer player)) return;
+
+        boolean generated = stack.getOrDefault(ModDataComponents.SEALED_ARTIFACT_GENERATED, false);
+        if (generated) return;
+
+        String baseType = stack.get(ModDataComponents.SEALED_ARTIFACT_BASE_TYPE);
+        Integer sequence = stack.get(ModDataComponents.SEALED_ARTIFACT_GENERATED_SEQ);
+        String path = stack.get(ModDataComponents.SEALED_ARTIFACT_GENERATED_PATH);
+
+        if(baseType == null || sequence == null || path == null) return;
+
+        SealedArtifactData data = SealedArtifactHandler.createSealedArtifactData(path, sequence, baseType);
+
+        stack.set(ModDataComponents.SEALED_ARTIFACT_DATA, data);
+        stack.set(ModDataComponents.SEALED_ARTIFACT_GENERATED, true);
     }
 
 // ── Sections ────────────────────────────────────────────────
