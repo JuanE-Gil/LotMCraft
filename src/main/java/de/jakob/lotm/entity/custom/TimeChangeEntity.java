@@ -6,6 +6,7 @@ import de.jakob.lotm.util.data.Location;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.ParticleUtil;
 import de.jakob.lotm.util.scheduling.ServerScheduler;
+import net.minecraft.client.multiplayer.chat.report.ReportEnvironment;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -13,17 +14,20 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import org.joml.Vector3f;
 
 import java.util.*;
@@ -219,12 +223,14 @@ public class TimeChangeEntity extends Entity {
     public static void onEntityTickPre(EntityTickEvent.Pre event) {
         if (event.getEntity().level().isClientSide) return;
 
-        UUID uuid = event.getEntity().getUUID();
+        Entity entity = event.getEntity();
+        if (entity instanceof ServerPlayer) return;
+
+        UUID uuid = entity.getUUID();
         Float multiplier = controlledEntities.get(uuid);
         if (multiplier == null) return;
 
         float acc = tickAccumulators.getOrDefault(uuid, 0f) + multiplier;
-
         if (acc >= 1.0f) {
             tickAccumulators.put(uuid, acc - 1.0f);
         } else {
@@ -234,18 +240,39 @@ public class TimeChangeEntity extends Entity {
     }
 
     @SubscribeEvent
+    public static void onPlayerTick(PlayerTickEvent.Pre event) {
+        if(!(event.getEntity().level() instanceof ServerLevel)) return;
+
+        var player = event.getEntity();
+
+        if (controlledEntities.containsKey(player.getUUID())) {
+            float multiplier = controlledEntities.get(player.getUUID());
+
+            if (multiplier <= 0.001f) { // time stop
+                player.setDeltaMovement(Vec3.ZERO);
+                player.setOnGround(true);
+                player.getAbilities().mayfly = false;
+                player.getAbilities().flying = false;
+                player.getAbilities().instabuild = false;
+                var pos = player.position();
+                player.teleportTo(pos.x(), pos.y(), pos.z());
+            }
+        }
+    }
+
+    @SubscribeEvent
     public static void onEntityTickPost(EntityTickEvent.Post event) {
         if (event.getEntity().level().isClientSide) return;
 
-        UUID uuid = event.getEntity().getUUID();
+        Entity entity = event.getEntity();
+        UUID uuid = entity.getUUID();
         if (!controlledEntities.containsKey(uuid)) return;
 
         float acc = tickAccumulators.getOrDefault(uuid, 0f);
         while (acc >= 1.0f) {
-            event.getEntity().tick();
+            entity.tick();
             acc -= 1.0f;
         }
-        tickAccumulators.put(uuid, acc);
     }
 
     // ─── Synched data getters/setters ────────────────────────────────────────────

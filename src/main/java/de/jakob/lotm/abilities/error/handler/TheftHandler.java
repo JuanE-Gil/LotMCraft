@@ -452,8 +452,8 @@ public class TheftHandler {
             return;
         }
 
-        float sanityToSteal = getSeqDifferenceMultiplier(BeyonderData.getSequence(entity), BeyonderData.getSequence(target))
-                * (float) (BeyonderData.getMultiplier(entity) / 20);
+        float baseSanity = (float) BeyonderData.getMultiplier(entity) / 20;
+        float sanityToSteal = getSeqDifferenceMultiplier(BeyonderData.getSequence(entity), BeyonderData.getSequence(target)) * baseSanity;
 
         var targetSanity = target.getData(ModAttachments.SANITY_COMPONENT);
         var entitySanity = entity.getData(ModAttachments.SANITY_COMPONENT);
@@ -463,7 +463,7 @@ public class TheftHandler {
 
         LOTMCraft.LOGGER.info("sanSt: {}, tar: {}, user: {}", sanityToSteal, targetSanityValue, userSanityValue);
 
-        targetSanity.setSanityAndSync(Math.max(targetSanityValue - sanityToSteal, 0.0f), target);
+        targetSanity.setSanityAndSync(Math.max(targetSanityValue - baseSanity, 0.0f), target);
         entitySanity.setSanityAndSync(Math.max(userSanityValue + (sanityToSteal/2.0f), 1.0f), entity);
     }
 
@@ -488,7 +488,7 @@ public class TheftHandler {
 
         LOTMCraft.LOGGER.info("base: {}, mult: {}, ds: {}", baseDigestion, multiplier, digestionToSteal);
 
-        BeyonderData.digest((ServerPlayer) target, -digestionToSteal, false);
+        BeyonderData.digest((ServerPlayer) target, -baseDigestion, false);
         BeyonderData.digest((ServerPlayer) entity, (digestionToSteal/2.0f), false);
     }
 }
