@@ -82,6 +82,10 @@ public class LOTMCraft
     public static KeyMapping returnToMainBody;
     public static KeyMapping openArtifactWheel;
     public static KeyMapping nextArtifactAbilityKey;
+    public static KeyMapping openSharedAbilityWheelKey;
+    public static KeyMapping useSharedAbilityKey;
+    public static KeyMapping nextSharedAbilityKey;
+    public static KeyMapping previousSharedAbilityKey;
 
     public static KeyMapping useAbilityBarAbility1;
     public static KeyMapping useAbilityBarAbility2;

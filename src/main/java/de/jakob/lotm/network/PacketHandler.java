@@ -304,6 +304,18 @@ public class PacketHandler {
         );
 
         registrar.playToClient(
+                PendingTeamInvitePacket.TYPE,
+                PendingTeamInvitePacket.STREAM_CODEC,
+                PendingTeamInvitePacket::handle
+        );
+
+        registrar.playToClient(
+                SyncSharedAbilitiesDataPacket.TYPE,
+                SyncSharedAbilitiesDataPacket.STREAM_CODEC,
+                SyncSharedAbilitiesDataPacket::handle
+        );
+
+        registrar.playToClient(
                 RemoveMovableEffectPacket.TYPE,
                 RemoveMovableEffectPacket.STREAM_CODEC,
                 RemoveMovableEffectPacket::handle
@@ -481,6 +493,18 @@ public class PacketHandler {
         );
 
         registrar.playToServer(
+                SyncSharedAbilitiesPacket.TYPE,
+                SyncSharedAbilitiesPacket.STREAM_CODEC,
+                SyncSharedAbilitiesPacket::handle
+        );
+
+        registrar.playToServer(
+                RequestSharedAbilitiesPacket.TYPE,
+                RequestSharedAbilitiesPacket.STREAM_CODEC,
+                RequestSharedAbilitiesPacket::handle
+        );
+
+        registrar.playToServer(
                 UpdateSelectedAbilityPacket.TYPE,
                 UpdateSelectedAbilityPacket.STREAM_CODEC,
                 UpdateSelectedAbilityPacket::handle
@@ -490,6 +514,12 @@ public class PacketHandler {
                 UseSelectedAbilityPacket.TYPE,
                 UseSelectedAbilityPacket.STREAM_CODEC,
                 UseSelectedAbilityPacket::handle
+        );
+
+        registrar.playToServer(
+                UseSharedAbilityPacket.TYPE,
+                UseSharedAbilityPacket.STREAM_CODEC,
+                UseSharedAbilityPacket::handle
         );
 
         registrar.playToServer(
