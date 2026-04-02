@@ -41,6 +41,8 @@ public class MobEvents {
         else if(!BeyonderData.beyonderMap.check(npc.getPathway(), npc.getSequence())){
             event.setResult(MobSpawnEvent.PositionCheck.Result.FAIL);
         }
+        else if(pos.getY() >= 130 || pos.getY() <= 30)
+            event.setResult(MobSpawnEvent.PositionCheck.Result.FAIL);
 
     }
 
@@ -51,9 +53,13 @@ public class MobEvents {
 
         if(!(event.getEntity() instanceof BeyonderNPCEntity npc)) return;
 
+        BlockPos pos = npc.getOnPos();
+
         if(!BeyonderData.beyonderMap.check(npc.getPathway(), npc.getSequence())){
             event.setCanceled(true);
         }
+        else if(pos.getY() >= 130 || pos.getY() <= 30)
+            event.setCanceled(true);
     }
 
 }
