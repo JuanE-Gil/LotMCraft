@@ -96,7 +96,7 @@ public class SealedArtifactAnvilRecipe {
         switch (seq){
             case 6,5 -> additional += 0.1f;
             case 4,3 -> additional += 0.2f;
-            case 2,1 -> additional += 3.0f;
+            case 2,1 -> additional += 0.3f;
         }
 
         return level.random.nextFloat() < 0.2f + additional;
