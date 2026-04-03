@@ -41,7 +41,7 @@ public class PurificationHaloAbility extends Ability {
         RingEffectManager.createRingForAll(entity.getEyePosition().subtract(0, .4, 0), 30, 20 * 20, 252 / 255f, 173 /255f, 3 / 255f, .85f, 1f, 2f, .24f, true, (ServerLevel) level);
         AtomicDouble radius = new AtomicDouble(.5);
         ServerScheduler.scheduleForDuration(0, 2, 20 * 5, () -> {
-            AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, radius.get() - .25, radius.get() + .25,15 * multiplier(entity), entity.position(), true, false, true, 0, ModDamageTypes.source(level, ModDamageTypes.PURIFICATION, entity));
+            AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, radius.get() - .25, radius.get() + .25,15 * multiplier(entity), entity.position(), true, false, true, 0, ModDamageTypes.source(level, ModDamageTypes.PURIFICATION_INDIRECT, entity));
             radius.addAndGet(.25f);
         });
     }

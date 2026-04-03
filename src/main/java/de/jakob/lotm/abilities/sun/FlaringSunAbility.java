@@ -78,7 +78,7 @@ public class FlaringSunAbility extends Ability {
             ParticleUtil.spawnSphereParticles((ServerLevel) level, ParticleTypes.FLAME, startPos, 4.75f, 200);
             ParticleUtil.spawnSphereParticles((ServerLevel) level, ParticleTypes.END_ROD, startPos, 4.75f, 180);
 
-            AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 17, DamageLookup.lookupDps(4, .85, 4, 20) * multiplier(entity), targetPos, true, false, 20 * 4, ModDamageTypes.source(level, ModDamageTypes.PURIFICATION, entity));
+            AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 17, DamageLookup.lookupDps(4, .85, 4, 20) * multiplier(entity), targetPos, true, false, 20 * 4, ModDamageTypes.source(level, ModDamageTypes.PURIFICATION_INDIRECT, entity));
         }, () -> {
             if(level.getBlockState(blockPos).getBlock() == Blocks.LIGHT) {
                 level.setBlockAndUpdate(blockPos, Blocks.AIR.defaultBlockState());

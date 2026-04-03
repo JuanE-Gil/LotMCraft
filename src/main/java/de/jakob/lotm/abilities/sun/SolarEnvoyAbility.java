@@ -95,7 +95,7 @@ public class SolarEnvoyAbility extends ToggleAbility {
         }
 
         // Damage entities
-        AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 37, DamageLookup.lookupDps(2, .9, 5, 20) * multiplier(entity), entity.position(), true, true, 20 * 5, ModDamageTypes.source(level, ModDamageTypes.PURIFICATION, entity));
+        AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 37, DamageLookup.lookupDps(2, .9, 5, 20) * multiplier(entity), entity.position(), true, true, 20 * 5, ModDamageTypes.source(level, ModDamageTypes.PURIFICATION_INDIRECT, entity));
 
         // Particles
         ParticleUtil.spawnSphereParticles((ServerLevel) level, ParticleTypes.END_ROD, entity.position(), 2.6, 60);

@@ -2,6 +2,7 @@ package de.jakob.lotm.events;
 
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.artifacts.SealedArtifactData;
+import de.jakob.lotm.damage.ModDamageTypes;
 import de.jakob.lotm.attachments.DisabledFlightComponent;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.data.ModDataComponents;
@@ -33,6 +34,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerContainerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
 import java.util.Objects;
+import java.util.Random;
 
 import static de.jakob.lotm.util.BeyonderData.beyonderMap;
 
@@ -234,6 +236,74 @@ public class BeyonderEventHandler {
 
             container.broadcastChanges();
         });
+    }
+
+    /**
+     * Sun Pathway seq ≤ 3: hits reduce the victim's digestion.
+     * Direct hit (attacker == direct entity): 3% base, ±1% per sequence difference.
+     * Indirect hit (projectile / AoE): 0.5% flat.
+     * If digestion hits 0, each hit has a 10% chance to regress the victim by 1 sequence
+     * and give the attacker the corresponding characteristic item.
+     */
+    @SubscribeEvent
+    public static void onSunHitDigestion(LivingDamageEvent.Post event) {
+        if (event.getEntity().level().isClientSide()) return;
+
+        // Attacker must be a Sun Pathway Beyonder at seq 3 or stronger
+        if (!(event.getSource().getEntity() instanceof LivingEntity attacker)) return;
+        if (!BeyonderData.isBeyonder(attacker)) return;
+        if (!BeyonderData.getPathway(attacker).equals("sun")) return;
+        int attackerSeq = BeyonderData.getSequence(attacker);
+        if (attackerSeq > 3) return; // seq 3, 2, 1 only
+
+        // Victim must be a Beyonder Player with digestion
+        LivingEntity victim = event.getEntity();
+        if (!(victim instanceof Player victimPlayer)) return;
+        if (!BeyonderData.isBeyonder(victim)) return;
+        if (victim.level().isClientSide()) return;
+
+        int victimSeq = BeyonderData.getSequence(victim);
+
+        // Indirect = ticking AoEs (PURIFICATION_INDIRECT). Everything else — melee, projectiles,
+        // spawned entities — counts as direct (PURIFICATION or any other damage type).
+        boolean isDirect = !event.getSource().is(ModDamageTypes.PURIFICATION_INDIRECT);
+
+        // seqDiff > 0 means attacker is stronger (lower seq number), < 0 means weaker
+        int seqDiff = victimSeq - attackerSeq;
+
+        float digestionDrain;
+        if (isDirect) {
+            // Base 5%, +1% per level attacker is stronger, -1% per level attacker is weaker, floor 1%
+            digestionDrain = Math.max(0.01f, 0.05f + seqDiff * 0.01f);
+        } else {
+            // Base 0.7%, +0.1% per level attacker is stronger, -0.1% per level attacker is weaker, floor 0.1%
+            digestionDrain = Math.max(0.001f, 0.007f + seqDiff * 0.001f);
+        }
+
+        float currentDigestion = BeyonderData.getDigestionProgress(victimPlayer);
+        float newDigestion = Math.max(0f, currentDigestion - digestionDrain);
+        victimPlayer.getPersistentData().putFloat(BeyonderData.NBT_DIGESTION_PROGRESS, newDigestion);
+        if (victim instanceof ServerPlayer sp) {
+            PacketHandler.syncBeyonderDataToPlayer(sp);
+        }
+
+        // If digestion is fully drained, 10% chance to regress victim and reward attacker
+        if (newDigestion <= 0f && new Random().nextFloat() < 0.1f) {
+            int newVictimSeq = victimSeq + 1; // higher number = weaker
+            BeyonderData.setBeyonder(victim, BeyonderData.getPathway(victim), newVictimSeq);
+            // Regression is unfair — start with full digestion so the victim isn't immediately vulnerable again
+            victimPlayer.getPersistentData().putFloat(BeyonderData.NBT_DIGESTION_PROGRESS, 1.0f);
+            if (victim instanceof ServerPlayer sp) PacketHandler.syncBeyonderDataToPlayer(sp);
+
+            // Give the attacker the corresponding characteristic item (not for void-summoned puppets or players possessing one)
+            if (!victim.getPersistentData().getBoolean("VoidSummoned")) {
+                BeyonderCharacteristicItem charItem = BeyonderCharacteristicItemHandler
+                        .selectCharacteristicOfPathwayAndSequence(BeyonderData.getPathway(victim), victimSeq);
+                if (charItem != null && attacker instanceof Player attackerPlayer) {
+                    attackerPlayer.getInventory().add(new ItemStack(charItem.asItem()));
+                }
+            }
+        }
     }
 
     @SubscribeEvent
