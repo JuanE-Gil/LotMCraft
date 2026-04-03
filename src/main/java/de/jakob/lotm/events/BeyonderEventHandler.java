@@ -49,6 +49,8 @@ public class BeyonderEventHandler {
             // Sync beyonder data when player joins
             PacketHandler.syncBeyonderDataToPlayer(serverPlayer);
 
+            beyonderMap.onPlayerUUIDChange(serverPlayer);
+
             if (!beyonderMap.contains(serverPlayer)) {
                 beyonderMap.put(serverPlayer);
             } else {
