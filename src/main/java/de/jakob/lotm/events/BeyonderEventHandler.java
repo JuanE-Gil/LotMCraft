@@ -264,11 +264,11 @@ public class BeyonderEventHandler {
 
         float digestionDrain;
         if (isDirect) {
-            // Base 3%, +1% per level attacker is stronger, -1% per level attacker is weaker, floor 1%
-            digestionDrain = Math.max(0.01f, 0.03f + seqDiff * 0.01f);
+            // Base 5%, +1% per level attacker is stronger, -1% per level attacker is weaker, floor 1%
+            digestionDrain = Math.max(0.01f, 0.05f + seqDiff * 0.01f);
         } else {
-            // Base 0.5%, +0.1% per level attacker is stronger, -0.1% per level attacker is weaker, floor 0.1%
-            digestionDrain = Math.max(0.001f, 0.005f + seqDiff * 0.001f);
+            // Base 0.7%, +0.1% per level attacker is stronger, -0.1% per level attacker is weaker, floor 0.1%
+            digestionDrain = Math.max(0.001f, 0.007f + seqDiff * 0.001f);
         }
 
         float currentDigestion = BeyonderData.getDigestionProgress(victimPlayer);
