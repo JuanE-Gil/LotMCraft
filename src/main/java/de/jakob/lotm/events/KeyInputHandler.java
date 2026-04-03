@@ -25,6 +25,7 @@ import net.neoforged.neoforge.client.event.ScreenEvent;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @EventBusSubscriber(modid = LOTMCraft.MOD_ID, value = Dist.CLIENT)
 public class KeyInputHandler {
@@ -152,6 +153,55 @@ public class KeyInputHandler {
             PacketHandler.sendToServer(new UseSelectedAbilityPacket());
         }
 
+        // Open shared ability wheel
+        if (LOTMCraft.openSharedAbilityWheelKey != null && LOTMCraft.openSharedAbilityWheelKey.consumeClick()
+                && mc.screen == null) {
+            openSharedAbilityWheel();
+        }
+
+        // Use selected shared ability
+        if (LOTMCraft.useSharedAbilityKey != null && LOTMCraft.useSharedAbilityKey.consumeClick()) {
+            List<String> sharedWheel = ClientData.getSharedWheelAbilities();
+            int idx = ClientData.getSelectedSharedAbility();
+            if (!sharedWheel.isEmpty() && idx >= 0 && idx < sharedWheel.size()) {
+                PacketHandler.sendToServer(new UseSharedAbilityPacket(sharedWheel.get(idx)));
+            }
+        }
+
+        // Cycle sub-abilities of the selected shared ability forward
+        if (LOTMCraft.nextSharedAbilityKey != null && LOTMCraft.nextSharedAbilityKey.consumeClick()) {
+            Player player = mc.player;
+            if (player != null) {
+                List<String> sharedWheel = ClientData.getSharedWheelAbilities();
+                int idx = ClientData.getSelectedSharedAbility();
+                if (!sharedWheel.isEmpty() && idx >= 0 && idx < sharedWheel.size()) {
+                    Ability sharedAbility = LOTMCraft.abilityHandler.getById(sharedWheel.get(idx));
+                    if (sharedAbility instanceof SelectableAbility selectableShared) {
+                        selectableShared.nextAbility(player);
+                        player.displayClientMessage(
+                            Component.translatable(selectableShared.getSelectedAbility(player)).withStyle(ChatFormatting.AQUA), true);
+                    }
+                }
+            }
+        }
+
+        // Cycle sub-abilities of the selected shared ability backward
+        if (LOTMCraft.previousSharedAbilityKey != null && LOTMCraft.previousSharedAbilityKey.consumeClick()) {
+            Player player = mc.player;
+            if (player != null) {
+                List<String> sharedWheel = ClientData.getSharedWheelAbilities();
+                int idx = ClientData.getSelectedSharedAbility();
+                if (!sharedWheel.isEmpty() && idx >= 0 && idx < sharedWheel.size()) {
+                    Ability sharedAbility = LOTMCraft.abilityHandler.getById(sharedWheel.get(idx));
+                    if (sharedAbility instanceof SelectableAbility selectableShared) {
+                        selectableShared.previousAbility(player);
+                        player.displayClientMessage(
+                            Component.translatable(selectableShared.getSelectedAbility(player)).withStyle(ChatFormatting.AQUA), true);
+                    }
+                }
+            }
+        }
+
         if(holdAbilityWheelCooldownTicks > 0) {
             holdAbilityWheelCooldownTicks--;
         }
@@ -237,6 +287,27 @@ public class KeyInputHandler {
                 number - 1
         );
         PacketHandler.sendToServer(new CloseAbilityWheelPacket());
+    }
+
+    private static void openSharedAbilityWheel() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null) return;
+
+        if (!de.jakob.lotm.util.helper.ClientTeamData.hasTeam()) {
+            mc.player.displayClientMessage(
+                    Component.literal("You are not part of a Red Priest's team.").withStyle(ChatFormatting.RED), true);
+            return;
+        }
+
+        List<String> sharedAbilities = ClientData.getSharedWheelAbilities();
+        if (sharedAbilities.isEmpty()) {
+            mc.player.displayClientMessage(
+                    Component.literal("No abilities have been added to the shared wheel yet.").withStyle(ChatFormatting.YELLOW), true);
+            return;
+        }
+
+        ClientData.sharedAbilityMode = true;
+        PacketHandler.sendToServer(new OpenAbilityWheelPacket());
     }
 
     private static void openAbilityWheel() {

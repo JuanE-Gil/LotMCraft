@@ -9,6 +9,8 @@ import de.jakob.lotm.network.PacketHandler;
 import de.jakob.lotm.network.packets.toServer.*;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.ClientQuestData;
+import de.jakob.lotm.util.data.ClientData;
+import de.jakob.lotm.util.helper.ClientTeamData;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -42,7 +44,8 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
     // Tab management for abilities
     private enum Tab {
         ABILITY_WHEEL,
-        ABILITY_BAR
+        ABILITY_BAR,
+        SHARED_ABILITIES
     }
 
     private Tab currentTab = Tab.ABILITY_WHEEL;
@@ -53,6 +56,10 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
     private final List<Ability> availableAbilities = new ArrayList<>();
     private final List<Ability> abilityWheelSlots = new ArrayList<>();
     private final List<Ability> abilityBarSlots = new ArrayList<>();
+    // Client-side personal shared wheel ordering
+    private final List<String> sharedWheelSlots = new ArrayList<>();
+    private int draggedFromSharedWheelIndex = -1;
+    private int draggedFromSharedPoolIndex = -1;
     private Ability draggedAbility = null;
     private int draggedFromWheelIndex = -1;
     private int draggedFromBarIndex = -1;
@@ -68,6 +75,8 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
     private static final int ABILITY_ICON_SIZE = 16;
     private static final int ABILITY_WHEEL_MAX = 14;
     private static final int ABILITY_BAR_MAX = 6;
+    private static final int SHARED_POOL_HEIGHT = 50;   // top: all shared abilities + add/remove
+    private static final int SHARED_WHEEL_HEIGHT = 60;  // bottom: personal shared wheel slots
 
     // UI dimensions for quests panel
     private static final int QUESTS_PANEL_WIDTH = 140;
@@ -149,6 +158,13 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
 
         // Request quest data from server
         PacketHandler.sendToServer(new RequestQuestDataPacket());
+
+        // Request team/shared abilities data from server
+        PacketHandler.sendToServer(new RequestSharedAbilitiesPacket());
+
+        // Restore shared wheel from ClientData so it persists across screen opens
+        sharedWheelSlots.clear();
+        sharedWheelSlots.addAll(ClientData.getSharedWheelAbilities());
 
         KEYBIND_LABELS[0] = LOTMCraft.useAbilityBarAbility1.getKey().getDisplayName().getString();
         KEYBIND_LABELS[1] = LOTMCraft.useAbilityBarAbility2.getKey().getDisplayName().getString();
@@ -278,8 +294,10 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
     private void addAbilityButtons(int baseLeftPos) {
         // Add tab buttons
         int tabButtonY = this.topPos;
-        int tabButtonWidth = ABILITIES_PANEL_WIDTH / 2;
         int panelX = baseLeftPos + this.imageWidth + 5;
+
+        boolean showSharedTab = ClientTeamData.hasTeam();
+        int tabButtonWidth = showSharedTab ? ABILITIES_PANEL_WIDTH / 3 : ABILITIES_PANEL_WIDTH / 2;
 
         wheelTabButton = Button.builder(Component.literal("Wheel"),
                         button -> {
@@ -300,10 +318,24 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
         this.addRenderableWidget(wheelTabButton);
         this.addRenderableWidget(barTabButton);
 
+        if (showSharedTab) {
+            Button sharedTabButton = Button.builder(Component.literal("Shared"),
+                            button -> {
+                                currentTab = Tab.SHARED_ABILITIES;
+                                updateButtonPositions();
+                            })
+                    .bounds(panelX + tabButtonWidth * 2, tabButtonY, tabButtonWidth, 15)
+                    .build();
+            this.addRenderableWidget(sharedTabButton);
+            if (currentTab == Tab.SHARED_ABILITIES) sharedTabButton.active = false;
+        } else if (currentTab == Tab.SHARED_ABILITIES) {
+            currentTab = Tab.ABILITY_WHEEL;
+        }
+
         // Highlight active tab
         if (currentTab == Tab.ABILITY_WHEEL) {
             wheelTabButton.active = false;
-        } else {
+        } else if (currentTab == Tab.ABILITY_BAR) {
             barTabButton.active = false;
         }
 
@@ -313,7 +345,6 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
 
         if (currentTab == Tab.ABILITY_WHEEL) {
             clearButtonY = this.topPos + 15 + ABILITIES_PANEL_HEIGHT + 5 + ABILITY_WHEEL_HEIGHT + 5;
-
             clearWheelButton = Button.builder(Component.literal("Clear Wheel").withStyle(ChatFormatting.RED),
                             button -> {
                                 abilityWheelSlots.clear();
@@ -321,11 +352,9 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
                             })
                     .bounds(clearButtonX, clearButtonY, ABILITIES_PANEL_WIDTH, 20)
                     .build();
-
             this.addRenderableWidget(clearWheelButton);
-        } else {
+        } else if (currentTab == Tab.ABILITY_BAR) {
             clearButtonY = this.topPos + 15 + ABILITIES_PANEL_HEIGHT + 5 + ABILITY_BAR_HEIGHT + 5;
-
             clearBarButton = Button.builder(Component.literal("Clear Bar").withStyle(ChatFormatting.RED),
                             button -> {
                                 abilityBarSlots.clear();
@@ -333,7 +362,6 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
                             })
                     .bounds(clearButtonX, clearButtonY, ABILITIES_PANEL_WIDTH, 20)
                     .build();
-
             this.addRenderableWidget(clearBarButton);
         }
     }
@@ -607,6 +635,32 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
                 if (wheelSlot >= 0 && wheelSlot < abilityWheelSlots.size()) {
                     hoveredAbility = abilityWheelSlots.get(wheelSlot);
                 }
+            } else if (currentTab == Tab.SHARED_ABILITIES && ClientTeamData.hasTeam()) {
+                int iconsPerRow2 = (ABILITIES_PANEL_WIDTH - 10) / (ABILITY_ICON_SIZE + 2);
+                // Tooltip over sharing pool — use same allPooled list as the renderer
+                List<String> allPooledTooltip = getAllPooledAbilities();
+                for (int s = 0; s < allPooledTooltip.size(); s++) {
+                    int sx = panelX + 5 + (s % iconsPerRow2) * (ABILITY_ICON_SIZE + 2);
+                    int sy = slotY + 14 + (s / iconsPerRow2) * (ABILITY_ICON_SIZE + 2);
+                    if (sy + ABILITY_ICON_SIZE > slotY + SHARED_POOL_HEIGHT) break;
+                    if (mouseX >= sx && mouseX <= sx + ABILITY_ICON_SIZE && mouseY >= sy && mouseY <= sy + ABILITY_ICON_SIZE) {
+                        hoveredAbility = LOTMCraft.abilityHandler.getById(allPooledTooltip.get(s));
+                        break;
+                    }
+                }
+                // Tooltip over shared wheel
+                if (hoveredAbility == null) {
+                    int wheelY2 = slotY + SHARED_POOL_HEIGHT + 5;
+                    int iconsPerRowW2 = (ABILITIES_PANEL_WIDTH - 10) / (ABILITY_ICON_SIZE + 2);
+                    for (int i = 0; i < sharedWheelSlots.size(); i++) {
+                        int wx = panelX + 5 + (i % iconsPerRowW2) * (ABILITY_ICON_SIZE + 2);
+                        int wy = wheelY2 + 14 + (i / iconsPerRowW2) * (ABILITY_ICON_SIZE + 2);
+                        if (mouseX >= wx && mouseX <= wx + ABILITY_ICON_SIZE && mouseY >= wy && mouseY <= wy + ABILITY_ICON_SIZE) {
+                            hoveredAbility = LOTMCraft.abilityHandler.getById(sharedWheelSlots.get(i));
+                            break;
+                        }
+                    }
+                }
             } else {
                 int barSlot = getAbilityBarSlot((int) mouseX, (int) mouseY, panelX, slotY);
                 if (barSlot >= 0 && barSlot < abilityBarSlots.size()) {
@@ -695,8 +749,10 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
 
         if (currentTab == Tab.ABILITY_WHEEL) {
             renderAbilityWheelSection(guiGraphics, panelX, slotY, mouseX, mouseY);
-        } else {
+        } else if (currentTab == Tab.ABILITY_BAR) {
             renderAbilityBarSection(guiGraphics, panelX, slotY, mouseX, mouseY);
+        } else if (currentTab == Tab.SHARED_ABILITIES) {
+            renderSharedAbilitiesTab(guiGraphics, panelX, slotY, mouseX, mouseY);
         }
     }
 
@@ -810,6 +866,115 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
         }
     }
 
+    /**
+     * Renders the full Shared Abilities tab.
+     * Top section (Sharing): drag from available panel to add; drag out to unshare your own.
+     * Bottom section (Shared Wheel): drag from pool above to fill slots; drag out to remove.
+     */
+    private void renderSharedAbilitiesTab(GuiGraphics guiGraphics, int panelX, int sectionY, int mouseX, int mouseY) {
+        String myUUID = this.minecraft.player.getStringUUID();
+        List<String> myContributions = ClientTeamData.getContributionsFor(myUUID);
+        int maxSlots = ClientTeamData.getSlotsPerMember();
+        List<String> allPooled = getAllPooledAbilities();
+
+        // === TOP SECTION: sharing pool ===
+        guiGraphics.fill(panelX, sectionY, panelX + ABILITIES_PANEL_WIDTH, sectionY + SHARED_POOL_HEIGHT, 0xCC000000);
+        guiGraphics.renderOutline(panelX, sectionY, ABILITIES_PANEL_WIDTH, SHARED_POOL_HEIGHT, 0xFFAAAAAA);
+        guiGraphics.drawString(this.font, Component.literal("Sharing").withStyle(ChatFormatting.BOLD), panelX + 5, sectionY + 3, 0xFFFFFFFF, true);
+
+        // Draw all pooled abilities as a flat list; own contributions are editable, others are read-only
+        // Also render empty own contribution slots so the player knows how many they can add
+        int iconsPerRow = (ABILITIES_PANEL_WIDTH - 10) / (ABILITY_ICON_SIZE + 2);
+
+        // Collect all slots: filled pooled abilities first, then empty own slots up to maxSlots
+        int totalSlots = Math.max(allPooled.size(), myContributions.size() > maxSlots ? myContributions.size() : maxSlots);
+        // But only show own empty slots beyond current filled count
+        int slotsToShow = allPooled.size();
+        int myFilledCount = myContributions.size();
+        int emptyOwnSlots = Math.max(0, maxSlots - myFilledCount);
+
+        for (int i = 0; i < slotsToShow; i++) {
+            String abilityId = allPooled.get(i);
+            int ix = panelX + 5 + (i % iconsPerRow) * (ABILITY_ICON_SIZE + 2);
+            int iy = sectionY + 14 + (i / iconsPerRow) * (ABILITY_ICON_SIZE + 2);
+            if (iy + ABILITY_ICON_SIZE > sectionY + SHARED_POOL_HEIGHT) break;
+
+            boolean isMine = myContributions.contains(abilityId);
+            int bgColor = isMine ? 0xFF333333 : 0xFF222233;
+            int borderColor = isMine ? 0xFF555555 : 0xFF4444AA;
+            guiGraphics.fill(ix, iy, ix + ABILITY_ICON_SIZE, iy + ABILITY_ICON_SIZE, bgColor);
+            guiGraphics.renderOutline(ix, iy, ABILITY_ICON_SIZE, ABILITY_ICON_SIZE, borderColor);
+
+            Ability ability = LOTMCraft.abilityHandler.getById(abilityId);
+            if (ability != null && draggedFromSharedPoolIndex != i) {
+                renderAbilityIcon(guiGraphics, ability, ix, iy);
+            }
+        }
+
+        // Draw empty own slots after the filled ones
+        for (int e = 0; e < emptyOwnSlots; e++) {
+            int i = slotsToShow + e;
+            int ix = panelX + 5 + (i % iconsPerRow) * (ABILITY_ICON_SIZE + 2);
+            int iy = sectionY + 14 + (i / iconsPerRow) * (ABILITY_ICON_SIZE + 2);
+            if (iy + ABILITY_ICON_SIZE > sectionY + SHARED_POOL_HEIGHT) break;
+            guiGraphics.fill(ix, iy, ix + ABILITY_ICON_SIZE, iy + ABILITY_ICON_SIZE, 0xFF1A1A1A);
+            guiGraphics.renderOutline(ix, iy, ABILITY_ICON_SIZE, ABILITY_ICON_SIZE, 0xFF444444);
+        }
+
+        // === BOTTOM SECTION: personal shared wheel ===
+        int wheelY = sectionY + SHARED_POOL_HEIGHT + 5;
+        guiGraphics.fill(panelX, wheelY, panelX + ABILITIES_PANEL_WIDTH, wheelY + SHARED_WHEEL_HEIGHT, 0xCC000000);
+        guiGraphics.renderOutline(panelX, wheelY, ABILITIES_PANEL_WIDTH, SHARED_WHEEL_HEIGHT, 0xFFAAAAAA);
+        guiGraphics.drawString(this.font, Component.literal("Shared Wheel").withStyle(ChatFormatting.BOLD), panelX + 5, wheelY + 3, 0xFFFFFFFF, true);
+
+        int startX = panelX + 5;
+        int startY = wheelY + 14;
+        int iconsPerRowW = (ABILITIES_PANEL_WIDTH - 10) / (ABILITY_ICON_SIZE + 2);
+        int maxWheelSlots = iconsPerRowW * 2;
+
+        if (allPooled.isEmpty()) {
+            Component empty = Component.literal("No shared abilities").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
+            int w = this.font.width(empty);
+            guiGraphics.drawString(this.font, empty, panelX + (ABILITIES_PANEL_WIDTH - w) / 2, wheelY + 28, 0xFF888888, false);
+        } else {
+            for (int i = 0; i < maxWheelSlots; i++) {
+                int wx = startX + (i % iconsPerRowW) * (ABILITY_ICON_SIZE + 2);
+                int wy = startY + (i / iconsPerRowW) * (ABILITY_ICON_SIZE + 2);
+                guiGraphics.fill(wx, wy, wx + ABILITY_ICON_SIZE, wy + ABILITY_ICON_SIZE, 0xFF333333);
+                guiGraphics.renderOutline(wx, wy, ABILITY_ICON_SIZE, ABILITY_ICON_SIZE, 0xFF666666);
+                if (i < sharedWheelSlots.size()) {
+                    Ability ability = LOTMCraft.abilityHandler.getById(sharedWheelSlots.get(i));
+                    if (ability != null && draggedFromSharedWheelIndex != i) {
+                        renderAbilityIcon(guiGraphics, ability, wx, wy);
+                    }
+                }
+            }
+        }
+    }
+
+    private List<String> getAllPooledAbilities() {
+        List<String> result = new ArrayList<>();
+        // Include leader's contributions
+        String leaderUUID = ClientTeamData.getLeaderUUID();
+        if (!leaderUUID.isEmpty()) {
+            for (String id : ClientTeamData.getContributionsFor(leaderUUID)) {
+                if (!result.contains(id)) result.add(id);
+            }
+        }
+        // Include all members' contributions
+        for (String memberUUID : ClientTeamData.getMemberUUIDs()) {
+            for (String id : ClientTeamData.getContributionsFor(memberUUID)) {
+                if (!result.contains(id)) result.add(id);
+            }
+        }
+        // Also include own contributions in case the current player is the leader
+        String myUUID = this.minecraft.player.getStringUUID();
+        for (String id : ClientTeamData.getContributionsFor(myUUID)) {
+            if (!result.contains(id)) result.add(id);
+        }
+        return result;
+    }
+
     private void renderAbilityIcon(GuiGraphics guiGraphics, Ability ability, int x, int y) {
         if (ability.getTextureLocation() != null) {
             guiGraphics.blit(ability.getTextureLocation(), x, y, 0, 0, ABILITY_ICON_SIZE, ABILITY_ICON_SIZE, ABILITY_ICON_SIZE, ABILITY_ICON_SIZE);
@@ -817,6 +982,65 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
             guiGraphics.fill(x, y, x + ABILITY_ICON_SIZE, y + ABILITY_ICON_SIZE, 0xFFFFFFFF);
             guiGraphics.renderOutline(x, y, ABILITY_ICON_SIZE, ABILITY_ICON_SIZE, 0xFF000000);
         }
+    }
+
+    private boolean handleSharedTabClick(int mouseX, int mouseY, int panelX, int sectionY) {
+        if (!ClientTeamData.hasTeam()) return false;
+
+        String myUUID = this.minecraft.player.getStringUUID();
+        List<String> myContributions = ClientTeamData.getContributionsFor(myUUID);
+        int maxSlots = ClientTeamData.getSlotsPerMember();
+        int iconsPerRow = (ABILITIES_PANEL_WIDTH - 10) / (ABILITY_ICON_SIZE + 2);
+
+        // --- Top section: drag start from any pooled icon ---
+        List<String> allPooled = getAllPooledAbilities();
+        for (int i = 0; i < allPooled.size(); i++) {
+            int ix = panelX + 5 + (i % iconsPerRow) * (ABILITY_ICON_SIZE + 2);
+            int iy = sectionY + 14 + (i / iconsPerRow) * (ABILITY_ICON_SIZE + 2);
+            if (iy + ABILITY_ICON_SIZE > sectionY + SHARED_POOL_HEIGHT) break;
+            if (mouseX >= ix && mouseX <= ix + ABILITY_ICON_SIZE && mouseY >= iy && mouseY <= iy + ABILITY_ICON_SIZE) {
+                Ability ability = LOTMCraft.abilityHandler.getById(allPooled.get(i));
+                if (ability == null) return false;
+                draggedAbility = ability;
+                // Only track pool index if it's the player's own (so drag-out = unshare)
+                draggedFromSharedPoolIndex = myContributions.contains(allPooled.get(i)) ? i : -1;
+                draggedFromSharedWheelIndex = -1;
+                draggedFromWheelIndex = -1;
+                draggedFromBarIndex = -1;
+                draggedFromAvailable = false;
+                dragOffsetX = mouseX - ix;
+                dragOffsetY = mouseY - iy;
+                return true;
+            }
+        }
+
+        // --- Bottom section: drag start from shared wheel slots ---
+        int wheelY = sectionY + SHARED_POOL_HEIGHT + 5;
+        int startX = panelX + 5;
+        int startY = wheelY + 14;
+        int iconsPerRowW = (ABILITIES_PANEL_WIDTH - 10) / (ABILITY_ICON_SIZE + 2);
+        int maxWheelSlots = iconsPerRowW * 2;
+
+        for (int i = 0; i < maxWheelSlots; i++) {
+            int wx = startX + (i % iconsPerRowW) * (ABILITY_ICON_SIZE + 2);
+            int wy = startY + (i / iconsPerRowW) * (ABILITY_ICON_SIZE + 2);
+            if (mouseX >= wx && mouseX <= wx + ABILITY_ICON_SIZE && mouseY >= wy && mouseY <= wy + ABILITY_ICON_SIZE) {
+                if (i < sharedWheelSlots.size()) {
+                    draggedAbility = LOTMCraft.abilityHandler.getById(sharedWheelSlots.get(i));
+                    draggedFromSharedWheelIndex = i;
+                    draggedFromSharedPoolIndex = -1;
+                    draggedFromWheelIndex = -1;
+                    draggedFromBarIndex = -1;
+                    draggedFromAvailable = false;
+                    dragOffsetX = mouseX - wx;
+                    dragOffsetY = mouseY - wy;
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        return false;
     }
 
     // ===== MOUSE INPUT HANDLING =====
@@ -828,6 +1052,13 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
             int panelX = baseLeftPos + this.imageWidth + 5;
             int panelY = this.topPos + 15;
             int slotY = panelY + ABILITIES_PANEL_HEIGHT + 5;
+
+            // Handle shared abilities clicks
+            if (currentTab == Tab.SHARED_ABILITIES) {
+                if (handleSharedTabClick((int) mouseX, (int) mouseY, panelX, slotY)) {
+                    return true;
+                }
+            }
 
             // Check if clicking on current tab's slots first
             if (currentTab == Tab.ABILITY_WHEEL) {
@@ -841,7 +1072,7 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
                     dragOffsetY = (int) mouseY - getWheelSlotY(wheelSlot, panelX, slotY);
                     return true;
                 }
-            } else {
+            } else if (currentTab == Tab.ABILITY_BAR) {
                 int barSlot = getAbilityBarSlot((int) mouseX, (int) mouseY, panelX, slotY);
                 if (barSlot >= 0 && barSlot < abilityBarSlots.size()) {
                     draggedAbility = abilityBarSlots.get(barSlot);
@@ -911,7 +1142,7 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
 
                 PacketHandler.sendToServer(new SyncAbilityWheelAbilitiesPacket(abilityWheelSlots.stream().map(Ability::getId).collect(Collectors.toCollection(ArrayList::new))));
 
-            } else {
+            } else if (currentTab == Tab.ABILITY_BAR) {
                 if (isInAbilityBarArea((int) mouseX, (int) mouseY, panelX, slotY)) {
                     int targetSlot = getAbilityBarSlot((int) mouseX, (int) mouseY, panelX, slotY);
 
@@ -942,12 +1173,101 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
                 }
 
                 PacketHandler.sendToServer(new SyncAbilityBarAbilitiesPacket(abilityBarSlots.stream().map(Ability::getId).collect(Collectors.toCollection(ArrayList::new))));
+            } else if (currentTab == Tab.SHARED_ABILITIES && draggedAbility != null) {
+                int sectionY = panelY + ABILITIES_PANEL_HEIGHT + 5;
+                String myUUID = this.minecraft.player.getStringUUID();
+                List<String> myContributions = new ArrayList<>(ClientTeamData.getContributionsFor(myUUID));
+                String draggedId = draggedAbility.getId();
+                int iconsPerRow = (ABILITIES_PANEL_WIDTH - 10) / (ABILITY_ICON_SIZE + 2);
+
+                // Determine if mouse is inside the sharing pool area
+                boolean inPoolArea = (int) mouseX >= panelX && (int) mouseX <= panelX + ABILITIES_PANEL_WIDTH
+                        && (int) mouseY >= sectionY && (int) mouseY <= sectionY + SHARED_POOL_HEIGHT;
+
+                // Determine if mouse is inside the shared wheel area
+                int wheelY = sectionY + SHARED_POOL_HEIGHT + 5;
+                int startX = panelX + 5;
+                int startY = wheelY + 14;
+                int iconsPerRowW = (ABILITIES_PANEL_WIDTH - 10) / (ABILITY_ICON_SIZE + 2);
+                int maxWheelSlots = iconsPerRowW * 2;
+
+                int targetWheelSlot = -1;
+                for (int i = 0; i < maxWheelSlots; i++) {
+                    int wx = startX + (i % iconsPerRowW) * (ABILITY_ICON_SIZE + 2);
+                    int wy = startY + (i / iconsPerRowW) * (ABILITY_ICON_SIZE + 2);
+                    if ((int) mouseX >= wx && (int) mouseX <= wx + ABILITY_ICON_SIZE
+                            && (int) mouseY >= wy && (int) mouseY <= wy + ABILITY_ICON_SIZE) {
+                        targetWheelSlot = i;
+                        break;
+                    }
+                }
+
+                if (draggedFromAvailable) {
+                    // Drop from available abilities panel → add to sharing pool
+                    if (inPoolArea && !myContributions.contains(draggedId)) {
+                        myContributions.add(draggedId);
+                        PacketHandler.sendToServer(new SyncSharedAbilitiesPacket(new ArrayList<>(myContributions)));
+                    }
+                } else if (draggedFromSharedWheelIndex >= 0) {
+                    // Dragging from shared wheel — reorder or remove
+                    if (targetWheelSlot >= 0 && targetWheelSlot != draggedFromSharedWheelIndex) {
+                        sharedWheelSlots.remove(draggedFromSharedWheelIndex);
+                        sharedWheelSlots.add(Math.min(targetWheelSlot, sharedWheelSlots.size()), draggedId);
+                    } else if (targetWheelSlot < 0 && !inPoolArea) {
+                        sharedWheelSlots.remove(draggedFromSharedWheelIndex);
+                    }
+                } else if (draggedFromSharedPoolIndex >= 0) {
+                    // Dragged own pool ability
+                    if (inPoolArea) {
+                        // Dropped back in pool — no action (stays shared)
+                    } else if (targetWheelSlot >= 0) {
+                        // Dropped on wheel — own ability, no sequence gate needed (it's theirs)
+                        List<String> allPooled = getAllPooledAbilities();
+                        if (allPooled.contains(draggedId) && !sharedWheelSlots.contains(draggedId)) {
+                            if (targetWheelSlot < sharedWheelSlots.size()) {
+                                sharedWheelSlots.add(targetWheelSlot, draggedId);
+                            } else {
+                                sharedWheelSlots.add(draggedId);
+                            }
+                        }
+                    } else {
+                        // Dropped outside pool and wheel — unshare
+                        myContributions.remove(draggedId);
+                        sharedWheelSlots.remove(draggedId);
+                        ClientData.setSharedWheelAbilities(sharedWheelSlots);
+                        PacketHandler.sendToServer(new SyncSharedAbilitiesPacket(new ArrayList<>(myContributions)));
+                    }
+                } else {
+                    // Dragged a teammate's pooled ability → can only go to wheel if sequence allows
+                    if (targetWheelSlot >= 0) {
+                        List<String> allPooled = getAllPooledAbilities();
+                        if (allPooled.contains(draggedId) && !sharedWheelSlots.contains(draggedId)) {
+                            int mySeq = BeyonderData.getSequence(this.minecraft.player);
+                            int reqSeq = draggedAbility.lowestSequenceUsable();
+                            if (reqSeq >= 0 && mySeq > reqSeq) {
+                                this.minecraft.player.displayClientMessage(
+                                        Component.literal("Your sequence is too low to use this ability.").withStyle(ChatFormatting.RED), true);
+                            } else {
+                                if (targetWheelSlot < sharedWheelSlots.size()) {
+                                    sharedWheelSlots.add(targetWheelSlot, draggedId);
+                                } else {
+                                    sharedWheelSlots.add(draggedId);
+                                }
+                            }
+                        }
+                    }
+                }
             }
+
+            // Sync shared wheel to ClientData after any change
+            ClientData.setSharedWheelAbilities(sharedWheelSlots);
 
             // Reset drag state
             draggedAbility = null;
             draggedFromWheelIndex = -1;
             draggedFromBarIndex = -1;
+            draggedFromSharedWheelIndex = -1;
+            draggedFromSharedPoolIndex = -1;
             draggedFromAvailable = false;
             return true;
         }
