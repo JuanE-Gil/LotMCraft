@@ -8,8 +8,12 @@ import de.jakob.lotm.entity.ModEntities;
 import de.jakob.lotm.entity.custom.ability_entities.OriginalBodyEntity;
 import de.jakob.lotm.network.PacketHandler;
 import de.jakob.lotm.network.packets.toClient.SyncOriginalBodyOwnerPacket;
+import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityWheelHelper;
 import de.jakob.lotm.util.helper.AllyUtil;
+import de.jakob.lotm.util.helper.marionettes.MarionetteUtils;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import de.jakob.lotm.util.shapeShifting.ShapeShiftingUtil;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -113,8 +117,28 @@ public class ControllingUtil {
         // remove body from allies (to clean it up)
         AllyUtil.removeAllyOneWay(player, data.getBodyUUID());
 
+        // Track the restored target so we can update its controller item after the body is restored
+        LivingEntity restoredTarget = null;
+
         // returning the target before returning to main body
         if (targetTag != null) {
+            // Patch the saved tag with the player's current Beyonder state so sequence regressions persist
+            CompoundTag playerPData = player.getPersistentData();
+            String currentPathway = playerPData.getString("beyonder_pathway");
+            int currentSequence = playerPData.getInt("beyonder_sequence");
+            if (!currentPathway.isEmpty() && currentSequence >= 0) {
+                targetTag.putString("Pathway", currentPathway);
+                targetTag.putInt("Sequence", currentSequence);
+                // also patch NeoForgeData persistent data inside the tag
+                if (targetTag.contains("NeoForgeData")) {
+                    CompoundTag nfd = targetTag.getCompound("NeoForgeData");
+                    nfd.putString("beyonder_pathway", currentPathway);
+                    nfd.putInt("beyonder_sequence", currentSequence);
+                    nfd.putFloat("beyonder_spirituality", playerPData.getFloat("beyonder_spirituality"));
+                    nfd.putFloat("beyonder_digestion_progress", playerPData.getFloat("beyonder_digestion_progress"));
+                }
+            }
+
             Entity targetEntity = EntityType.loadEntityRecursive(targetTag, level, (entity) -> {
                 entity.setPos(player.getX(), player.getY(), player.getZ());
 
@@ -126,6 +150,15 @@ public class ControllingUtil {
             });
             if (targetEntity != null) {
                 level.addFreshEntity(targetEntity);
+
+                // Carry over digestion progress (stored in persistent data, not NPC fields)
+                if (targetEntity instanceof LivingEntity targetLiving) {
+                    targetLiving.getPersistentData().putFloat(
+                            BeyonderData.NBT_DIGESTION_PROGRESS,
+                            player.getPersistentData().getFloat(BeyonderData.NBT_DIGESTION_PROGRESS)
+                    );
+                    restoredTarget = targetLiving;
+                }
 
                 // copy wheel abilities
                 AbilityWheelComponent sourceWheelData = player.getData(ModAttachments.ABILITY_WHEEL_COMPONENT);
@@ -181,6 +214,21 @@ public class ControllingUtil {
                 }
             }
         }
+        // Update the marionette controller item lore to reflect any sequence changes (must be after body restore)
+        if (restoredTarget != null) {
+            String targetUUIDStr = restoredTarget.getStringUUID();
+            for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+                ItemStack stack = player.getInventory().getItem(i);
+                if (stack.isEmpty()) continue;
+                CustomData customData = stack.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
+                if (customData == null) continue;
+                if (targetUUIDStr.equals(customData.copyTag().getString("MarionetteUUID"))) {
+                    player.getInventory().setItem(i, MarionetteUtils.createMarionetteController(restoredTarget));
+                    break;
+                }
+            }
+        }
+
         // resetting shape
         ShapeShiftingUtil.resetShape(player);
 
@@ -241,6 +289,7 @@ public class ControllingUtil {
             targetData.remove("beyonder_spirituality");
             targetData.remove("beyonder_digestion_progress");
             targetData.remove("beyonder_griefing_enabled");
+            targetData.remove("VoidSummoned");
             PhysicalEnhancementsAbility.resetEnhancements(target.getUUID());
         } else {
             targetData.putString("beyonder_pathway", sourceData.getString("beyonder_pathway"));
@@ -248,6 +297,11 @@ public class ControllingUtil {
             targetData.putFloat("beyonder_spirituality", sourceData.getFloat("beyonder_spirituality"));
             targetData.putFloat("beyonder_digestion_progress", sourceData.getFloat("beyonder_digestion_progress"));
             targetData.putBoolean("beyonder_griefing_enabled", sourceData.getBoolean("beyonder_griefing_enabled"));
+            if (sourceData.getBoolean("VoidSummoned")) {
+                targetData.putBoolean("VoidSummoned", true);
+            } else {
+                targetData.remove("VoidSummoned");
+            }
         }
 
         // sync the changes to the client
