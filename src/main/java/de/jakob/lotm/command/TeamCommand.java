@@ -31,10 +31,7 @@ public class TeamCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 
         dispatcher.register(Commands.literal("rteam")
-                .requires(source -> {
-                    ServerPlayer player = source.getPlayer();
-                    return player != null && TeamUtils.isEligibleLeader(player);
-                })
+                .requires(source -> source.getPlayer() != null)
                 // /team add <player> — leader invites a player
                 .then(Commands.literal("add")
                         .then(Commands.argument("player", EntityArgument.player())
@@ -106,12 +103,19 @@ public class TeamCommand {
             source.sendFailure(Component.literal("Your team is full (" + maxSize + " members max at your sequence)."));
             return 0;
         }
+        TeamComponent targetTeam = target.getData(ModAttachments.TEAM_COMPONENT.get());
+
         if (leaderTeam.hasMember(target.getStringUUID())) {
-            source.sendFailure(Component.literal(target.getName().getString() + " is already in your team."));
-            return 0;
+            if (!targetTeam.isInTeam()) {
+                // Stale entry — member left while leader was offline, clean it up
+                leader.setData(ModAttachments.TEAM_COMPONENT.get(), leaderTeam.removeMember(target.getStringUUID()));
+                leaderTeam = leader.getData(ModAttachments.TEAM_COMPONENT.get());
+            } else {
+                source.sendFailure(Component.literal(target.getName().getString() + " is already in your team."));
+                return 0;
+            }
         }
 
-        TeamComponent targetTeam = target.getData(ModAttachments.TEAM_COMPONENT.get());
         if (targetTeam.isInTeam()) {
             source.sendFailure(Component.literal(target.getName().getString() + " is already in another team."));
             return 0;

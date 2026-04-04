@@ -1494,9 +1494,6 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
         int color2 = 0xFFa8422d;
         guiGraphics.fillGradient(barStartX + x, barStartY + y, barEndX + x, barEndY + y, color, color2);
 
-        // TODO: remove — debug percentage label
-        String pct = String.format("%.1f%%", menu.getDigestionProgress() * 100f);
-        guiGraphics.drawString(this.font, pct, x + barStartX, y + barStartY - 9, 0xFFFFFFFF, true);
     }
 
     private void renderSequenceNumber(GuiGraphics guiGraphics, int x, int y) {

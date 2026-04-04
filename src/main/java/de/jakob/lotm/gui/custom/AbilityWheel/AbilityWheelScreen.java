@@ -355,9 +355,8 @@ public class AbilityWheelScreen extends AbstractContainerScreen<AbilityWheelMenu
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (button == 0 && hoveredSlot != -1) {
             if (ClientData.sharedAbilityMode) {
-                // In shared mode: select the slot then immediately fire the ability
-                PacketHandler.sendToServer(new UpdateSelectedAbilityPacket(hoveredSlot));
-                PacketHandler.sendToServer(new UseSelectedAbilityPacket());
+                // In shared mode: only update the selected index, don't fire the ability
+                ClientData.setSelectedSharedAbility(hoveredSlot);
             } else {
                 PacketHandler.sendToServer(new UpdateSelectedAbilityPacket(hoveredSlot));
                 ClientData.setAbilityWheelData(
@@ -376,12 +375,16 @@ public class AbilityWheelScreen extends AbstractContainerScreen<AbilityWheelMenu
 
     @Override
     public void onClose() {
-        if (!ClientData.sharedAbilityMode && KeyInputHandler.wasWheelOpenedWithHold && hoveredSlot != -1) {
+        if (KeyInputHandler.wasWheelOpenedWithHold && hoveredSlot != -1) {
             PacketHandler.sendToServer(new UpdateSelectedAbilityPacket(hoveredSlot));
-            ClientData.setAbilityWheelData(
-                    new java.util.ArrayList<>(getActiveAbilities()),
-                    hoveredSlot
-            );
+            if (ClientData.sharedAbilityMode) {
+                ClientData.setSelectedSharedAbility(hoveredSlot);
+            } else {
+                ClientData.setAbilityWheelData(
+                        new java.util.ArrayList<>(getActiveAbilities()),
+                        hoveredSlot
+                );
+            }
         }
         ClientData.sharedAbilityMode = false;
         super.onClose();

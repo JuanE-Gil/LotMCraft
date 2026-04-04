@@ -93,14 +93,18 @@ public record UseSharedAbilityPacket(String abilityId) implements CustomPacketPa
             return false;
         }
 
-        // Member: check other online members' contributions keyed by leader UUID
+        // Member: check all members' contributions (including self) and leader's own contributions
         ServerPlayer leader = player.getServer().getPlayerList().getPlayer(
                 java.util.UUID.fromString(team.leaderUUID()));
         if (leader == null) return false;
 
+        // Check leader's own contributions
+        SharedAbilitiesComponent leaderShared = leader.getData(ModAttachments.SHARED_ABILITIES_COMPONENT.get());
+        if (leaderShared.getContributions(leader.getStringUUID()).contains(abilityId)) return true;
+
+        // Check all members' contributions (including this player)
         TeamComponent leaderTeam = leader.getData(ModAttachments.TEAM_COMPONENT.get());
         for (String memberUUID : leaderTeam.memberUUIDs()) {
-            if (memberUUID.equals(player.getStringUUID())) continue;
             ServerPlayer member = player.getServer().getPlayerList().getPlayer(
                     java.util.UUID.fromString(memberUUID));
             if (member == null) continue;
