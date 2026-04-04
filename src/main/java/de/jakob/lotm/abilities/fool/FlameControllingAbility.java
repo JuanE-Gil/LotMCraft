@@ -51,13 +51,15 @@ public class FlameControllingAbility extends Ability {
 
         level.playSound(null, startPos.x, startPos.y, startPos.z, SoundEvents.BLAZE_SHOOT, entity.getSoundSource(), 1.0f, 1.0f);
 
+        double multiplier = multiplier(entity);
+
         ServerScheduler.scheduleForDuration(0, 1, 20 * 20, () -> {
             if(hasHit.get())
                 return;
 
             Vec3 pos = currentPos.get();
 
-            if(AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 2.5f, DamageLookup.lookupDamage(7, .83) * (float) multiplier(entity), pos, true, false, true, 0, 20 * 5)) {
+            if(AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 2.5f, DamageLookup.lookupDamage(7, .83) * (float) multiplier, pos, true, false, true, 0, 20 * 5)) {
                 hasHit.set(true);
                 return;
             }

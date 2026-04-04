@@ -411,6 +411,12 @@ public class PacketHandler {
                 SyncOriginalBodyOwnerPacket.STREAM_CODEC,
                 SyncOriginalBodyOwnerPacket::handle
         );
+
+        registrar.playToClient(
+                SyncSkillScalingPacket.TYPE,
+                SyncSkillScalingPacket.STREAM_CODEC,
+                SyncSkillScalingPacket::handle
+        );
     }
 
     private static void registerServerPackets(PayloadRegistrar registrar) {

@@ -8,6 +8,7 @@ import de.jakob.lotm.gamerule.ModGameRules;
 import de.jakob.lotm.network.PacketHandler;
 import de.jakob.lotm.network.packets.toClient.UseAbilityPacket;
 import de.jakob.lotm.util.BeyonderData;
+import de.jakob.lotm.util.helper.AbilityUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -20,8 +21,10 @@ import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
 
 public abstract class Ability {
 
@@ -55,10 +58,15 @@ public abstract class Ability {
     // Utility
     protected final Random random = new Random();
 
+    //Scaling
+    public HashMap<UUID, Integer> artifactScalingMap;
+    protected boolean autoClear = true;
+
     public Ability(String id, float cooldown, String... interactionFlags) {
         this.id = id;
         this.cooldown = Math.round(cooldown * 20);
         this.interactionFlags = interactionFlags;
+        this.artifactScalingMap = new HashMap<>(60);
     }
 
     public void useAbility(ServerLevel serverLevel, LivingEntity entity, boolean consumeSpirituality, boolean hasToHaveAbility, boolean hasToMeetRequirements) {
@@ -97,9 +105,18 @@ public abstract class Ability {
         AbilityCooldownComponent component = newUser.getData(ModAttachments.COOLDOWN_COMPONENT);
         component.setCooldown(id, cooldown);
 
+        if(AbilityUtil.hasArtifactScaling(entity)){
+            artifactScalingMap.put(entity.getUUID(), AbilityUtil.getArtifactScalingSeq(entity));
+            AbilityUtil.removeArtifactScaling(entity);
+        }
+
         // Use ability client and server sided
         onAbilityUse(serverLevel, newUser);
         PacketHandler.sendToAllPlayersInSameLevel(new UseAbilityPacket(getId(), newUser.getId()), serverLevel);
+
+        if(this.autoClear){
+            clearArtifactScaling(entity);
+        }
 
         // Track ability use for Recording/Replicating detection
         AbilityUseTracker.trackUse(newUser, this, newUser.position(), serverLevel);
@@ -116,14 +133,18 @@ public abstract class Ability {
         useAbility(serverLevel, entity, true, true, true);
     }
 
+    public void clearArtifactScaling(LivingEntity entity){
+        artifactScalingMap.remove(entity.getUUID());
+    }
+
     public abstract void onAbilityUse(Level level, LivingEntity entity);
 
     public abstract Map<String, Integer> getRequirements();
 
     protected abstract float getSpiritualityCost();
 
-    protected float multiplier(LivingEntity entity) {
-        return (float) BeyonderData.getMultiplier(entity);
+    public float multiplier(LivingEntity entity) {
+        return (float) AbilityUtil.getMultiplierWithArt(entity, this);
     }
 
     public void onHold(Level level, LivingEntity entity) {

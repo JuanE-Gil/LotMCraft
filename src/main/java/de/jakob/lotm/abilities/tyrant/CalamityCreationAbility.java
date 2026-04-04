@@ -99,9 +99,11 @@ public class CalamityCreationAbility extends SelectableAbility {
                 .toList();
 
 
+        double multiplier = multiplier(entity);
+
         ServerScheduler.scheduleForDuration(0, 4, 20 * 30, () -> {
             // Damage and Effects
-            AbilityUtil.damageNearbyEntities(serverLevel, entity, 60, DamageLookup.lookupDps(2, .8, 4, 30) * (float) multiplier(entity), startPos, true, false);
+            AbilityUtil.damageNearbyEntities(serverLevel, entity, 60, DamageLookup.lookupDps(2, .8, 4, 30) * (float) multiplier, startPos, true, false);
             AbilityUtil.addPotionEffectToNearbyEntities(serverLevel, entity, 60, startPos,
                     new MobEffectInstance(MobEffects.WEAKNESS, 20 * 5, 1, false, false, false),
                     new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20 * 5, 7, false, false, false));
@@ -173,9 +175,10 @@ public class CalamityCreationAbility extends SelectableAbility {
                 .filter(b -> serverLevel.isEmptyBlock(b.above()))    // mimic onlyExposed = true
                 .toList();
 
+        double multiplier = multiplier(entity);
         ServerScheduler.scheduleForDuration(0, 4, 20 * 30, () -> {
             // Damage and Effects
-            AbilityUtil.damageNearbyEntities(serverLevel, entity, 90, DamageLookup.lookupDps(2, .8, 4, 30) * (float) multiplier(entity), startPos, true, false, 20 * 10);
+            AbilityUtil.damageNearbyEntities(serverLevel, entity, 90, DamageLookup.lookupDps(2, .8, 4, 30) * (float) multiplier, startPos, true, false, 20 * 10);
             AbilityUtil.addPotionEffectToNearbyEntities(serverLevel, entity, 90, startPos,
                     new MobEffectInstance(MobEffects.WEAKNESS, 20 * 5, 1, false, false, false),
                     new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20 * 5, 4, false, false, false));

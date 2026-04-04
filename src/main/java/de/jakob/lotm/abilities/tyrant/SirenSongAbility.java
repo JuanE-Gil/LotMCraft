@@ -106,6 +106,7 @@ public class SirenSongAbility extends SelectableAbility {
 
         level.playSound(null, BlockPos.containing(entity.position()), ModSounds.DEATH_MELODY.get(), SoundSource.BLOCKS, 1, 1);
 
+        double multiplier = multiplier(entity);
         ServerScheduler.scheduleForDuration(0,  2, 20 * 30, () -> {
             if(entity.level().isClientSide)
                 return;
@@ -115,7 +116,7 @@ public class SirenSongAbility extends SelectableAbility {
         ServerScheduler.scheduleForDuration(0,  18, 20 * 30, () -> {
             if(entity.level().isClientSide)
                 return;
-            AbilityUtil.damageNearbyEntities((ServerLevel) entity.level(), entity, 25, DamageLookup.lookupDps(5,  .65, 18, 20) * multiplier(entity), entity.position(), true, false, true, 0);
+            AbilityUtil.damageNearbyEntities((ServerLevel) entity.level(), entity, 25, DamageLookup.lookupDps(5,  .65, 18, 20) * multiplier, entity.position(), true, false, true, 0);
         }, level);
     }
 }

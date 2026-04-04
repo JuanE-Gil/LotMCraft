@@ -6,6 +6,7 @@ import de.jakob.lotm.damage.ModDamageTypes;
 import de.jakob.lotm.attachments.DisabledFlightComponent;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.data.ModDataComponents;
+import de.jakob.lotm.effect.ModEffects;
 import de.jakob.lotm.gamerule.ModGameRules;
 import de.jakob.lotm.item.PotionIngredient;
 import de.jakob.lotm.network.PacketHandler;
@@ -22,6 +23,7 @@ import de.jakob.lotm.attachments.TeamComponent;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -67,6 +69,8 @@ public class BeyonderEventHandler {
                     beyonderMap.put(serverPlayer);
                 }
             }
+
+            serverPlayer.addEffect(new MobEffectInstance(ModEffects.CONCEALMENT, 20 * 30, 99));
         }
     }
 

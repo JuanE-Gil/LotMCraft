@@ -62,8 +62,10 @@ public class FlameAuthorityAbility extends SelectableAbility {
         ParticleUtil.createParticleSpirals(serverLevel, ParticleTypes.FLAME, startPos, 1.5, 6, 5, .75, 1, 20 * 6, 120, 1);
         ParticleUtil.createParticleSpirals(serverLevel, ModParticles.PURPLE_FLAME.get(), startPos, 1.5, 6, 5, .75, 1, 20 * 6, 120, 1);
 
+        double multiplier = multiplier(entity);
+
         ServerScheduler.scheduleForDuration(0, 5, 20 * 6,
-                () -> AbilityUtil.damageNearbyEntities(serverLevel, entity, 9, DamageLookup.lookupDps(1, 1, 5, 20) * multiplier(entity), startPos, true, false, 20 * 40),
+                () -> AbilityUtil.damageNearbyEntities(serverLevel, entity, 9, DamageLookup.lookupDps(1, 1, 5, 20) * multiplier, startPos, true, false, 20 * 40),
                 null,
                 serverLevel,
                 () -> AbilityUtil.getTimeInArea(entity, new Location(startPos, serverLevel)));
@@ -80,10 +82,11 @@ public class FlameAuthorityAbility extends SelectableAbility {
         // VFX
         EffectManager.playEffect(EffectManager.Effect.INFERNO, pos.x, pos.y, pos.z, serverLevel, entity);
 
+        double multiplier = multiplier(entity);
         // Damage
         ServerScheduler.scheduleForDuration(
                 0, 5, 20 * 4,
-                () -> AbilityUtil.damageNearbyEntities(serverLevel, entity, 22.5, DamageLookup.lookupDps(1, .8, 5, 20) * multiplier(entity), pos, true, false, 20 * 40),
+                () -> AbilityUtil.damageNearbyEntities(serverLevel, entity, 22.5, DamageLookup.lookupDps(1, .8, 5, 20) * multiplier, pos, true, false, 20 * 40),
                 null,
                 serverLevel,
                 () -> AbilityUtil.getTimeInArea(entity, new Location(pos, serverLevel)));

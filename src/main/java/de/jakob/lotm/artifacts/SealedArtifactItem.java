@@ -2,12 +2,14 @@ package de.jakob.lotm.artifacts;
 
 import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.abilities.core.SelectableAbility;
+import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.data.ModDataComponents;
 import de.jakob.lotm.gamerule.ModGameRules;
 import de.jakob.lotm.item.ModItems;
 import de.jakob.lotm.potions.BeyonderCharacteristicItem;
 import de.jakob.lotm.potions.BeyonderCharacteristicItemHandler;
 import de.jakob.lotm.util.BeyonderData;
+import de.jakob.lotm.util.helper.AbilityUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.network.chat.Component;
@@ -58,8 +60,10 @@ public class SealedArtifactItem extends Item {
 
         Ability ability = data.abilities().get(selectedIndex);
 
+        AbilityUtil.setArtifactScaling(player, data.pathway(), data.sequence());
+
         // Use the ability
-        ability.useAbility((ServerLevel) level, player, false, false, true);
+        ability.useAbility((ServerLevel) level, player, true, false, true);
 
         // Apply Use-Only Negative Effects
         for (NegativeEffect effect : data.negativeEffect()) {

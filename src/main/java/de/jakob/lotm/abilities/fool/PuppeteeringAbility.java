@@ -42,7 +42,6 @@ public class PuppeteeringAbility extends Ability {
         super(id, 1);
 
         canBeCopied = false;
-        canBeReplicated = false;
     }
 
     @Override
@@ -125,10 +124,12 @@ public class PuppeteeringAbility extends Ability {
             return;
         }
 
-        if(!BeyonderData.isBeyonder(entity) || BeyonderData.getSequence(entity) < 0 || BeyonderData.getSequence(entity) > 9)
+        int sequence = AbilityUtil.getSeqWithArt(entity, this);
+
+        if(!BeyonderData.isBeyonder(entity) || sequence < 0 || sequence > 9)
             return;
 
-        int sequence = BeyonderData.getSequence(entity);
+
 
         LivingEntity target = AbilityUtil.getTargetEntity(entity, getManipulationDistance(sequence), 3);
         if(target == null || target == entity || target instanceof Phantom) {
@@ -139,7 +140,7 @@ public class PuppeteeringAbility extends Ability {
             return;
         }
 
-        int time = getManipulationTime(BeyonderData.getSequence(entity));
+        int time = getManipulationTime(sequence);
 
         if(BeyonderData.isBeyonder(target)) {
             int targetSequence = BeyonderData.getSequence(target);

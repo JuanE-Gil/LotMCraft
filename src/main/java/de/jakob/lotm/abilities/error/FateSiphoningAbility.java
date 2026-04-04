@@ -68,13 +68,15 @@ public class FateSiphoningAbility extends Ability {
             return;
         }
 
-        if(BeyonderData.getPathway(target).equals("error") && BeyonderData.getSequence(target) < BeyonderData.getSequence(entity)){
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+
+        if(BeyonderData.getPathway(target).equals("error") && BeyonderData.getSequence(target) < entitySeq){
             AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.fate_siphoning.resisted").withColor(0x6d32a8));
             return;
         }
 
         // High-sequence opponents may outright resist the fate link being established
-        double failureChance = AbilityUtil.getSequenceFailureChance(entity, target);
+        double failureChance = AbilityUtil.getSequenceFailureChance(entitySeq, BeyonderData.getSequence(target));
         if (ThreadLocalRandom.current().nextDouble() < failureChance) {
             AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.fate_siphoning.resisted").withColor(0x6d32a8));
             return;

@@ -44,7 +44,7 @@ public class FogOfWarAbility extends ToggleAbility {
 
         // Fog of War is weakened by light_source interactions
         Location fogLoc = new Location(entity.getEyePosition(), level);
-        int seq = BeyonderData.getSequence(entity);
+        int seq = AbilityUtil.getSeqWithArt(entity, this);
         boolean lightNearby = InteractionHandler.isInteractionPossible(fogLoc, "light_source", seq);
 
         ParticleUtil.spawnParticles((ServerLevel) level, ModParticles.FOG_OF_WAR.get(), entity.getEyePosition(), 20, 15, 5, 15, 0);

@@ -52,6 +52,7 @@ public class ThunderclapAbility extends Ability {
 
         AtomicBoolean hasLanded = new AtomicBoolean(false);
 
+        double multiplier = multiplier(entity);
         ServerScheduler.scheduleForDuration(0, 0, 15, () -> {
             if(hasLanded.get())
                 return;
@@ -60,7 +61,7 @@ public class ThunderclapAbility extends Ability {
             ParticleUtil.spawnParticles((ServerLevel) level, ModParticles.LIGHTNING.get(), entity.position(), 80, 1, 0.1);
             level.playSound(null, BlockPos.containing(entity.position()), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.BLOCKS, 2, 1);
 
-            AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 8, DamageLookup.lookupDamage(3, .85) * multiplier(entity), entity.position(), true, false, ModDamageTypes.source(level, ModDamageTypes.SAILOR_LIGHTNING, entity));
+            AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 8, DamageLookup.lookupDamage(3, .85) * multiplier, entity.position(), true, false, ModDamageTypes.source(level, ModDamageTypes.SAILOR_LIGHTNING, entity));
 
             entity.setDeltaMovement(new Vec3(dir.x, dir.y * .1, dir.z).scale(7));
             entity.hurtMarked = true;

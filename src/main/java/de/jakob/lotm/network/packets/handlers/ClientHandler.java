@@ -299,6 +299,21 @@ public class ClientHandler {
         entity.getData(ModAttachments.SANITY_COMPONENT.get()).setSanity(packet.sanity());
     }
 
+    public static void handleSkillScalingPacket(SyncSkillScalingPacket packet) {
+        ClientLevel level = Minecraft.getInstance().level;
+        if (level == null) return;
+
+        Entity entity = level.getEntity(packet.entityId());
+        if(entity == null) {
+            return;
+        }
+        var component = entity.getData(ModAttachments.SKILL_SCALING_COMPONENT.get());
+
+        component.setScalingToSkill(packet.scaleToSkill())
+                .setPath(packet.path())
+                .setSeq(packet.seq());
+    }
+
     public static void handleAllyPacket(SyncAllyDataPacket packet) {
         if (Minecraft.getInstance().player != null) {
             AllyComponent newComponent = new AllyComponent(packet.allies());

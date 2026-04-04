@@ -73,12 +73,15 @@ public class SteelMasteryAbility extends SelectableAbility {
         Location loc = new Location(target.position(), target.level());
 
         AtomicReference<UUID> taskIdRef = new AtomicReference<>();
+
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+
         UUID taskId = ServerScheduler.scheduleForDuration(0, 5, 20 * 8, () -> {
             if(entity.isDeadOrDying())
                 return;
 
             // Blink Escape - only the bound entity can free itself
-            if(InteractionHandler.isInteractionPossibleForEntity(loc, "blink_escape", BeyonderData.getSequence(entity), target)) {
+            if(InteractionHandler.isInteractionPossibleForEntity(loc, "blink_escape", entitySeq, target)) {
                 ServerScheduler.cancel(taskIdRef.get());
 
                 target.removeEffect(MobEffects.MOVEMENT_SLOWDOWN);

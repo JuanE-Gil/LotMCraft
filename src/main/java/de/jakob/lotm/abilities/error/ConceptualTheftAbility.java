@@ -79,7 +79,7 @@ public class ConceptualTheftAbility extends SelectableAbility {
             return;
         }
 
-        TheftHandler.performSanityTheft(entity, target, random);
+        TheftHandler.performSanityTheft(entity, target, random, this);
     }
 
     private void stealDigestion(Level level, LivingEntity entity){
@@ -96,7 +96,7 @@ public class ConceptualTheftAbility extends SelectableAbility {
             return;
         }
 
-        TheftHandler.performDigestionTheft(entity, target, random);
+        TheftHandler.performDigestionTheft(entity, target, random, this);
     }
 
     private void stealDayNight(ServerLevel serverLevel, LivingEntity entity) {

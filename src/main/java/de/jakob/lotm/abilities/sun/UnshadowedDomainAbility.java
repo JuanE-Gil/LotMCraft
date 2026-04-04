@@ -69,6 +69,9 @@ public class UnshadowedDomainAbility extends Ability {
 
         blocks.forEach(b -> level.setBlockAndUpdate(b, Blocks.LIGHT.defaultBlockState()));
 
+        double multiplier = multiplier(entity);
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+
         ServerScheduler.scheduleForDuration(0, 10, 20 * 30, () -> {
             ParticleUtil.spawnParticles((ServerLevel) level, dust, startPos, 120, 25, 5, 25, 0);
             ParticleUtil.spawnParticles((ServerLevel) level, ParticleTypes.END_ROD, startPos, 120, 25, 5, 25, 0);
@@ -76,8 +79,8 @@ public class UnshadowedDomainAbility extends Ability {
             AbilityUtil.addPotionEffectToNearbyEntities((ServerLevel) level, entity, 40, startPos, new MobEffectInstance(MobEffects.GLOWING, 20 * 2, 1, false, false, false));
             AbilityUtil.getNearbyEntities(entity, (ServerLevel) level, startPos, 40)
                     .stream()
-                    .filter(e -> (!BeyonderData.isBeyonder(e) || BeyonderData.getSequence(e) > BeyonderData.getSequence(entity)) && (e instanceof Mob || e instanceof Player))
-                    .forEach(e -> e.hurt(ModDamageTypes.source(level, ModDamageTypes.PURIFICATION_INDIRECT, entity), (float) (DamageLookup.lookupDps(4, .4, 10, 20) * multiplier(entity))));
+                    .filter(e -> (!BeyonderData.isBeyonder(e) || BeyonderData.getSequence(e) > entitySeq) && (e instanceof Mob || e instanceof Player))
+                    .forEach(e -> e.hurt(ModDamageTypes.source(level, ModDamageTypes.PURIFICATION_INDIRECT, entity), (float) (DamageLookup.lookupDps(4, .4, 10, 20) * multiplier)));
         }, () -> blocks.forEach(b -> {
             BlockState state = level.getBlockState(b);
             if(state.is(Blocks.LIGHT))

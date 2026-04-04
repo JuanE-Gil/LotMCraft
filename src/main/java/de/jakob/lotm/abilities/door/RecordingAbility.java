@@ -33,6 +33,7 @@ public class RecordingAbility extends SelectableAbility {
         this.cannotBeStolen = true;
         canBeCopied = false;
         canBeReplicated = false;
+        autoClear = false;
     }
 
     @Override
@@ -108,7 +109,9 @@ public class RecordingAbility extends SelectableAbility {
                 return;
             }
 
-            if (usedAbility.lowestSequenceUsable() + 2 < BeyonderData.getSequence(entity)) {
+            int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+
+            if (usedAbility.lowestSequenceUsable() + 2 < entitySeq) {
                 entity.hurt(entity.damageSources().source(ModDamageTypes.LOOSING_CONTROL), entity.getHealth() - .5f);
                 AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.recording.too_high_sequence").withColor(0xFF8ff4ff));
                 level.playSound(null, BlockPos.containing(entity.position()), SoundEvents.ANVIL_PLACE, SoundSource.BLOCKS, 1, 1);
@@ -139,6 +142,7 @@ public class RecordingAbility extends SelectableAbility {
             ParticleUtil.spawnParticles(serverLevel, ParticleTypes.END_ROD, book.position(), 60, .3, .08);
             ParticleUtil.spawnParticles(serverLevel, ParticleTypes.ENCHANT, book.position(), 60, .3, .08);
         }, () -> {
+            clearArtifactScaling(entity);
             if (hasRecordedAbility.get())
                 return;
             AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.recording.no_ability").withColor(0xFF8ff4ff));

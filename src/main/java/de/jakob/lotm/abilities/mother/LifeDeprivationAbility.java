@@ -74,9 +74,12 @@ public class LifeDeprivationAbility extends SelectableAbility {
         });
 
         List<LivingEntity> targets = AbilityUtil.getNearbyEntities(entity, serverLevel, entity.position(), 55);
+
+        double multiplier = multiplier(entity);
+
         ServerScheduler.scheduleForDuration(0, 2, 50, () -> {
             for(LivingEntity target : targets) {
-                target.hurt(ModDamageTypes.source(serverLevel, ModDamageTypes.MOTHER_GENERIC, entity), (float) (DamageLookup.lookupDps(3, .3, 2, 25) * multiplier(entity)));
+                target.hurt(ModDamageTypes.source(serverLevel, ModDamageTypes.MOTHER_GENERIC, entity), (float) (DamageLookup.lookupDps(3, .3, 2, 25) * multiplier));
                 target.invulnerableTime = 0;
 
                 Vec3 targetCenter = target.position().add(0, target.getBbHeight() / 2, 0);
@@ -98,8 +101,10 @@ public class LifeDeprivationAbility extends SelectableAbility {
             return;
         }
 
+        double multiplier = multiplier(entity);
+
         ServerScheduler.scheduleForDuration(0, 2, 50, () -> {
-            target.hurt(ModDamageTypes.source(serverLevel, ModDamageTypes.MOTHER_GENERIC, entity), (float) (DamageLookup.lookupDps(3, .8, 2, 25) * multiplier(entity)));
+            target.hurt(ModDamageTypes.source(serverLevel, ModDamageTypes.MOTHER_GENERIC, entity), (float) (DamageLookup.lookupDps(3, .8, 2, 25) * multiplier));
             target.invulnerableTime = 0;
 
             Vec3 targetCenter = target.position().add(0, target.getBbHeight() / 2, 0);

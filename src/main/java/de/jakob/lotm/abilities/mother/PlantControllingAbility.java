@@ -87,7 +87,9 @@ public class PlantControllingAbility extends SelectableAbility {
 
         boundEntities.add(targetEntity.getUUID());
 
-        if(!BeyonderData.isBeyonder(targetEntity) || BeyonderData.getSequence(targetEntity) - 1 > BeyonderData.getSequence(entity)) {
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+
+        if(!BeyonderData.isBeyonder(targetEntity) || BeyonderData.getSequence(targetEntity) - 1 > entitySeq) {
             if(targetEntity instanceof Mob) {
                 ((Mob) targetEntity).setNoAi(true);
                 ServerScheduler.scheduleDelayed(duration, () -> ((Mob) targetEntity).setNoAi(false));
@@ -99,7 +101,7 @@ public class PlantControllingAbility extends SelectableAbility {
         AtomicReference<UUID> taskIdRef = new AtomicReference<>();
         UUID taskId = ServerScheduler.scheduleForDuration(0, 5, duration, () -> {
             // Blink Escape - only the bound entity can free itself
-            if(InteractionHandler.isInteractionPossibleForEntity(loc, "blink_escape", BeyonderData.getSequence(entity), targetEntity)) {
+            if(InteractionHandler.isInteractionPossibleForEntity(loc, "blink_escape", entitySeq, targetEntity)) {
                 ServerScheduler.cancel(taskIdRef.get());
 
                 targetEntity.removeEffect(MobEffects.MOVEMENT_SLOWDOWN);
@@ -121,7 +123,6 @@ public class PlantControllingAbility extends SelectableAbility {
             loc.setPosition(targetEntity.position());
         });
         taskIdRef.set(taskId);
-
 
         ServerScheduler.scheduleDelayed(duration, () -> boundEntities.remove(targetEntity.getUUID()));
     }

@@ -42,6 +42,7 @@ public class ThreadManipulationAbility extends SelectableAbility {
 
     public ThreadManipulationAbility(String id) {
         super(id, 1.5f);
+        autoClear = false;
     }
 
     @Override
@@ -114,6 +115,7 @@ public class ThreadManipulationAbility extends SelectableAbility {
             loc.setLevel(entity.level());
         }, () -> inCocoon.remove(entity.getUUID()), level);
         taskIdRef.set(taskId);
+        clearArtifactScaling(entity);
     }
 
     private void shoot(ServerLevel level, LivingEntity entity) {
@@ -150,7 +152,7 @@ public class ThreadManipulationAbility extends SelectableAbility {
             ParticleUtil.spawnParticles(level, dust, pos, 60, 0.1, 0.02);
 
             currentPos.set(pos.add(direction));
-        }, level);
+        }, () -> clearArtifactScaling(entity), level);
     }
 
     private void binding(ServerLevel level, LivingEntity entity) {
@@ -181,7 +183,7 @@ public class ThreadManipulationAbility extends SelectableAbility {
         boundEntities.add(targetEntity.getUUID());
         int duration = 20 * 20;
 
-        if(!BeyonderData.isBeyonder(targetEntity) || BeyonderData.getSequence(targetEntity) - 1 > BeyonderData.getSequence(entity)) {
+        if(!BeyonderData.isBeyonder(targetEntity) || BeyonderData.getSequence(targetEntity) - 1 > AbilityUtil.getSeqWithArt(entity, this)) {
             if(targetEntity instanceof Mob) {
                 ((Mob) targetEntity).setNoAi(true);
                 ServerScheduler.scheduleDelayed(duration, () -> ((Mob) targetEntity).setNoAi(false), level, () -> AbilityUtil.getTimeInArea(entity, new Location(entity.position(), level)));
@@ -217,7 +219,7 @@ public class ThreadManipulationAbility extends SelectableAbility {
                 return;
             }
 
-            if(InteractionHandler.isInteractionPossibleForEntity(loc, "blink_escape", BeyonderData.getSequence(entity), targetEntity)) {
+            if(InteractionHandler.isInteractionPossibleForEntity(loc, "blink_escape", AbilityUtil.getSeqWithArt(entity, this), targetEntity)) {
                 ServerScheduler.cancel(taskIdRef.get());
 
                 targetEntity.removeEffect(MobEffects.MOVEMENT_SLOWDOWN);
@@ -238,7 +240,7 @@ public class ThreadManipulationAbility extends SelectableAbility {
 
             loc.setLevel(targetEntity.level());
             loc.setPosition(targetEntity.position());
-        }, null, level, () -> AbilityUtil.getTimeInArea(entity, new Location(entity.position(), level)));
+        }, () -> clearArtifactScaling(entity), level, () -> AbilityUtil.getTimeInArea(entity, new Location(entity.position(), level)));
         taskIdRef.set(taskId);
 
         ServerScheduler.scheduleDelayed(duration, () -> boundEntities.remove(targetEntity.getUUID()));

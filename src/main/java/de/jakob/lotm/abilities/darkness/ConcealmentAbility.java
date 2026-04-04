@@ -33,6 +33,7 @@ public class ConcealmentAbility extends SelectableAbility {
     public ConcealmentAbility(String id) {
         super(id, 5);
         this.canBeCopied = false;
+        autoClear = false;
     }
 
     @Override
@@ -111,6 +112,8 @@ public class ConcealmentAbility extends SelectableAbility {
                 serverPlayer.getYRot(),
                 serverPlayer.getXRot()
         );
+
+        this.clearArtifactScaling(entity);
     }
 
     /**
@@ -279,7 +282,9 @@ public class ConcealmentAbility extends SelectableAbility {
             }
 
             AbilityUtil.getNearbyEntities(entity, serverLevel, finalTargetLoc, radius.get()).forEach(targetEntity -> {
-                if(AbilityUtil.isTargetSignificantlyStronger(entity, targetEntity)) return;
+                int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+
+                if(AbilityUtil.isTargetSignificantlyStronger(entitySeq, BeyonderData.getSequence(targetEntity))) return;
 
                 Vec3 originalPos = targetEntity.position();
 
@@ -301,14 +306,14 @@ public class ConcealmentAbility extends SelectableAbility {
 
                 if(teleportedEntity == null) return;
 
-                if(AbilityUtil.isTargetSignificantlyWeaker(entity, teleportedEntity)) {
+                if(AbilityUtil.isTargetSignificantlyWeaker(entitySeq, BeyonderData.getSequence(teleportedEntity))) {
                     teleportedEntity.setHealth(1);
                     if(!(targetEntity instanceof Player))
                         return;
                 }
 
-                int returnTime = AbilityUtil.isTargetSignificantlyWeaker(entity, teleportedEntity) ? 20 * 60 * 2 :
-                        BeyonderData.getSequence(teleportedEntity) < BeyonderData.getSequence(entity) ? 20 * 5 : 20 * 25;
+                int returnTime = AbilityUtil.isTargetSignificantlyWeaker(entitySeq, BeyonderData.getSequence(teleportedEntity)) ? 20 * 60 * 2 :
+                        BeyonderData.getSequence(teleportedEntity) < entitySeq ? 20 * 5 : 20 * 25;
 
                 ServerScheduler.scheduleDelayed(returnTime, () -> {
                     teleportedEntity.teleportTo(serverLevel,
@@ -323,6 +328,6 @@ public class ConcealmentAbility extends SelectableAbility {
             });
 
             radius.addAndGet(0.5);
-        }, null, serverLevel, () -> AbilityUtil.getTimeInArea(entity, new Location(finalTargetLoc, serverLevel)));
+        }, () -> this.clearArtifactScaling(entity), serverLevel, () -> AbilityUtil.getTimeInArea(entity, new Location(finalTargetLoc, serverLevel)));
     }
 }

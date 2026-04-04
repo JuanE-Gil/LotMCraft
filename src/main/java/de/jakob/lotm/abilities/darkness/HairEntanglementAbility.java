@@ -73,14 +73,18 @@ public class HairEntanglementAbility extends Ability {
 
         pacifiedEntities.add(targetEntity.getUUID());
         int duration = 20 * 60;
-        if(AbilityUtil.isTargetSignificantlyStronger(entity, targetEntity)) {
+
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+        int targetSeq = BeyonderData.getSequence(targetEntity);
+
+        if(AbilityUtil.isTargetSignificantlyStronger(entitySeq, targetSeq)) {
             duration = 35;
         }
-        if(AbilityUtil.isTargetSignificantlyWeaker(entity, targetEntity)) {
+        if(AbilityUtil.isTargetSignificantlyWeaker(entitySeq, targetSeq)) {
             duration = 20 * 90;
         }
 
-        if(!BeyonderData.isBeyonder(targetEntity) || BeyonderData.getSequence(targetEntity) - 1 > BeyonderData.getSequence(entity)) {
+        if(!BeyonderData.isBeyonder(targetEntity) || BeyonderData.getSequence(targetEntity) - 1 > entitySeq) {
             if(targetEntity instanceof Mob) {
                 ((Mob) targetEntity).setNoAi(true);
                 ServerScheduler.scheduleDelayed(duration, () -> ((Mob) targetEntity).setNoAi(false));

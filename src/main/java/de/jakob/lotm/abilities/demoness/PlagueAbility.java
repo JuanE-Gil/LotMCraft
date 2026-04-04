@@ -24,6 +24,7 @@ import java.util.Map;
 public class PlagueAbility extends Ability {
     public PlagueAbility(String id) {
         super(id, 120, "plague");
+        autoClear = false;
     }
 
     @Override
@@ -49,7 +50,7 @@ public class PlagueAbility extends Ability {
 
             // Disease is suppressed by purification, cleansing, life aura, or blooming interactions
             Location currentLoc = new Location(entity.position(), entity.level());
-            int seq = BeyonderData.getSequence(entity);
+            int seq = AbilityUtil.getSeqWithArt(entity, this);
             if(InteractionHandler.isInteractionPossible(currentLoc, "purification", seq) ||
                     InteractionHandler.isInteractionPossible(currentLoc, "cleansing", seq))
                 return;
@@ -63,6 +64,6 @@ public class PlagueAbility extends Ability {
             AbilityUtil.addPotionEffectToNearbyEntities((ServerLevel) entity.level(), entity, 70, entity.position(), new MobEffectInstance(MobEffects.BLINDNESS, 20, 4, false, false, false));
             AbilityUtil.addPotionEffectToNearbyEntities((ServerLevel) entity.level(), entity, 70, entity.position(), new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, 2, false, false, false));
             AbilityUtil.damageNearbyEntities((ServerLevel) entity.level(), entity, 70, DamageLookup.lookupDps(4, .3, 20, 20) * (float) multiplier(entity) * damageMult, entity.position(), true, false, true, 0, ModDamageTypes.source(level, ModDamageTypes.DEMONESS_GENERIC, entity));
-        }, null, serverLevel, () -> AbilityUtil.getTimeInArea(entity, new Location(entity.position(), level)));
+        }, () -> clearArtifactScaling(entity), serverLevel, () -> AbilityUtil.getTimeInArea(entity, new Location(entity.position(), level)));
     }
 }

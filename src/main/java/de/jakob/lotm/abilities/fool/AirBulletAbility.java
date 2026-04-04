@@ -49,7 +49,10 @@ public class AirBulletAbility extends Ability {
 
         level.playSound(null, startPos.x, startPos.y, startPos.z, SoundEvents.SNOWBALL_THROW, entity.getSoundSource(), 1.0f, 1.0f);
 
-        double rawDamage = Math.min(DamageLookup.lookupDamage(BeyonderData.getSequence(entity), .9), DamageLookup.lookupDamage(3, .9));
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+        double multiplier = multiplier(entity);
+
+        double rawDamage = Math.min(DamageLookup.lookupDamage(entitySeq, .9), DamageLookup.lookupDamage(3, .9));
 
         ServerScheduler.scheduleForDuration(0, 1, 20 * 10, () -> {
             if(hasHit.get())
@@ -57,19 +60,19 @@ public class AirBulletAbility extends Ability {
 
             Vec3 pos = currentPos.get();
 
-            if(AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 2.5f, rawDamage * multiplier(entity), pos, true, false, true, 0)) {
+            if(AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 2.5f, rawDamage * multiplier, pos, true, false, true, 0)) {
                 hasHit.set(true);
                 return;
             }
 
             if(!level.getBlockState(BlockPos.containing(pos.x, pos.y, pos.z)).isAir()) {
                 pos = pos.subtract(direction);
-                level.explode(null, pos.x, pos.y, pos.z, getExplosionPowerForSequence(BeyonderData.getSequence(entity)), BeyonderData.isGriefingEnabled(entity) ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE);
+                level.explode(null, pos.x, pos.y, pos.z, getExplosionPowerForSequence(entitySeq), BeyonderData.isGriefingEnabled(entity) ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE);
                 hasHit.set(true);
                 return;
             }
 
-            ParticleUtil.spawnCircleParticles((ServerLevel) level, ParticleTypes.EFFECT, pos, direction, getRadiusForSequence(BeyonderData.getSequence(entity)), 25);
+            ParticleUtil.spawnCircleParticles((ServerLevel) level, ParticleTypes.EFFECT, pos, direction, getRadiusForSequence(entitySeq), 25);
 
             currentPos.set(pos.add(direction));
         }, null, (ServerLevel) level, () -> AbilityUtil.getTimeInArea(entity, new de.jakob.lotm.util.data.Location(currentPos.get(), level)));

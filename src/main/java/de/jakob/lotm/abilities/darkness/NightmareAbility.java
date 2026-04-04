@@ -59,6 +59,7 @@ public class NightmareAbility extends SelectableAbility {
         canBeCopied = false;
         canBeUsedByNPC = false;
         canBeReplicated = false;
+        autoClear = false;
     }
 
     @Override
@@ -84,6 +85,10 @@ public class NightmareAbility extends SelectableAbility {
             case 2 -> restrict(level, entity);
             case 3 -> attack(level, entity);
             case 4 -> teleport(level, entity);
+        }
+
+        if(abilityIndex != 3){
+            clearArtifactScaling(entity);
         }
     }
 
@@ -149,7 +154,7 @@ public class NightmareAbility extends SelectableAbility {
             ParticleUtil.spawnParticles((ServerLevel) level, dustVerySmall, pos, 20, .25, 0);
 
             currentPos.set(pos.add(dir));
-        }, null, hasHit);
+        }, () -> this.clearArtifactScaling(entity), hasHit);
     }
 
     private void restrict(Level level, LivingEntity entity) {

@@ -56,7 +56,7 @@ public class MentalPlagueAbility extends Ability {
 
         // Mental Plague is weakened by purification
         Location targetLoc = new Location(target.position(), level);
-        int seq = BeyonderData.getSequence(entity);
+        int seq = AbilityUtil.getSeqWithArt(entity, this);
         int duration = InteractionHandler.isInteractionPossible(targetLoc, "purification", seq) ? 20 * 60 * 2 : 20 * 60 * 10;
 
         target.addEffect(new MobEffectInstance(ModEffects.MENTAL_PLAGUE, duration, 4, false, false, false));

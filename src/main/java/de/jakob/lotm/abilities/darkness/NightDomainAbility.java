@@ -28,6 +28,7 @@ public class NightDomainAbility extends Ability {
     public NightDomainAbility(String id) {
         super(id, 30);
         this.canBeCopied = false;
+        autoClear = false;
     }
 
     @Override
@@ -55,7 +56,7 @@ public class NightDomainAbility extends Ability {
         final UUID[] taskIdHolder = new UUID[1];
         taskIdHolder[0] = ServerScheduler.scheduleForDuration(0, 2, 20 * 25, () -> {
             Location currentLoc = new Location(entity.position(), serverLevel);
-            int seq = BeyonderData.getSequence(entity);
+            int seq = AbilityUtil.getSeqWithArt(entity, this);
 
             // Night Domain is completely cancelled by light_strong if the caster is at least 1 sequence higher
             if(InteractionHandler.isInteractionPossibleStrictlyHigher(currentLoc, "light_strong", seq, 1)) {
@@ -81,6 +82,6 @@ public class NightDomainAbility extends Ability {
             BeyonderData.addModifierWithTimeLimit(entity, "night_domain_buff", 1.35f, 2000);
 
             entity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 20 * 2, 2, false, false, false));
-        }, null, serverLevel, () -> AbilityUtil.getTimeInArea(entity, new Location(startPos, level)));
+        }, () -> this.clearArtifactScaling(entity), serverLevel, () -> AbilityUtil.getTimeInArea(entity, new Location(startPos, level)));
     }
 }

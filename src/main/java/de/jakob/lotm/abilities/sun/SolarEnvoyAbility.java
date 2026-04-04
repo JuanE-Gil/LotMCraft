@@ -28,6 +28,7 @@ public class SolarEnvoyAbility extends ToggleAbility {
         canBeCopied = false;
         canBeReplicated = false;
         canBeUsedInArtifact = false;
+        autoClear = false;
     }
 
     @Override
@@ -124,5 +125,6 @@ public class SolarEnvoyAbility extends ToggleAbility {
             transformationComponent.setTransformedAndSync(false, entity);
         }
 
+        clearArtifactScaling(entity);
     }
 }

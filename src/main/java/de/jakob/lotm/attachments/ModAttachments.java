@@ -211,6 +211,13 @@ public class ModAttachments {
                             .build()
             );
 
+    public static final Supplier<AttachmentType<SkillScalingComponent>> SKILL_SCALING_COMPONENT =
+            ATTACHMENT_TYPES.register("skill_scaling_component", () ->
+                    AttachmentType.builder(SkillScalingComponent::new)
+                            .serialize(SkillScalingComponent.SERIALIZER)
+                            .build()
+            );
+
     public static void register(IEventBus eventBus) {
         ATTACHMENT_TYPES.register(eventBus);
     }
