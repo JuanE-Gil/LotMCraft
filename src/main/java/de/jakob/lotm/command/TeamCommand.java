@@ -2,6 +2,8 @@ package de.jakob.lotm.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import de.jakob.lotm.LOTMCraft;
+import de.jakob.lotm.attachments.ControllingDataComponent;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.attachments.TeamComponent;
 import de.jakob.lotm.network.PacketHandler;
@@ -29,6 +31,10 @@ public class TeamCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 
         dispatcher.register(Commands.literal("rteam")
+                .requires(source -> {
+                    ServerPlayer player = source.getPlayer();
+                    return player != null && TeamUtils.isEligibleLeader(player);
+                })
                 // /team add <player> — leader invites a player
                 .then(Commands.literal("add")
                         .then(Commands.argument("player", EntityArgument.player())
@@ -66,11 +72,28 @@ public class TeamCommand {
         );
     }
 
-    private static int executeAdd(CommandSourceStack source, ServerPlayer leader, ServerPlayer target) {
-        if (!TeamUtils.isEligibleLeader(leader)) {
-            source.sendFailure(Component.literal("Only Red Priest Beyonders at sequence 4 or higher can lead a team."));
-            return 0;
+    private static boolean checkEligible(CommandSourceStack source, ServerPlayer player) {
+        // If the player is currently controlling a marionette, check their original body's data
+        ControllingDataComponent controlling = player.getData(ModAttachments.CONTROLLING_DATA);
+        if (controlling.getTargetUUID() != null) {
+            net.minecraft.nbt.CompoundTag bodyTag = controlling.getBodyEntity();
+            String pathway = bodyTag != null ? bodyTag.getCompound("NeoForgeData").getString("beyonder_pathway") : "";
+            int sequence = bodyTag != null ? bodyTag.getCompound("NeoForgeData").getInt("beyonder_sequence") : LOTMCraft.NON_BEYONDER_SEQ;
+            if (!pathway.equals("red_priest") || sequence > 3) {
+                source.sendFailure(Component.literal("Only Red Priest Beyonders at sequence 3 or higher can use this command."));
+                return false;
+            }
+            return true;
         }
+        if (!TeamUtils.isEligibleLeader(player)) {
+            source.sendFailure(Component.literal("Only Red Priest Beyonders at sequence 3 or higher can use this command."));
+            return false;
+        }
+        return true;
+    }
+
+    private static int executeAdd(CommandSourceStack source, ServerPlayer leader, ServerPlayer target) {
+        if (!checkEligible(source, leader)) return 0;
         if (leader.equals(target)) {
             source.sendFailure(Component.literal("You cannot invite yourself."));
             return 0;
@@ -110,6 +133,7 @@ public class TeamCommand {
     }
 
     private static int executeRemove(CommandSourceStack source, ServerPlayer sender, ServerPlayer target) {
+        if (!checkEligible(source, sender)) return 0;
         TeamComponent senderTeam = sender.getData(ModAttachments.TEAM_COMPONENT.get());
 
         // Allow the leader to remove a member
@@ -149,6 +173,7 @@ public class TeamCommand {
     }
 
     private static int executeDisband(CommandSourceStack source, ServerPlayer sender) {
+        if (!checkEligible(source, sender)) return 0;
         TeamComponent senderTeam = sender.getData(ModAttachments.TEAM_COMPONENT.get());
         if (senderTeam.memberCount() == 0 && !senderTeam.isInTeam()) {
             source.sendFailure(Component.literal("You do not have a team to disband."));

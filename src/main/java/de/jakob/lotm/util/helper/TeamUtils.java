@@ -30,10 +30,10 @@ public class TeamUtils {
         return 1; // sequence 3 and 4
     }
 
-    /** Returns true if the player is a Red Priest at sequence <= 4. */
+    /** Returns true if the player is a Red Priest at sequence <= 3. */
     public static boolean isEligibleLeader(ServerPlayer player) {
         return BeyonderData.getPathway(player).equals("red_priest")
-                && BeyonderData.getSequence(player) <= 4;
+                && BeyonderData.getSequence(player) <= 3;
     }
 
     /**

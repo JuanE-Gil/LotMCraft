@@ -17,6 +17,8 @@ import de.jakob.lotm.util.ClientBeyonderCache;
 import de.jakob.lotm.util.beyonderMap.BeyonderMap;
 import de.jakob.lotm.util.beyonderMap.CharacteristicStack;
 import de.jakob.lotm.util.beyonderMap.StoredData;
+import de.jakob.lotm.attachments.SharedAbilitiesComponent;
+import de.jakob.lotm.attachments.TeamComponent;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
@@ -252,9 +254,17 @@ public class BeyonderEventHandler {
         // Attacker must be a Sun Pathway Beyonder at seq 3 or stronger
         if (!(event.getSource().getEntity() instanceof LivingEntity attacker)) return;
         if (!BeyonderData.isBeyonder(attacker)) return;
-        if (!BeyonderData.getPathway(attacker).equals("sun")) return;
-        int attackerSeq = BeyonderData.getSequence(attacker);
-        if (attackerSeq > 3) return; // seq 3, 2, 1 only
+
+        int attackerSeq;
+        if (BeyonderData.getPathway(attacker).equals("sun")) {
+            attackerSeq = BeyonderData.getSequence(attacker);
+            if (attackerSeq > 3) return;
+        } else {
+            // Allow shared Sun abilities: attacker must have a Sun team member (seq <= 3) who contributed an ability.
+            if (!(attacker instanceof ServerPlayer attackerPlayer)) return;
+            attackerSeq = getSunContributorSeq(attackerPlayer);
+            if (attackerSeq < 0) return;
+        }
 
         // Victim must be a Beyonder Player with digestion
         LivingEntity victim = event.getEntity();
@@ -304,6 +314,46 @@ public class BeyonderEventHandler {
                 }
             }
         }
+    }
+
+    /**
+     * Returns the sequence of the strongest Sun contributor (seq <= 3) sharing abilities with the given player,
+     * or -1 if no such contributor exists.
+     */
+    private static int getSunContributorSeq(ServerPlayer player) {
+        if (player.getServer() == null) return -1;
+        TeamComponent team = player.getData(ModAttachments.TEAM_COMPONENT.get());
+
+        // Collect all member UUIDs to check — if player is a team member, check other members + leader;
+        // if player is the leader, check their members.
+        java.util.List<String> toCheck = new java.util.ArrayList<>();
+        if (team.isInTeam()) {
+            // player is a member — the leader UUID and other members contributed abilities accessible to the leader
+            toCheck.add(team.leaderUUID());
+            ServerPlayer leader = player.getServer().getPlayerList().getPlayer(
+                    java.util.UUID.fromString(team.leaderUUID()));
+            if (leader != null) {
+                toCheck.addAll(leader.getData(ModAttachments.TEAM_COMPONENT.get()).memberUUIDs());
+            }
+        } else {
+            toCheck.addAll(team.memberUUIDs());
+        }
+
+        int best = -1;
+        for (String uuid : toCheck) {
+            ServerPlayer member = player.getServer().getPlayerList().getPlayer(java.util.UUID.fromString(uuid));
+            if (member == null) continue;
+            if (!BeyonderData.isBeyonder(member)) continue;
+            if (!BeyonderData.getPathway(member).equals("sun")) continue;
+            int seq = BeyonderData.getSequence(member);
+            if (seq > 3) continue;
+            // Check that this member has actually contributed at least one ability to the team
+            SharedAbilitiesComponent shared = member.getData(ModAttachments.SHARED_ABILITIES_COMPONENT.get());
+            String leaderUUID = team.isInTeam() ? team.leaderUUID() : player.getStringUUID();
+            if (shared.getContributions(leaderUUID).isEmpty()) continue;
+            if (best < 0 || seq < best) best = seq;
+        }
+        return best;
     }
 
     @SubscribeEvent
