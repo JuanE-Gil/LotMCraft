@@ -163,7 +163,16 @@ public class BeyonderEventHandler {
 
     @SubscribeEvent
     public static void onDeath(LivingDeathEvent event) {
-        if (event.getEntity() instanceof Player player) {
+        if (event.getEntity() instanceof ServerPlayer player) {
+
+            var source = event.getSource().getEntity();
+            if(source != null){
+                LOTMCraft.LOGGER.info("{} was killed by {} with {}", player.getGameProfile().getName(), event.getSource().getEntity().getName(), event.getSource());
+            }
+            else{
+                LOTMCraft.LOGGER.info("{} was killed with {}", player.getGameProfile().getName(),event.getSource());
+            }
+
 
             if (!BeyonderData.isBeyonder(player)) return;
             if(beyonderMap.get(player).isEmpty()) return;
