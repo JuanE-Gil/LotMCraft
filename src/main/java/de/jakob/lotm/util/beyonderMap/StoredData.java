@@ -11,7 +11,8 @@ import java.util.LinkedList;
 
 public record StoredData(String pathway, Integer sequence, HonorificName honorificName,
                          String trueName, LinkedList<MessageType> msgs, LinkedList<HonorificName> knownNames,
-                         Boolean modified, Vec3 lastPosition, CharacteristicStack charStack) {
+                         Boolean modified, Vec3 lastPosition, CharacteristicStack charStack,
+                         PathwayHistory pathwayHistory) {
 
     public static final String NBT_PATHWAY = "beyonder_map_pathway";
     public static final String NBT_SEQUENCE = "beyonder_map_sequence";
@@ -21,6 +22,7 @@ public record StoredData(String pathway, Integer sequence, HonorificName honorif
     public static final String NBT_KNOWN_NAMES = "beyonder_map_known_names";
     public static final String NBT_MODIFIED = "beyonder_map_modified";
     public static final String NBT_CHAR_STACK = "beyonder_map_char_stack";
+    public static final String NBT_PATHWAY_HISTORY = "beyonder_map_pathway_history";
 
     public static final String NBT_LAST_POSITION_X = "beyonder_map_last_position_x";
     public static final String NBT_LAST_POSITION_Y = "beyonder_map_last_position_y";
@@ -40,9 +42,27 @@ public record StoredData(String pathway, Integer sequence, HonorificName honorif
                 + "\n--- Seq: " + sequence
                 + "\n--- Honorific Name: " + honorificName.getAllInfo()
                 + "\n--- Logout Position: " + (int) lastPosition.x + " " + (int) lastPosition.y + " " + (int) lastPosition.z
-                + "\n--- Characteristics stack: " + charStack.getInfo()
+                + "\n--- Characteristics stack: " + getCharStackInfo()
+                + "\n--- Pathway history: " + pathwayHistory.getInfo()
                 + "\n--- Was modified: " + modified
                 ;
+    }
+
+    private String getCharStackInfo() {
+        StringBuilder sb = new StringBuilder();
+        // Walk from most powerful (1) to weakest (9), tracking which pathway was active.
+        // The switch records history[prevSeq]=prevPathway (e.g. history[5]="fool" means seq 5+ was fool).
+        // Start with current pathway, then switch to historical once we reach the recorded sequence.
+        // e.g. history[5]="fool", current="error" → seq 1-4 show "error", seq 5-9 show "fool"
+        String activePathway = pathway;
+        for (int i = 1; i <= 9; i++) {
+            String historyPathway = pathwayHistory.get(i);
+            if (historyPathway != null) {
+                activePathway = historyPathway;
+            }
+            sb.append("\n   Seq ").append(i).append(" (").append(activePathway).append("): ").append(charStack.get(i));
+        }
+        return sb.toString();
     }
 
     public void addMsg(MessageType msg){
@@ -53,13 +73,50 @@ public record StoredData(String pathway, Integer sequence, HonorificName honorif
         msgs.removeIf(str -> str.equals(msg));
     }
 
-    public StoredData regressSeq(){
+    public StoredData regressSeq() {
+        return regressSeq(true);
+    }
+
+    public StoredData regressSeq(boolean respectCharStack){
+        int currentStack = charStack.get(sequence);
+
+        if (respectCharStack && currentStack > 0) {
+            // Has stacks: stay at the same sequence, lose one stack, reset digestion to full
+            return builder
+                    .copyFrom(this)
+                    .charStack(charStack.set(sequence, currentStack - 1))
+                    .build();
+        }
+
+        // No stacks (or ignoring stacks): drop a sequence
+        int newSequence = sequence + 1;
+        boolean becomesNonBeyonder = newSequence == LOTMCraft.NON_BEYONDER_SEQ;
+
+        // If a domain-switch was recorded for the sequence being restored to, revert to that pathway
+        String regressedPathway;
+        if (becomesNonBeyonder) {
+            regressedPathway = "none";
+        } else {
+            String historyPathway = pathwayHistory.get(newSequence);
+            regressedPathway = (historyPathway != null) ? historyPathway : pathway;
+        }
+
+        // Clear history at newSequence (just used) and all sequences more powerful than it (numerically
+        // lower), since those belonged to the switched pathway and are no longer relevant
+        PathwayHistory clearedHistory = pathwayHistory;
+        if (!becomesNonBeyonder) {
+            for (int i = 0; i <= newSequence; i++) {
+                clearedHistory = clearedHistory.clear(i);
+            }
+        }
+
         return builder
                 .copyFrom(this)
-                .pathway((sequence + 1 == LOTMCraft.NON_BEYONDER_SEQ) ? "none" : pathway)
-                .sequence(sequence + 1)
-                .honorificName((sequence + 1 >= 3) ? HonorificName.EMPTY : honorificName)
-                .charStack((sequence + 1 == LOTMCraft.NON_BEYONDER_SEQ) ? charStack.clear() : charStack.clear(sequence))
+                .pathway(regressedPathway)
+                .sequence(newSequence)
+                .honorificName((newSequence >= 3) ? HonorificName.EMPTY : honorificName)
+                .charStack(becomesNonBeyonder ? charStack.clear() : charStack.clear(sequence))
+                .pathwayHistory(becomesNonBeyonder ? pathwayHistory.clear() : clearedHistory)
                 .build();
     }
 
@@ -95,6 +152,7 @@ public record StoredData(String pathway, Integer sequence, HonorificName honorif
         tag.putDouble(NBT_LAST_POSITION_Z, lastPosition.z());
 
         tag.put(NBT_CHAR_STACK, charStack.toNBT());
+        tag.put(NBT_PATHWAY_HISTORY, pathwayHistory.toNBT());
 
         return tag;
     }
@@ -124,8 +182,9 @@ public record StoredData(String pathway, Integer sequence, HonorificName honorif
                 tag.getDouble(NBT_LAST_POSITION_Z));
 
         CharacteristicStack stack = CharacteristicStack.fromNBT(tag.getCompound(NBT_CHAR_STACK));
+        PathwayHistory history = tag.contains(NBT_PATHWAY_HISTORY) ? PathwayHistory.fromNBT(tag.getCompound(NBT_PATHWAY_HISTORY)) : new PathwayHistory();
 
-        return new StoredData(path, seq, name, trueName, list, names, modified, vec, stack);
+        return new StoredData(path, seq, name, trueName, list, names, modified, vec, stack, history);
     }
 
 }

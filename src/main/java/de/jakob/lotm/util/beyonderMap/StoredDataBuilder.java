@@ -17,6 +17,7 @@ public class StoredDataBuilder {
     private Boolean modified;
     private Vec3 lastPosition;
     private CharacteristicStack charStack;
+    private PathwayHistory pathwayHistory;
 
     public StoredDataBuilder(){
         clean();
@@ -32,6 +33,7 @@ public class StoredDataBuilder {
         modified = false;
         lastPosition = new Vec3(0, 0, 0);
         charStack = new CharacteristicStack();
+        pathwayHistory = new PathwayHistory();
     }
 
     public StoredDataBuilder copyFrom(@Nullable StoredData data){
@@ -47,6 +49,7 @@ public class StoredDataBuilder {
             modified = data.modified();
             lastPosition = data.lastPosition();
             charStack = data.charStack();
+            pathwayHistory = data.pathwayHistory();
         }
 
         return this;
@@ -97,11 +100,16 @@ public class StoredDataBuilder {
         return this;
     }
 
+    public StoredDataBuilder pathwayHistory(PathwayHistory history){
+        pathwayHistory = history;
+        return this;
+    }
+
     public StoredData build(){
         StoredData buff = new StoredData(pathway, sequence,
                 honorificName, trueName,
                 msgs, knownNames, modified,
-                lastPosition, charStack);
+                lastPosition, charStack, pathwayHistory);
 
         clean();
 
