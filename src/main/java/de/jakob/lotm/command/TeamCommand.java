@@ -66,6 +66,28 @@ public class TeamCommand {
                             return executeDisband(context.getSource(), sender);
                         })
                 )
+                // /rteam admin — OP-only subcommands for managing team state
+                .then(Commands.literal("admin")
+                        .requires(source -> source.hasPermission(2))
+                        // /rteam admin reset <player> — clears all team data for a player
+                        .then(Commands.literal("reset")
+                                .then(Commands.argument("player", EntityArgument.player())
+                                        .executes(context -> {
+                                            ServerPlayer target = EntityArgument.getPlayer(context, "player");
+                                            return executeAdminReset(context.getSource(), target);
+                                        })
+                                )
+                        )
+                        // /rteam admin info <player> — shows team status of a player
+                        .then(Commands.literal("info")
+                                .then(Commands.argument("player", EntityArgument.player())
+                                        .executes(context -> {
+                                            ServerPlayer target = EntityArgument.getPlayer(context, "player");
+                                            return executeAdminInfo(context.getSource(), target);
+                                        })
+                                )
+                        )
+                )
         );
     }
 
@@ -117,8 +139,17 @@ public class TeamCommand {
         }
 
         if (targetTeam.isInTeam()) {
-            source.sendFailure(Component.literal(target.getName().getString() + " is already in another team."));
-            return 0;
+            // Check if the membership is stale (leader no longer claims this player)
+            ServerPlayer claimedLeader = source.getServer().getPlayerList()
+                    .getPlayer(UUID.fromString(targetTeam.leaderUUID()));
+            boolean stale = claimedLeader == null ||
+                    !claimedLeader.getData(ModAttachments.TEAM_COMPONENT.get()).hasMember(target.getStringUUID());
+            if (stale) {
+                target.setData(ModAttachments.TEAM_COMPONENT.get(), targetTeam.clearLeader());
+            } else {
+                source.sendFailure(Component.literal(target.getName().getString() + " is already in another team."));
+                return 0;
+            }
         }
 
         // Check if target already sent an invite to the leader (auto-accept)
@@ -190,6 +221,66 @@ public class TeamCommand {
 
         TeamUtils.disbandTeam(sender, source.getServer());
         source.sendSuccess(() -> Component.literal("Your team has been disbanded.").withStyle(s -> s.withColor(0xF44336)), false);
+        return 1;
+    }
+
+    // ===== Admin commands =====
+
+    private static int executeAdminReset(CommandSourceStack source, ServerPlayer target) {
+        TeamComponent team = target.getData(ModAttachments.TEAM_COMPONENT.get());
+
+        // If target is a leader, disband their whole team first
+        if (team.memberCount() > 0) {
+            TeamUtils.disbandTeam(target, source.getServer());
+        }
+
+        // If target is a member, remove them from their leader's team
+        if (team.isInTeam()) {
+            ServerPlayer leader = source.getServer().getPlayerList()
+                    .getPlayer(UUID.fromString(team.leaderUUID()));
+            if (leader != null) {
+                TeamUtils.removeMember(leader, target);
+            } else {
+                // Leader offline — clear manually
+                target.setData(ModAttachments.TEAM_COMPONENT.get(), new TeamComponent());
+                PacketHandler.sendToPlayer(target, new de.jakob.lotm.network.packets.toClient.SyncSharedAbilitiesDataPacket(
+                        "", new java.util.ArrayList<>(), new java.util.ArrayList<>(), new java.util.HashMap<>(), 0, 0));
+            }
+        }
+
+        // Force-clear regardless, in case data was stale
+        target.setData(ModAttachments.TEAM_COMPONENT.get(), new TeamComponent());
+        PacketHandler.sendToPlayer(target, new de.jakob.lotm.network.packets.toClient.SyncSharedAbilitiesDataPacket(
+                "", new java.util.ArrayList<>(), new java.util.ArrayList<>(), new java.util.HashMap<>(), 0, 0));
+
+        source.sendSuccess(() -> Component.literal("Reset team data for " + target.getName().getString() + ".").withStyle(s -> s.withColor(0x4CAF50)), true);
+        target.sendSystemMessage(Component.literal("An admin has reset your team status.").withStyle(s -> s.withColor(0xFF9800)));
+        return 1;
+    }
+
+    private static int executeAdminInfo(CommandSourceStack source, ServerPlayer target) {
+        TeamComponent team = target.getData(ModAttachments.TEAM_COMPONENT.get());
+        String name = target.getName().getString();
+
+        if (!team.isInTeam() && team.memberCount() == 0) {
+            source.sendSuccess(() -> Component.literal(name + " is not in any team."), false);
+            return 1;
+        }
+
+        if (team.isInTeam()) {
+            String leaderUUID = team.leaderUUID();
+            ServerPlayer leader = source.getServer().getPlayerList().getPlayer(UUID.fromString(leaderUUID));
+            String leaderName = leader != null ? leader.getName().getString() : "offline (" + leaderUUID + ")";
+            source.sendSuccess(() -> Component.literal(name + " is a member of " + leaderName + "'s team."), false);
+        } else {
+            StringBuilder sb = new StringBuilder(name + " is a leader with " + team.memberCount() + " member(s): ");
+            for (String uuid : team.memberUUIDs()) {
+                ServerPlayer member = source.getServer().getPlayerList().getPlayer(UUID.fromString(uuid));
+                sb.append(member != null ? member.getName().getString() : "offline(" + uuid + ")").append(", ");
+            }
+            String msg = sb.toString().replaceAll(", $", "");
+            source.sendSuccess(() -> Component.literal(msg), false);
+        }
         return 1;
     }
 
