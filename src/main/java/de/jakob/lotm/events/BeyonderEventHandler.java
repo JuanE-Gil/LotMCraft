@@ -283,11 +283,11 @@ public class BeyonderEventHandler {
 
         float digestionDrain;
         if (isDirect) {
-            // Base 5%, +1% per level attacker is stronger, -1% per level attacker is weaker, floor 1%
-            digestionDrain = Math.max(0.01f, 0.05f + seqDiff * 0.01f);
+            // Base 3%, +1% per level attacker is stronger, -1% per level attacker is weaker, floor 1%
+            digestionDrain = Math.max(0.01f, 0.03f + seqDiff * 0.01f);
         } else {
-            // Base 0.7%, +0.1% per level attacker is stronger, -0.1% per level attacker is weaker, floor 0.1%
-            digestionDrain = Math.max(0.001f, 0.007f + seqDiff * 0.001f);
+            // Base 0.5%, +0.1% per level attacker is stronger, -0.1% per level attacker is weaker, floor 0.1%
+            digestionDrain = Math.max(0.001f, 0.005f + seqDiff * 0.001f);
         }
 
         float currentDigestion = BeyonderData.getDigestionProgress(victimPlayer);
@@ -299,13 +299,21 @@ public class BeyonderEventHandler {
 
         // If digestion is fully drained, 10% chance to regress victim and reward attacker
         if (newDigestion <= 0f && new Random().nextFloat() < 0.1f) {
-            int newVictimSeq = victimSeq + 1; // higher number = weaker
-            BeyonderData.setBeyonder(victim, BeyonderData.getPathway(victim), newVictimSeq);
-            // Regression is unfair — start with full digestion so the victim isn't immediately vulnerable again
-            victimPlayer.getPersistentData().putFloat(BeyonderData.NBT_DIGESTION_PROGRESS, 1.0f);
-            if (victim instanceof ServerPlayer sp) PacketHandler.syncBeyonderDataToPlayer(sp);
+            // Check if victim has a characteristic stack at their current sequence
+            boolean hasStack = BeyonderData.beyonderMap != null
+                    && BeyonderData.beyonderMap.get(victim.getUUID()).isPresent()
+                    && BeyonderData.beyonderMap.get(victim.getUUID()).get().charStack().get(victimSeq) > 0;
 
-            // Give the attacker the corresponding characteristic item (not for void-summoned puppets or players possessing one)
+            if (hasStack) {
+                // Consume one stack instead of desequencing
+                BeyonderData.setCharStack(victim, victimSeq,
+                        BeyonderData.beyonderMap.get(victim.getUUID()).get().charStack().get(victimSeq) - 1, true);
+            } else {
+                // No stack — desequence the victim
+                BeyonderData.setBeyonder(victim, BeyonderData.getPathway(victim), victimSeq + 1);
+            }
+
+            // Always give the attacker the corresponding characteristic item (not for void-summoned puppets or players possessing one)
             if (!victim.getPersistentData().getBoolean("VoidSummoned")) {
                 BeyonderCharacteristicItem charItem = BeyonderCharacteristicItemHandler
                         .selectCharacteristicOfPathwayAndSequence(BeyonderData.getPathway(victim), victimSeq);
@@ -313,6 +321,10 @@ public class BeyonderEventHandler {
                     attackerPlayer.getInventory().add(new ItemStack(charItem.asItem()));
                 }
             }
+
+            // Either way, reset digestion to full so the victim isn't immediately vulnerable again
+            victimPlayer.getPersistentData().putFloat(BeyonderData.NBT_DIGESTION_PROGRESS, 1.0f);
+            if (victim instanceof ServerPlayer sp) PacketHandler.syncBeyonderDataToPlayer(sp);
         }
     }
 
