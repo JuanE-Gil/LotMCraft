@@ -4,6 +4,7 @@ import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.network.packets.toClient.*;
 import de.jakob.lotm.network.packets.toServer.*;
 import de.jakob.lotm.util.BeyonderData;
+import de.jakob.lotm.util.beyonderMap.PathwayHistory;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerLevel;
@@ -678,7 +679,11 @@ public class PacketHandler {
         boolean griefingEnabled = BeyonderData.isGriefingEnabled(player);
         float digestionProgress = BeyonderData.getDigestionProgress(player);
 
-        SyncBeyonderDataPacket packet = new SyncBeyonderDataPacket(pathway, sequence, spirituality, griefingEnabled, digestionProgress);
+        PathwayHistory history = BeyonderData.beyonderMap != null && BeyonderData.beyonderMap.get(player).isPresent()
+                ? BeyonderData.beyonderMap.get(player).get().pathwayHistory()
+                : new PathwayHistory();
+
+        SyncBeyonderDataPacket packet = new SyncBeyonderDataPacket(pathway, sequence, spirituality, griefingEnabled, digestionProgress, history);
         sendToPlayer(player, packet);
     }
 
@@ -725,7 +730,7 @@ public class PacketHandler {
         boolean griefingEnabled = BeyonderData.isGriefingEnabled(targetPlayer);
         float digestionProgress = BeyonderData.getDigestionProgress(targetPlayer);
 
-        SyncBeyonderDataPacket packet = new SyncBeyonderDataPacket(pathway, sequence, spirituality, griefingEnabled, digestionProgress);
+        SyncBeyonderDataPacket packet = new SyncBeyonderDataPacket(pathway, sequence, spirituality, griefingEnabled, digestionProgress, new PathwayHistory());
 
         targetPlayer.getServer().getPlayerList().getPlayers().forEach(player -> {
             sendToPlayer(player, packet);

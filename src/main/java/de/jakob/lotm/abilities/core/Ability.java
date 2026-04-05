@@ -8,6 +8,7 @@ import de.jakob.lotm.gamerule.ModGameRules;
 import de.jakob.lotm.network.PacketHandler;
 import de.jakob.lotm.network.packets.toClient.UseAbilityPacket;
 import de.jakob.lotm.util.BeyonderData;
+import de.jakob.lotm.util.beyonderMap.PathwayHistory;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -145,10 +146,29 @@ public abstract class Ability {
             return getRequirements().values().stream().anyMatch(reqSeq -> reqSeq >= sequence);
         }
 
-        if(!getRequirements().containsKey(pathway)) return false;
-        if(getRequirements().get(pathway) < sequence) return false;
+        // Check current pathway
+        if(getRequirements().containsKey(pathway) && getRequirements().get(pathway) >= sequence) {
+            return true;
+        }
 
-        return true;
+        // Check historical pathways from domain switches — abilities from the previous pathway are
+        // accessible only down to the switch point (e.g. switched at seq 4, so only fool seq 5–9 carry over)
+        if(!entity.level().isClientSide() && BeyonderData.beyonderMap != null) {
+            var stored = BeyonderData.beyonderMap.get(entity.getUUID());
+            if (stored.isPresent()) {
+                PathwayHistory history = stored.get().pathwayHistory();
+                for (int seq = sequence + 1; seq <= 9; seq++) {
+                    String historicalPathway = history.get(seq);
+                    if (historicalPathway != null
+                            && getRequirements().containsKey(historicalPathway)
+                            && getRequirements().get(historicalPathway) >= seq) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     public boolean canUse(LivingEntity entity) {

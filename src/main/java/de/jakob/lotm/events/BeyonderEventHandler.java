@@ -164,15 +164,17 @@ public class BeyonderEventHandler {
             if (!player.level().getGameRules().getBoolean(ModGameRules.REGRESS_SEQUENCE_ON_DEATH)) return;
 
             StoredData data = beyonderMap.get(player).get();
+            StoredData regressed = data.regressSeq(false);
 
-            beyonderMap.put(player, data.regressSeq());
+            beyonderMap.put(player, regressed);
+            player.getPersistentData().putFloat(BeyonderData.NBT_DIGESTION_PROGRESS, 1.0f);
 
             BeyonderData.recalculateCharStackModifiers(player);
 
-            if (Objects.equals(data.sequence(), LOTMCraft.NON_BEYONDER_SEQ)) {
+            if (Objects.equals(regressed.sequence(), LOTMCraft.NON_BEYONDER_SEQ)) {
                 ClientBeyonderCache.removePlayer(player.getUUID());
             } else
-                ClientBeyonderCache.updateData(player.getUUID(), data.pathway(), data.sequence(),
+                ClientBeyonderCache.updateData(player.getUUID(), regressed.pathway(), regressed.sequence(),
                         0.0f, false, true, 0.0f);
         }
     }
@@ -300,7 +302,16 @@ public class BeyonderEventHandler {
         // If digestion is fully drained, 10% chance to regress victim and reward attacker
         if (newDigestion <= 0f && new Random().nextFloat() < 0.1f) {
             int newVictimSeq = victimSeq + 1; // higher number = weaker
-            BeyonderData.setBeyonder(victim, BeyonderData.getPathway(victim), newVictimSeq);
+            // Capture pathway before regression changes it — the dropped characteristic belongs to the old pathway/seq
+            String pathwayBeforeRegress = BeyonderData.getPathway(victim);
+            // Use regressSeq so domain-switched players restore to their previous pathway on regression
+            if (victim instanceof ServerPlayer sp && BeyonderData.beyonderMap.get(sp).isPresent()) {
+                StoredData regressed = BeyonderData.beyonderMap.get(sp).get().regressSeq();
+                BeyonderData.beyonderMap.put(sp, regressed);
+                BeyonderData.setBeyonder(victim, regressed.pathway(), regressed.sequence());
+            } else {
+                BeyonderData.setBeyonder(victim, BeyonderData.getPathway(victim), newVictimSeq);
+            }
             // Regression is unfair — start with full digestion so the victim isn't immediately vulnerable again
             victimPlayer.getPersistentData().putFloat(BeyonderData.NBT_DIGESTION_PROGRESS, 1.0f);
             if (victim instanceof ServerPlayer sp) PacketHandler.syncBeyonderDataToPlayer(sp);
@@ -308,7 +319,7 @@ public class BeyonderEventHandler {
             // Give the attacker the corresponding characteristic item (not for void-summoned puppets or players possessing one)
             if (!victim.getPersistentData().getBoolean("VoidSummoned")) {
                 BeyonderCharacteristicItem charItem = BeyonderCharacteristicItemHandler
-                        .selectCharacteristicOfPathwayAndSequence(BeyonderData.getPathway(victim), victimSeq);
+                        .selectCharacteristicOfPathwayAndSequence(pathwayBeforeRegress, victimSeq);
                 if (charItem != null && attacker instanceof Player attackerPlayer) {
                     attackerPlayer.getInventory().add(new ItemStack(charItem.asItem()));
                 }

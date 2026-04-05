@@ -427,7 +427,7 @@ public class BeyonderData {
         if (!entity.level().isClientSide()) {
             if(entity instanceof ServerPlayer serverPlayer) {
                 // Send empty data to clear client cache
-                SyncBeyonderDataPacket packet = new SyncBeyonderDataPacket("none", 10, 0.0f, false, 0.0f);
+                SyncBeyonderDataPacket packet = new SyncBeyonderDataPacket("none", 10, 0.0f, false, 0.0f, new de.jakob.lotm.util.beyonderMap.PathwayHistory());
                 PacketHandler.sendToPlayer(serverPlayer, packet);
             }
             else {
