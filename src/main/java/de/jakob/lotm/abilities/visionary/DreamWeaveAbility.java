@@ -15,6 +15,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
 
 import java.util.*;
@@ -22,9 +23,10 @@ import java.util.*;
 @EventBusSubscriber(modid = LOTMCraft.MOD_ID)
 public class DreamWeaveAbility extends SelectableAbility {
     private static final Map<UUID, List<BeyonderNPCEntity>> VICTIM_MOBS = new HashMap<>();
+    private static final Map<Integer, UUID> MOB_TO_VICTIM = new HashMap<>();
 
     public DreamWeaveAbility(String id) {
-        super(id, 10f);
+        super(id, 20f);
     }
 
     @Override
@@ -53,7 +55,31 @@ public class DreamWeaveAbility extends SelectableAbility {
         }
     }
 
+
+    private BeyonderNPCEntity spawnPassiveMob(ServerLevel serverLevel, LivingEntity target,
+                                              int mobSeq, double x, double y, double z) {
+        List<String> pathways = new ArrayList<>(BeyonderData.implementedPathways);
+        String pathway = pathways.get(random.nextInt(pathways.size()));
+
+        // Spawn non-hostile — mob will not attack until harmed
+        BeyonderNPCEntity mob = new BeyonderNPCEntity(
+                ModEntities.BEYONDER_NPC.get(), serverLevel, false, pathway, mobSeq);
+        mob.setPos(x, y, z);
+        mob.getPersistentData().putBoolean("VoidSummoned", true);
+        mob.setPuppetWarrior(true);
+        mob.setMaxLifetimeIfPuppet(20 * 10);
+        // No target set yet — mob is passive until harmed
+
+        serverLevel.addFreshEntity(mob);
+
+        VICTIM_MOBS.computeIfAbsent(target.getUUID(), k -> new ArrayList<>()).add(mob);
+        MOB_TO_VICTIM.put(mob.getId(), target.getUUID());
+
+        return mob;
+    }
+
     // Spawns 1 mob, 1 sequence below the caster
+
     private void strong(Level level, LivingEntity entity) {
         if (level.isClientSide) return;
         if (!(level instanceof ServerLevel serverLevel)) return;
@@ -68,22 +94,10 @@ public class DreamWeaveAbility extends SelectableAbility {
         int mobSeq = Math.min(BeyonderData.getSequence(entity) + 1, 9);
         Vec3 center = target.position();
 
-        List<String> pathways = new ArrayList<>(BeyonderData.implementedPathways);
-        String pathway = pathways.get(random.nextInt(pathways.size()));
+        BeyonderNPCEntity mob = spawnPassiveMob(serverLevel, target, mobSeq,
+                center.x, center.y, center.z);
 
-        BeyonderNPCEntity mob = new BeyonderNPCEntity(
-                ModEntities.BEYONDER_NPC.get(), serverLevel, true, pathway, mobSeq);
-        mob.setPos(center.x, center.y, center.z);
-        mob.getPersistentData().putBoolean("VoidSummoned", true);
-        mob.setPuppetWarrior(true);
-        mob.setMaxLifetimeIfPuppet(20 * 5);
-        mob.setTarget(target);
-
-        serverLevel.addFreshEntity(mob);
-
-        VICTIM_MOBS.computeIfAbsent(target.getUUID(), k -> new ArrayList<>()).add(mob);
-
-        ServerScheduler.scheduleDelayed(20 * 5, () -> {
+        ServerScheduler.scheduleDelayed(20 * 10, () -> {
             if (!mob.isRemoved()) mob.discard();
             removeMob(target.getUUID(), mob);
         });
@@ -112,22 +126,10 @@ public class DreamWeaveAbility extends SelectableAbility {
             double spawnX = center.x + spawnRadius * Math.cos(angle);
             double spawnZ = center.z + spawnRadius * Math.sin(angle);
 
-            List<String> pathways = new ArrayList<>(BeyonderData.implementedPathways);
-            String pathway = pathways.get(random.nextInt(pathways.size()));
-
-            BeyonderNPCEntity mob = new BeyonderNPCEntity(
-                    ModEntities.BEYONDER_NPC.get(), serverLevel, true, pathway, mobSeq);
-            mob.setPos(spawnX, center.y, spawnZ);
-            mob.getPersistentData().putBoolean("VoidSummoned", true);
-            mob.setPuppetWarrior(true);
-            mob.setMaxLifetimeIfPuppet(20 * 5);
-            mob.setTarget(target);
-
-            serverLevel.addFreshEntity(mob);
+            BeyonderNPCEntity mob = spawnPassiveMob(serverLevel, target, mobSeq,
+                    spawnX, center.y, spawnZ);
             mobs.add(mob);
         }
-
-        VICTIM_MOBS.computeIfAbsent(target.getUUID(), k -> new ArrayList<>()).addAll(mobs);
 
         ServerScheduler.scheduleDelayed(20 * 5, () -> {
             for (BeyonderNPCEntity mob : mobs) {
@@ -136,8 +138,28 @@ public class DreamWeaveAbility extends SelectableAbility {
             removeAllMobs(target.getUUID(), mobs);
         });
     }
+    
+ 
+    @SubscribeEvent
+    public static void onMobHurt(LivingDamageEvent.Pre event) {
+        LivingEntity damagedEntity = event.getEntity();
+        if (!(damagedEntity instanceof BeyonderNPCEntity mob)) return;
+        if (!MOB_TO_VICTIM.containsKey(mob.getId())) return;
 
+        UUID victimUUID = MOB_TO_VICTIM.get(mob.getId());
+        net.minecraft.world.entity.Entity attacker = event.getSource().getEntity();
+        if (attacker == null) return;
 
+        // Only trigger when the designated victim is the one dealing damage
+        if (!attacker.getUUID().equals(victimUUID)) return;
+
+        // Turn hostile and target the attacker
+        if (!mob.isHostile() && attacker instanceof LivingEntity livingAttacker) {
+            mob.setHostile(true);
+            mob.setTarget(livingAttacker);
+        }
+    }
+    
     @SubscribeEvent
     public static void onEffectRemoved(MobEffectEvent.Remove event) {
         if (event.getEntity().level().isClientSide) return;
@@ -148,11 +170,13 @@ public class DreamWeaveAbility extends SelectableAbility {
         if (mobs == null) return;
 
         for (BeyonderNPCEntity mob : mobs) {
+            MOB_TO_VICTIM.remove(mob.getId());
             if (!mob.isRemoved()) mob.discard();
         }
     }
-
+    
     private static void removeMob(UUID victimUUID, BeyonderNPCEntity mob) {
+        MOB_TO_VICTIM.remove(mob.getId());
         List<BeyonderNPCEntity> mobs = VICTIM_MOBS.get(victimUUID);
         if (mobs == null) return;
         mobs.remove(mob);
@@ -160,6 +184,7 @@ public class DreamWeaveAbility extends SelectableAbility {
     }
 
     private static void removeAllMobs(UUID victimUUID, List<BeyonderNPCEntity> mobs) {
+        for (BeyonderNPCEntity mob : mobs) MOB_TO_VICTIM.remove(mob.getId());
         List<BeyonderNPCEntity> tracked = VICTIM_MOBS.get(victimUUID);
         if (tracked == null) return;
         tracked.removeAll(mobs);
