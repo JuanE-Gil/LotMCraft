@@ -48,6 +48,9 @@ public class ParasitationAbility extends SelectableAbility {
     public ParasitationAbility(String id) {
         super(id, 10f);
         canBeUsedByNPC = false;
+        canBeCopied = false;
+        canBeReplicated = false;
+        canBeUsedInArtifact = false;
     }
 
     @Override
