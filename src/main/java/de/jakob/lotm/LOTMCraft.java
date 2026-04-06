@@ -4,6 +4,7 @@ import com.zigythebird.playeranim.animation.PlayerAnimationController;
 import com.zigythebird.playeranim.api.PlayerAnimationFactory;
 import com.zigythebird.playeranimcore.enums.PlayState;
 import de.jakob.lotm.abilities.PassiveAbilityHandler;
+import de.jakob.lotm.abilities.black_emperor.LawDamageHandler;
 import de.jakob.lotm.abilities.core.AbilityHandler;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.block.ModBlockEntities;
@@ -117,6 +118,7 @@ import org.apache.logging.log4j.Logger;
 @Mod(LOTMCraft.MOD_ID)
 public class LOTMCraft
 {
+
     public static final String MOD_ID = "lotmcraft";
 
     public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
@@ -141,7 +143,6 @@ public class LOTMCraft
     public static KeyMapping useAbilityBarAbility4;
     public static KeyMapping useAbilityBarAbility5;
     public static KeyMapping useAbilityBarAbility6;
-
 
     public static AbilityHandler abilityHandler;
 

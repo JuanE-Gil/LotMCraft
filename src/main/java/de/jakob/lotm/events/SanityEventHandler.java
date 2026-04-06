@@ -1,5 +1,6 @@
 package de.jakob.lotm.events;
 
+import de.jakob.lotm.abilities.black_emperor.BlackEmperorSanity;
 import de.jakob.lotm.attachments.DisabledAbilitiesComponent;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.attachments.SanityComponent;
@@ -37,6 +38,7 @@ public class SanityEventHandler {
 
         // Add sanity back over time if not angel, otherwise reduce it
         float sanityIncrease = BeyonderData.isBeyonder(entity) && BeyonderData.getSequence(entity) <= 2 ? -0.00025f : 0.0025f;
+        sanityIncrease = BlackEmperorSanity.applySanityLossResistance(entity, sanityIncrease);
         sanityComp.increaseSanityAndSync(sanityIncrease, entity);
 
         float sanity = sanityComp.getSanity();

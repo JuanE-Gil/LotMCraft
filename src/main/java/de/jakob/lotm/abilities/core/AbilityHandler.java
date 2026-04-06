@@ -13,6 +13,7 @@ import de.jakob.lotm.abilities.sun.*;
 import de.jakob.lotm.abilities.tyrant.*;
 import de.jakob.lotm.abilities.visionary.*;
 import de.jakob.lotm.abilities.wheel_of_fortune.*;
+import de.jakob.lotm.abilities.black_emperor.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -248,6 +249,11 @@ public class AbilityHandler {
         abilities.add(new FateSiphoningAbility("fate_siphoning_ability"));
         abilities.add(new ConceptualTheftAbility("conceptual_theft_ability"));
         abilities.add(new TimeManipulationAbility("time_manipulation_ability"));
+
+        //Black Emperor PATHWAY
+        abilities.add(new Eloquence("eloquence_ability"));
+        abilities.add(new LawProficiency("law_proficiency_ability"));
+        abilities.add(new BriberAbility("briber_ability"));
     }
 
     public HashSet<Ability> getAbilities() {

@@ -101,12 +101,14 @@ public class BeyonderData {
             "mother",
             "abyss",
             "visionary",
-            "wheel_of_fortune"
+            "wheel_of_fortune",
+            "black_emperor"
     );
 
     public static int getHighestImplementedSequence(String pathway) {
         return switch (pathway) {
             case "mother", "darkness", "fool", "wheel_of_fortune", "error", "visionary", "demoness", "red_priest", "sun", "tyrant", "door", "abyss" -> 1;
+            case "black_emperor" -> 8;
             default -> 9;
         };
     }
