@@ -771,6 +771,9 @@
   "item.lotmcraft.puppeteering_enhancements_ability.description": "Your range has increased massively and the time it takes was reduced greatly. Your marionettes can now use your abilities. The number of marionettes was increased",
 
   "item.lotmcraft.nocturnality_ability": "Nocturnality",
+  "item.lotmcraft.nocturnality_ability.description": "Become stronger at night",
+  "item.lotmcraft.darkness_revival_ability": "Darkness Revival",
+  "item.lotmcraft.darkness_revival_ability.description": "Revive from the darkness at the cost of losing yourself slowly",
 
   "item.lotmcraft.feather_fall_ability": "Feather Fall",
   "item.lotmcraft.blood_loss_ability": "Blood Loss",
