@@ -1,5 +1,6 @@
 package de.jakob.lotm.entity.custom.ability_entities.door_pathway;
 
+import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.particle.ModParticles;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityUtil;
@@ -33,6 +34,8 @@ import java.util.UUID;
 public class ExileDoorsEntity extends Entity {
     private int lifetime = 0;
     private int petrifiedTicks = 0;
+    private int ownerSequence = LOTMCraft.NON_BEYONDER_SEQ;
+    private double ownerMultiplier = 1.0;
 
     private static final HashSet<UUID> onExileCooldown = new HashSet<>();
 
@@ -49,12 +52,14 @@ public class ExileDoorsEntity extends Entity {
     }
 
     // Main constructor for placing the door
-    public ExileDoorsEntity(EntityType<?> entityType, Level level, int duration, LivingEntity source) {
+    public ExileDoorsEntity(EntityType<?> entityType, Level level, int duration, LivingEntity source, int seq, double mult) {
         this(entityType, level);
         this.setDuration(duration);
         if(source != null) {
             this.setCasterUUID(source.getUUID());
         }
+        ownerSequence = seq;
+        ownerMultiplier = mult;
     }
 
     // Somewhere in your entity or ability class
@@ -85,7 +90,6 @@ public class ExileDoorsEntity extends Entity {
             LivingEntity owner = ownerUUID != null && (serverLevel.getEntity(ownerUUID) instanceof LivingEntity livingEntity) ? livingEntity : null;
 
             boolean ownerIsBeyonder = owner != null && BeyonderData.isBeyonder(owner);
-            int ownerSequence = ownerIsBeyonder ? BeyonderData.getSequence(owner) : 9;
 
             for (LivingEntity entity : entities) {
                 if ((owner != null && (
@@ -108,7 +112,7 @@ public class ExileDoorsEntity extends Entity {
                     exileTicks = 10 * 20;
                 }
 
-                exileTicks = (int) Math.round(exileTicks * BeyonderData.getMultiplier(entity));
+                exileTicks = (int) Math.round(exileTicks * ownerMultiplier);
 
                 ServerLevel origLevel = (ServerLevel) entity.level();
                 double origX = entity.getX();

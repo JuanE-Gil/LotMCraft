@@ -47,8 +47,9 @@ public class RoarAbility extends Ability {
 
         level.playSound(null, BlockPos.containing(startPos), SoundEvents.ENDER_DRAGON_GROWL, SoundSource.BLOCKS, 3, 1);
 
+        double multiplier = multiplier(entity);
         AbilityUtil.getNearbyEntities(entity, (ServerLevel) level, startPos, 19).forEach(e -> {
-            e.hurt(ModDamageTypes.source(level, ModDamageTypes.BEYONDER_GENERIC, entity), (float) (DamageLookup.lookupDamage(4, .85) * multiplier(entity)));
+            e.hurt(ModDamageTypes.source(level, ModDamageTypes.BEYONDER_GENERIC, entity), (float) (DamageLookup.lookupDamage(4, .85) * multiplier));
             Vec3 knockBack = new Vec3(e.position().subtract(startPos).normalize().x, .75, e.position().subtract(startPos).normalize().z).normalize().scale(1.5);
             e.setDeltaMovement(knockBack);
         });

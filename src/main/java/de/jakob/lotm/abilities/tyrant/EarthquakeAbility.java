@@ -57,11 +57,12 @@ public class EarthquakeAbility extends Ability {
         List<BlockPos> validBlocks = blocks.stream().filter(b -> !level.getBlockState(b).getCollisionShape(level, b).isEmpty() && level.getBlockState(b.above()).getCollisionShape(level, b).isEmpty() && !level.getBlockState(b).is(Blocks.WATER)).toList();
         boolean griefing = BeyonderData.isGriefingEnabled(entity);
 
+        double multiplier = multiplier(entity);
         ServerScheduler.scheduleForDuration(0, 8, 20 * 25, () -> {
             AbilityUtil.getNearbyEntities(entity, (ServerLevel) level, startPos, 90).forEach(e -> {
                 if(AbilityUtil.distanceToGround(level, e) < 1.5) {
                     if(random.nextBoolean())
-                        e.hurt(ModDamageTypes.source(level, ModDamageTypes.BEYONDER_GENERIC, entity), (float) DamageLookup.lookupDps(4, .925, 8, 20) * (float) multiplier(entity));
+                        e.hurt(ModDamageTypes.source(level, ModDamageTypes.BEYONDER_GENERIC, entity), (float) DamageLookup.lookupDps(4, .925, 8, 20) * (float) multiplier);
                     if(random.nextInt(12) == 0)
                         e.setDeltaMovement(new Vec3((0.5 - random.nextDouble()) * 0.5, 0.25 + random.nextDouble() * .75, (0.5 - random.nextDouble()) * 0.25));
                 }

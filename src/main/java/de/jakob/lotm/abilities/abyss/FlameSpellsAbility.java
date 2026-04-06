@@ -70,7 +70,8 @@ public class FlameSpellsAbility extends SelectableAbility {
         level.playSound(null, BlockPos.containing(startPos), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.BLOCKS, 3, 1);
 
         AbilityUtil.getNearbyEntities(entity, (ServerLevel) level, startPos, 5).forEach(e -> {
-            e.hurt(ModDamageTypes.source(level, ModDamageTypes.BEYONDER_GENERIC, entity), (float) (DamageLookup.lookupDamage(6, .875) * multiplier(entity)));
+            e.hurt(ModDamageTypes.source(level, ModDamageTypes.BEYONDER_GENERIC, entity), (float) (DamageLookup.lookupDamage(6, .875) *
+                    multiplier(entity)));
             e.setRemainingFireTicks(20 * 3);
             Vec3 knockBack = new Vec3(e.position().subtract(startPos).normalize().x, .75, e.position().subtract(startPos).normalize().z).normalize().scale(.5);
             e.setDeltaMovement(knockBack);
@@ -120,7 +121,10 @@ public class FlameSpellsAbility extends SelectableAbility {
 
         level.playSound(null, startPos.x, startPos.y, startPos.z, SoundEvents.BLAZE_SHOOT, entity.getSoundSource(), 1.0f, 1.0f);
 
-        FireballEntity fireball = new FireballEntity(level, entity, DamageLookup.lookupDamage(6, .75) * multiplier(entity), BeyonderData.isGriefingEnabled(entity));
+        float damage = (float) DamageLookup.lookupDamage(6, .75) *
+                multiplier(entity);
+
+        FireballEntity fireball = new FireballEntity(level, entity, damage, BeyonderData.isGriefingEnabled(entity));
         fireball.setPos(startPos.x, startPos.y, startPos.z); // Set initial position
         fireball.shoot(direction.x, direction.y, direction.z, 1.2f, 0);
         level.addFreshEntity(fireball);

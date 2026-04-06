@@ -14,6 +14,8 @@ public class ModDamageTypes {
 
     public static final ResourceKey<DamageType> LOOSING_CONTROL = key("loosing_control");
     public static final ResourceKey<DamageType> PURIFICATION = key("purification");
+    /** Used by ticking/AoE Sun abilities — treated as indirect for digestion drain purposes. */
+    public static final ResourceKey<DamageType> PURIFICATION_INDIRECT = key("purification_indirect");
     public static final ResourceKey<DamageType> HUNTER_FIRE = key("hunter_fire");
     public static final ResourceKey<DamageType> SAILOR_LIGHTNING = key("sailor_lightning");
     public static final ResourceKey<DamageType> UNLUCK = key("unluck");

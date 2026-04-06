@@ -116,8 +116,9 @@ public class TorrentialDownpourAbility extends Ability {
         }, () -> activeDownpours.remove(data), (ServerLevel) level, () -> AbilityUtil.getTimeInArea(entity, new Location(startPos, level)));
 
         // Scheduler for Damage
+        double multiplier = multiplier(entity);
         ServerScheduler.scheduleForDuration(0, 10, 20 * 30, () -> {
-            AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 25, DamageLookup.lookupDps(3, .75, 10, 20) * multiplier(entity), startPos, true, false, true, 0);
+            AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 25, DamageLookup.lookupDps(3, .75, 10, 20) * multiplier, startPos, true, false, true, 0);
         }, null, (ServerLevel) level, () -> AbilityUtil.getTimeInArea(entity, new Location(startPos, level)));
     }
 

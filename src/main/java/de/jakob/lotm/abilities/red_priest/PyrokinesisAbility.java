@@ -109,6 +109,8 @@ public class PyrokinesisAbility extends SelectableAbility {
 
         Vec3 perpendicular = VectorUtil.getPerpendicularVector(entity.getLookAngle()).normalize();
 
+        double multiplier = multiplier(entity);
+
         ServerScheduler.scheduleForDuration(0, 1, 20 * 20, () -> {
             if(random.nextInt(10) == 0)
                 level.playSound(null, targetPos.x, targetPos.y, targetPos.z, SoundEvents.BLAZE_SHOOT, entity.getSoundSource(), 1.0f, 1.0f);
@@ -121,7 +123,7 @@ public class PyrokinesisAbility extends SelectableAbility {
                     ParticleUtil.spawnParticles((ServerLevel) level, ParticleTypes.FLAME, pos, 1, 0.5, 0.02);
                     ParticleUtil.spawnParticles((ServerLevel) level, ParticleTypes.SMOKE, pos, 1, 0.5, 0.02);
 
-                    AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 1f, DamageLookup.lookupDamage(7, .2) * multiplier(entity), pos, true, false, false, 15, 20 * 4);
+                    AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 1f, DamageLookup.lookupDamage(7, .2) * multiplier, pos, true, false, false, 15, 20 * 4);
 
                     for(LivingEntity target : AbilityUtil.getNearbyEntities(entity, (ServerLevel) level, pos, 1f)) {
                         Vec3 knockback = target.position().subtract(pos).normalize().add(0, .2, 0).scale(0.8f);
@@ -141,7 +143,9 @@ public class PyrokinesisAbility extends SelectableAbility {
 
         level.playSound(null, startPos.x, startPos.y, startPos.z, SoundEvents.BLAZE_SHOOT, entity.getSoundSource(), 1.0f, 1.0f);
 
-        ServerScheduler.scheduleDelayed(18, () -> AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 5.5, DamageLookup.lookupDamage(7, .9) * multiplier(entity), entity.position().add(0, .2, 0), true, false, true, 0, 20 * 5));
+        double multiplier = multiplier(entity);
+
+        ServerScheduler.scheduleDelayed(18, () -> AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 5.5, DamageLookup.lookupDamage(7, .9) * multiplier, entity.position().add(0, .2, 0), true, false, true, 0, 20 * 5));
 
         AtomicDouble i = new AtomicDouble(0.6);
         ServerScheduler.scheduleForDuration(0, 1, 24, () -> {

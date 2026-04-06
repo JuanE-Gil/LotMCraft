@@ -143,12 +143,13 @@ public class DesireControlAbility extends SelectableAbility {
     }
 
     private int calculateAmplifier(LivingEntity caster, LivingEntity target) {
+        int castersSeq = AbilityUtil.getSeqWithArt(caster, this);
+        int targetSeq = BeyonderData.getSequence(target);
+
         if (AbilityUtil.isTargetSignificantlyWeaker(caster, target)) {
             return 4;
         }
 
-        int castersSeq = BeyonderData.getSequence(caster);
-        int targetSeq = BeyonderData.getSequence(target);
         int diff = targetSeq - castersSeq;
 
         if (diff >= 2) {

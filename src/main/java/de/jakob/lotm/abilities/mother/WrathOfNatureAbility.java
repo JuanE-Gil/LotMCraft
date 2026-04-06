@@ -70,9 +70,10 @@ public class WrathOfNatureAbility extends SelectableAbility {
         if (!level.isClientSide) {
             Vec3 center = entity.position();
 
+            double multiplier = multiplier(entity);
             // Affect entities
             ServerScheduler.scheduleForDuration(0, 4, 20 * 15, () -> {
-                AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 55, DamageLookup.lookupDps(1, .5, 4, 20) * multiplier(entity), center, true, false, 20 * 8);
+                AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 55, DamageLookup.lookupDps(1, .5, 4, 20) * multiplier, center, true, false, 20 * 8);
             });
 
             List<BlockPos> affectedBlocks = AbilityUtil.getBlocksInEllipsoid((ServerLevel) level, center, 45, 18, true, false, true)
@@ -123,14 +124,13 @@ public class WrathOfNatureAbility extends SelectableAbility {
                     level.sendBlockUpdated(b, level.getBlockState(b), level.getBlockState(b), Block.UPDATE_ALL);
                 });
             }, (ServerLevel) level);
-
-
-
         }
     }
 
     private void lightning(Level level, LivingEntity entity) {
         Vec3 targetLocFinak = AbilityUtil.getTargetLocation(entity, 70, 2, true);
+        double multiplier = multiplier(entity);
+
         ServerScheduler.scheduleForDuration(0, 20, 20 * 4, () -> {
             Vec3 targetLoc = new Vec3(targetLocFinak.x, targetLocFinak.y, targetLocFinak.z);
             for(int i = 0; i < 35; i++) {
@@ -139,7 +139,7 @@ public class WrathOfNatureAbility extends SelectableAbility {
                     targetLoc = targetLoc.subtract(0, 1, 0);
             }
 
-            GiantLightningEntity lightning = new GiantLightningEntity(level, entity, targetLoc, 50, 6, DamageLookup.lookupDamage(1, .4) * multiplier(entity), BeyonderData.isGriefingEnabled(entity), 13, 200, 0x6522a8);
+            GiantLightningEntity lightning = new GiantLightningEntity(level, entity, targetLoc, 50, 6, DamageLookup.lookupDamage(1, .4) * multiplier, BeyonderData.isGriefingEnabled(entity), 13, 200, 0x6522a8);
             level.addFreshEntity(lightning);
         });
     }

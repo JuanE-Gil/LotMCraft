@@ -12,7 +12,7 @@ import java.util.Map;
 
 public class LightningBranchAbility extends Ability {
     public LightningBranchAbility(String id) {
-        super(id, 1.5f);
+        super(id, 5f);
         canBeCopied = false;
     }
 
@@ -34,7 +34,7 @@ public class LightningBranchAbility extends Ability {
         Vec3 dir = entity.getLookAngle().normalize();
         Vec3 startPos = entity.position().add(dir).add(0, 1.5, 0);
 
-        LightningBranchEntity branch = new LightningBranchEntity(level, entity, startPos, dir, 30, DamageLookup.lookupDamage(3, .5) * multiplier(entity));
+        LightningBranchEntity branch = new LightningBranchEntity(level, entity, startPos, dir, 30, DamageLookup.lookupDamage(3, .5) * multiplier(entity)/2f);
         level.addFreshEntity(branch);
     }
 }

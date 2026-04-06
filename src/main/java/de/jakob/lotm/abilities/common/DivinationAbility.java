@@ -80,10 +80,6 @@ public class DivinationAbility extends SelectableAbility {
         }
     }
 
-    private void dowsingRod(Level level, LivingEntity entity) {
-
-    }
-
     private void dangerPremonition(Level level, LivingEntity entity) {
         if(level.isClientSide)
             return;

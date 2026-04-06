@@ -124,8 +124,9 @@ public class WaterManipulationAbility extends SelectableAbility {
             ParticleUtil.spawnParticles((ServerLevel) level, ParticleTypes.SNEEZE, rainPos, 45, 4, 4, 4, 0);
         }, () -> castingCorrosiveRain.remove(entity.getUUID()), (ServerLevel) level);
 
+        double multiplier = multiplier(entity);
         ServerScheduler.scheduleForDuration(0, 10, 20 * 15, () -> {
-            AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 5, DamageLookup.lookupDps(7, .775, 10, 20) * multiplier(entity), startPos, true, false, true, 0);
+            AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 5, DamageLookup.lookupDps(7, .775, 10, 20) * multiplier, startPos, true, false, true, 0);
         }, (ServerLevel) level);
     }
 
@@ -143,6 +144,7 @@ public class WaterManipulationAbility extends SelectableAbility {
         AtomicBoolean hasHit = new AtomicBoolean(false);
         AtomicBoolean frozen = new AtomicBoolean(false);
 
+        double multiplier = multiplier(entity);
         ServerScheduler.scheduleForDuration(0, 1, 20 * 5, () -> {
             if (hasHit.get()) {
                 return;
@@ -159,7 +161,7 @@ public class WaterManipulationAbility extends SelectableAbility {
                 return;
             }
 
-            if(AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 2.5f, DamageLookup.lookupDamage(7, .825) * multiplier(entity), pos, true, false, true, 0)) {
+            if(AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 2.5f, DamageLookup.lookupDamage(7, .825) * multiplier, pos, true, false, true, 0)) {
                 hasHit.set(true);
                 return;
             }

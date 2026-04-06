@@ -26,6 +26,7 @@ import java.util.*;
 public class SurgeOfDarknessAbility extends Ability {
     public SurgeOfDarknessAbility(String id) {
         super(id, 11);
+        autoClear = false;
     }
 
     @Override
@@ -47,7 +48,7 @@ public class SurgeOfDarknessAbility extends Ability {
             ServerScheduler.scheduleForDuration(0, 4, 20 * 15, () -> {
                 // Surge of Darkness is weakened by light_strong
                 Location currentLoc = new Location(center, level);
-                int seq = BeyonderData.getSequence(entity);
+                int seq = AbilityUtil.getSeqWithArt(entity, this);
                 boolean purified = InteractionHandler.isInteractionPossible(currentLoc, "light_strong", seq);
                 float damageMult = purified ? 0.3f : 1f;
 
@@ -60,7 +61,7 @@ public class SurgeOfDarknessAbility extends Ability {
                 });
 
                 AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 45, DamageLookup.lookupDps(3, .5, 4, 20) * multiplier(entity) * damageMult, center, true, false, ModDamageTypes.source(level, ModDamageTypes.DARKNESS_GENERIC, entity));
-            });
+            }, () -> clearArtifactScaling(entity), (ServerLevel) level);
 
             List<BlockPos> affectedBlocks = AbilityUtil.getBlocksInEllipsoid((ServerLevel) level, center, 45, 18, true, false, true)
                     .stream().filter(blockPos -> !level.getBlockState(blockPos).isAir()).toList();

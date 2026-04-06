@@ -60,14 +60,16 @@ public class FrenzyAbility extends Ability {
 
         int amplifier = getAmplifier(entity, target);
 
-        if(!BeyonderData.isBeyonder(target) || BeyonderData.getSequence(target) >= BeyonderData.getSequence(entity)) {
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+
+        if(!BeyonderData.isBeyonder(target) || BeyonderData.getSequence(target) >= entitySeq) {
             if (!target.hasEffect(ModEffects.LOOSING_CONTROL) || target.getEffect(ModEffects.LOOSING_CONTROL).getAmplifier() < amplifier)
                 target.addEffect(new MobEffectInstance(ModEffects.LOOSING_CONTROL, 20 * 8, amplifier));
         }
 
         target.hurt(entity.damageSources().source(ModDamageTypes.LOOSING_CONTROL), (float) (DamageLookup.lookupDamage(7, .85) * multiplier(entity)));
 
-        target.getData(ModAttachments.SANITY_COMPONENT).increaseSanityAndSync((float) (-0.065f * multiplier(entity) * multiplier(entity)), target);
+        target.getData(ModAttachments.SANITY_COMPONENT).increaseSanityAndSync((float) (-0.065f * multiplier(entity)), target);
 
         ParticleUtil.spawnParticles((ServerLevel) level, dust, target.getEyePosition(), 80, 0.5f);
     }
@@ -83,7 +85,7 @@ public class FrenzyAbility extends Ability {
 
         if(BeyonderData.isBeyonder(entity) && BeyonderData.isBeyonder(target)) {
             int targetSequence = BeyonderData.getSequence(target);
-            int sequence = BeyonderData.getSequence(entity);
+            int sequence = AbilityUtil.getSeqWithArt(entity, this);
 
             if(targetSequence <= sequence) {
                 return 2;

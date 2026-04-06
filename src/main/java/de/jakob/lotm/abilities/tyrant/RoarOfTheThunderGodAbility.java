@@ -24,7 +24,7 @@ import java.util.Map;
 
 public class RoarOfTheThunderGodAbility extends Ability {
     public RoarOfTheThunderGodAbility(String id) {
-        super(id, 2);
+        super(id, 5);
         canBeCopied = false;
     }
 
@@ -54,7 +54,7 @@ public class RoarOfTheThunderGodAbility extends Ability {
         level.playSound(null, BlockPos.containing(startPos), SoundEvents.ENDER_DRAGON_GROWL, SoundSource.BLOCKS, 10, 1);
 
         AbilityUtil.getNearbyEntities(entity, (ServerLevel) level, startPos, 50).forEach(e -> {
-            e.hurt(ModDamageTypes.source(level, ModDamageTypes.BEYONDER_GENERIC, entity), (float) (DamageLookup.lookupDamage(1, .85) * multiplier(entity)));
+            e.hurt(ModDamageTypes.source(level, ModDamageTypes.BEYONDER_GENERIC, entity), (float) (DamageLookup.lookupDamage(1, .85) * multiplier(entity))/3);
             Vec3 knockBack = new Vec3(e.position().subtract(startPos).normalize().x, .75, e.position().subtract(startPos).normalize().z).normalize().scale(2.75);
             e.setDeltaMovement(knockBack);
         });

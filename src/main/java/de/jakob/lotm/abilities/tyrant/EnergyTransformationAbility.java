@@ -64,7 +64,7 @@ public class EnergyTransformationAbility extends ToggleAbility {
         if(entity instanceof Player player) {
             player.getAbilities().mayfly = true;
             player.getAbilities().flying = true;
-            player.getAbilities().setFlyingSpeed(.75f);
+            player.getAbilities().setFlyingSpeed(.6f);
             player.onUpdateAbilities();
         }
 

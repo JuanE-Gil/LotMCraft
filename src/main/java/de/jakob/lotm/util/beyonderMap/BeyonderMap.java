@@ -50,6 +50,20 @@ public class BeyonderMap extends SavedData {
         }
     }
 
+    public void onPlayerUUIDChange(ServerPlayer player){
+        String name = player.getGameProfile().getName();
+
+        UUID inMapId = getKeyByName(name);
+        if(inMapId == null) return;
+
+        if(!inMapId.equals(player.getUUID())){
+            var data = map.get(inMapId);
+            remove(inMapId);
+
+            put(player, data);
+        }
+    }
+
     public void put(LivingEntity entity) {
         if(!(entity instanceof ServerPlayer)) return;
 

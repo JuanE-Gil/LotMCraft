@@ -45,8 +45,6 @@ public class MarionetteControllingAbility extends SelectableAbility {
 
         canBeCopied = false;
         canBeUsedByNPC = false;
-        canBeReplicated = false;
-
     }
 
     @Override

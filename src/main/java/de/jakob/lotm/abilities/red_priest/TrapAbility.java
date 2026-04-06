@@ -55,6 +55,8 @@ public class TrapAbility extends Ability {
         AtomicBoolean hasExploded = new AtomicBoolean(false);
 
         if(!level.isClientSide()) {
+            double multiplier = multiplier(entity);
+
             ServerScheduler.scheduleForDuration(0, 1, duration, () -> {
                 if(hasExploded.get()) {
                     return;
@@ -68,7 +70,7 @@ public class TrapAbility extends Ability {
                         PacketHandler.sendToPlayer(player, new SyncExplodedTrapPacket(trapId));
                     }
 
-                    AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 3, DamageLookup.lookupDamage(9, .95) * multiplier(entity), pos, true, false, true, 0);
+                    AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 3, DamageLookup.lookupDamage(9, .95) * multiplier, pos, true, false, true, 0);
 
                     if(BeyonderData.isGriefingEnabled(entity)) {
                         level.explode(entity, pos.x, pos.y, pos.z, 4f, true, Level.ExplosionInteraction.MOB);

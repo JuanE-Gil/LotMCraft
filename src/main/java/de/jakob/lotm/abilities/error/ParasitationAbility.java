@@ -5,16 +5,21 @@ import de.jakob.lotm.abilities.core.ToggleAbility;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.attachments.ParasitationComponent;
 import de.jakob.lotm.attachments.TransformationComponent;
+import de.jakob.lotm.effect.ModEffects;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Tuple;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
@@ -24,15 +29,14 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @EventBusSubscriber(modid = LOTMCraft.MOD_ID)
 public class ParasitationAbility extends ToggleAbility {
 
-    private static final HashMap<UUID, UUID> hostMap = new HashMap<>();
+    private static final HashMap<UUID, UUID> hostMap = new HashMap<>(60);
+    private static final HashMap<UUID, List<WrappedGoal>> goalsMap = new HashMap<>(60);
+
     public ParasitationAbility(String id) {
         super(id);
 
@@ -78,6 +82,10 @@ public class ParasitationAbility extends ToggleAbility {
         ParasitationComponent parasitationComponent = host.getData(ModAttachments.PARASITE_COMPONENT);
         parasitationComponent.setParasited(true);
         parasitationComponent.setParasiteUUID(entity.getUUID());
+
+        if(host instanceof Mob mobHost) {
+            removeMovementGoals(mobHost);
+        }
     }
 
     @Override
@@ -101,10 +109,13 @@ public class ParasitationAbility extends ToggleAbility {
         }
 
         Entity host = serverLevel.getEntity(hostMap.get(entity.getUUID()));
-        if(host == null || host.isRemoved() || host.distanceToSqr(entity) > 128 || !host.isAlive() || !(host instanceof LivingEntity)) {
+        if(host == null || host.isRemoved() || !host.isAlive() || !(host instanceof LivingEntity)) {
             cancel(serverLevel, entity);
             return;
         }
+
+        entity.addEffect(new MobEffectInstance(ModEffects.CONCEALMENT, 20 * 10, 10, false, false));
+        entity.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 20 * 5, 5, false, false, false));
 
         Vec3 dir = new Vec3(entity.getLookAngle().x(), 0, entity.getLookAngle().z()).normalize().scale(Math.min(-.85f, -1 * host.getBbWidth()));
         Vec3 hostPos = entity.position().add(dir);
@@ -133,7 +144,6 @@ public class ParasitationAbility extends ToggleAbility {
                 .toList()
                 .forEach(entity::removeEffect);
 
-
         // Stop when overridden by another transformation^1
         TransformationComponent transformationComponent = entity.getData(ModAttachments.TRANSFORMATION_COMPONENT);
         if (!transformationComponent.isTransformed() || transformationComponent.getTransformationIndex() != TransformationComponent.TransformationType.PARASTATION.getIndex()) {
@@ -153,6 +163,9 @@ public class ParasitationAbility extends ToggleAbility {
                 ParasitationComponent parasitationComponent = livingHost.getData(ModAttachments.PARASITE_COMPONENT);
                 parasitationComponent.setParasited(false);
                 parasitationComponent.setParasiteUUID(null);
+
+                if(host instanceof Mob mobHost)
+                    addMovementGoals(mobHost);
             }
         }
 
@@ -219,5 +232,30 @@ public class ParasitationAbility extends ToggleAbility {
 
             event.setCanceled(true);
         }
+    }
+
+    public void removeMovementGoals(Mob mob) {
+        List<WrappedGoal> removedGoals = new ArrayList<>();
+
+        for(var goalWrapper : mob.goalSelector.getAvailableGoals()) {
+            var goal = goalWrapper.getGoal();
+            if(goal instanceof RandomStrollGoal ||
+                    goal instanceof WaterAvoidingRandomStrollGoal ||
+                    goal instanceof MoveThroughVillageGoal ||
+                    goal instanceof FloatGoal) {
+                removedGoals.add(goalWrapper);
+                }
+            }
+
+        goalsMap.put(mob.getUUID(), removedGoals);
+        mob.goalSelector.getAvailableGoals().removeIf(removedGoals::contains);
+    }
+
+    private void addMovementGoals(Mob mob){
+        for(var goal : goalsMap.get(mob.getUUID())) {
+            mob.goalSelector.addGoal(goal.getPriority(), goal.getGoal());
+        }
+
+        goalsMap.remove(mob.getUUID());
     }
 }

@@ -5,6 +5,7 @@ import de.jakob.lotm.entity.ModEntities;
 import de.jakob.lotm.entity.custom.ability_entities.door_pathway.TravelersDoorEntity;
 import de.jakob.lotm.network.PacketHandler;
 import de.jakob.lotm.network.packets.toClient.OpenCoordinateScreenTravelersDoorPacket;
+import de.jakob.lotm.util.TeleportationUtil;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.scheduling.ServerScheduler;
 import net.minecraft.core.BlockPos;
@@ -101,7 +102,9 @@ public class TravelersDoorAbility extends SelectableAbility {
             if(travelersDoorUsers.containsKey(player.getUUID())) {
                 hasInputCoordinates.set(true);
 
-                BlockPos pos = travelersDoorUsers.get(player.getUUID());
+                var validatedPos = TeleportationUtil.clampToBorder(serverLevel,
+                        travelersDoorUsers.get(player.getUUID()).getBottomCenter());
+                BlockPos pos = new BlockPos((int) validatedPos.x,(int) validatedPos.y,(int) validatedPos.z);
 
                 travelersDoorUsers.remove(player.getUUID());
 

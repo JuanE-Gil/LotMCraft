@@ -114,7 +114,8 @@ public class DemonicSpellsAbility extends SelectableAbility {
                 entity.getSoundSource(), 1.5f, 1.2f);
 
         String pathway = BeyonderData.getPathway(entity);
-        int sequence = BeyonderData.getSequence(entity);
+        int sequence = AbilityUtil.getSeqWithArt(entity, this);
+
         AvatarEntity clone = new AvatarEntity(ModEntities.ERROR_AVATAR.get(), level,
                 entity.getUUID(), pathway, sequence);
         clone.setPos(clonePos.x, clonePos.y, clonePos.z);
@@ -139,6 +140,8 @@ public class DemonicSpellsAbility extends SelectableAbility {
                 clone.discard();
             }
         }, level);
+
+        this.clearArtifactScaling(entity);
     }
 
     private void explodeClone(ServerLevel level, LivingEntity caster, Vec3 explosionPos) {
@@ -147,6 +150,7 @@ public class DemonicSpellsAbility extends SelectableAbility {
         level.playSound(null, explosionPos.x, explosionPos.y, explosionPos.z, SoundEvents.GENERIC_EXPLODE, caster.getSoundSource(), 1.5f, 1.0f);
 
         double explosionDamage = DamageLookup.lookupDamage(4, 0.65) * multiplier(caster);
+
         AbilityUtil.damageNearbyEntities(level, caster, 15, explosionDamage, explosionPos, true, false);
         AbilityUtil.getNearbyEntities(caster, level, explosionPos, 15)
                 .stream()
@@ -156,11 +160,12 @@ public class DemonicSpellsAbility extends SelectableAbility {
                     target.setDeltaMovement(target.getDeltaMovement().add(knockback));
                     target.hurtMarked = true;
                 });
+
     }
 
     private void castHellfireWall(ServerLevel level, LivingEntity entity) {
         double wallRadius = 13;
-        double damage = DamageLookup.lookupDamage(4, 0.6) * multiplier(entity);
+        double damage = multiplier(entity);
 
         final double centerX = entity.getX();
         final double centerY = entity.getY();

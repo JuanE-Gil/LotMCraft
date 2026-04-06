@@ -66,6 +66,8 @@ public class HolyLightSummoningAbility extends Ability {
 
             EffectManager.playEffect(EffectManager.Effect.HOLY_LIGHT_SMALL, initialPos.x, initialPos.y - 18, initialPos.z, (ServerLevel) level, entity);
 
+            double multiplier = multiplier(entity);
+
             ServerScheduler.scheduleForDuration(0, 1, 22, () -> {
                 Vec3 pos = currentPos.get();
 
@@ -76,7 +78,7 @@ public class HolyLightSummoningAbility extends Ability {
                     lights.add(blockPos);
                 }
 
-                AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 5f, DamageLookup.lookupDamage(7, .8) * multiplier(entity), pos, true, false, false, 10, ModDamageTypes.source(level, ModDamageTypes.PURIFICATION, entity));
+                AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 5f, DamageLookup.lookupDamage(7, .8) * multiplier, pos, true, false, false, 10, ModDamageTypes.source(level, ModDamageTypes.PURIFICATION, entity));
 
                 currentPos.set(pos.subtract(0, 1, 0));
             }, null, (ServerLevel) level, () -> AbilityUtil.getTimeInArea(entity, new Location(entity.position(), level)));

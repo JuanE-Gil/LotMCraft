@@ -6,7 +6,9 @@ import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.events.KeyInputHandler;
 import de.jakob.lotm.network.PacketHandler;
 import de.jakob.lotm.network.packets.toServer.UpdateSelectedAbilityPacket;
+import de.jakob.lotm.network.packets.toServer.UseSelectedAbilityPacket;
 import de.jakob.lotm.util.data.ClientData;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.GameRenderer;
@@ -38,6 +40,13 @@ public class AbilityWheelScreen extends AbstractContainerScreen<AbilityWheelMenu
         this.imageHeight = WHEEL_SIZE;
     }
 
+    private List<String> getActiveAbilities() {
+        if (ClientData.sharedAbilityMode) {
+            return ClientData.getSharedWheelAbilities();
+        }
+        return ClientData.getAbilityWheelAbilities();
+    }
+
     @Override
     protected void init() {
         super.init();
@@ -49,7 +58,7 @@ public class AbilityWheelScreen extends AbstractContainerScreen<AbilityWheelMenu
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         super.render(guiGraphics, mouseX, mouseY, partialTick);
 
-        List<String> abilities = ClientData.getAbilityWheelAbilities();
+        List<String> abilities = getActiveAbilities();
         if (abilities.isEmpty()) {
             return;
         }
@@ -65,7 +74,7 @@ public class AbilityWheelScreen extends AbstractContainerScreen<AbilityWheelMenu
 
     @Override
     protected void renderBg(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY) {
-        List<String> abilities = ClientData.getAbilityWheelAbilities();
+        List<String> abilities = getActiveAbilities();
         if (abilities.isEmpty()) {
             return;
         }
@@ -345,14 +354,17 @@ public class AbilityWheelScreen extends AbstractContainerScreen<AbilityWheelMenu
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (button == 0 && hoveredSlot != -1) {
-            // Update selected ability
-            PacketHandler.sendToServer(new UpdateSelectedAbilityPacket(hoveredSlot));
-            ClientData.setAbilityWheelData(
-                    new java.util.ArrayList<>(ClientData.getAbilityWheelAbilities()),
-                    hoveredSlot
-            );
+            if (ClientData.sharedAbilityMode) {
+                // In shared mode: only update the selected index, don't fire the ability
+                ClientData.setSelectedSharedAbility(hoveredSlot);
+            } else {
+                PacketHandler.sendToServer(new UpdateSelectedAbilityPacket(hoveredSlot));
+                ClientData.setAbilityWheelData(
+                        new java.util.ArrayList<>(getActiveAbilities()),
+                        hoveredSlot
+                );
+            }
 
-            // Close the screen
             KeyInputHandler.holdAbilityWheelCooldownTicks = 12;
             this.onClose();
             return true;
@@ -363,13 +375,18 @@ public class AbilityWheelScreen extends AbstractContainerScreen<AbilityWheelMenu
 
     @Override
     public void onClose() {
-        if(KeyInputHandler.wasWheelOpenedWithHold && hoveredSlot != -1) {
+        if (KeyInputHandler.wasWheelOpenedWithHold && hoveredSlot != -1) {
             PacketHandler.sendToServer(new UpdateSelectedAbilityPacket(hoveredSlot));
-            ClientData.setAbilityWheelData(
-                    new java.util.ArrayList<>(ClientData.getAbilityWheelAbilities()),
-                    hoveredSlot
-            );
+            if (ClientData.sharedAbilityMode) {
+                ClientData.setSelectedSharedAbility(hoveredSlot);
+            } else {
+                ClientData.setAbilityWheelData(
+                        new java.util.ArrayList<>(getActiveAbilities()),
+                        hoveredSlot
+                );
+            }
         }
+        ClientData.sharedAbilityMode = false;
         super.onClose();
     }
 

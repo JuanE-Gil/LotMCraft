@@ -73,7 +73,7 @@ public class PsycheStormAbility extends Ability {
 
         if(BeyonderData.isBeyonder(entity) && BeyonderData.isBeyonder(target)) {
             int targetSequence = BeyonderData.getSequence(target);
-            int sequence = BeyonderData.getSequence(entity);
+            int sequence = AbilityUtil.getSeqWithArt(entity, this);
 
             if(targetSequence <= sequence) {
                 return 2;

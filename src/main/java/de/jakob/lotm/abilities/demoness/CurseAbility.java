@@ -38,6 +38,7 @@ public class CurseAbility extends Ability {
         canBeUsedByNPC = false;
         canBeCopied = false;
         canBeReplicated = false;
+        autoClear = false;
     }
 
     @Override
@@ -84,7 +85,10 @@ public class CurseAbility extends Ability {
             return;
         }
 
-        if(AbilityUtil.isTargetSignificantlyStronger(entity, livingTarget)) {
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+        int livingTargetSeq = BeyonderData.getSequence(livingTarget);
+
+        if(AbilityUtil.isTargetSignificantlyStronger(entitySeq, livingTargetSeq)) {
             entity.addEffect(new MobEffectInstance(ModEffects.LOOSING_CONTROL, 20 * 5, 3));
             entity.hurt(ModDamageTypes.source(entity.level(), ModDamageTypes.DEMONESS_GENERIC), 10);
             return;
@@ -103,7 +107,7 @@ public class CurseAbility extends Ability {
             }
 
             // Curse gets cleansed
-            if (InteractionHandler.isInteractionPossibleForEntity(new Location(target.position(), target.level()), "cleansing", BeyonderData.getSequence(entity), entity)) {
+            if (InteractionHandler.isInteractionPossibleForEntity(new Location(target.position(), target.level()), "cleansing", entitySeq, entity)) {
                 ServerScheduler.cancel(taskIdRef.get());
                 return;
             }
@@ -118,7 +122,7 @@ public class CurseAbility extends Ability {
                     livingTarget.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 20 * 2, 3));
                 }
             }
-        }, serverLevel);
+        }, () -> clearArtifactScaling(entity) ,serverLevel);
         taskIdRef.set(taskId);
     }
 }

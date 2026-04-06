@@ -118,11 +118,14 @@ public class WaterMasteryAbility extends SelectableAbility {
         ActiveWaterWall wallData = new ActiveWaterWall(targetPos, perpendicular, wallId, 30, -2, 17);
         activeWaterWalls.add(wallData);
 
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+        double multiplier = multiplier(entity);
+
         ServerScheduler.scheduleForDuration(0, 7, 20 * 30, () -> {
             if(random.nextInt(10) == 0)
                 level.playSound(null, targetPos.x, targetPos.y, targetPos.z, SoundEvents.GENERIC_SPLASH, entity.getSoundSource(), 2.0f, 1.0f);
 
-            if(InteractionHandler.isInteractionPossible(new Location(targetPos, level), "freezing", BeyonderData.getSequence(entity))) {
+            if(InteractionHandler.isInteractionPossible(new Location(targetPos, level), "freezing", entitySeq)) {
                 isFrozen.set(true);
             }
 
@@ -140,7 +143,7 @@ public class WaterMasteryAbility extends SelectableAbility {
                     if(random.nextBoolean())
                         ParticleUtil.spawnParticles(level, !isFrozen.get() ? dust : ParticleTypes.SNOWFLAKE, pos, 1, 0.5, 0.02);
 
-                    AbilityUtil.damageNearbyEntities(level, isFrozen.get() ? null : entity, 1.2f, DamageLookup.lookupDamage(4, .35) * multiplier(entity), pos, true, false, false, 15);
+                    AbilityUtil.damageNearbyEntities(level, isFrozen.get() ? null : entity, 1.2f, DamageLookup.lookupDamage(4, .35) * multiplier, pos, true, false, false, 15);
 
                     for(LivingEntity target : AbilityUtil.getNearbyEntities(isFrozen.get() ? null : entity, level, pos, 1f)) {
                         Vec3 knockback = target.position().subtract(pos).normalize().add(0, .2, 0).scale(1.4f);

@@ -88,7 +88,7 @@ public class CharmAbility extends Ability {
 
         onCharmedCooldown.add(target.getUUID());
 
-        int casterSequence = BeyonderData.getSequence(entity);
+        int casterSequence = AbilityUtil.getSeqWithArt(entity, this);
 
         // Charm vs Battle Hypnosis: charm prevails if caster has lower (stronger) sequence
         DisabledAbilitiesComponent disabledComp = target.getData(ModAttachments.DISABLED_ABILITIES_COMPONENT);

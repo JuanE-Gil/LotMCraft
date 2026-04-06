@@ -3,6 +3,7 @@ package de.jakob.lotm.attachments;
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.util.helper.marionettes.MarionetteComponent;
 import de.jakob.lotm.util.helper.subordinates.SubordinateComponent;
+import com.mojang.serialization.Codec;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.neoforged.bus.api.IEventBus;
@@ -192,6 +193,29 @@ public class ModAttachments {
     public static final Supplier<AttachmentType<CopiedAbilityComponent>> COPIED_ABILITY_COMPONENT =
             ATTACHMENT_TYPES.register("copied_ability_component", () ->
                     AttachmentType.serializable(CopiedAbilityComponent::new).copyOnDeath().build()
+            );
+
+    public static final Supplier<AttachmentType<TeamComponent>> TEAM_COMPONENT =
+            ATTACHMENT_TYPES.register("team_component", () ->
+                    AttachmentType.builder(TeamComponent::new)
+                            .serialize(TeamComponent.CODEC)
+                            .copyOnDeath()
+                            .build()
+            );
+
+    public static final Supplier<AttachmentType<SharedAbilitiesComponent>> SHARED_ABILITIES_COMPONENT =
+            ATTACHMENT_TYPES.register("shared_abilities_component", () ->
+                    AttachmentType.builder(SharedAbilitiesComponent::new)
+                            .serialize(SharedAbilitiesComponent.SERIALIZER)
+                            .copyOnDeath()
+                            .build()
+            );
+
+    public static final Supplier<AttachmentType<SkillScalingComponent>> SKILL_SCALING_COMPONENT =
+            ATTACHMENT_TYPES.register("skill_scaling_component", () ->
+                    AttachmentType.builder(SkillScalingComponent::new)
+                            .serialize(SkillScalingComponent.SERIALIZER)
+                            .build()
             );
 
     public static void register(IEventBus eventBus) {

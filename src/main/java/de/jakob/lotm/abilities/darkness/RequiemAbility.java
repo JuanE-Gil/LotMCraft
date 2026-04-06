@@ -78,14 +78,18 @@ public class RequiemAbility extends Ability {
 
         pacifiedEntities.add(targetEntity.getUUID());
         int duration = 20 * 15;
-        if(AbilityUtil.isTargetSignificantlyStronger(entity, targetEntity)) {
+
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+        int targetEntitySeq = BeyonderData.getSequence(targetEntity);
+
+        if(AbilityUtil.isTargetSignificantlyStronger(entitySeq, targetEntitySeq)) {
             duration = 35;
         }
-        if(AbilityUtil.isTargetSignificantlyWeaker(entity, targetEntity)) {
+        if(AbilityUtil.isTargetSignificantlyWeaker(entitySeq, targetEntitySeq)) {
             duration = 20 * 65;
         }
 
-        if(!BeyonderData.isBeyonder(targetEntity) || BeyonderData.getSequence(targetEntity) - 1 > BeyonderData.getSequence(entity)) {
+        if(!BeyonderData.isBeyonder(targetEntity) || targetEntitySeq - 1 > entitySeq) {
             if(targetEntity instanceof Mob) {
                 ((Mob) targetEntity).setNoAi(true);
                 ServerScheduler.scheduleDelayed(duration, () -> ((Mob) targetEntity).setNoAi(false));

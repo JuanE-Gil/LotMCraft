@@ -29,6 +29,7 @@ public class MythicalCreatureFormAbility extends ToggleAbility {
         this.cannotBeStolen = true;
         this.canBeReplicated = false;
         this.canBeUsedInArtifact = false;
+        this.canAlwaysBeUsed = true;
     }
 
     @Override
@@ -39,19 +40,18 @@ public class MythicalCreatureFormAbility extends ToggleAbility {
 
         AttributeInstance scaleAttribute = entity.getAttribute(Attributes.SCALE);
         if(scaleAttribute != null) {
-            scaleAttribute.setBaseValue(2.75);
+            scaleAttribute.setBaseValue(2.0);
         }
 
         int seq = BeyonderData.getSequence(entity);
         if(seq > 2){
             var sanity = entity.getData(ModAttachments.SANITY_COMPONENT.get());
-            sanity.setSanityAndSync(sanity.getSanity() - (seq == 4 ? 0.01f : 0.005f), entity);
+            sanity.setSanityAndSync(Math.max(0.0f, sanity.getSanity() - (seq == 4 ? 0.01f : 0.005f)), entity);
         }
 
         // Buff user
-        BeyonderData.addModifier(entity, "mythical_creature_form", (seq > 2 ? 1.25 : 1.75));
 
-        int amplifier = (seq > 2 ? 4 : 6);
+        int amplifier = (seq > 2 ? 3 : 6);
 
         // Make all entities lower than you loose control when seeing you
         AbilityUtil.getNearbyEntities(entity, serverLevel, entity.position(), 30).forEach(e -> {
@@ -91,6 +91,8 @@ public class MythicalCreatureFormAbility extends ToggleAbility {
         if(scaleAttribute != null) {
             previousScale.put(entity.getUUID(), scaleAttribute.getValue());
         }
+
+        BeyonderData.addModifier(entity, "mythical_creature_form", (BeyonderData.getSequence(entity) > 2 ? 1.25 : 1.5));
 
         TransformationComponent transformationComponent = entity.getData(ModAttachments.TRANSFORMATION_COMPONENT);
         transformationComponent.setTransformedAndSync(true, entity);

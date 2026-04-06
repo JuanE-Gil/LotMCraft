@@ -85,6 +85,8 @@ public class NatureSpellsAbility extends SelectableAbility {
 
         affectedByNatureWrath.add(entity.getUUID());
 
+        double multiplier = multiplier(entity);
+
         ServerScheduler.scheduleForDuration(0, 2, 20 * 25, () -> {
             if(target.isDeadOrDying()) {
                 affectedByNatureWrath.remove(target.getUUID());
@@ -96,7 +98,7 @@ public class NatureSpellsAbility extends SelectableAbility {
             ParticleUtil.spawnParticles(serverLevel, greenDustSmall, target.position().add(0, entity.getEyeHeight() / 2, 0), 10, .2, entity.getEyeHeight() / 2, .2, 0);
 
             if(random.nextInt(20) == 0) {
-                target.hurt(ModDamageTypes.source(serverLevel, ModDamageTypes.BEYONDER_GENERIC, entity), (float) (DamageLookup.lookupDamage(5, .775f) * multiplier(entity)));
+                target.hurt(ModDamageTypes.source(serverLevel, ModDamageTypes.BEYONDER_GENERIC, entity), (float) (DamageLookup.lookupDamage(5, .775f) * multiplier));
             }
 
             if(random.nextInt(25) == 0) {
@@ -130,7 +132,7 @@ public class NatureSpellsAbility extends SelectableAbility {
                 if(targetEntity == null)
                     return;
 
-                targetEntity.hurt(ModDamageTypes.source(serverLevel, ModDamageTypes.BEYONDER_GENERIC, entity), (float) DamageLookup.lookupDamage(5, .85) * (float) multiplier(entity));
+                targetEntity.hurt(ModDamageTypes.source(serverLevel, ModDamageTypes.BEYONDER_GENERIC, entity), (float) DamageLookup.lookupDamage(5, .85) * (float) multiplier);
             }
         }, null, serverLevel, () -> AbilityUtil.getTimeInArea(entity, new de.jakob.lotm.util.data.Location(target.position().add(0, target.getEyeHeight() / 2, 0), serverLevel)));
     }
