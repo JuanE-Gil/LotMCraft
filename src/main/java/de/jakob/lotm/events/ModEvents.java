@@ -252,6 +252,39 @@ public class ModEvents {
     }
 
     @SubscribeEvent
+    public static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+
+        MinecraftServer server = player.getServer();
+        if (server == null) return;
+
+        TeamComponent team = player.getData(ModAttachments.TEAM_COMPONENT.get());
+
+        if (team.isInTeam()) {
+            // Player is a member — check if their leader still has them listed
+            ServerPlayer leader = server.getPlayerList().getPlayer(java.util.UUID.fromString(team.leaderUUID()));
+            if (leader != null && !leader.getData(ModAttachments.TEAM_COMPONENT.get()).hasMember(player.getStringUUID())) {
+                // Leader is online but no longer claims this player — clear stale membership
+                player.setData(ModAttachments.TEAM_COMPONENT.get(), team.clearLeader());
+                PacketHandler.sendToPlayer(player, new de.jakob.lotm.network.packets.toClient.SyncSharedAbilitiesDataPacket(
+                        "", new ArrayList<>(), new ArrayList<>(), new java.util.HashMap<>(), 0, 0));
+            }
+        } else if (team.memberCount() > 0) {
+            // Player is a leader — remove any members whose leaderUUID no longer points back to this leader
+            TeamComponent current = team;
+            for (String memberUUID : new ArrayList<>(current.memberUUIDs())) {
+                ServerPlayer member = server.getPlayerList().getPlayer(java.util.UUID.fromString(memberUUID));
+                if (member != null && !member.getData(ModAttachments.TEAM_COMPONENT.get()).leaderUUID().equals(player.getStringUUID())) {
+                    current = current.removeMember(memberUUID);
+                }
+            }
+            if (!current.memberUUIDs().equals(team.memberUUIDs())) {
+                player.setData(ModAttachments.TEAM_COMPONENT.get(), current);
+            }
+        }
+    }
+
+    @SubscribeEvent
     public static void onPlayerClone(PlayerEvent.Clone event) {
         Player original = event.getOriginal();
         Player newPlayer = event.getEntity();
