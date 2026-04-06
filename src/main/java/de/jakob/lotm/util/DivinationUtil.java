@@ -229,6 +229,9 @@ public class DivinationUtil {
         if (ConcealedDomainEntity.ENTITIES_INSIDE_DOMAIN.contains(serverPlayer.getUUID())) {
             addedValue += 99;
         }
+        if (ParasitationAbility.isConcealed(serverPlayer.getUUID())) {
+            addedValue += 99;
+        }
         
         return addedValue;
     }
