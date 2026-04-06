@@ -2,6 +2,7 @@ package de.jakob.lotm.abilities.wheel_of_fortune;
 
 import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.abilities.core.SelectableAbility;
+import de.jakob.lotm.attachments.LuckComponent;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.attachments.SanityComponent;
 import de.jakob.lotm.rendering.effectRendering.EffectManager;
@@ -94,6 +95,11 @@ public class SpiritualBaptismAbility extends SelectableAbility {
         if(target instanceof Player player) {
             player.getFoodData().setSaturation(20);
             player.getFoodData().setFoodLevel(20);
+        }
+
+        LuckComponent luckComponent = target.getData(ModAttachments.LUCK_COMPONENT);
+        if(luckComponent.getLuck() < 0) {
+            luckComponent.setLuck(0);
         }
 
         SanityComponent sanityComponent = target.getData(ModAttachments.SANITY_COMPONENT);

@@ -1,6 +1,8 @@
 package de.jakob.lotm.abilities.wheel_of_fortune;
 
 import de.jakob.lotm.abilities.core.Ability;
+import de.jakob.lotm.attachments.LuckComponent;
+import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.effect.ModEffects;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.ParticleUtil;
@@ -56,7 +58,8 @@ public class MisfortuneGiftingAbility extends Ability {
         double eyeHeight = target.getEyeHeight();
         ParticleUtil.spawnParticles(serverLevel, dust, target.position().add(0, eyeHeight / 2, 0), 120, .3, eyeHeight / 2, .3, 0);
 
-        int amplifier = (int) Math.round(multiplier(entity) * 2.5f);
-        target.addEffect(new MobEffectInstance(ModEffects.UNLUCK, 20 * 20, amplifier));
+        int amplifier = Math.round(multiplier(entity) * 250);
+        LuckComponent luckComponent = target.getData(ModAttachments.LUCK_COMPONENT.get());
+        luckComponent.addLuckWithMax(-amplifier, (int) (-amplifier * 1.25f));
     }
 }

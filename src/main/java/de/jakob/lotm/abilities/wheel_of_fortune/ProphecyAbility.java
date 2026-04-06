@@ -2,6 +2,8 @@ package de.jakob.lotm.abilities.wheel_of_fortune;
 
 import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.abilities.core.SelectableAbility;
+import de.jakob.lotm.attachments.LuckComponent;
+import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.effect.ModEffects;
 import de.jakob.lotm.entity.ModEntities;
 import de.jakob.lotm.entity.custom.ability_entities.tyrant_pathway.GiantLightningEntity;
@@ -134,7 +136,8 @@ public class ProphecyAbility extends SelectableAbility {
                 BeyonderData.addModifierWithTimeLimit(target, "prophecy", 0.6, 20 * 40);
             }
             case 1 -> {
-                target.addEffect(new MobEffectInstance(ModEffects.UNLUCK, 20 * 40, 20, false, false, false));
+                LuckComponent component = target.getData(ModAttachments.LUCK_COMPONENT.get());
+                component.addLuckWithMax(-1750, -1950);
                 EffectManager.playEffect(EffectManager.Effect.MISFORTUNE_CURSE, target.getX(), target.getY() + 1, target.getZ(), (ServerLevel) level);
             }
             case 2 -> {
@@ -155,7 +158,8 @@ public class ProphecyAbility extends SelectableAbility {
     }
 
     private void giveLuckEffect(Level level, LivingEntity entity) {
-        entity.addEffect(new MobEffectInstance(ModEffects.LUCK, 20 * 20, 26, false, false, false));
+        LuckComponent component = entity.getData(ModAttachments.LUCK_COMPONENT.get());
+        component.addLuckWithMax(800, 3000);
         EffectManager.playEffect(EffectManager.Effect.BLESSING, entity.getX(), entity.getY() + 1, entity.getZ(), (ServerLevel) level);
     }
 

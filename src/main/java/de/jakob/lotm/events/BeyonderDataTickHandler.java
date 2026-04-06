@@ -6,10 +6,8 @@ import de.jakob.lotm.abilities.PassiveAbilityItem;
 import de.jakob.lotm.abilities.PhysicalEnhancementsAbility;
 import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.abilities.core.ToggleAbility;
-import de.jakob.lotm.attachments.AbilityCooldownComponent;
-import de.jakob.lotm.attachments.AbilityWheelComponent;
-import de.jakob.lotm.attachments.DisabledFlightComponent;
-import de.jakob.lotm.attachments.ModAttachments;
+import de.jakob.lotm.abilities.wheel_of_fortune.passives.PassiveLuckAbility;
+import de.jakob.lotm.attachments.*;
 import de.jakob.lotm.item.ModItems;
 import de.jakob.lotm.item.custom.MarionetteControllerItem;
 import de.jakob.lotm.item.custom.SubordinateControllerItem;
@@ -86,6 +84,17 @@ public class BeyonderDataTickHandler {
         DisabledFlightComponent disabledFlightComponent = livingEntity.getData(ModAttachments.FLIGHT_DISABLE_COMPONENT);
         if(disabledFlightComponent.getCooldownTicks() > 0) {
             disabledFlightComponent.setCooldownTicks(disabledFlightComponent.getCooldownTicks() - 1);
+        }
+
+        // Remove Unluck gradually
+        LuckComponent luckComponent = livingEntity.getData(ModAttachments.LUCK_COMPONENT);
+        if(luckComponent.getLuck() < 0) {
+            luckComponent.addLuckWithMax((int) (3 * BeyonderData.getMultiplier(livingEntity)), 0);
+        }
+
+        // Remove Luck gradually
+        if(luckComponent.getLuck() > PassiveLuckAbility.getNormalLuckForEntity(livingEntity)) {
+            luckComponent.addLuckWithMax(-3, PassiveLuckAbility.getNormalLuckForEntity(livingEntity));
         }
 
         if(BeyonderData.isBeyonder(livingEntity)) {

@@ -74,8 +74,9 @@ public class ToxicSmokeAbility extends Ability {
                         0,
                         ModDamageTypes.source(level, ModDamageTypes.BEYONDER_GENERIC, entity)
                 );
-                ParticleUtil.spawnParticles((ServerLevel) level, ParticleTypes.EXPLOSION, pos, 75, 84, .02);
-                ParticleUtil.spawnParticles((ServerLevel) level, ParticleTypes.FLAME, pos, 75, 84, .02);
+                ParticleUtil.spawnParticles((ServerLevel) level, ParticleTypes.EXPLOSION_EMITTER, pos, 50, 7, .02);
+                ParticleUtil.spawnParticles((ServerLevel) level, ParticleTypes.LARGE_SMOKE, pos, 175, 7, .02);
+                ParticleUtil.spawnParticles((ServerLevel) level, ParticleTypes.FLAME, pos, 250, 7, .02);
                 level.playSound(null, pos.x, pos.y, pos.z, SoundEvents.GENERIC_EXPLODE, SoundSource.BLOCKS, 1, 1);
                 if(taskIdHolder[0] != null) ServerScheduler.cancel(taskIdHolder[0]);
                 return;

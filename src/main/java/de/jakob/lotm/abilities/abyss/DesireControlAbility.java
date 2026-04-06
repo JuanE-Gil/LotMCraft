@@ -80,6 +80,7 @@ public class DesireControlAbility extends SelectableAbility {
 
         // Cancel when calming effect is active
         if (InteractionHandler.isInteractionPossible(new Location(target.position(), level), "calming", BeyonderData.getSequence(entity))) {
+            ParticleUtil.spawnParticles(level, new DustParticleOptions(new Vector3f(250 / 255f, 201 / 255f, 102 / 255f), 1.25f), entity.position().add(0, 1, 0), 200, 1, 0.5);
             return;
         }
 
@@ -115,6 +116,7 @@ public class DesireControlAbility extends SelectableAbility {
 
         // Cancel when calming effect is active
         if (InteractionHandler.isInteractionPossible(new Location(entity.position(), level), "calming", BeyonderData.getSequence(entity))) {
+            ParticleUtil.spawnParticles(level, new DustParticleOptions(new Vector3f(250 / 255f, 201 / 255f, 102 / 255f), 1.25f), entity.position().add(0, 1, 0), 200, 1, 0.5);
             return;
         }
 

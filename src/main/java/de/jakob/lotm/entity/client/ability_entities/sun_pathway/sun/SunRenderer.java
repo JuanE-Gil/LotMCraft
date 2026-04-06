@@ -19,6 +19,8 @@ public class SunRenderer extends EntityRenderer<SunEntity> {
 
     private static final ResourceLocation GOLD_TEXTURE =
             ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID,"textures/entity/sun/gold.png");
+    private static final ResourceLocation BLACK_TEXTURE =
+            ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID,"textures/entity/black_hole/black.png");
 
     public SunRenderer(EntityRendererProvider.Context context) {
         super(context);
@@ -35,7 +37,7 @@ public class SunRenderer extends EntityRenderer<SunEntity> {
         poseStack.scale(radius, radius, radius);
         Matrix4f matrix = poseStack.last().pose();
 
-        VertexConsumer buffer = bufferSource.getBuffer(RenderType.entityCutoutNoCull(GOLD_TEXTURE));
+        VertexConsumer buffer = bufferSource.getBuffer(RenderType.entityCutoutNoCull(getTextureLocation(entity)));
 
         renderSphere(matrix, buffer);
         poseStack.popPose();
@@ -49,7 +51,7 @@ public class SunRenderer extends EntityRenderer<SunEntity> {
 
     @Override
     public @NotNull ResourceLocation getTextureLocation(@NotNull SunEntity sunEntity) {
-        return GOLD_TEXTURE;
+        return sunEntity.getTags().contains("darkened") ? BLACK_TEXTURE : GOLD_TEXTURE;
     }
 
     private void renderSphere(Matrix4f matrix, VertexConsumer buffer) {

@@ -53,8 +53,8 @@ public class FearAuraAbility extends Ability {
             loc.setLevel(serverLevel);
             MovableEffectManager.updateEffectPosition(effectID, loc, serverLevel);
 
-            if(InteractionHandler.isInteractionPossible(new Location(entity.position(), serverLevel), "purification",
-                    AbilityUtil.getSeqWithArt(entity, this))) {
+            if(InteractionHandler.isInteractionPossible(new Location(entity.position(), serverLevel), "purification", AbilityUtil.getSeqWithArt(entity, this)) ||
+                    InteractionHandler.isInteractionPossible(new Location(entity.position(), serverLevel), "sealing", AbilityUtil.getSeqWithArt(entity, this))) {
                 return;
             }
 

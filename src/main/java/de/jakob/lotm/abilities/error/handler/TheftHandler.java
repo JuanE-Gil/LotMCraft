@@ -4,6 +4,7 @@ import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.attachments.CopiedAbilityComponent;
 import de.jakob.lotm.attachments.DisabledAbilitiesComponent;
+import de.jakob.lotm.attachments.LuckComponent;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.effect.ModEffects;
 import de.jakob.lotm.rendering.effectRendering.EffectManager;
@@ -434,16 +435,13 @@ public class TheftHandler {
 
         int difference = targetSeq - userSeq;
 
-        int userLuck = user.hasEffect(ModEffects.LUCK) ? Objects.requireNonNull(user.getEffect(ModEffects.LUCK)).getAmplifier() : 0;
-        int targetLuck = target.hasEffect(ModEffects.LUCK) ? Objects.requireNonNull(target.getEffect(ModEffects.LUCK)).getAmplifier() : 0;
+        LuckComponent userLuckComponent = user.getData(ModAttachments.LUCK_COMPONENT);
+        LuckComponent targetLuckComponent = target.getData(ModAttachments.LUCK_COMPONENT);
 
-        int userUnLuck = user.hasEffect(ModEffects.UNLUCK) ? Objects.requireNonNull(user.getEffect(ModEffects.UNLUCK)).getAmplifier() : 0;
-        int targetUnLuck = target.hasEffect(ModEffects.UNLUCK) ? Objects.requireNonNull(target.getEffect(ModEffects.UNLUCK)).getAmplifier() : 0;
+        int userLuck = userLuckComponent.getLuck();
+        int targetLuck = targetLuckComponent.getLuck();
 
-        int luckDiff = userLuck - targetLuck;
-        int unLuckDiff = userUnLuck - targetUnLuck;
-
-        double luckMultiplier = (double) (luckDiff - unLuckDiff) / 10;
+        double luckMultiplier = (double) (userLuck - targetLuck) / (120 * 10);
 
         double baseFailPerStep = 0.15;
 

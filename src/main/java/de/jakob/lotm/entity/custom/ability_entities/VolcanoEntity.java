@@ -105,7 +105,12 @@ public class VolcanoEntity extends Entity {
             return;
         }
 
-        // Petrification Logic -- run before super.tick() to stop movement completely
+        // Sealing Logic
+        if (getTags().contains("sealing")) {
+            return;
+        }
+
+        // Petrification Logic
         if(getTags().contains("petrified")) {
             petrifiedTicks++;
             if(petrifiedTicks >= 20 * 5) {

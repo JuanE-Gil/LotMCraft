@@ -69,7 +69,8 @@ public class MindFogAbility extends ToggleAbility {
         }
 
         if (InteractionHandler.isInteractionPossible(new Location(entity.position(), level), "purification", seq) ||
-            InteractionHandler.isInteractionPossible(new Location(entity.position(), level), "calming", seq)) {
+            InteractionHandler.isInteractionPossible(new Location(entity.position(), level), "calming", seq) ||
+                InteractionHandler.isInteractionPossible(new Location(entity.position(), level), "sealing", seq)) {
             cancel(serverLevel, entity);
             return;
         }

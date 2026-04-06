@@ -2,9 +2,12 @@ package de.jakob.lotm.abilities.sun;
 
 import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.abilities.core.AbilityUsedEvent;
+import de.jakob.lotm.abilities.core.interaction.InteractionHandler;
 import de.jakob.lotm.damage.ModDamageTypes;
 import de.jakob.lotm.entity.ModEntities;
 import de.jakob.lotm.entity.custom.ability_entities.sun_pathway.SunEntity;
+import de.jakob.lotm.network.PacketHandler;
+import de.jakob.lotm.network.packets.toClient.AddClientSideTagPacket;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.data.Location;
 import de.jakob.lotm.util.helper.AbilityUtil;
@@ -23,6 +26,7 @@ import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class FlaringSunAbility extends Ability {
     public FlaringSunAbility(String id) {
@@ -74,13 +78,24 @@ public class FlaringSunAbility extends Ability {
         sun.setPos(startPos);
         level.addFreshEntity(sun);
 
+        AtomicBoolean wasDarkened = new AtomicBoolean(false);
         double multiplier = multiplier(entity);
 
         ServerScheduler.scheduleForDuration(0, 4, 20 * 19, () -> {
-            ParticleUtil.spawnSphereParticles((ServerLevel) level, ParticleTypes.FLAME, startPos, 4.75f, 200);
-            ParticleUtil.spawnSphereParticles((ServerLevel) level, ParticleTypes.END_ROD, startPos, 4.75f, 180);
+            if(!wasDarkened.get()) {
+                if(InteractionHandler.isInteractionPossible(new Location(targetPos, level), "darkness", BeyonderData.getSequence(entity))) {
+                    wasDarkened.set(true);
+                    sun.addTag("darkened");
+                    PacketHandler.sendToAllPlayersInSameLevel(new AddClientSideTagPacket("darkened", sun.getId()), (ServerLevel) level);
+                }
+                ParticleUtil.spawnSphereParticles((ServerLevel) level, ParticleTypes.FLAME, startPos, 4.75f, 200);
+                ParticleUtil.spawnSphereParticles((ServerLevel) level, ParticleTypes.END_ROD, startPos, 4.75f, 180);
 
-            AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 17, DamageLookup.lookupDps(4, .85, 4, 20) * multiplier, targetPos, true, false, 20 * 4, ModDamageTypes.source(level, ModDamageTypes.PURIFICATION, entity));
+                AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 17, DamageLookup.lookupDps(4, .85, 4, 20) * multiplier, targetPos, true, false, 20 * 4, ModDamageTypes.source(level, ModDamageTypes.PURIFICATION, entity));
+            }
+            else {
+                ParticleUtil.spawnSphereParticles((ServerLevel) level, ParticleTypes.SMOKE, startPos, 4.75f, 300);
+            }
         }, () -> {
             if(level.getBlockState(blockPos).getBlock() == Blocks.LIGHT) {
                 level.setBlockAndUpdate(blockPos, Blocks.AIR.defaultBlockState());

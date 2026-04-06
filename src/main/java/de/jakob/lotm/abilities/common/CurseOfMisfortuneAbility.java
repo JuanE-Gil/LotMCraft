@@ -2,6 +2,8 @@ package de.jakob.lotm.abilities.common;
 
 import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.abilities.core.AbilityUsedEvent;
+import de.jakob.lotm.attachments.LuckComponent;
+import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.effect.ModEffects;
 import de.jakob.lotm.rendering.effectRendering.EffectManager;
 import de.jakob.lotm.util.BeyonderData;
@@ -77,11 +79,12 @@ public class CurseOfMisfortuneAbility extends Ability {
 
         double resistance = AbilityUtil.getSequenceResistanceFactor(entitySeq, targetSeq);
         float multiplier = multiplier(entity);
-        int amplifier = (int) Math.round(multiplier * 6.25f * (1.0 - resistance));
+        int amplifier = (int) Math.min(Math.round(multiplier * 6.25f * (1.0 - resistance)) * 120, 3000);
         if (amplifier <= 0) {
             return; // Full resistance – curse has no meaningful effect
         }
-        target.addEffect(new MobEffectInstance(ModEffects.UNLUCK, 20 * 60 * 17, amplifier));
+        LuckComponent luckComponent = target.getData(ModAttachments.LUCK_COMPONENT);
+        luckComponent.addLuckWithMax(-amplifier, -3000);
         NeoForge.EVENT_BUS.post(new AbilityUsedEvent(serverLevel, target.position(), entity, target, this, interactionFlags, interactionRadius, interactionCacheTicks));
-        }
+    }
 }

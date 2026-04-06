@@ -19,12 +19,6 @@ public class ModEffects {
             () -> new AsleepEffect(MobEffectCategory.HARMFUL, 0x2E2E5C)
                     .addAttributeModifier(Attributes.MOVEMENT_SPEED, ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "asleep"), -10f, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL)); // Dark blue color
 
-    public static final Holder<MobEffect> LUCK = MOB_EFFECTS.register("luck",
-            () -> new LuckEffect(MobEffectCategory.BENEFICIAL, 0xdaeaf5));
-
-    public static final Holder<MobEffect> UNLUCK = MOB_EFFECTS.register("unluck",
-            () -> new UnluckEffect(MobEffectCategory.HARMFUL, 0xf0b05d));
-
     public static final Holder<MobEffect> MENTAL_PLAGUE = MOB_EFFECTS.register("mental_plague",
             () -> new MentalPlagueEffect(MobEffectCategory.HARMFUL, 0xf0b05d));
 

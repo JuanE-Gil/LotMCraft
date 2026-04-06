@@ -90,42 +90,34 @@ public class GuidingBookRenderer {
         int screenWidth = mc.getWindow().getGuiScaledWidth();
         int screenHeight = mc.getWindow().getGuiScaledHeight();
 
-        // Book page dimensions - more book-like proportions
-        int pageWidth = (int) (screenWidth / 1.75f);
-        int pageHeight = (int) (pageWidth / 1.5f); // Taller than wide for book page look
+        int padding = 1;
 
-        // Center the page
+        int pageWidth = (int) (screenWidth / 1.75f);
+        int pageHeight = (int) (pageWidth / 1.5f);
+
+        int contentWidth = pageWidth - (padding * 2);
+        int contentHeight = pageHeight - (padding * 2);
+
         int x = (screenWidth - pageWidth) / 2;
         int y = (screenHeight - pageHeight) / 2;
 
-        // Push pose to ensure we render on top
         graphics.pose().pushPose();
-        graphics.pose().translate(0, 0, 1000); // High Z-index to render on top
+        graphics.pose().translate(0, 0, 1000);
 
-        // Draw semi-transparent background overlay
         graphics.fill(0, 0, screenWidth, screenHeight, 0x60000000);
+        graphics.fill(x + 2, y + 2, x + pageWidth + 2, y + pageHeight + 2, 0x80000000);
 
-        // Draw drop shadow for depth
-        graphics.fill(x + 4, y + 4, x + pageWidth + 4, y + pageHeight + 4, 0x80000000);
-
-        // Draw parchment-colored background
-        graphics.fill(x, y, x + pageWidth, y + pageHeight, 0xFFF5E6D3);
-
-        // Draw border to frame the page
         int borderColor = 0xFF8B7355;
-        graphics.fill(x, y, x + pageWidth, y + 2, borderColor); // Top
-        graphics.fill(x, y + pageHeight - 2, x + pageWidth, y + pageHeight, borderColor); // Bottom
-        graphics.fill(x, y, x + 2, y + pageHeight, borderColor); // Left
-        graphics.fill(x + pageWidth - 2, y, x + pageWidth, y + pageHeight, borderColor); // Right
+        graphics.fill(x, y, x + pageWidth, y + 1, borderColor);
+        graphics.fill(x, y + pageHeight - 1, x + pageWidth, y + pageHeight, borderColor);
+        graphics.fill(x, y, x + 1, y + pageHeight, borderColor);
+        graphics.fill(x + pageWidth - 1, y, x + pageWidth, y + pageHeight, borderColor);
 
-        // Enable blending for texture
+        int midX = x + pageWidth / 2;
+        graphics.fill(midX, y + 4, midX + 1, y + pageHeight - 4, 0xAA8B7355);
+
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-
-        // Draw the actual page content with some padding
-        int padding = 20;
-        int contentWidth = pageWidth - (padding * 2);
-        int contentHeight = pageHeight - (padding * 2);
 
         graphics.blit(
                 pageTexture,
@@ -139,20 +131,7 @@ public class GuidingBookRenderer {
                 contentHeight
         );
 
-        // Draw page number indicator at bottom
-        String pageText = "Page " + (currentPage + 1) + " / " + pages.size();
-        int textWidth = mc.font.width(pageText);
-        graphics.drawString(
-                mc.font,
-                pageText,
-                x + (pageWidth - textWidth) / 2,
-                y + pageHeight - 12,
-                0xFF5A4A3A,
-                false
-        );
-
         RenderSystem.disableBlend();
-
         graphics.pose().popPose();
     }
 }

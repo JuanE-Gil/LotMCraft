@@ -94,7 +94,6 @@ public abstract class PhysicalEnhancementsAbility extends PassiveAbilityItem {
 
         applyNightVision(entity, enhancements, temps);
         applyConduit(entity, enhancements, temps);
-        applyLuck(entity, enhancements, temps, boosts);
         applyDolphinsGrace(entity, enhancements, temps);
         applySaturation(entity, enhancements, temps);
         applyWaterBreathing(entity, enhancements, temps);
@@ -221,37 +220,6 @@ public abstract class PhysicalEnhancementsAbility extends PassiveAbilityItem {
         if (hasFireRes) {
             entity.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 300, 0, false, false, false));
         }
-    }
-
-    private void applyLuck(LivingEntity entity,
-                           Map<EnhancementType, Integer> enhancements,
-                           Map<String, TemporaryEnhancement> temps,
-                           Map<String, EnhancementBoost> boosts) {
-        int luckLevel = 0;
-
-        if (enhancements != null && enhancements.containsKey(EnhancementType.LUCK)) {
-            luckLevel = enhancements.get(EnhancementType.LUCK);
-        }
-
-        if (temps != null) {
-            for (TemporaryEnhancement temp : temps.values()) {
-                if (temp.enhancement.getType() == EnhancementType.LUCK) {
-                    luckLevel += temp.enhancement.getLevel();
-                }
-            }
-        }
-
-        if (boosts != null) {
-            for (EnhancementBoost boost : boosts.values()) {
-                if (boost.enhancement.getType() == EnhancementType.LUCK) {
-                    luckLevel += boost.amount;
-                }
-            }
-        }
-
-        if (luckLevel <= 0) return;
-
-        entity.addEffect(new MobEffectInstance(ModEffects.LUCK, 300, luckLevel - 1, false, false, false));
     }
 
     private void applyConduit(LivingEntity entity,
