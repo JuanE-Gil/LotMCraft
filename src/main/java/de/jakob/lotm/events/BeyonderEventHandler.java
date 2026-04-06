@@ -245,7 +245,7 @@ public class BeyonderEventHandler {
                                 ALLOW_ARTIFACTS_WITH_NO_NEGATIVES) && data.negativeEffect().isEmpty();
                     }
 
-                    if (data != null && (!valid || !allowed) && noNegativesAllowed) {
+                    if (data != null && (!valid || !allowed || noNegativesAllowed)) {
                         slot.set(ItemStack.EMPTY);
                     }
                 }

@@ -144,16 +144,7 @@ public class ModEvents {
                 ModEntities.BEYONDER_NPC.get(),
                 SpawnPlacementTypes.ON_GROUND,
                 Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
-                (entityType, level, spawnType, pos, random) -> {
-                    // Get the ServerLevel to access gamerules
-                    ServerLevel serverLevel = level.getLevel();
-                    if (!serverLevel.getGameRules().getBoolean(ModGameRules.ALLOW_BEYONDER_SPAWNING)) {
-                        return false;
-                    }
-
-                    // Then check the normal mob spawn rules
-                    return Mob.checkMobSpawnRules(entityType, level, spawnType, pos, random);
-                },
+                BeyonderNPCEntity::canSpawn,
                 RegisterSpawnPlacementsEvent.Operation.REPLACE
         );
         event.register(
