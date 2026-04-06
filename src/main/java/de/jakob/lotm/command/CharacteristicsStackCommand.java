@@ -16,8 +16,8 @@ import net.minecraft.world.entity.LivingEntity;
 
 public class CharacteristicsStackCommand {
 
-    private static LiteralArgumentBuilder<CommandSourceStack> add() {
-        return Commands.literal("add")
+    private static LiteralArgumentBuilder<CommandSourceStack> set() {
+        return Commands.literal("set")
                 .then(Commands.argument("target", EntityArgument.entity())
                         .then(Commands.argument("seq", IntegerArgumentType.integer())
                         .then(Commands.argument("stack", IntegerArgumentType.integer())
@@ -142,7 +142,7 @@ public class CharacteristicsStackCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("characteristicstack")
                 .requires(source -> source.hasPermission(2))
-                .then(add())
+                .then(set())
                 .then(delete())
                 .then(recalculate())
         );

@@ -40,7 +40,7 @@ public class MythicalCreatureFormAbility extends ToggleAbility {
 
         AttributeInstance scaleAttribute = entity.getAttribute(Attributes.SCALE);
         if(scaleAttribute != null) {
-            scaleAttribute.setBaseValue(2.75);
+            scaleAttribute.setBaseValue(2.0);
         }
 
         int seq = BeyonderData.getSequence(entity);
