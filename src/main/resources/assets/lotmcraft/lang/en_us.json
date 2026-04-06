@@ -384,6 +384,8 @@
   "lotmcraft.concealment_ability.description": "Conceal everything around you, effectively erasing it",
   "ability.lotmcraft.concealment.enter_concealed_area": "Enter Concealed Area",
   "ability.lotmcraft.concealment.surroundings": "Conceal Surroundings",
+  "lotmcraft.concealed_domain_ability": "Concealed Domain",
+  "lotmcraft.concealed_domain_ability.description": "Create a concealed domain, sealing those inside",
   "lotmcraft.sword_of_darkness_ability": "Sword of Darkness",
   "lotmcraft.sword_of_darkness_ability.description": "Create a giant slash that cuts everything in its way",
 
