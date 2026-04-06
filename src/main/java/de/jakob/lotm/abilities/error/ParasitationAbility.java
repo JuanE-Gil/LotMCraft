@@ -5,6 +5,7 @@ import de.jakob.lotm.abilities.core.ToggleAbility;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.attachments.ParasitationComponent;
 import de.jakob.lotm.attachments.TransformationComponent;
+import de.jakob.lotm.effect.ModEffects;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import net.minecraft.network.chat.Component;
@@ -105,6 +106,8 @@ public class ParasitationAbility extends ToggleAbility {
             cancel(serverLevel, entity);
             return;
         }
+
+        entity.addEffect(new MobEffectInstance(ModEffects.CONCEALMENT, 20 * 10, 10));
 
         Vec3 dir = new Vec3(entity.getLookAngle().x(), 0, entity.getLookAngle().z()).normalize().scale(Math.min(-.85f, -1 * host.getBbWidth()));
         Vec3 hostPos = entity.position().add(dir);

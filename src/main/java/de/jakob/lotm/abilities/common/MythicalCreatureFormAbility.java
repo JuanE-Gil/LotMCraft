@@ -29,6 +29,7 @@ public class MythicalCreatureFormAbility extends ToggleAbility {
         this.cannotBeStolen = true;
         this.canBeReplicated = false;
         this.canBeUsedInArtifact = false;
+        this.canAlwaysBeUsed = true;
     }
 
     @Override
@@ -49,7 +50,6 @@ public class MythicalCreatureFormAbility extends ToggleAbility {
         }
 
         // Buff user
-        BeyonderData.addModifier(entity, "mythical_creature_form", (seq > 2 ? 1.25 : 1.75));
 
         int amplifier = (seq > 2 ? 3 : 6);
 
@@ -91,6 +91,8 @@ public class MythicalCreatureFormAbility extends ToggleAbility {
         if(scaleAttribute != null) {
             previousScale.put(entity.getUUID(), scaleAttribute.getValue());
         }
+
+        BeyonderData.addModifier(entity, "mythical_creature_form", (BeyonderData.getSequence(entity) > 2 ? 1.25 : 1.5));
 
         TransformationComponent transformationComponent = entity.getData(ModAttachments.TRANSFORMATION_COMPONENT);
         transformationComponent.setTransformedAndSync(true, entity);

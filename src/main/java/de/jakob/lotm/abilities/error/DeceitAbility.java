@@ -37,6 +37,7 @@ public class DeceitAbility extends SelectableAbility {
         canBeCopied = false;
         canBeReplicated = false;
         autoClear = false;
+        canBeUsedInArtifact = false;
     }
 
     @Override

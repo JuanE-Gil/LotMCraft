@@ -52,7 +52,7 @@ public class LightningStormAbility extends Ability {
                 targetLoc = targetLoc.subtract(0, 1, 0);
         }
 
-        double multiplier = multiplier(entity);
+        double multiplier = multiplier(entity)*2;
         Vec3 finalTargetLoc = targetLoc;
         ServerScheduler.scheduleForDuration(0, 4, 20 * 17, () -> {
             for(int j = 0; j < random.nextInt(5, 19); j++) {

@@ -378,16 +378,20 @@ public class BeyonderEventHandler {
 
         if(!(victim instanceof Player)) return;
 
-        if (source.getEntity() instanceof Player player) {
+        if (source.getEntity() instanceof ServerPlayer player) {
             if (player.level().isClientSide) return;
 
             if(!BeyonderData.isBeyonder(player) || !BeyonderData.isBeyonder(victim)) return;
+
+            BeyonderData.recalculateCharStackModifiers(player);
 
             float diff = BeyonderData.getSequence(player) - BeyonderData.getSequence(victim);
 
             if(diff >= 0){
                 BeyonderData.digest(player, (0.01f + (diff * 0.1f)), true);
             }
+
+           victim.addEffect(new MobEffectInstance(ModEffects.CONCEALMENT, 20 * 30, 99));
         }
     }
 

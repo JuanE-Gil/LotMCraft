@@ -544,7 +544,6 @@ public class NegativeEffect {
             ).filter(Objects::nonNull).toList();
 
             case "door" -> Stream.of(
-                    NegativeEffectType.FULL_MOON_WHISPERS,
                     (sequence <= 5) ? NegativeEffectType.RANDOM_TELEPORT : null
             ).filter(Objects::nonNull).toList();
 
@@ -600,7 +599,7 @@ public class NegativeEffect {
                     NegativeEffectType.NAUSEA
             ).filter(Objects::nonNull).toList();
 
-            default -> List.of(
+            default -> Stream.of(
                     NegativeEffectType.DRAIN_HEALTH,
                     NegativeEffectType.DRAIN_HUNGER,
                     NegativeEffectType.HEARING_WHISPERS,
@@ -608,8 +607,9 @@ public class NegativeEffect {
                     NegativeEffectType.MINING_FATIGUE,
                     NegativeEffectType.HEAR_SOUNDS,
                     NegativeEffectType.NEAR_DEATH_PULSE,
-                    NegativeEffectType.HEART_STOP
-            );
+                    NegativeEffectType.HEART_STOP,
+                    (sequence <= 4) ? NegativeEffectType.FULL_MOON_WHISPERS : null
+            ).filter(Objects::nonNull).toList();
         };
     }
 
@@ -778,7 +778,6 @@ public class NegativeEffect {
         STOP_TIME,
 
         // door
-        FULL_MOON_WHISPERS,
         RANDOM_TELEPORT,
 
         // sun
@@ -830,7 +829,8 @@ public class NegativeEffect {
         MINING_FATIGUE,
         HEAR_SOUNDS,
         NEAR_DEATH_PULSE,
-        HEART_STOP;
+        HEART_STOP,
+        FULL_MOON_WHISPERS;
     }
 
     public static List<NegativeEffect.NegativeEffectType> handOnlyTick = List.of(

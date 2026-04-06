@@ -106,7 +106,7 @@ public class SirenSongAbility extends SelectableAbility {
 
         level.playSound(null, BlockPos.containing(entity.position()), ModSounds.DEATH_MELODY.get(), SoundSource.BLOCKS, 1, 1);
 
-        double multiplier = multiplier(entity);
+        double multiplier = multiplier(entity)/3;
         ServerScheduler.scheduleForDuration(0,  2, 20 * 30, () -> {
             if(entity.level().isClientSide)
                 return;

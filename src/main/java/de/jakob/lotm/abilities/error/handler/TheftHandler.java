@@ -476,12 +476,12 @@ public class TheftHandler {
             return;
         }
 
-        if (doesTheftFail(entity, target, random, skill)) {
+        if (doesTheftFail(entity, target, random, skill) || !(target instanceof ServerPlayer)) {
             AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.conceptual_theft.failed.sanity").withColor(0x6d32a8));
             return;
         }
 
-        float baseSanity = (float) skill.multiplier(entity) / 20;
+        float baseSanity = (float) skill.multiplier(entity) / 200;
         float sanityToSteal = getSeqDifferenceMultiplier(AbilityUtil.getSeqWithArt(entity, skill), BeyonderData.getSequence(target)) * baseSanity;
 
         var targetSanity = target.getData(ModAttachments.SANITY_COMPONENT);
@@ -490,8 +490,13 @@ public class TheftHandler {
         float targetSanityValue = targetSanity.getSanity();
         float userSanityValue = entitySanity.getSanity();
 
-        targetSanity.setSanityAndSync(Math.max(targetSanityValue - baseSanity, 0.0f), target);
-        entitySanity.setSanityAndSync(Math.max(userSanityValue + (sanityToSteal/2.0f), 1.0f), entity);
+        float result = targetSanityValue - sanityToSteal;
+        sanityToSteal = result < 0f ? sanityToSteal - result: sanityToSteal;
+
+        LOTMCraft.LOGGER.info("SANITY base: {}, mult: {}, steal: {}, result: {}", baseSanity, getSeqDifferenceMultiplier(AbilityUtil.getSeqWithArt(entity, skill), BeyonderData.getSequence(target)), sanityToSteal, result);
+
+        targetSanity.setSanityAndSync(targetSanityValue - sanityToSteal, target);
+        entitySanity.setSanityAndSync(userSanityValue + (sanityToSteal/2.0f), entity);
     }
 
     public static void performDigestionTheft(LivingEntity entity, LivingEntity target, Random random, Ability skill){
@@ -508,11 +513,17 @@ public class TheftHandler {
         int userSeq = AbilityUtil.getSeqWithArt(entity, skill);
         int targetSeq = BeyonderData.getSequence(target);
 
-        float baseDigestion = (float)(skill.multiplier(entity) / 20);
+        float baseDigestion = (float)(skill.multiplier(entity) / 200);
+
         float multiplier = getSeqDifferenceMultiplier(userSeq, targetSeq);
         float digestionToSteal = baseDigestion * multiplier;
 
-        BeyonderData.digest((ServerPlayer) target, -baseDigestion, false);
-        BeyonderData.digest((ServerPlayer) entity, (digestionToSteal/2.0f), false);
+        float targetResult = BeyonderData.getDigestionProgress((Player) target) - digestionToSteal;
+        digestionToSteal = targetResult < 0.0f ? digestionToSteal - targetResult : digestionToSteal;
+
+        LOTMCraft.LOGGER.info("DIGESTION base: {}, mult: {}, steal: {}, result: {}", baseDigestion, multiplier, digestionToSteal, targetResult);
+
+        BeyonderData.digest((ServerPlayer) target, - digestionToSteal, false);
+        BeyonderData.digest((ServerPlayer) entity, digestionToSteal,false);
     }
 }

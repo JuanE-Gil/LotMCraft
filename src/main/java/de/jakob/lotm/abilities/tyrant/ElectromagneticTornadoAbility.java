@@ -14,7 +14,7 @@ import java.util.Map;
 
 public class ElectromagneticTornadoAbility extends Ability {
     public ElectromagneticTornadoAbility(String id) {
-        super(id, 2.5f);
+        super(id, 20f);
         canBeCopied = false;
     }
 
@@ -37,8 +37,8 @@ public class ElectromagneticTornadoAbility extends Ability {
         Vec3 pos = AbilityUtil.getTargetLocation(entity, 12, 2);
 
         ElectromagneticTornadoEntity tornado = target == null ?
-                new ElectromagneticTornadoEntity(ModEntities.ELECTROMAGNETIC_TORNADO.get(), level, .4f, (float) DamageLookup.lookupDamage(1, .65) * (float) multiplier(entity), entity) :
-                new ElectromagneticTornadoEntity(ModEntities.ELECTROMAGNETIC_TORNADO.get(), level, .4f, (float) DamageLookup.lookupDamage(1, .65) * (float) multiplier(entity), entity, target);
+                new ElectromagneticTornadoEntity(ModEntities.ELECTROMAGNETIC_TORNADO.get(), level, .4f, (float) DamageLookup.lookupDamage(1, .65) * (float) multiplier(entity)/3, entity) :
+                new ElectromagneticTornadoEntity(ModEntities.ELECTROMAGNETIC_TORNADO.get(), level, .4f, (float) DamageLookup.lookupDamage(1, .65) * (float) multiplier(entity)/3, entity, target);
         tornado.setPos(pos);
         level.addFreshEntity(tornado);
     }

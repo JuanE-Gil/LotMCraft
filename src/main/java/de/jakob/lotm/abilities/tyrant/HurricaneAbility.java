@@ -14,7 +14,7 @@ import java.util.Map;
 
 public class HurricaneAbility extends Ability {
     public HurricaneAbility(String id) {
-        super(id, 2.5f);
+        super(id, 20f);
         canBeCopied = false;
     }
 
@@ -36,7 +36,7 @@ public class HurricaneAbility extends Ability {
 
         Vec3 pos = AbilityUtil.getTargetLocation(entity, 12, 2);
 
-        TornadoEntity tornado = target == null ? new TornadoEntity(ModEntities.TORNADO.get(), level, .15f, (float) (DamageLookup.lookupDamage(4, .65) * multiplier(entity)), entity) : new TornadoEntity(ModEntities.TORNADO.get(), level, .15f, (float) (DamageLookup.lookupDamage(4, .65) * multiplier(entity)), entity, target);
+        TornadoEntity tornado = target == null ? new TornadoEntity(ModEntities.TORNADO.get(), level, .15f, (float) (DamageLookup.lookupDamage(4, .65) * multiplier(entity)/2.5), entity) : new TornadoEntity(ModEntities.TORNADO.get(), level, .15f, (float) (DamageLookup.lookupDamage(4, .65) * multiplier(entity)), entity, target);
         tornado.setPos(pos);
         level.addFreshEntity(tornado);
     }

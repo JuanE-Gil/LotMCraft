@@ -73,7 +73,7 @@ public class CalamityCreationAbility extends SelectableAbility {
     private void createVolcano(ServerLevel serverLevel, LivingEntity entity) {
         Vec3 targetPos = AbilityUtil.getTargetLocation(entity, 60, 2);
 
-        VolcanoEntity volcano = new VolcanoEntity(serverLevel, targetPos, (float) DamageLookup.lookupDamage(2, .5) * (float) multiplier(entity), entity);
+        VolcanoEntity volcano = new VolcanoEntity(serverLevel, targetPos, (float) DamageLookup.lookupDamage(2, .5) * (float) multiplier(entity)/3, entity);
         serverLevel.addFreshEntity(volcano);
 
     }
@@ -99,7 +99,7 @@ public class CalamityCreationAbility extends SelectableAbility {
                 .toList();
 
 
-        double multiplier = multiplier(entity);
+        double multiplier = multiplier(entity)/5;
 
         ServerScheduler.scheduleForDuration(0, 4, 20 * 30, () -> {
             // Damage and Effects
@@ -175,7 +175,7 @@ public class CalamityCreationAbility extends SelectableAbility {
                 .filter(b -> serverLevel.isEmptyBlock(b.above()))    // mimic onlyExposed = true
                 .toList();
 
-        double multiplier = multiplier(entity);
+        double multiplier = multiplier(entity)/5;
         ServerScheduler.scheduleForDuration(0, 4, 20 * 30, () -> {
             // Damage and Effects
             AbilityUtil.damageNearbyEntities(serverLevel, entity, 90, DamageLookup.lookupDps(2, .8, 4, 30) * (float) multiplier, startPos, true, false, 20 * 10);
@@ -239,12 +239,12 @@ public class CalamityCreationAbility extends SelectableAbility {
 
         Vec3 pos = AbilityUtil.getTargetLocation(entity, 12, 2);
 
-        TornadoEntity tornado = target == null ? new TornadoEntity(ModEntities.TORNADO.get(), serverLevel, .15f, (float) DamageLookup.lookupDamage(2, .775) * (float) multiplier(entity), entity) : new TornadoEntity(ModEntities.TORNADO.get(), serverLevel, .15f, 32.5f * (float) multiplier(entity), entity, target);
+        TornadoEntity tornado = target == null ? new TornadoEntity(ModEntities.TORNADO.get(), serverLevel, .15f, (float) DamageLookup.lookupDamage(2, .775) * (float) multiplier(entity)/3, entity) : new TornadoEntity(ModEntities.TORNADO.get(), serverLevel, .15f, 15.5f * (float) multiplier(entity)/3, entity, target);
         tornado.setPos(pos);
         serverLevel.addFreshEntity(tornado);
 
         for(int i = 0; i < 30; i++) {
-            TornadoEntity additionalTornado = target == null || random.nextInt(4) != 0 ? new TornadoEntity(ModEntities.TORNADO.get(), serverLevel, .15f, 17f, entity) : new TornadoEntity(ModEntities.TORNADO.get(), serverLevel, .15f, 17f, entity, target);
+            TornadoEntity additionalTornado = target == null || random.nextInt(4) != 0 ? new TornadoEntity(ModEntities.TORNADO.get(), serverLevel, .15f, 17f, entity) : new TornadoEntity(ModEntities.TORNADO.get(), serverLevel, .15f, 10f, entity, target);
             Vec3 randomOffset = new Vec3((serverLevel.random.nextDouble() - 0.5) * 120, 3, (serverLevel.random.nextDouble() - 0.5) * 120);
             additionalTornado.setPos(pos.add(randomOffset));
             serverLevel.addFreshEntity(additionalTornado);

@@ -25,7 +25,7 @@ import java.util.Map;
 
 public class ConceptualTheftAbility extends SelectableAbility {
     public ConceptualTheftAbility(String id) {
-        super(id, 25);
+        super(id, 15);
 
         canBeUsedByNPC = false;
         canBeCopied = false;
@@ -34,7 +34,7 @@ public class ConceptualTheftAbility extends SelectableAbility {
 
     @Override
     public Map<String, Integer> getRequirements() {
-        return new HashMap<>(Map.of("error", 2));
+        return new HashMap<>(Map.of("error", 1));
     }
 
     @Override

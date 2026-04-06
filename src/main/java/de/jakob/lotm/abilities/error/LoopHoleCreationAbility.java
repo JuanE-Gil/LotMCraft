@@ -46,7 +46,7 @@ public class LoopHoleCreationAbility extends Ability {
 
     @Override
     public Map<String, Integer> getRequirements() {
-        return new HashMap<>(Map.of("error", 3));
+        return new HashMap<>(Map.of("error", 2));
     }
 
     @Override
