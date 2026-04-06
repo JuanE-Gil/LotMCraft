@@ -51,8 +51,8 @@ public class ConqueringAbility extends Ability {
         int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
 
         AbilityUtil.getNearbyEntities(entity, (ServerLevel) level, entity.position(), 3.75, false).forEach(e -> {
-            if(AbilityUtil.getSequenceDifference(entitySeq, BeyonderData.getSequence(e)) > 0) {
-                e.addEffect(new MobEffectInstance(ModEffects.CONQUERED, 20 * 60 * 60, 7));
+            if(AbilityUtil.getSequenceDifference(entitySeq, BeyonderData.getSequence(e)) > entitySeq) {
+                e.addEffect(new MobEffectInstance(ModEffects.CONQUERED, 20 * 60 * 5, 7));
             }
         });
     }
