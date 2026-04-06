@@ -198,7 +198,7 @@ public class BeyonderData {
                 PacketHandler.syncBeyonderDataToPlayer(serverPlayer);
                 beyonderMap.put(serverPlayer);
 
-                SyncBeyonderDataPacket packet = new SyncBeyonderDataPacket(pathway, sequence, 0.0f, false, 0.0f);
+                SyncBeyonderDataPacket packet = new SyncBeyonderDataPacket(pathway, sequence, 0.0f, false, 0.0f, new de.jakob.lotm.util.beyonderMap.PathwayHistory());
                 PacketHandler.sendToAllPlayers(packet);
 
                 // Disband team if leader is no longer eligible (Red Priest seq <= 3)
