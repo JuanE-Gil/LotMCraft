@@ -226,6 +226,10 @@ public class DivinationUtil {
         if(SpaceConcealmentAbility.isInsideConcealedSpace(serverPlayer.position())) {
             addedValue += 12;
         }
+        if (ConcealedDomainEntity.ENTITIES_INSIDE_DOMAIN.contains(serverPlayer.getUUID())) {
+            addedValue += 99;
+        }
+        
         return addedValue;
     }
 
