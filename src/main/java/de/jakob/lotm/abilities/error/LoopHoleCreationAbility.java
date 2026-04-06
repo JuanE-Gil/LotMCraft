@@ -41,11 +41,12 @@ public class LoopHoleCreationAbility extends Ability {
         super(id, 3.5f);
         canBeCopied = false;
         canBeReplicated = false;
+        autoClear = false;
     }
 
     @Override
     public Map<String, Integer> getRequirements() {
-        return new HashMap<>(Map.of("error", 3));
+        return new HashMap<>(Map.of("error", 2));
     }
 
     @Override
@@ -88,7 +89,7 @@ public class LoopHoleCreationAbility extends Ability {
                     e.teleportTo(targetLoc.x, targetLoc.y, targetLoc.z);
 
                     if(BeyonderData.isBeyonder(e))
-                        TheftHandler.performAbilityTheft(serverLevel, entity, e, random, false);
+                        TheftHandler.performAbilityTheft(serverLevel, entity, e, random, false, this);
                 }
             });
         });
@@ -96,6 +97,7 @@ public class LoopHoleCreationAbility extends Ability {
         // Clean up after loophole expires
         ServerScheduler.scheduleDelayed(20 * 14, () -> {
             removeLoophole(loopholeId);
+            clearArtifactScaling(entity);
         });
     }
 

@@ -94,9 +94,9 @@ public class SealedArtifactAnvilRecipe {
         float additional = 0.0f;
 
         switch (seq){
-            case 6,5 -> additional += 0.1f;
-            case 4,3 -> additional += 0.2f;
-            case 2,1 -> additional += 0.3f;
+            case 6,5 -> additional += 0.4f;
+            case 4,3 -> additional += 0.5f;
+            case 2,1 -> additional += 0.6f;
         }
 
         return level.random.nextFloat() < 0.2f + additional;

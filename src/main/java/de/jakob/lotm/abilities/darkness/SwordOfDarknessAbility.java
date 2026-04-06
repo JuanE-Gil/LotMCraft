@@ -32,6 +32,7 @@ public class SwordOfDarknessAbility extends Ability {
     public SwordOfDarknessAbility(String id) {
         super(id, 2);
         this.canBeCopied = false;
+        autoClear = false;
     }
 
     @Override
@@ -52,7 +53,6 @@ public class SwordOfDarknessAbility extends Ability {
         Vec3 slashStart = VectorUtil.getRelativePosition(startLoc, direction, 0, offsetRight, 8);
         Vec3 slashEnd = VectorUtil.getRelativePosition(startLoc, direction, 0, -offsetRight, -8);
 
-
         AtomicDouble distance = new AtomicDouble(0);
         ServerScheduler.scheduleForDuration(0, 1, 20 * 6, () -> {
             for (int j = 0; j < 3; j++) {
@@ -66,11 +66,12 @@ public class SwordOfDarknessAbility extends Ability {
 
                     // Sword of Darkness is weakened by Wall of Light (purification)
                     Location pointLoc = new Location(point, level);
-                    boolean purified = InteractionHandler.isInteractionPossible(pointLoc, "purification", BeyonderData.getSequence(entity));
+                    int seq = AbilityUtil.getSeqWithArt(entity, this);
+                    boolean purified = InteractionHandler.isInteractionPossible(pointLoc, "purification", seq);
                     float damageMult = purified ? 0.3f : 1f;
 
                     ParticleUtil.spawnParticles(serverLevel, ModParticles.BLACK.get(), point, 3, 0.2, 0);
-                    AbilityUtil.damageNearbyEntities(serverLevel, entity, 3, multiplier(entity) * DamageLookup.lookupDamage(1, .85) * damageMult, point, true, false, false, 10, ModDamageTypes.source(level, ModDamageTypes.DARKNESS_GENERIC, entity));
+                    AbilityUtil.damageNearbyEntities(serverLevel, entity, 3, (multiplier(entity)/3) * DamageLookup.lookupDamage(1, .85) * damageMult, point, true, false, false, 10, ModDamageTypes.source(level, ModDamageTypes.DARKNESS_GENERIC, entity));
                     if(BeyonderData.isGriefingEnabled(entity)) {
                         if(serverLevel.getBlockState(BlockPos.containing(point)).getDestroySpeed(level, BlockPos.containing(point)) < 0)
                             continue;
@@ -80,12 +81,12 @@ public class SwordOfDarknessAbility extends Ability {
 
                 distance.addAndGet(.5);
             }
-        }, null, serverLevel, () -> AbilityUtil.getTimeInArea(entity, new de.jakob.lotm.util.data.Location(entity.position(), serverLevel)));
+        }, () -> clearArtifactScaling(entity), serverLevel, () -> AbilityUtil.getTimeInArea(entity, new de.jakob.lotm.util.data.Location(entity.position(), serverLevel)));
     }
 
     @Override
     public Map<String, Integer> getRequirements() {
-        return new HashMap<>(Map.of("darkness", 1));
+        return new HashMap<>(Map.of("darkness", 3));
     }
 
     @Override

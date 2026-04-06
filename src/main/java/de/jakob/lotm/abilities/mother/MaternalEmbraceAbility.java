@@ -50,8 +50,11 @@ public class MaternalEmbraceAbility extends Ability {
         CoffinEntity coffinEntity = new CoffinEntity(serverLevel, targetEntity.position().add(0, 1, 0));
         serverLevel.addFreshEntity(coffinEntity);
 
-        if(AbilityUtil.isTargetSignificantlyStronger(entity, targetEntity) || (
-                BeyonderData.isBeyonder(entity) && BeyonderData.isBeyonder(targetEntity) && BeyonderData.getSequence(targetEntity) <= BeyonderData.getSequence(entity))) {
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+        int targetEntitySeq = BeyonderData.getSequence(targetEntity);
+
+        if(AbilityUtil.isTargetSignificantlyStronger(entitySeq, targetEntitySeq) || (
+                BeyonderData.isBeyonder(entity) && BeyonderData.isBeyonder(targetEntity) && targetEntitySeq <= entitySeq)) {
             AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.maternal_embrace.too_strong").withColor(0x8abd93));
             coffinEntity.discard();
             return;

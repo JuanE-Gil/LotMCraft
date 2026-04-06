@@ -71,7 +71,7 @@ public class NightmareSpectatorAbility extends Ability {
         target.addEffect(new MobEffectInstance(ModEffects.LOOSING_CONTROL, 20 * 4, 1));
 
         // Decrease Sanity
-        target.getData(ModAttachments.SANITY_COMPONENT).increaseSanityAndSync((float) (-0.165f * multiplier(entity)), target);
+        target.getData(ModAttachments.SANITY_COMPONENT).increaseSanityAndSync((float) (-0.165f * (multiplier(entity)/2)), target);
 
         // Particles
         ParticleUtil.spawnParticles(serverLevel, dust, target.position().add(0, target.getEyeHeight() / 2, 0), 200, .35, target.getEyeHeight() / 2, .35, 0);

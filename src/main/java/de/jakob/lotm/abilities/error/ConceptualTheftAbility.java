@@ -25,7 +25,7 @@ import java.util.Map;
 
 public class ConceptualTheftAbility extends SelectableAbility {
     public ConceptualTheftAbility(String id) {
-        super(id, 25);
+        super(id, 15);
 
         canBeUsedByNPC = false;
         canBeCopied = false;
@@ -34,7 +34,7 @@ public class ConceptualTheftAbility extends SelectableAbility {
 
     @Override
     public Map<String, Integer> getRequirements() {
-        return new HashMap<>(Map.of("error", 2));
+        return new HashMap<>(Map.of("error", 1));
     }
 
     @Override
@@ -79,7 +79,7 @@ public class ConceptualTheftAbility extends SelectableAbility {
             return;
         }
 
-        TheftHandler.performSanityTheft(entity, target, random);
+        TheftHandler.performSanityTheft(entity, target, random, this);
     }
 
     private void stealDigestion(Level level, LivingEntity entity){
@@ -96,7 +96,7 @@ public class ConceptualTheftAbility extends SelectableAbility {
             return;
         }
 
-        TheftHandler.performDigestionTheft(entity, target, random);
+        TheftHandler.performDigestionTheft(entity, target, random, this);
     }
 
     private void stealDayNight(ServerLevel serverLevel, LivingEntity entity) {

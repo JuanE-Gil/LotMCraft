@@ -247,7 +247,13 @@ public class TimeChangeEntity extends Entity {
         if (controlledEntities.containsKey(player.getUUID())) {
             float multiplier = controlledEntities.get(player.getUUID());
 
+            LOTMCraft.LOGGER.info("Player : {}", player.getName());
+
             if (multiplier <= 0.001f) { // time stop
+
+                LOTMCraft.LOGGER.info("TIME STOP");
+                var pos = player.position();
+
                 player.setDeltaMovement(Vec3.ZERO);
                 player.setOnGround(true);
                 player.getAbilities().mayfly = false;
@@ -256,6 +262,8 @@ public class TimeChangeEntity extends Entity {
 
                 player.setDeltaMovement(new Vec3(0, 0, 0));
                 player.hurtMarked = true;
+
+                player.teleportTo(pos.x, pos.y, pos.z);
             }
         }
     }

@@ -28,6 +28,7 @@ public class HorrorAuraAbility extends Ability {
     public HorrorAuraAbility(String id) {
         super(id, 30);
         this.canBeCopied = false;
+        autoClear = false;
     }
 
     @Override
@@ -57,7 +58,7 @@ public class HorrorAuraAbility extends Ability {
             MovableEffectManager.updateEffectPosition(effectID, loc, serverLevel);
 
             // Horror Aura is suppressed by purification
-            int seq = BeyonderData.getSequence(entity);
+            int seq = AbilityUtil.getSeqWithArt(entity, this);
             if(InteractionHandler.isInteractionPossible(loc, "purification", seq))
                 return;
 
@@ -79,14 +80,15 @@ public class HorrorAuraAbility extends Ability {
                 e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, 4, false, false, false));
 
                 BeyonderData.addModifier(e, "horror_aura", .4);
-                if(AbilityUtil.isTargetSignificantlyWeaker(entity, e) && ticks.get() % 10 == 0) {
-                    e.hurt(ModDamageTypes.source(level, ModDamageTypes.LOOSING_CONTROL, entity), (float) (DamageLookup.lookupDps(3, .95, 10, 20) * multiplier(entity)));
+                if(AbilityUtil.isTargetSignificantlyWeaker(seq, BeyonderData.getSequence(e)) && ticks.get() % 10 == 0) {
+                    e.hurt(ModDamageTypes.source(level, ModDamageTypes.LOOSING_CONTROL, entity), (float) (DamageLookup.lookupDps(3, .95, 10, 20) *
+                            multiplier(entity)));
                 }
 
                 SanityComponent sanityComponent = e.getData(ModAttachments.SANITY_COMPONENT);
                 sanityComponent.increaseSanityAndSync(-.0033f, e);
             });
             ticks.getAndIncrement();
-        }, null, serverLevel, () -> AbilityUtil.getTimeInArea(entity, new Location(entity.position(), serverLevel)));
+        }, () -> this.clearArtifactScaling(entity), serverLevel, () -> AbilityUtil.getTimeInArea(entity, new Location(entity.position(), serverLevel)));
     }
 }

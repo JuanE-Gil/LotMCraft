@@ -17,7 +17,7 @@ import java.util.Map;
 
 public class HeavenlyPunishmentAbility extends Ability {
     public HeavenlyPunishmentAbility(String id) {
-        super(id, 2);
+        super(id, 5);
         canBeCopied = false;
     }
 
@@ -44,7 +44,7 @@ public class HeavenlyPunishmentAbility extends Ability {
                 targetLoc = targetLoc.subtract(0, 1, 0);
         }
 
-        GiantLightningEntity lightning = new GiantLightningEntity(level, entity, targetLoc, 50, 6, DamageLookup.lookupDamage(1, .9) * multiplier(entity), BeyonderData.isGriefingEnabled(entity), 13, 200, 0x6522a8);
+        GiantLightningEntity lightning = new GiantLightningEntity(level, entity, targetLoc, 50, 6, DamageLookup.lookupDamage(1, .9) * (multiplier(entity)/3), BeyonderData.isGriefingEnabled(entity), 13, 200, 0x6522a8);
         level.addFreshEntity(lightning);
     }
 }

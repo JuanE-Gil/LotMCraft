@@ -1,6 +1,8 @@
 package de.jakob.lotm.events;
 
 import de.jakob.lotm.LOTMCraft;
+import de.jakob.lotm.attachments.ModAttachments;
+import de.jakob.lotm.attachments.TeamComponent;
 import de.jakob.lotm.command.*;
 import de.jakob.lotm.entity.ModEntities;
 import de.jakob.lotm.entity.client.ability_entities.door_pathway.travelers_door.TravelersDoorModel;
@@ -41,13 +43,18 @@ import de.jakob.lotm.entity.custom.*;
 import de.jakob.lotm.entity.custom.ability_entities.OriginalBodyEntity;
 import de.jakob.lotm.entity.custom.spirits.*;
 import de.jakob.lotm.gamerule.ModGameRules;
+import de.jakob.lotm.network.PacketHandler;
+import de.jakob.lotm.network.packets.toClient.SyncSharedAbilitiesDataPacket;
+import de.jakob.lotm.util.helper.TeamUtils;
 import de.jakob.lotm.rendering.models.DoorMythicalCreatureModel;
 import de.jakob.lotm.rendering.models.TyrantMythicalCreatureModel;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.SpiritualityProgressTracker;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.SpawnPlacementTypes;
 import net.minecraft.world.entity.player.Player;
@@ -59,6 +66,9 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import static de.jakob.lotm.abilities.fool.HistoricalVoidSummoningAbility.MARKED_ENTITIES_TAG;
 import static de.jakob.lotm.util.BeyonderData.*;
@@ -134,16 +144,7 @@ public class ModEvents {
                 ModEntities.BEYONDER_NPC.get(),
                 SpawnPlacementTypes.ON_GROUND,
                 Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
-                (entityType, level, spawnType, pos, random) -> {
-                    // Get the ServerLevel to access gamerules
-                    ServerLevel serverLevel = level.getLevel();
-                    if (!serverLevel.getGameRules().getBoolean(ModGameRules.ALLOW_BEYONDER_SPAWNING)) {
-                        return false;
-                    }
-
-                    // Then check the normal mob spawn rules
-                    return Mob.checkMobSpawnRules(entityType, level, spawnType, pos, random);
-                },
+                BeyonderNPCEntity::canSpawn,
                 RegisterSpawnPlacementsEvent.Operation.REPLACE
         );
         event.register(
@@ -217,6 +218,70 @@ public class ModEvents {
         EnableAbilityCommand.register(event.getDispatcher());
         HonorificNameCommand.register(event.getDispatcher());
         CharacteristicsStackCommand.register(event.getDispatcher());
+        TeamCommand.register(event.getDispatcher());
+        TeamInviteResponseCommand.register(event.getDispatcher());
+    }
+
+    @SubscribeEvent
+    public static void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer leavingPlayer)) return;
+
+        TeamComponent team = leavingPlayer.getData(ModAttachments.TEAM_COMPONENT.get());
+        MinecraftServer server = leavingPlayer.getServer();
+        if (server == null) return;
+
+        if (team.memberCount() > 0) {
+            // Leaving player is a leader — clear the shared tab for all online members
+            SyncSharedAbilitiesDataPacket clearPacket = new SyncSharedAbilitiesDataPacket(
+                    "", new ArrayList<>(), new ArrayList<>(), new HashMap<>(), 0, 0);
+            for (String memberUUID : team.memberUUIDs()) {
+                ServerPlayer member = server.getPlayerList().getPlayer(
+                        java.util.UUID.fromString(memberUUID));
+                if (member != null) {
+                    PacketHandler.sendToPlayer(member, clearPacket);
+                }
+            }
+        } else if (team.isInTeam()) {
+            // Leaving player is a member — re-sync the team so their abilities vanish from the pool
+            ServerPlayer leader = server.getPlayerList().getPlayer(
+                    java.util.UUID.fromString(team.leaderUUID()));
+            if (leader != null) {
+                TeamUtils.syncToTeam(leader);
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+
+        MinecraftServer server = player.getServer();
+        if (server == null) return;
+
+        TeamComponent team = player.getData(ModAttachments.TEAM_COMPONENT.get());
+
+        if (team.isInTeam()) {
+            // Player is a member — check if their leader still has them listed
+            ServerPlayer leader = server.getPlayerList().getPlayer(java.util.UUID.fromString(team.leaderUUID()));
+            if (leader != null && !leader.getData(ModAttachments.TEAM_COMPONENT.get()).hasMember(player.getStringUUID())) {
+                // Leader is online but no longer claims this player — clear stale membership
+                player.setData(ModAttachments.TEAM_COMPONENT.get(), team.clearLeader());
+                PacketHandler.sendToPlayer(player, new de.jakob.lotm.network.packets.toClient.SyncSharedAbilitiesDataPacket(
+                        "", new ArrayList<>(), new ArrayList<>(), new java.util.HashMap<>(), 0, 0));
+            }
+        } else if (team.memberCount() > 0) {
+            // Player is a leader — remove any members whose leaderUUID no longer points back to this leader
+            TeamComponent current = team;
+            for (String memberUUID : new ArrayList<>(current.memberUUIDs())) {
+                ServerPlayer member = server.getPlayerList().getPlayer(java.util.UUID.fromString(memberUUID));
+                if (member != null && !member.getData(ModAttachments.TEAM_COMPONENT.get()).leaderUUID().equals(player.getStringUUID())) {
+                    current = current.removeMember(memberUUID);
+                }
+            }
+            if (!current.memberUUIDs().equals(team.memberUUIDs())) {
+                player.setData(ModAttachments.TEAM_COMPONENT.get(), current);
+            }
+        }
     }
 
     @SubscribeEvent

@@ -62,7 +62,8 @@ public class FlamesOfTheAbyssAbility extends SelectableAbility {
 
         Vec3 targetPos = AbilityUtil.getTargetLocation(entity, 80, 1.5f);
         boolean griefing = BeyonderData.isGriefingEnabled(entity);
-        float damage = (float) (DamageLookup.lookupDamage(1, 0.85) * multiplier(entity));
+        float damage = (float) (DamageLookup.lookupDamage(1, 0.85) *
+                multiplier(entity));
 
         level.playSound(null, BlockPos.containing(entity.position()),
                 SoundEvents.GENERIC_EXPLODE.value(), SoundSource.BLOCKS, 3f, 0.6f);
@@ -100,7 +101,9 @@ public class FlamesOfTheAbyssAbility extends SelectableAbility {
                 SoundEvents.BLAZE_SHOOT, SoundSource.BLOCKS, 3f, 0.5f);
 
         // Apply heavy debuffs to all nearby entities
-        float damage = (float) (DamageLookup.lookupDamage(1, 0.6) * multiplier(entity));
+        float damage = (float) (DamageLookup.lookupDamage(1, 0.6) *
+                multiplier(entity));
+
         AbilityUtil.getNearbyEntities(entity, serverLevel, entity.position(), 18).forEach(e -> {
             e.addEffect(new MobEffectInstance(MobEffects.POISON, 20 * 20, 4));          // Poison V
             e.addEffect(new MobEffectInstance(MobEffects.WITHER, 20 * 6, 1));           // Wither II

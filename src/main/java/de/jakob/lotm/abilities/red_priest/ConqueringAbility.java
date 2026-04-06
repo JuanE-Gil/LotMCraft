@@ -3,6 +3,8 @@ package de.jakob.lotm.abilities.red_priest;
 import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.effect.ModEffects;
 import de.jakob.lotm.rendering.effectRendering.EffectManager;
+import de.jakob.lotm.rendering.effectRendering.impl.BaptismEffect;
+import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -46,9 +48,11 @@ public class ConqueringAbility extends Ability {
 
         EffectManager.playEffect(EffectManager.Effect.CONQUERING, entity.getX(), entity.getY(), entity.getZ(), serverLevel, entity);
 
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+
         AbilityUtil.getNearbyEntities(entity, (ServerLevel) level, entity.position(), 3.75, false).forEach(e -> {
-            if(AbilityUtil.getSequenceDifference(entity, e) > 0) {
-                e.addEffect(new MobEffectInstance(ModEffects.CONQUERED, 20 * 60 * 60, 7));
+            if(AbilityUtil.getSequenceDifference(entitySeq, BeyonderData.getSequence(e)) > entitySeq) {
+                e.addEffect(new MobEffectInstance(ModEffects.CONQUERED, 20 * 60 * 5, 7));
             }
         });
     }

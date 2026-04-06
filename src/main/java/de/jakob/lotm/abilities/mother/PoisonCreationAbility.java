@@ -103,10 +103,13 @@ public class PoisonCreationAbility extends SelectableAbility {
     private void createPoisonArea(ServerLevel serverLevel, LivingEntity entity) {
         AtomicDouble radius = new AtomicDouble(0);
         Vec3 startPos = entity.position().add(0, 0.185, 0);
+
+        double multiplier = multiplier(entity);
+
         ServerScheduler.scheduleForDuration(0, 2, 20 * 5, () -> {
             radius.addAndGet(0.5);
             ParticleUtil.spawnParticles(serverLevel, dustBig, startPos, (int) (radius.get() * 12), radius.get(), 0.1, radius.get(), 0);
-            AbilityUtil.damageNearbyEntities(serverLevel, entity, radius.get(), DamageLookup.lookupDps(6, .95, 2, 20) * multiplier(entity), startPos, true, false);
+            AbilityUtil.damageNearbyEntities(serverLevel, entity, radius.get(), DamageLookup.lookupDps(6, .95, 2, 20) * multiplier, startPos, true, false);
             AbilityUtil.addPotionEffectToNearbyEntities(serverLevel, entity, radius.get(), startPos, new MobEffectInstance(MobEffects.POISON, 20 * 5, 8));
         }, null, serverLevel, () -> AbilityUtil.getTimeInArea(entity, new Location(startPos, serverLevel)));
     }

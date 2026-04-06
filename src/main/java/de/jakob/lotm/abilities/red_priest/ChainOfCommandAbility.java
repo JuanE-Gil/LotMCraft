@@ -70,7 +70,10 @@ public class ChainOfCommandAbility extends Ability {
             return;
         }
 
-        if(!BeyonderData.isBeyonder(target) || BeyonderData.getSequence(target) > BeyonderData.getSequence(entity)) {
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+        int targetSeq = BeyonderData.getSequence(target);
+
+        if(!BeyonderData.isBeyonder(target) || targetSeq > entitySeq) {
             SubordinateUtils.turnEntityIntoSubordinate(target, player);
             ParticleUtil.spawnParticles(serverLevel, dust, target.position().add(0, target.getEyeHeight() / 2, 0), 95, .5, target.getEyeHeight() / 2, .5, 0);
         }

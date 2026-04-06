@@ -26,6 +26,7 @@ public class FearAuraAbility extends Ability {
     public FearAuraAbility(String id) {
         super(id, 30);
         this.canBeCopied = false;
+        autoClear = false;
     }
 
     @Override
@@ -52,7 +53,8 @@ public class FearAuraAbility extends Ability {
             loc.setLevel(serverLevel);
             MovableEffectManager.updateEffectPosition(effectID, loc, serverLevel);
 
-            if(InteractionHandler.isInteractionPossible(new Location(entity.position(), serverLevel), "purification", BeyonderData.getSequence(entity))) {
+            if(InteractionHandler.isInteractionPossible(new Location(entity.position(), serverLevel), "purification",
+                    AbilityUtil.getSeqWithArt(entity, this))) {
                 return;
             }
 
@@ -63,14 +65,19 @@ public class FearAuraAbility extends Ability {
 
             AbilityUtil.getNearbyEntities(entity, serverLevel, entity.position(), 20).forEach(e -> {
                 BeyonderData.addModifier(e, "fear_aura", .4);
-                if (AbilityUtil.isTargetSignificantlyWeaker(entity, e) && ticks.get() % 10 == 0) {
-                    e.hurt(e.damageSources().mobAttack(entity), (float) (DamageLookup.lookupDps(3, 0.6, 10, 20) * multiplier(entity)));
+
+                int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+                int targetSeq = BeyonderData.getSequence(e);
+
+                if (AbilityUtil.isTargetSignificantlyWeaker(entitySeq, targetSeq) && ticks.get() % 10 == 0) {
+                    e.hurt(e.damageSources().mobAttack(entity), (float) (DamageLookup.lookupDps(3, 0.6, 10, 20) *
+                           multiplier(entity)));
                 }
 
                 SanityComponent sanityComponent = e.getData(ModAttachments.SANITY_COMPONENT);
                 sanityComponent.increaseSanityAndSync(-.0033f, e);
             });
             ticks.getAndIncrement();
-        });
+        }, () -> this.clearArtifactScaling(entity), serverLevel);
     }
 }

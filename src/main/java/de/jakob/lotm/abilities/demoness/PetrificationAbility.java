@@ -33,6 +33,7 @@ public class PetrificationAbility extends SelectableAbility {
     public PetrificationAbility(String id) {
         super(id, 60);
         canBeCopied = false;
+        autoClear = false;
     }
 
     @Override
@@ -82,10 +83,13 @@ public class PetrificationAbility extends SelectableAbility {
 
             AbilityUtil.getAllNearbyEntities(entity, serverLevel, startPos, radius.get(), false).forEach(target -> {
                 if(target instanceof LivingEntity living) {
-                    if (AbilityUtil.isTargetSignificantlyWeaker(entity, living)) {
+                    int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+                    int livingSeq = BeyonderData.getSequence(living);
+
+                    if (AbilityUtil.isTargetSignificantlyWeaker(entitySeq, livingSeq)) {
                         living.addEffect(new MobEffectInstance(ModEffects.PETRIFICATION, 20 * 60 * 10, 9));
                         return;
-                    } else if (AbilityUtil.isTargetSignificantlyStronger(entity, living)) {
+                    } else if (AbilityUtil.isTargetSignificantlyStronger(entitySeq, livingSeq)) {
                         living.addEffect(new MobEffectInstance(ModEffects.PETRIFICATION, 20, 9));
                         return;
                     }
@@ -99,7 +103,7 @@ public class PetrificationAbility extends SelectableAbility {
             });
 
             radius.addAndGet(0.5);
-        }, null, serverLevel, () -> AbilityUtil.getTimeInArea(entity, new Location(entity.position(), serverLevel)));
+        }, () -> clearArtifactScaling(entity), serverLevel, () -> AbilityUtil.getTimeInArea(entity, new Location(entity.position(), serverLevel)));
     }
 
     private void petrifyTarget(ServerLevel serverLevel, LivingEntity entity) {
@@ -107,11 +111,14 @@ public class PetrificationAbility extends SelectableAbility {
             Entity target = AbilityUtil.getTargetEntityNonLivingIncluded(entity, 15, 2, false, false, false);
             if(target != null) {
                 if(target instanceof LivingEntity livingTarget) {
+                    int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+                    int livingTargetSeq = BeyonderData.getSequence(livingTarget);
+
                     int duration = 20 * 60 * 2;
-                    if(AbilityUtil.isTargetSignificantlyStronger(entity, livingTarget)) {
+                    if(AbilityUtil.isTargetSignificantlyStronger(entitySeq, livingTargetSeq)) {
                         duration = 20 * 2;
                     }
-                    if(AbilityUtil.isTargetSignificantlyWeaker(entity, livingTarget)) {
+                    if(AbilityUtil.isTargetSignificantlyWeaker(entitySeq, livingTargetSeq)) {
                         duration = 20 * 60 * 10;
                     }
                     livingTarget.addEffect(new MobEffectInstance(ModEffects.PETRIFICATION, duration, 9, false, false));
@@ -129,7 +136,7 @@ public class PetrificationAbility extends SelectableAbility {
                     }
                 });
             }
-        }, null, serverLevel, () -> AbilityUtil.getTimeInArea(entity, new Location(entity.position(), serverLevel)));
+        }, () -> clearArtifactScaling(entity), serverLevel, () -> AbilityUtil.getTimeInArea(entity, new Location(entity.position(), serverLevel)));
     }
 
     @SubscribeEvent

@@ -5,6 +5,7 @@ import de.jakob.lotm.attachments.DisabledAbilitiesComponent;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.entity.ModEntities;
 import de.jakob.lotm.entity.custom.ability_entities.door_pathway.DistortionFieldEntity;
+import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.data.Location;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.scheduling.ServerScheduler;
@@ -26,6 +27,7 @@ public class DistortionFieldAbility extends Ability {
     public DistortionFieldAbility(String id) {
         super(id, 40);
         canBeCopied = false;
+        autoClear = false;
     }
 
     @Override
@@ -95,7 +97,7 @@ public class DistortionFieldAbility extends Ability {
 
             // Randomly teleport entities around and disable ability use
             AbilityUtil.getNearbyEntities(entity, serverLevel, startPos, 40).forEach(e -> {
-                if(random.nextInt(15) == 0) {
+                if(random.nextInt(15) == 0 && AbilityUtil.getSeqWithArt(entity, this) <= BeyonderData.getSequence(e)) {
                     DisabledAbilitiesComponent component = e.getData(ModAttachments.DISABLED_ABILITIES_COMPONENT);
                     component.disableAbilityUsageForTime("distortion_field", 20 * 4, e);
                 }
@@ -106,6 +108,8 @@ public class DistortionFieldAbility extends Ability {
         }, () -> {
             // Remove Distortion Field Entity
             distortionFieldEntity.discard();
+
+            clearArtifactScaling(entity);
 
             // Remove Barriers
             barrierBlocks.forEach(b -> {

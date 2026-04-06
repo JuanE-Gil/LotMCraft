@@ -2,6 +2,7 @@ package de.jakob.lotm.abilities.visionary;
 
 import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.effect.ModEffects;
+import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.data.Location;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.ParticleUtil;
@@ -52,6 +53,9 @@ public class SleepInducementAbility extends Ability {
             }
             return;
         }
+
+        if(AbilityUtil.getSeqWithArt(entity, this) > BeyonderData.getSequence(target))
+            return;
 
         // Add sleep effect
         target.addEffect(new MobEffectInstance(ModEffects.ASLEEP, 20 * 12, 1, false, false, false));

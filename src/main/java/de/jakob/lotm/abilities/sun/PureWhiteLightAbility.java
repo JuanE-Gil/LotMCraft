@@ -69,6 +69,7 @@ public class PureWhiteLightAbility extends Ability {
 
         AtomicDouble radius = new AtomicDouble(2);
 
+        double multiplier = multiplier(entity);
         Vec3 finalTargetLoc = targetLoc;
         ServerScheduler.scheduleForDuration(29, 2, 110, () -> {
             if(BeyonderData.isGriefingEnabled(entity)) {
@@ -78,7 +79,7 @@ public class PureWhiteLightAbility extends Ability {
                 });
             }
 
-            AbilityUtil.damageNearbyEntities(serverLevel, entity, radius.get(), DamageLookup.lookupDamage(1, .8) * multiplier(entity), finalTargetLoc, true, false, false, 15, ModDamageTypes.source(level, ModDamageTypes.PURIFICATION, entity));
+            AbilityUtil.damageNearbyEntities(serverLevel, entity, radius.get(), DamageLookup.lookupDamage(1, .8) * multiplier, finalTargetLoc, true, false, false, 15, ModDamageTypes.source(level, ModDamageTypes.PURIFICATION, entity));
 
             radius.addAndGet(0.8);
         }, null, (ServerLevel) level, () -> AbilityUtil.getTimeInArea(entity, new Location(entity.position(), level)));

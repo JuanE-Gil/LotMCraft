@@ -17,6 +17,7 @@ import de.jakob.lotm.util.beyonderMap.HonorificName;
 import de.jakob.lotm.util.beyonderMap.StoredData;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.ParticleUtil;
+import de.jakob.lotm.util.helper.TeamUtils;
 import de.jakob.lotm.util.helper.marionettes.MarionetteComponent;
 import de.jakob.lotm.util.pathways.PathwayInfos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -196,6 +197,14 @@ public class BeyonderData {
             if(entity instanceof ServerPlayer serverPlayer) {
                 PacketHandler.syncBeyonderDataToPlayer(serverPlayer);
                 beyonderMap.put(serverPlayer);
+
+                SyncBeyonderDataPacket packet = new SyncBeyonderDataPacket(pathway, sequence, 0.0f, false, 0.0f);
+                PacketHandler.sendToAllPlayers(packet);
+
+                // Disband team if leader is no longer eligible (Red Priest seq <= 3)
+                if (!TeamUtils.isEligibleLeader(serverPlayer)) {
+                    TeamUtils.disbandTeam(serverPlayer, serverPlayer.getServer());
+                }
             }
             else {
                 PacketHandler.syncBeyonderDataToEntity(entity);

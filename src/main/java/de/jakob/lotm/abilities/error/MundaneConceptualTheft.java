@@ -94,23 +94,28 @@ public class MundaneConceptualTheft extends SelectableAbility {
 
         EffectManager.playEffect(EffectManager.Effect.CONCEPTUAL_THEFT, target.getX(), target.getEyeY(), target.getZ(), serverLevel, entity);
 
-        if(BeyonderData.isBeyonder(target) && TheftHandler.doesTheftFail(entity, target, random)) {
+        if(BeyonderData.isBeyonder(target) && TheftHandler.doesTheftFail(entity, target, random, this)) {
             AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.mundane_conceptual_theft.theft_failed").withColor(0x4742c9));
             return;
         }
 
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+        int targetSeq = BeyonderData.getSequence(target);
+
         switch (abilityIndex) {
-            case 0 -> stealWalk(target, getTheftDuration(BeyonderData.getSequence(entity), BeyonderData.getSequence(target)));
-            case 1 -> stealSight(target, getTheftDuration(BeyonderData.getSequence(entity), BeyonderData.getSequence(target)));
+            case 0 -> stealWalk(target, getTheftDuration(entitySeq, targetSeq));
+            case 1 -> stealSight(target, getTheftDuration(entitySeq, targetSeq));
             case 2 -> stealHealth(entity, target);
 
         }
     }
 
     private void stealDistance(ServerLevel level, LivingEntity entity) {
-        if(BeyonderData.getSequence(entity) > 6) return;
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
 
-        Vec3 targetLoc = AbilityUtil.getTargetBlock(entity, (1 << (9 - BeyonderData.getSequence(entity))), true).getCenter().add(0, 1, 0);
+        if(entitySeq > 6) return;
+
+        Vec3 targetLoc = AbilityUtil.getTargetBlock(entity, (1 << (9 - entitySeq)), true).getCenter().add(0, 1, 0);
         level.playSound(null, targetLoc.x, targetLoc.y, targetLoc.z, SoundEvents.ENDERMAN_TELEPORT, SoundSource.BLOCKS, .5f, 1);
 
         var validatedPos = TeleportationUtil.clampToBorder(level, targetLoc);

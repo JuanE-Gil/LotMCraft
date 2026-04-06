@@ -67,10 +67,12 @@ public class MidnightPoemAbility extends SelectableAbility {
 
         // Wilt damage is reduced by nearby light_source interactions
         Location loc = new Location(entity.position(), level);
-        int seq = BeyonderData.getSequence(entity);
+        int seq = AbilityUtil.getSeqWithArt(entity, this);
         float damageMult = InteractionHandler.isInteractionPossible(loc, "light_source", seq) ? 0.4f : 1f;
 
-        AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 20, DamageLookup.lookupDamage(8, 1.1) * multiplier(entity) * damageMult, entity.getEyePosition(), true, false, ModDamageTypes.source(level, ModDamageTypes.DARKNESS_GENERIC, entity));
+        AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 20, DamageLookup.lookupDamage(8, 1.1) *
+                multiplier(entity)
+                * damageMult, entity.getEyePosition(), true, false, ModDamageTypes.source(level, ModDamageTypes.DARKNESS_GENERIC, entity));
     }
 
     private void lullaby(Level level, LivingEntity entity) {
@@ -82,8 +84,10 @@ public class MidnightPoemAbility extends SelectableAbility {
 
         int duration = (int) (20 * 5 * multiplier(entity));
 
+        int seq = AbilityUtil.getSeqWithArt(entity, this);
+
         targets.forEach(target -> {
-            int actualDuration = AbilityUtil.isTargetSignificantlyStronger(entity, target) ? 35 : AbilityUtil.isTargetSignificantlyWeaker(entity, target) ? 20 * 25 : duration;
+            int actualDuration = AbilityUtil.isTargetSignificantlyStronger(seq, BeyonderData.getSequence(target)) ? 35 : AbilityUtil.isTargetSignificantlyWeaker(seq, BeyonderData.getSequence(target)) ? 20 * 25 : duration;
             target.addEffect(new MobEffectInstance(ModEffects.ASLEEP, actualDuration, 1, false, false, true));
 
             ServerScheduler.scheduleForDuration(0, 3, actualDuration, () -> {

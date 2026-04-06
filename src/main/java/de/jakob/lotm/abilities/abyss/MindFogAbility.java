@@ -19,6 +19,7 @@ import org.joml.Vector3f;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
 
 public class MindFogAbility extends ToggleAbility {
     private final Random random = new Random();
@@ -31,6 +32,7 @@ public class MindFogAbility extends ToggleAbility {
         canBeUsedByNPC = false;
         this.canBeCopied = false;
         this.canBeReplicated = false;
+        autoClear = false;
     }
 
     @Override
@@ -55,6 +57,8 @@ public class MindFogAbility extends ToggleAbility {
         ServerLevel serverLevel = (ServerLevel) level;
         double fogRadius = 20;
 
+        int seq = AbilityUtil.getSeqWithArt(entity, this);
+
         for (int i = 0; i < 8; i++) {
             double angle = random.nextDouble() * Math.PI * 2;
             double distance = random.nextDouble() * fogRadius;
@@ -64,8 +68,8 @@ public class MindFogAbility extends ToggleAbility {
             ParticleUtil.spawnParticles(serverLevel, particle, new Vec3(x, entity.getY() + 1, z), 1, 0.2, 0.02);
         }
 
-        if (InteractionHandler.isInteractionPossible(new Location(entity.position(), level), "purification", BeyonderData.getSequence(entity)) ||
-            InteractionHandler.isInteractionPossible(new Location(entity.position(), level), "calming", BeyonderData.getSequence(entity))) {
+        if (InteractionHandler.isInteractionPossible(new Location(entity.position(), level), "purification", seq) ||
+            InteractionHandler.isInteractionPossible(new Location(entity.position(), level), "calming", seq)) {
             cancel(serverLevel, entity);
             return;
         }
@@ -90,6 +94,8 @@ public class MindFogAbility extends ToggleAbility {
     @Override
     public void stop(Level level, LivingEntity entity) {
         if (level.isClientSide) return;
+
+        clearArtifactScaling(entity);
     }
 
     private void applyRandomNegativeEffect(LivingEntity entity) {

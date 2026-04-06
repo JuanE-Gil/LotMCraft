@@ -39,6 +39,10 @@
   "key.beyonders.return_to_main_body": "Return to Main Body",
   "key.beyonders.next_artifact_ability": "Use next Artifact Ability",
   "key.beyonders.openArtifactWheel": "Open Artifact Wheel",
+  "key.beyonders.open_shared_ability_wheel": "Open Shared Ability Wheel",
+  "key.beyonders.use_shared_ability": "Use Shared Ability",
+  "key.beyonders.next_shared_ability": "Next Shared Sub-Ability",
+  "key.beyonders.previous_shared_ability": "Previous Shared Sub-Ability",
 
 
   "_comment001": "Abilities------------------------------------------------------------------------------------",
@@ -1365,6 +1369,7 @@
   "lotm.marionette": "Marionette",
   "lotm.ability": "Ability",
   "lotm.selected": "Selected",
+  "lotm.shared": "Shared",
   "lotm.potion_recipe": "Potion Recipe",
   "lotm.beyonder_message.full": "Become a Beyonder of the %s Pathway at Sequence %s",
   "lotm.not_implemented_yet": "Not Implemented Yet",

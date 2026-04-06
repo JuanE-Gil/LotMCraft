@@ -2,6 +2,7 @@ package de.jakob.lotm.abilities.door;
 
 import de.jakob.lotm.abilities.core.SelectableAbility;
 import de.jakob.lotm.entity.custom.ability_entities.door_pathway.ElectricShockEntity;
+import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.DamageLookup;
 import de.jakob.lotm.util.helper.ParticleUtil;
@@ -27,6 +28,7 @@ public class SpellsAbility extends SelectableAbility {
 
     public SpellsAbility(String id) {
         super(id, .8f);
+        autoClear = false;
     }
 
     @Override
@@ -52,6 +54,9 @@ public class SpellsAbility extends SelectableAbility {
             case 2 -> freeze(level, entity);
             case 3 -> flash(level, entity);
         }
+
+        if(abilityIndex != 0)
+            clearArtifactScaling(entity);
     }
 
     private void freeze(Level level, LivingEntity entity) {
@@ -110,8 +115,10 @@ public class SpellsAbility extends SelectableAbility {
         ServerScheduler.scheduleForDuration(0, 1, 20 * 6, () -> {
             Vec3 dir = entity.getLookAngle().normalize().scale(.5);
             AbilityUtil.getNearbyEntities(entity, (ServerLevel) level, entity.position(), 10).forEach(e -> {
-                e.setDeltaMovement(dir);
-                e.hurtMarked = true;
+                if(AbilityUtil.getSequenceDifference(AbilityUtil.getSeqWithArt(entity, this), BeyonderData.getSequence(e)) >= 0) {
+                    e.setDeltaMovement(dir);
+                    e.hurtMarked = true;
+                }
             });
 
             if(random.nextBoolean())
@@ -123,6 +130,9 @@ public class SpellsAbility extends SelectableAbility {
                 ParticleUtil.spawnParticles((ServerLevel) level, ParticleTypes.CLOUD, pos, 0, dir.x, dir.y, dir.z, 1);
             }
 
-        }, () -> isCastingWind.remove(entity.getUUID()), (ServerLevel) level, () -> AbilityUtil.getTimeInArea(entity, new de.jakob.lotm.util.data.Location(entity.position(), level)));
+        }, () -> {
+            isCastingWind.remove(entity.getUUID());
+            clearArtifactScaling(entity);
+            }, (ServerLevel) level, () -> AbilityUtil.getTimeInArea(entity, new de.jakob.lotm.util.data.Location(entity.position(), level)));
     }
 }

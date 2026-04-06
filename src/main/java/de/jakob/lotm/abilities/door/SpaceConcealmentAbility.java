@@ -99,7 +99,7 @@ public class SpaceConcealmentAbility extends SelectableAbility {
 
         // Remove all spaces
         for(ConcealedSpace space : new ArrayList<>(spaces)) {
-            space.collapse(entity, BeyonderData.getMultiplier(entity));
+            space.collapse(entity, multiplier(entity));
             ServerScheduler.cancel(space.getTaskId());
             if(space.getParticleTaskId() != null) {
                 ServerScheduler.cancel(space.getParticleTaskId());

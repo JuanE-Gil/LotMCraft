@@ -29,12 +29,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ReplicatingAbility extends SelectableAbility {
     public ReplicatingAbility(String id) {
-        super(id, 8f);
+        super(id, 2f);
 
         canBeCopied = false;
         canBeUsedByNPC = false;
         cannotBeStolen = true;
         canBeReplicated = false;
+        autoClear = false;
     }
 
     @Override
@@ -110,7 +111,7 @@ public class ReplicatingAbility extends SelectableAbility {
                 return;
             }
 
-            if (usedAbility.lowestSequenceUsable() + 2 < BeyonderData.getSequence(entity)) {
+            if (usedAbility.lowestSequenceUsable() + 2 < AbilityUtil.getSeqWithArt(entity, this)) {
                 entity.hurt(entity.damageSources().source(ModDamageTypes.LOOSING_CONTROL), entity.getHealth() - .5f);
                 AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.replicating.too_high_sequence").withColor(0xFF8ff4ff));
                 level.playSound(null, BlockPos.containing(entity.position()), SoundEvents.ANVIL_PLACE, SoundSource.BLOCKS, 1, 1);
@@ -142,6 +143,7 @@ public class ReplicatingAbility extends SelectableAbility {
             ParticleUtil.spawnParticles(serverLevel, ParticleTypes.END_ROD, book.position(), 60, .3, .08);
             ParticleUtil.spawnParticles(serverLevel, ParticleTypes.ENCHANT, book.position(), 60, .3, .08);
         }, () -> {
+            clearArtifactScaling(entity);
             if (hasReplicatedAbility.get())
                 return;
             AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.replicating.no_ability").withColor(0xFF8ff4ff));

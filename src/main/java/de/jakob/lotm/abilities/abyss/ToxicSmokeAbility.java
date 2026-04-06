@@ -59,12 +59,14 @@ public class ToxicSmokeAbility extends Ability {
         taskIdHolder[0] = ServerScheduler.scheduleForDuration(0, 6, 20 * 5, () -> {
             // Toxic smoke is completely cancelled by purification and will explode with burning interaction
             Location smokeLoc = new Location(pos, level);
-            int seq = BeyonderData.getSequence(entity);
+            int seq = AbilityUtil.getSeqWithArt(entity, this);
+
             if(InteractionHandler.isInteractionPossible(smokeLoc, "burning", seq)) {
                 AbilityUtil.damageNearbyEntities((ServerLevel) level,
                         null,
                         9,
-                        DamageLookup.lookupDamage(8, 1.2) * multiplier(entity),
+                        DamageLookup.lookupDamage(8, 1.2) *
+                                multiplier(entity),
                         pos,
                         true,
                         false,

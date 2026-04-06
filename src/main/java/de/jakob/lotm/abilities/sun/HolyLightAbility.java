@@ -65,6 +65,8 @@ public class HolyLightAbility extends Ability {
 
             level.playSound(null, initialPos.x, initialPos.y - 14, initialPos.z, SoundEvents.BEACON_ACTIVATE, entity.getSoundSource(), 3.0f, 1.0f);
 
+            double multiplier = multiplier(entity);
+
             ServerScheduler.scheduleForDuration(0, 1, 18, () -> {
                 Vec3 pos = currentPos.get();
                 ParticleUtil.spawnCircleParticles((ServerLevel) level, ParticleTypes.FIREWORK, pos, 1.4, 20);
@@ -76,7 +78,7 @@ public class HolyLightAbility extends Ability {
                     lights.add(blockPos);
                 }
 
-                AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 2.5f, DamageLookup.lookupDamage(8, .8) * multiplier(entity), pos, true, false, false, 10, ModDamageTypes.source(level, ModDamageTypes.PURIFICATION, entity));
+                AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 2.5f, DamageLookup.lookupDamage(8, .8) * multiplier, pos, true, false, false, 10, ModDamageTypes.source(level, ModDamageTypes.PURIFICATION, entity));
 
                 currentPos.set(pos.subtract(0, 1, 0));
             }, null, (ServerLevel) level, () -> AbilityUtil.getTimeInArea(entity, new Location(entity.position(), level)));

@@ -65,10 +65,13 @@ public class BattleHypnosisAbility extends Ability {
 
         // BH vs Charm: if BH caster has lower or equal sequence, BH prevails and removes charm
         UUID charmCasterUUID = CharmAbility.getCharmed().get(target.getUUID());
+
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+
         if(charmCasterUUID != null) {
             Entity charmCasterEntity = ((ServerLevel) level).getEntity(charmCasterUUID);
             int charmCasterSeq = charmCasterEntity instanceof LivingEntity livingCharmCaster ? BeyonderData.getSequence(livingCharmCaster) : LOTMCraft.NON_BEYONDER_SEQ;
-            if(BeyonderData.getSequence(entity) <= charmCasterSeq) {
+            if(entitySeq <= charmCasterSeq) {
                 CharmAbility.removeCharm(target.getUUID());
             }
         }

@@ -30,7 +30,6 @@ import java.util.*;
 
 public class SpiritVisionAbility extends ToggleAbility {
 
-
     public SpiritVisionAbility(String id) {
         super(id);
 
@@ -39,6 +38,7 @@ public class SpiritVisionAbility extends ToggleAbility {
         doesNotIncreaseDigestion = true;
         cannotBeStolen = true;
         canBeReplicated = false;
+        canBeUsedInArtifact = false;
     }
 
     @Override
@@ -87,7 +87,6 @@ public class SpiritVisionAbility extends ToggleAbility {
             LivingEntity lookedAt = AbilityUtil.getTargetEntity(entity, 40, 1.2f);
             PacketHandler.sendToPlayer(player,  new SyncSpiritVisionAbilityPacket(true, lookedAt == null ? -1 : lookedAt.getId()));
 
-
             if(lookedAt != null){
                 if(shouldLooseControl(entity, lookedAt)){
                     if(!entity.hasEffect(ModEffects.LOOSING_CONTROL))
@@ -120,7 +119,7 @@ public class SpiritVisionAbility extends ToggleAbility {
         if(player.getData(ModAttachments.ALLY_COMPONENT.get()).isAlly(target.getUUID()))
             return false;
 
-        return targetSeq <= 4 && playerSeq > targetSeq;
+        return AbilityUtil.isTargetSignificantlyStronger(player, target);
     }
 
     public static void setGlowingForPlayer(Entity entity, ServerPlayer player, boolean glowing) {

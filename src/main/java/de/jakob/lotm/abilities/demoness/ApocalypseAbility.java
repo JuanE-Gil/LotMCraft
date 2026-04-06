@@ -21,6 +21,7 @@ public class ApocalypseAbility extends Ability {
     public ApocalypseAbility(String id) {
         super(id, 10);
         this.canBeCopied = false;
+        autoClear = false;
     }
 
     @Override
@@ -67,6 +68,6 @@ public class ApocalypseAbility extends Ability {
             AbilityUtil.damageNearbyEntities(serverLevel, entity, radius.get(), DamageLookup.lookupDamage(1, .8) * multiplier(entity), loc, true, false, false, 30, ModDamageTypes.source(level, ModDamageTypes.DEMONESS_GENERIC, entity));
 
             radius.addAndGet(0.8);
-        }, null, serverLevel, () -> AbilityUtil.getTimeInArea(entity, new de.jakob.lotm.util.data.Location(entity.position(), serverLevel)));
+        }, () -> clearArtifactScaling(entity), serverLevel, () -> AbilityUtil.getTimeInArea(entity, new de.jakob.lotm.util.data.Location(entity.position(), serverLevel)));
     }
 }
