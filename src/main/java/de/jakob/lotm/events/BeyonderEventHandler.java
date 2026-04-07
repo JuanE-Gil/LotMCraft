@@ -24,6 +24,8 @@ import de.jakob.lotm.util.beyonderMap.StoredData;
 import de.jakob.lotm.attachments.SharedAbilitiesComponent;
 import de.jakob.lotm.attachments.TeamComponent;
 import de.jakob.lotm.util.helper.AbilityUtil;
+import de.jakob.lotm.util.helper.TeamUtils;
+import de.jakob.lotm.util.scheduling.ServerScheduler;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -130,9 +132,38 @@ public class BeyonderEventHandler {
 
     @SubscribeEvent
     public static void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
-        if (event.getEntity().level().isClientSide()) {
-            // Clear client cache when player logs out
+        if (!(event.getEntity() instanceof ServerPlayer player)) {
+            // Client side — clear cache
             ClientBeyonderCache.removePlayer(event.getEntity().getUUID());
+            return;
+        }
+        if (player.getServer() == null) return;
+
+        TeamComponent team = player.getData(ModAttachments.TEAM_COMPONENT.get());
+
+        if (!team.isInTeam() && team.memberCount() > 0) {
+            // Player is the leader logging out — schedule a clear to online members after disconnect completes
+            java.util.List<String> memberUUIDs = new java.util.ArrayList<>(team.memberUUIDs());
+            ServerScheduler.scheduleDelayed(1, () -> {
+                for (String memberUUID : memberUUIDs) {
+                    ServerPlayer member = player.getServer().getPlayerList().getPlayer(
+                            java.util.UUID.fromString(memberUUID));
+                    if (member != null) {
+                        PacketHandler.sendToPlayer(member, new de.jakob.lotm.network.packets.toClient.SyncSharedAbilitiesDataPacket(
+                                "", new java.util.ArrayList<>(), new java.util.ArrayList<>(), new java.util.HashMap<>(), 0, 0));
+                    }
+                }
+            });
+        } else if (team.isInTeam()) {
+            // Player is a member logging out — schedule a re-sync from leader after disconnect completes
+            String leaderUUID = team.leaderUUID();
+            ServerScheduler.scheduleDelayed(1, () -> {
+                ServerPlayer leader = player.getServer().getPlayerList().getPlayer(
+                        java.util.UUID.fromString(leaderUUID));
+                if (leader != null) {
+                    TeamUtils.syncToTeam(leader);
+                }
+            });
         }
     }
 
