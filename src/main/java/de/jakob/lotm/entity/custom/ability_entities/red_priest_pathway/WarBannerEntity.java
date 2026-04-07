@@ -4,6 +4,7 @@ import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.data.Location;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.ParticleUtil;
+import net.minecraft.world.entity.LivingEntity;
 import de.jakob.lotm.util.scheduling.ServerScheduler;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -84,11 +85,16 @@ public class WarBannerEntity extends Entity {
 
         spawnParticles();
 
+        Entity casterEntity = getCasterEntity();
+
         AbilityUtil.getNearbyEntities(null, (ServerLevel) level(), position(), getRadius()).forEach(e -> {
             ParticleUtil.spawnParticles((ServerLevel) level(), ParticleTypes.FLAME, e.position().add(0, e.getBbHeight() / 2, 0), 1, .4, 1, .4, 0);
             ParticleUtil.spawnParticles((ServerLevel) level(), dust, e.position().add(0, e.getBbHeight() / 2, 0), 7, .4, 1, .4, 0);
 
-            if(e.getUUID().equals(getCasterUUID())) {
+            boolean isCaster = e.getUUID().equals(getCasterUUID());
+            boolean isAlly = !isCaster && casterEntity instanceof LivingEntity livingCaster && !AbilityUtil.mayTarget(livingCaster, e);
+
+            if(isCaster || isAlly) {
                 BeyonderData.addModifier(e, "war_song", 1.5f);
 
                 ServerScheduler.scheduleDelayed(20, () -> {
