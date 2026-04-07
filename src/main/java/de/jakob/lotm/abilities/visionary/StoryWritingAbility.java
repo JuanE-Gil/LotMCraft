@@ -282,8 +282,9 @@ public class StoryWritingAbility extends SelectableAbility {
             return;
         }
 
-        // Sanity drain once per second
-        if (target.tickCount % 20 == 0) {
+        // Sanity drain once per second after the first ramp (ie after 30s)
+        //the sanity drain needs to be tested cuz i dont know how to create a server in my ide so idk how strong this sanity drain is. I want it to be heavy for those below s4
+        if (target.tickCount % 20 == 0 && data.rampCount >= 1) {
             SanityComponent sanity = target.getData(ModAttachments.SANITY_COMPONENT);
             sanity.increaseSanityAndSync(data.currentDrain, target);
         }
