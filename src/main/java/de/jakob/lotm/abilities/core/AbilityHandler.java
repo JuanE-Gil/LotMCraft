@@ -223,6 +223,8 @@ public class AbilityHandler {
         abilities.add(new MindInvasionAbility("mind_invasion_ability"));
         abilities.add(new DreamWeaveAbility("dream_weave_ability"));
         abilities.add(new DreamMazeAbility("dream_maze_ability"));
+        abilities.add(new DisasterFantasiaAbility("disaster_fantasia_ability"));
+        abilities.add(new StoryWritingAbility("story_writing_ability"));
 
 
         // WHEEL OF FORTUNE PATHWAY
