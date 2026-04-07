@@ -51,7 +51,7 @@ public class SacrificeAbility extends Ability {
 
     @Override
     protected float getSpiritualityCost() {
-        return 1000;
+        return 3000;
     }
 
     @Override
