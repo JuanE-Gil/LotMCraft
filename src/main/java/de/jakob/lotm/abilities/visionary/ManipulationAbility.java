@@ -62,7 +62,32 @@ public class ManipulationAbility extends SelectableAbility {
     }
 
 
-    private void groupIncite(Level level, LivingEntity entity) {
+    public void triggerGroupIncite(ServerLevel level, ServerPlayer author, LivingEntity target) {
+        int casterSeq = BeyonderData.getSequence(author);
+        List<LivingEntity> nearby = AbilityUtil.getNearbyEntities(
+                author, level, target.position(), 20, false, true);
+
+        for (LivingEntity nearby_entity : nearby) {
+            if (nearby_entity.getUUID().equals(author.getUUID())) continue;
+            if (nearby_entity.getUUID().equals(target.getUUID())) continue;
+
+            if (nearby_entity instanceof ServerPlayer nearbyPlayer) {
+                if (!BeyonderData.isBeyonder(nearbyPlayer)) continue;
+                if (BeyonderData.getSequence(nearbyPlayer) <= casterSeq) continue;
+                forcePlayerAbilities(nearbyPlayer, target, level);
+            } else if (nearby_entity instanceof Mob mob) {
+                if (BeyonderData.isBeyonder(mob) && BeyonderData.getSequence(mob) <= casterSeq) continue;
+                LivingEntity originalTarget = mob.getTarget();
+                mob.setTarget(target);
+                ServerScheduler.scheduleDelayed(20 * 10, () -> {
+                    if (!mob.isRemoved())
+                        mob.setTarget(originalTarget != null && originalTarget.isAlive() ? originalTarget : null);
+                });
+            }
+        }
+    }
+
+    public void groupIncite(Level level, LivingEntity entity) {
         if (level.isClientSide) return;
         if (!(level instanceof ServerLevel serverLevel)) return;
 
@@ -153,14 +178,13 @@ public class ManipulationAbility extends SelectableAbility {
         // Give the player a movement-only controller item
         ItemStack controllerStack = new ItemStack(ModItems.MARIONETTE_CONTROLLER.get());
 
-        // Write NBT: entity UUID, type name, and movement-only flag
         CompoundTag tag = new CompoundTag();
         tag.putString("MarionetteUUID", target.getUUID().toString());
         tag.putString("MarionetteType", target.getName().getString());
         tag.putBoolean("MovementOnly", true); // flag to strip non-movement functionality
         controllerStack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
 
-        // Single use — item is consumed when the 10s expires
+        // Single use — item is consumed when the 7s expires
         player.addItem(controllerStack);
 
         AbilityUtil.sendActionBar(entity,
