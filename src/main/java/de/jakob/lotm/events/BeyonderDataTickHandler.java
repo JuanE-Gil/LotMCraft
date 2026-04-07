@@ -86,17 +86,6 @@ public class BeyonderDataTickHandler {
             disabledFlightComponent.setCooldownTicks(disabledFlightComponent.getCooldownTicks() - 1);
         }
 
-        // Remove Unluck gradually
-        LuckComponent luckComponent = livingEntity.getData(ModAttachments.LUCK_COMPONENT);
-        if(luckComponent.getLuck() < 0) {
-            luckComponent.addLuckWithMax((int) (3 * BeyonderData.getMultiplier(livingEntity)), 0);
-        }
-
-        // Remove Luck gradually
-        if(luckComponent.getLuck() > PassiveLuckAbility.getNormalLuckForEntity(livingEntity)) {
-            luckComponent.addLuckWithMax(-3, PassiveLuckAbility.getNormalLuckForEntity(livingEntity));
-        }
-
         if(BeyonderData.isBeyonder(livingEntity)) {
             if(entity.tickCount % 200 == 0) {
                 invalidateCache(livingEntity);
@@ -104,9 +93,21 @@ public class BeyonderDataTickHandler {
                 invalidateCache(livingEntity); // also re-filter applicable abilities
             }
 
-            // Tick Passive Abilities, Toggle Abilities and onHold for currently selected Ability
-            if(entity.tickCount % 5 == 0)
+            // Tick Passive Abilities, Toggle Abilities and onHold for currently selected Ability and tick luck
+            if(entity.tickCount % 5 == 0) {
                 tickAbilities(livingEntity);
+
+                // Remove Unluck gradually
+                LuckComponent luckComponent = livingEntity.getData(ModAttachments.LUCK_COMPONENT);
+                if(luckComponent.getLuck() < 0) {
+                    luckComponent.addLuckWithMax(1, 0);
+                }
+
+                // Remove Luck gradually
+                if(luckComponent.getLuck() > PassiveLuckAbility.getNormalLuckForEntity(livingEntity)) {
+                    luckComponent.addLuckWithMin(-1, PassiveLuckAbility.getNormalLuckForEntity(livingEntity));
+                }
+            }
         }
     }
 

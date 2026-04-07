@@ -8,6 +8,7 @@ import de.jakob.lotm.item.ModItems;
 import de.jakob.lotm.network.PacketHandler;
 import de.jakob.lotm.network.packets.toServer.InventoryOpenedPacket;
 import de.jakob.lotm.util.BeyonderData;
+import de.jakob.lotm.util.pathways.PathwayInfos;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
@@ -91,7 +92,12 @@ public class ClientEvents {
                             String pathway = data.pathway();
                             return BeyonderData.pathwayInfos.get(pathway).color();
                         }
-                        return 0xFFFFFFFF; // white = no tint
+                        // return random color
+                        int randomColor = BeyonderData.pathwayInfos.values().stream()
+                                .map(PathwayInfos::color)
+                                .findAny()
+                                .orElse(0xFFFFFF);
+                        return randomColor;
                     }
                     return -1; // -1 = no tint for this layer
                 },

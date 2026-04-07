@@ -28,6 +28,10 @@ public class PassiveLuckAbility extends PassiveAbilityItem {
             return 0;
         }
 
+        if(!instance.shouldApplyTo(livingEntity)) {
+            return 0;
+        }
+
         int sequence = BeyonderData.getSequence(livingEntity);
         if (sequence < 0 || sequence > 9) {
             return 0;

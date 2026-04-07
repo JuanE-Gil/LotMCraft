@@ -60,6 +60,6 @@ public class MisfortuneGiftingAbility extends Ability {
 
         int amplifier = Math.round(multiplier(entity) * 250);
         LuckComponent luckComponent = target.getData(ModAttachments.LUCK_COMPONENT.get());
-        luckComponent.addLuckWithMax(-amplifier, (int) (-amplifier * 1.25f));
+        luckComponent.addLuckWithMin(-amplifier, (int) (-amplifier * 1.25f));
     }
 }
