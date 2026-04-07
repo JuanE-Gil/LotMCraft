@@ -825,6 +825,12 @@
   "item.lotmcraft.riptide_ability": "Riptide",
   "item.lotmcraft.riptide_ability.description": "Your Beyonder Abilities get stronger while you are in water",
 
+  "item.lotmcraft.virtual_avatar_ability": "Identity Avatar",
+  "item.lotmcraft.virtual_avatar_ability.description": "Virtual Persona: Other can now split off a Identity Avatar into reality",
+  "item.lotmcraft.meta_awareness_ability": "Meta Awareness",
+  "item.lotmcraft.meta_awareness_ability.description": "Whoever says your username or divines you will automatically pray to you",
+  
+
   "_comment003": "Effects-----------------------------------------------------------------------------",
   "effect.lotmcraft.asleep": "Asleep",
   "effect.lotmcraft.loosing_control": "Loosing Control",
