@@ -80,7 +80,11 @@ public class PassiveAbilityHandler {
     public static final DeferredItem<Item> MIRROR_REVIVAL = ITEMS.registerItem("mirror_revival_ability", MirrorRevivalAbility::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
 
     public static final DeferredItem<Item> RIPTIDE = ITEMS.registerItem("riptide_ability", RiptideAbility::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
+    
+    public static final DeferredItem<Item> VIRTUAL_AVATAR = ITEMS.registerItem("virtual_avatar_ability", VirtualAvatarAbility::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
+    public static final DeferredItem<Item> META_AWARENESS = ITEMS.registerItem("meta_awareness_ability", MetaAwarenessAbility::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
 
+    
     public static void registerAbilities(IEventBus eventBus) {
         ITEMS.register(eventBus);
     }
