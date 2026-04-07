@@ -94,6 +94,8 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
     private int maxAbilitiesScroll = 0;
     private int completedQuestsScrollOffset = 0;
     private int maxCompletedQuestsScroll = 0;
+    private int sharedPoolScrollOffset = 0;
+    private int maxSharedPoolScroll = 0;
 
     public IntrospectScreen(IntrospectMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
@@ -344,6 +346,7 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
             Button sharedTabButton = Button.builder(Component.literal("Shared"),
                             button -> {
                                 currentTab = Tab.SHARED_ABILITIES;
+                                sharedPoolScrollOffset = 0;
                                 updateButtonPositions();
                             })
                     .bounds(panelX + tabButtonWidth * 2, tabButtonY, tabButtonWidth, 15)
@@ -665,12 +668,13 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
                 }
             } else if (currentTab == Tab.SHARED_ABILITIES && ClientTeamData.hasTeam()) {
                 int iconsPerRow2 = (ABILITIES_PANEL_WIDTH - 10) / (ABILITY_ICON_SIZE + 2);
-                // Tooltip over sharing pool — use same allPooled list as the renderer
+                // Tooltip over sharing pool
                 List<String> allPooledTooltip = getAllPooledAbilities();
                 for (int s = 0; s < allPooledTooltip.size(); s++) {
+                    int sRow = s / iconsPerRow2 - sharedPoolScrollOffset;
                     int sx = panelX + 5 + (s % iconsPerRow2) * (ABILITY_ICON_SIZE + 2);
-                    int sy = slotY + 14 + (s / iconsPerRow2) * (ABILITY_ICON_SIZE + 2);
-                    if (sy + ABILITY_ICON_SIZE > slotY + SHARED_POOL_HEIGHT) break;
+                    int sy = slotY + 14 + sRow * (ABILITY_ICON_SIZE + 2);
+                    if (sy < slotY + 14 || sy + ABILITY_ICON_SIZE > slotY + SHARED_POOL_HEIGHT) continue;
                     if (mouseX >= sx && mouseX <= sx + ABILITY_ICON_SIZE && mouseY >= sy && mouseY <= sy + ABILITY_ICON_SIZE) {
                         hoveredAbility = LOTMCraft.abilityHandler.getById(allPooledTooltip.get(s));
                         break;
@@ -904,7 +908,7 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
      */
     private void renderSharedAbilitiesTab(GuiGraphics guiGraphics, int panelX, int sectionY, int mouseX, int mouseY) {
         String myUUID = this.minecraft.player.getStringUUID();
-        List<String> myContributions = ClientTeamData.getContributionsFor(myUUID);
+        List<String> myContributions = new ArrayList<>(ClientTeamData.getContributionsFor(myUUID));
         int maxSlots = ClientTeamData.getSlotsPerMember();
         List<String> allPooled = getAllPooledAbilities();
 
@@ -917,18 +921,21 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
         // Also render empty own contribution slots so the player knows how many they can add
         int iconsPerRow = (ABILITIES_PANEL_WIDTH - 10) / (ABILITY_ICON_SIZE + 2);
 
-        // Collect all slots: filled pooled abilities first, then empty own slots up to maxSlots
-        int totalSlots = Math.max(allPooled.size(), myContributions.size() > maxSlots ? myContributions.size() : maxSlots);
-        // But only show own empty slots beyond current filled count
         int slotsToShow = allPooled.size();
         int myFilledCount = myContributions.size();
         int emptyOwnSlots = Math.max(0, maxSlots - myFilledCount);
+        int totalSlots = slotsToShow + emptyOwnSlots;
+        int totalRows = (int) Math.ceil((double) totalSlots / iconsPerRow);
+        int visibleRows = (SHARED_POOL_HEIGHT - 14) / (ABILITY_ICON_SIZE + 2);
+        maxSharedPoolScroll = Math.max(0, totalRows - visibleRows);
 
         for (int i = 0; i < slotsToShow; i++) {
             String abilityId = allPooled.get(i);
-            int ix = panelX + 5 + (i % iconsPerRow) * (ABILITY_ICON_SIZE + 2);
-            int iy = sectionY + 14 + (i / iconsPerRow) * (ABILITY_ICON_SIZE + 2);
-            if (iy + ABILITY_ICON_SIZE > sectionY + SHARED_POOL_HEIGHT) break;
+            int row = i / iconsPerRow - sharedPoolScrollOffset;
+            int col = i % iconsPerRow;
+            int ix = panelX + 5 + col * (ABILITY_ICON_SIZE + 2);
+            int iy = sectionY + 14 + row * (ABILITY_ICON_SIZE + 2);
+            if (iy < sectionY + 14 || iy + ABILITY_ICON_SIZE > sectionY + SHARED_POOL_HEIGHT) continue;
 
             boolean isMine = myContributions.contains(abilityId);
             int bgColor = isMine ? 0xFF333333 : 0xFF222233;
@@ -945,9 +952,11 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
         // Draw empty own slots after the filled ones
         for (int e = 0; e < emptyOwnSlots; e++) {
             int i = slotsToShow + e;
-            int ix = panelX + 5 + (i % iconsPerRow) * (ABILITY_ICON_SIZE + 2);
-            int iy = sectionY + 14 + (i / iconsPerRow) * (ABILITY_ICON_SIZE + 2);
-            if (iy + ABILITY_ICON_SIZE > sectionY + SHARED_POOL_HEIGHT) break;
+            int row = i / iconsPerRow - sharedPoolScrollOffset;
+            int col = i % iconsPerRow;
+            int ix = panelX + 5 + col * (ABILITY_ICON_SIZE + 2);
+            int iy = sectionY + 14 + row * (ABILITY_ICON_SIZE + 2);
+            if (iy < sectionY + 14 || iy + ABILITY_ICON_SIZE > sectionY + SHARED_POOL_HEIGHT) continue;
             guiGraphics.fill(ix, iy, ix + ABILITY_ICON_SIZE, iy + ABILITY_ICON_SIZE, 0xFF1A1A1A);
             guiGraphics.renderOutline(ix, iy, ABILITY_ICON_SIZE, ABILITY_ICON_SIZE, 0xFF444444);
         }
@@ -1019,21 +1028,21 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
         if (!ClientTeamData.hasTeam()) return false;
 
         String myUUID = this.minecraft.player.getStringUUID();
-        List<String> myContributions = ClientTeamData.getContributionsFor(myUUID);
+        List<String> myContributions = new ArrayList<>(ClientTeamData.getContributionsFor(myUUID));
         int maxSlots = ClientTeamData.getSlotsPerMember();
         int iconsPerRow = (ABILITIES_PANEL_WIDTH - 10) / (ABILITY_ICON_SIZE + 2);
 
         // --- Top section: drag start from any pooled icon ---
         List<String> allPooled = getAllPooledAbilities();
         for (int i = 0; i < allPooled.size(); i++) {
+            int row = i / iconsPerRow - sharedPoolScrollOffset;
             int ix = panelX + 5 + (i % iconsPerRow) * (ABILITY_ICON_SIZE + 2);
-            int iy = sectionY + 14 + (i / iconsPerRow) * (ABILITY_ICON_SIZE + 2);
-            if (iy + ABILITY_ICON_SIZE > sectionY + SHARED_POOL_HEIGHT) break;
+            int iy = sectionY + 14 + row * (ABILITY_ICON_SIZE + 2);
+            if (iy < sectionY + 14 || iy + ABILITY_ICON_SIZE > sectionY + SHARED_POOL_HEIGHT) continue;
             if (mouseX >= ix && mouseX <= ix + ABILITY_ICON_SIZE && mouseY >= iy && mouseY <= iy + ABILITY_ICON_SIZE) {
                 Ability ability = LOTMCraft.abilityHandler.getById(allPooled.get(i));
                 if (ability == null) return false;
                 draggedAbility = ability;
-                // Only track pool index if it's the player's own (so drag-out = unshare)
                 draggedFromSharedPoolIndex = myContributions.contains(allPooled.get(i)) ? i : -1;
                 draggedFromSharedWheelIndex = -1;
                 draggedFromWheelIndex = -1;
@@ -1322,6 +1331,16 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
                 abilitiesScrollOffset = Math.max(0, Math.min(maxAbilitiesScroll,
                         abilitiesScrollOffset - (int) scrollY));
                 return true;
+            }
+
+            if (currentTab == Tab.SHARED_ABILITIES) {
+                int slotY = this.topPos + 15 + ABILITIES_PANEL_HEIGHT + 5;
+                if (mouseX >= panelX && mouseX <= panelX + ABILITIES_PANEL_WIDTH &&
+                        mouseY >= slotY && mouseY <= slotY + SHARED_POOL_HEIGHT) {
+                    sharedPoolScrollOffset = Math.max(0, Math.min(maxSharedPoolScroll,
+                            sharedPoolScrollOffset - (int) scrollY));
+                    return true;
+                }
             }
         }
 
