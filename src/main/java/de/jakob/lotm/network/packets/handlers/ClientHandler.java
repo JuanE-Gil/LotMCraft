@@ -21,6 +21,7 @@ import de.jakob.lotm.quest.QuestRegistry;
 import de.jakob.lotm.rendering.*;
 import de.jakob.lotm.rendering.effectRendering.impl.VFXRenderer;
 import de.jakob.lotm.util.ClientBeyonderCache;
+import de.jakob.lotm.util.ClientSacrificeCache;
 import de.jakob.lotm.util.helper.RingExpansionRenderer;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
@@ -501,5 +502,17 @@ public class ClientHandler {
         if (entity != null) {
             entity.getTags().add(packet.tag());
         }
+    }
+
+    public static void syncKillCount(int killCount) {
+        ClientSacrificeCache.setKillCount(killCount);
+        if (Minecraft.getInstance().screen instanceof IntrospectScreen screen) {
+            screen.updateKillCount(killCount);
+        }
+    }
+
+    public static void syncSacrificeDuration(int totalTicks) {
+        ClientSacrificeCache.setTotalTicks(totalTicks);
+        ClientSacrificeCache.setRemainingTicks(totalTicks);
     }
 }

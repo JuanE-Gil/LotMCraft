@@ -218,6 +218,21 @@ public class ModAttachments {
                             .build()
             );
 
+    public static final Supplier<AttachmentType<KillCountComponent>> KILL_COUNT_COMPONENT =
+            ATTACHMENT_TYPES.register("kill_count_component", () ->
+                    AttachmentType.builder(KillCountComponent::new)
+                            .serialize(KillCountComponent.SERIALIZER)
+                            .copyOnDeath()
+                            .build()
+            );
+
+    public static final Supplier<AttachmentType<SacrificeRevertComponent>> SACRIFICE_REVERT_COMPONENT =
+            ATTACHMENT_TYPES.register("sacrifice_revert_component", () ->
+                    AttachmentType.builder(SacrificeRevertComponent::new)
+                            .serialize(SacrificeRevertComponent.SERIALIZER)
+                            .build()
+            );
+
     public static void register(IEventBus eventBus) {
         ATTACHMENT_TYPES.register(eventBus);
     }

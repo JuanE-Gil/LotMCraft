@@ -49,6 +49,7 @@ public abstract class Ability {
     public boolean cannotBeStolen = false;
     public boolean canBeUsedInArtifact = true;
     public boolean canBeReplicated = true;
+    public boolean canBeShared = true;
 
     public boolean canAlwaysBeUsed = false;
 

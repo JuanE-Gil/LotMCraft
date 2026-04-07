@@ -9,6 +9,7 @@ import de.jakob.lotm.network.PacketHandler;
 import de.jakob.lotm.network.packets.toServer.*;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.ClientBeyonderCache;
+import de.jakob.lotm.util.ClientSacrificeCache;
 import de.jakob.lotm.util.ClientQuestData;
 import de.jakob.lotm.util.beyonderMap.PathwayHistory;
 import de.jakob.lotm.util.data.ClientData;
@@ -100,6 +101,7 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
         this.containerBackground = ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "textures/gui/introspect.png");
 
         this.imageHeight = 231;
+
         this.imageWidth = 192;
     }
 
@@ -168,6 +170,8 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
         super.init();
 
         if(this.minecraft == null) return;
+
+        this.killCount = ClientSacrificeCache.getKillCount();
 
         // Request ability bar data from server
         PacketHandler.sendToServer(new RequestAbilityBarPacket());
@@ -420,6 +424,12 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
         return this.minecraft != null && this.minecraft.player != null
                 && this.minecraft.player.isCreative()
                 && this.minecraft.player.hasPermissions(2);
+    }
+
+    private int killCount = 0;
+
+    public void updateKillCount(int killCount) {
+        this.killCount = killCount;
     }
 
     public void updateMenuData(int sequence, String pathway, float digestionProgress, float sanity) {
@@ -778,10 +788,13 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
         int startX = panelX + 5;
         int startY = panelY - abilitiesScrollOffset * (ABILITY_ICON_SIZE + 2);
 
+        List<Ability> displayedAbilities = currentTab == Tab.SHARED_ABILITIES
+                ? availableAbilities.stream().filter(a -> a.canBeShared).toList()
+                : availableAbilities;
 
         int iconsPerRow = (ABILITIES_PANEL_WIDTH - 10) / (ABILITY_ICON_SIZE + 2);
 
-        for (int i = 0; i < availableAbilities.size(); i++) {
+        for (int i = 0; i < displayedAbilities.size(); i++) {
             int row = i / iconsPerRow;
             int col = i % iconsPerRow;
 
@@ -790,7 +803,7 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
 
             // Only render if within visible area
             if (y >= panelY && y + ABILITY_ICON_SIZE <= panelY + ABILITIES_PANEL_HEIGHT - 15) {
-                Ability ability = availableAbilities.get(i);
+                Ability ability = displayedAbilities.get(i);
                 renderAbilityIcon(guiGraphics, ability, x, y);
             }
         }
@@ -1104,14 +1117,17 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
             }
 
             // Check if clicking on available abilities
-            Ability clicked = getAbilityAt((int) mouseX, (int) mouseY, panelX, panelY, availableAbilities, true);
+            List<Ability> clickableAbilities = currentTab == Tab.SHARED_ABILITIES
+                    ? availableAbilities.stream().filter(a -> a.canBeShared).toList()
+                    : availableAbilities;
+            Ability clicked = getAbilityAt((int) mouseX, (int) mouseY, panelX, panelY, clickableAbilities, true);
             if (clicked != null) {
                 draggedAbility = clicked;
                 draggedFromWheelIndex = -1;
                 draggedFromBarIndex = -1;
                 draggedFromAvailable = true;
-                dragOffsetX = (int) mouseX - getAbilityX(clicked, panelX, panelY, availableAbilities, true);
-                dragOffsetY = (int) mouseY - getAbilityY(clicked, panelX, panelY, availableAbilities, true);
+                dragOffsetX = (int) mouseX - getAbilityX(clicked, panelX, panelY, clickableAbilities, true);
+                dragOffsetY = (int) mouseY - getAbilityY(clicked, panelX, panelY, clickableAbilities, true);
                 return true;
             }
         }
@@ -1466,13 +1482,21 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
         renderSanityLabel(guiGraphics, x, y);
         renderSanityProgress(guiGraphics, x, y);
         renderPassiveAbilitiesText(guiGraphics, x, y);
+        renderKillCount(guiGraphics, x, y);
         RenderSystem.disableBlend();
+    }
+
+    private void renderKillCount(GuiGraphics guiGraphics, int x, int y) {
+        if (!menu.getPathway().equals("red_priest") || menu.getSequence() > 3) return;
+        Component text = Component.literal("Kills: " + killCount).withStyle(ChatFormatting.BOLD);
+        guiGraphics.drawString(this.font, text, x + 7, y + 154, 0xDDDDDD, true);
     }
 
     private void renderPassiveAbilitiesText(GuiGraphics guiGraphics, int x, int y) {
         Component passiveAbilitiesText = Component.translatable("lotm.passive_abilities").withStyle(ChatFormatting.BOLD);
         int color = 0xDDDDDD;
-        int textY = 162;
+        boolean showKillCount = menu.getPathway().equals("red_priest") && menu.getSequence() <= 3;
+        int textY = showKillCount ? 171 : 162;
         int textX = 7;
         guiGraphics.drawString(this.font, passiveAbilitiesText, x + textX, y + textY, color, true);
     }

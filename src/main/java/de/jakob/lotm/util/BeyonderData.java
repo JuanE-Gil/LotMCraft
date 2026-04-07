@@ -156,13 +156,17 @@ public class BeyonderData {
     }
 
     public static void setBeyonder(LivingEntity entity, String pathway, int sequence) {
+        setBeyonder(entity, pathway, sequence, false);
+    }
+
+    public static void setBeyonder(LivingEntity entity, String pathway, int sequence, boolean skipCheck) {
         if(entity.level() instanceof ServerLevel serverLevel) {
             callPassiveEffectsOnRemoved(entity, serverLevel);
         }
 
 
         if(entity instanceof ServerPlayer player) {
-            if(!beyonderMap.check(pathway, sequence)) return;
+            if(!skipCheck && !beyonderMap.check(pathway, sequence)) return;
 
             if(!BeyonderData.getPathway(player).equals(pathway)
                     || BeyonderData.getSequence(player) < sequence)
