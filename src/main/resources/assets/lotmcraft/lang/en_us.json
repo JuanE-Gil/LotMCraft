@@ -1171,7 +1171,9 @@
   "advancements.lotmcraft.root.description": "Begin your journey as a Beyonder",
 
   "_comment013": "Sealed Artifacts-------------------------------------------------------------------------",
-  "item.lotm.sealed_artifact": "Sealed Artifact",
+  "item.lotmcraft.sealed_artifact": "Sealed Artifact",
+  "item.lotmcraft.sealed_artifact_gem": "Sealed Artifact",
+  "item.lotmcraft.sealed_artifact_star": "Sealed Artifact",
   "lotm.sealed_artifact.generic": "%s of %s",
   "lotm.sealed_artifact.selected_ability": "Selected Ability:",
 

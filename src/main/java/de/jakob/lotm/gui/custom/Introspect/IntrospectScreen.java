@@ -258,7 +258,9 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
                 .build();
 
 
-        this.addRenderableWidget(messageButton);
+        if(menu.getSequence() < 4) {
+            this.addRenderableWidget(messageButton);
+        }
 
         // Add "All Abilities" toggle button for creative + OP players
         if (isCreativeOp()) {

@@ -137,7 +137,7 @@ public class ProphecyAbility extends SelectableAbility {
             }
             case 1 -> {
                 LuckComponent component = target.getData(ModAttachments.LUCK_COMPONENT.get());
-                component.addLuckWithMax(-1750, -1950);
+                component.addLuckWithMin(-1750, -1950);
                 EffectManager.playEffect(EffectManager.Effect.MISFORTUNE_CURSE, target.getX(), target.getY() + 1, target.getZ(), (ServerLevel) level);
             }
             case 2 -> {

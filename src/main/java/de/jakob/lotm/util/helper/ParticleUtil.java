@@ -76,6 +76,25 @@ public class ParticleUtil {
         }
     }
 
+    public static void spawnSphereParticles(ServerLevel level, ParticleOptions particleType, Vec3 center,
+                                            double radius, int particleCount, double speed) {
+        if (level == null) return;
+
+        RandomSource random = level.random;
+
+        for (int i = 0; i < particleCount; i++) {
+            // Generate random points on a sphere using spherical coordinates
+            double theta = 2 * Math.PI * random.nextDouble(); // Azimuthal angle
+            double phi = Math.acos(2 * random.nextDouble() - 1); // Polar angle
+
+            double x = center.x + radius * Math.sin(phi) * Math.cos(theta);
+            double y = center.y + radius * Math.sin(phi) * Math.sin(theta);
+            double z = center.z + radius * Math.cos(phi);
+
+            level.sendParticles(particleType, x, y, z, 1, 0, 0, 0, speed);
+        }
+    }
+
     public static void drawParticleLine(ServerLevel level, ParticleOptions particleType, Vec3 start, Vec3 end, double step, int particleCount) {
         if (level == null) return;
 

@@ -45,7 +45,7 @@ public class MisfortuneFieldAbility extends Ability {
         ServerScheduler.scheduleForDuration(0, 2, 20 * 20, () -> {
             AbilityUtil.getNearbyEntities(entity, serverLevel, startPos, 20).forEach(e -> {
                 LuckComponent luckComponent = e.getData(ModAttachments.LUCK_COMPONENT.get());
-                luckComponent.addLuckWithMax(-amplifier, -amplifier);
+                luckComponent.addLuckWithMin(-amplifier, -amplifier);
             });
         });
     }

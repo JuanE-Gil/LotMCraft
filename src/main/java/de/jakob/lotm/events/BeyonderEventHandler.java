@@ -70,7 +70,7 @@ public class BeyonderEventHandler {
                 }
             }
 
-            serverPlayer.addEffect(new MobEffectInstance(ModEffects.CONCEALMENT, 20 * 30, 99));
+            serverPlayer.addEffect(new MobEffectInstance(ModEffects.CONCEALMENT, 20 * 30, 99, false, false, false));
         }
     }
 
@@ -403,7 +403,7 @@ public class BeyonderEventHandler {
                 BeyonderData.digest(player, (0.01f + (diff * 0.1f)), true);
             }
 
-           victim.addEffect(new MobEffectInstance(ModEffects.CONCEALMENT, 20 * 30, 99));
+           victim.addEffect(new MobEffectInstance(ModEffects.CONCEALMENT, 20 * 30, 99, false, false, false));
         }
     }
 
