@@ -19,7 +19,7 @@ public class DreamMazeData extends SavedData {
     private static final String DATA_NAME = "dream_maze_data";
 
     // Spacing between per-player maze regions in the dream maze dimension
-    public static final int MAZE_SIZE = 150; // editable — full width/depth of one maze region
+    public static final int MAZE_SIZE = 100; // editable — full width/depth of one maze region
     private static final int SPACING = MAZE_SIZE + 64; // gap between regions
     private final Map<UUID, BlockPos> mazeOrigins = new HashMap<>();
     private final Set<UUID> generatedMazes = new HashSet<>();
