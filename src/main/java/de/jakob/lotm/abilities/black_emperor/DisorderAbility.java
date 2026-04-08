@@ -69,7 +69,8 @@ public class DisorderAbility extends SelectableAbility {
                 "ability.lotmcraft.disorder.defensive_veil",
                 "ability.lotmcraft.disorder.break_bonds",
                 "ability.lotmcraft.disorder.distance_warp",
-                "ability.lotmcraft.disorder.frenzy"
+                "ability.lotmcraft.disorder.frenzy",
+                "ability.lotmcraft.disorder.entropy"
         };
     }
 
@@ -92,6 +93,12 @@ public class DisorderAbility extends SelectableAbility {
         // S-frenzy: AOE cast, no target required.
         if (abilityIndex == 5) {
             FrenzySubAbility.cast(serverLevel, entity);
+            return;
+        }
+
+        // S-entropy: AOE decay mark, no target required.
+        if (abilityIndex == 6) {
+            EntropySubAbility.cast(serverLevel, entity);
             return;
         }
 
@@ -208,22 +215,6 @@ public class DisorderAbility extends SelectableAbility {
                 .toList()
                 .forEach(target::removeEffect);
 
-        // Clear control / disorder tags from this mod.
-        target.getPersistentData().remove(DistortionAbility.DISTORT_ACTION_KEY);
-        target.getPersistentData().remove(DistortionAbility.DISTORT_TRAJ_KEY);
-        target.getPersistentData().remove(DISORDERED_ACTION_KEY);
-        target.getPersistentData().remove(DISORDERED_PERCEPTION_KEY);
-        target.getPersistentData().remove(DISTANCE_WARP_KEY);
-        target.getPersistentData().remove(FrenzySubAbility.FRENZY_MARK_KEY);
-        target.getPersistentData().remove(FrenzySubAbility.FRENZY_UNTIL_KEY);
-        target.getPersistentData().remove(FrenzySubAbility.FRENZY_COOLDOWN_KEY);
-
-        // Remove other debuff-style modifiers if present.
-        var armor = target.getAttribute(Attributes.ARMOR);
-        if (armor != null) {
-            armor.removeModifier(ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "briber_weaken_armor"));
-            armor.removeModifier(ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "weakness_detection_boost"));
-        }
 
         // Cleanse support
         if (target instanceof Player player) {
