@@ -2,6 +2,7 @@ package de.jakob.lotm.util;
 
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.gamerule.ClientGameruleCache;
+import de.jakob.lotm.util.beyonderMap.PathwayHistory;
 
 import java.util.Map;
 import java.util.UUID;
@@ -11,7 +12,11 @@ public class ClientBeyonderCache {
     private static final Map<UUID, BeyonderClientData> dataCache = new ConcurrentHashMap<>();
 
     public static void updateData(UUID playerUUID, String pathway, int sequence, float spirituality, boolean griefingEnabled, boolean isPlayer, float digestionProgress) {
-        dataCache.put(playerUUID, new BeyonderClientData(pathway, sequence, spirituality, griefingEnabled, digestionProgress));
+        updateData(playerUUID, pathway, sequence, spirituality, griefingEnabled, isPlayer, digestionProgress, new PathwayHistory());
+    }
+
+    public static void updateData(UUID playerUUID, String pathway, int sequence, float spirituality, boolean griefingEnabled, boolean isPlayer, float digestionProgress, PathwayHistory pathwayHistory) {
+        dataCache.put(playerUUID, new BeyonderClientData(pathway, sequence, spirituality, griefingEnabled, digestionProgress, pathwayHistory));
 
         if(isPlayer) {
             float progress = spirituality / BeyonderData.getMaxSpirituality(sequence);
@@ -53,6 +58,11 @@ public class ClientBeyonderCache {
         return data != null && !data.pathway().equals("none") && data.sequence() != LOTMCraft.NON_BEYONDER_SEQ;
     }
 
+    public static PathwayHistory getPathwayHistory(UUID playerUUID) {
+        BeyonderClientData data = dataCache.get(playerUUID);
+        return data != null ? data.pathwayHistory() : new PathwayHistory();
+    }
+
     public static void clearCache() {
         dataCache.clear();
     }
@@ -62,5 +72,5 @@ public class ClientBeyonderCache {
     }
 
     // Inner record to store client-side beyonder data
-    private record BeyonderClientData(String pathway, int sequence, float spirituality, boolean griefingEnabled, float digestionProgress) {}
+    private record BeyonderClientData(String pathway, int sequence, float spirituality, boolean griefingEnabled, float digestionProgress, PathwayHistory pathwayHistory) {}
 }
