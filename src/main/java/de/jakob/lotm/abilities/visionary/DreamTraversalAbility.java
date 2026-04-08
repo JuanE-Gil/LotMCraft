@@ -27,11 +27,14 @@ import java.util.UUID;
 
 @EventBusSubscriber(modid = LOTMCraft.MOD_ID)
 public class DreamTraversalAbility extends SelectableAbility {
-
     private static final HashMap<UUID, UUID> hideMap = new HashMap<>();
-    
+    private static final HashMap<UUID, Integer> hideSeqMap = new HashMap<>();
+    //this is for artifact stuff
+    //tbh wonkiest ability for atifact cuz it uses selectable (even though hide is a toggle style - cuz i didnt wanna make a whole other ability for it tbh
+
     public DreamTraversalAbility(String id) {
         super(id, 1f);
+        this.autoClear = false;
     }
 
     @Override
@@ -63,9 +66,8 @@ public class DreamTraversalAbility extends SelectableAbility {
     }
 
     private boolean requiresAsleep(LivingEntity entity) {
-        return BeyonderData.getSequence(entity) > 3;
+        return AbilityUtil.getSeqWithArt(entity, this) > 3;
     }
-
 
     private void jump(Level level, LivingEntity entity) {
         if (!(level instanceof ServerLevel serverLevel)) return;
@@ -99,7 +101,7 @@ public class DreamTraversalAbility extends SelectableAbility {
 
         entity.teleportTo(target.getX(), target.getY(), target.getZ());
     }
-    
+
     private void hide(Level level, LivingEntity entity) {
         if (level.isClientSide) return;
         if (!(level instanceof ServerLevel serverLevel)) return;
@@ -122,6 +124,8 @@ public class DreamTraversalAbility extends SelectableAbility {
         }
 
         hideMap.put(entity.getUUID(), target.getUUID());
+        // Store sequence at cast time for artifact stuff
+        hideSeqMap.put(entity.getUUID(), AbilityUtil.getSeqWithArt(entity, this));
 
         ParasitationComponent parasitationComponent = target.getData(ModAttachments.PARASITE_COMPONENT);
         parasitationComponent.setParasited(true);
@@ -149,6 +153,9 @@ public class DreamTraversalAbility extends SelectableAbility {
         }
 
         hideMap.remove(entity.getUUID());
+        hideSeqMap.remove(entity.getUUID());
+        clearArtifactScaling(entity);
+    //i think this should be good for artifact stuff?
 
         entity.setInvisible(false);
         entity.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 0, 0));
@@ -162,7 +169,7 @@ public class DreamTraversalAbility extends SelectableAbility {
             player.hurtMarked = true;
         }
     }
-    
+
     private void guidance(Level level, LivingEntity entity) {
         if (level.isClientSide) return;
         if (!(level instanceof ServerLevel serverLevel)) return;
@@ -174,7 +181,6 @@ public class DreamTraversalAbility extends SelectableAbility {
             return;
         }
 
-        // Guidance always requires the target to be asleep, regardless of sequence
         if (!target.hasEffect(ModEffects.ASLEEP)) {
             AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.dream_traversal.must_be_asleep").withColor(0xFFff124d));
             return;
@@ -187,14 +193,14 @@ public class DreamTraversalAbility extends SelectableAbility {
             return;
         }
 
-        int casterSeq = BeyonderData.getSequence(entity);
+        //casterSeq should function for usage in artifacts. or do i also need to change targetSeq??
+        int casterSeq = AbilityUtil.getSeqWithArt(entity, this);
         int targetSeq = BeyonderData.getSequence(target);
         String targetPathway = BeyonderData.getPathway(target);
         String pathwayName = BeyonderData.getSequenceName(targetPathway, targetSeq);
-        String displayPathway = targetPathway.substring(0, 1).toUpperCase() + targetPathway.substring(1).replace("_", " ");
-        //I can make it so they don't do red_priest but instead Red priest (but i dont know how to captilize the second word without making it complex)
+        String displayPathway = targetPathway.substring(0, 1).toUpperCase()
+                + targetPathway.substring(1).replace("_", " ");
 
-        // Same sequence or stronger (lower number) — reveal pathway only (weaker reveals sequence too)
         if (targetSeq <= casterSeq) {
             AbilityUtil.sendActionBar(entity,
                     Component.translatable("ability.lotmcraft.dream_traversal.guidance.pathway_only",
@@ -206,7 +212,6 @@ public class DreamTraversalAbility extends SelectableAbility {
         }
     }
 
-
     @SubscribeEvent
     public static void onEntityTick(EntityTickEvent.Post event) {
         if (!(event.getEntity() instanceof LivingEntity entity)) return;
@@ -216,7 +221,8 @@ public class DreamTraversalAbility extends SelectableAbility {
 
         Entity hostEntity = serverLevel.getEntity(hideMap.get(entity.getUUID()));
 
-        boolean seqUnlocked = BeyonderData.getSequence(entity) <= 3;
+        // Use the sequence stored at cast time (ie the artifact if used)
+        boolean seqUnlocked = hideSeqMap.getOrDefault(entity.getUUID(), 9) <= 3;
 
         if (hostEntity == null || hostEntity.isRemoved() || !(hostEntity instanceof LivingEntity host)
                 || !host.isAlive() || (!seqUnlocked && !host.hasEffect(ModEffects.ASLEEP))) {
@@ -228,7 +234,8 @@ public class DreamTraversalAbility extends SelectableAbility {
             }
 
             hideMap.remove(entity.getUUID());
-
+            hideSeqMap.remove(entity.getUUID());
+            // clearArtifactScaling since it should expire properly
             entity.setInvisible(false);
             entity.removeEffect(MobEffects.INVISIBILITY);
 
