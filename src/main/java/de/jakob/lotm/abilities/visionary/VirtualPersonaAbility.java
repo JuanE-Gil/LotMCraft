@@ -23,6 +23,10 @@ public class VirtualPersonaAbility extends SelectableAbility {
 
     public VirtualPersonaAbility(String id) {
         super(id, 3f);
+        canBeUsedByNPC = false;
+        canBeCopied = false;
+        canBeReplicated = false;
+        canBeUsedInArtifact = false;
     }
 
     @Override
