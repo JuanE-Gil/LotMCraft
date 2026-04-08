@@ -63,7 +63,7 @@ public class ManipulationAbility extends SelectableAbility {
 
 
     public void triggerGroupIncite(ServerLevel level, ServerPlayer author, LivingEntity target) {
-        int casterSeq = BeyonderData.getSequence(author);
+        int casterSeq = BeyonderData.getSequence(author); //this leave as is, its for story writing
         List<LivingEntity> nearby = AbilityUtil.getNearbyEntities(
                 author, level, target.position(), 20, false, true);
 
@@ -98,8 +98,7 @@ public class ManipulationAbility extends SelectableAbility {
             return;
         }
 
-        int casterSeq = BeyonderData.getSequence(entity);
-
+        int casterSeq = AbilityUtil.getSeqWithArt(entity, this);
         List<LivingEntity> nearby = AbilityUtil.getNearbyEntities(
                 entity, serverLevel, entity.position(), 20, false, true);
 
@@ -163,7 +162,7 @@ public class ManipulationAbility extends SelectableAbility {
             return;
         }
 
-        int casterSeq = BeyonderData.getSequence(entity);
+        int casterSeq = AbilityUtil.getSeqWithArt(entity, this);  
         if (BeyonderData.isBeyonder(target) && BeyonderData.getSequence(target) <= casterSeq) {
             AbilityUtil.sendActionBar(entity,
                     Component.translatable("ability.lotmcraft.manipulation.control.too_strong").withColor(0xFFff124d));
