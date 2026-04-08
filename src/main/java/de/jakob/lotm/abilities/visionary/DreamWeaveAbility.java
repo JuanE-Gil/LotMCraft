@@ -90,8 +90,8 @@ public class DreamWeaveAbility extends SelectableAbility {
                     Component.translatable("ability.lotmcraft.frenzy.no_target").withColor(0xFFff124d));
             return;
         }
-
-        int mobSeq = Math.min(BeyonderData.getSequence(entity) + 1, 9);
+        
+        int mobSeq = Math.min(AbilityUtil.getSeqWithArt(entity, this) + 1, 9);
         Vec3 center = target.position();
 
         BeyonderNPCEntity mob = spawnPassiveMob(serverLevel, target, mobSeq,
@@ -115,7 +115,7 @@ public class DreamWeaveAbility extends SelectableAbility {
             return;
         }
 
-        int mobSeq = Math.min(BeyonderData.getSequence(entity) + 3, 9);
+        int mobSeq = Math.min(AbilityUtil.getSeqWithArt(entity, this) + 3, 9);
         Vec3 center = target.position();
         double spawnRadius = 3.0;
 
