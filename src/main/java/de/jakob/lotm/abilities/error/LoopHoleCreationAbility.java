@@ -4,7 +4,7 @@ import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.abilities.core.AbilityUseEvent;
 import de.jakob.lotm.abilities.error.handler.TheftHandler;
-import de.jakob.lotm.abilities.visionary.IdentityAvatarAbility;
+import de.jakob.lotm.abilities.visionary.VirtualPersonaAbility;
 import de.jakob.lotm.data.ModDataComponents;
 import de.jakob.lotm.rendering.effectRendering.EffectManager;
 import de.jakob.lotm.util.BeyonderData;
@@ -192,7 +192,7 @@ public class LoopHoleCreationAbility extends Ability {
         if (ability != null && user.level() instanceof ServerLevel serverLevel && ability.canBeUsedByNPC
                 && !(ability instanceof LoopHoleCreationAbility)
                 && !(ability instanceof AvatarCreationAbility)
-                && !(ability instanceof IdentityAvatarAbility)) {
+                && !(ability instanceof VirtualPersonaAbility)) {
             // Use the creator as the caster but potentially keep original targeting
             isRedirecting.set(true);
             try {

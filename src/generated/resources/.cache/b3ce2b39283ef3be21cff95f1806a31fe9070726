@@ -1,4 +1,4 @@
-// 1.21.1	2026-03-28T12:00:30.9101889	Item Models: lotmcraft
+// 1.21.1	2026-04-08T18:51:00.4256064	Item Models: lotmcraft
 f73b18465ecc4c7209da8e28508db3e3a9a348de assets/lotmcraft/models/item/abyss_demonic_fish_blood.json
 ff1f40acc559743c518a78f4d8d99df759005e37 assets/lotmcraft/models/item/agate_peacock_egg.json
 65b6c713526448dd94ab6c94da2487f1a4242daf assets/lotmcraft/models/item/ancient_logbook.json
@@ -74,6 +74,7 @@ a5851523c9f6e597c054270b142883e9a1c91a94 assets/lotmcraft/models/item/cryptologi
 e5dd6827988440365a8eed0425f3632ad574b408 assets/lotmcraft/models/item/crystallized_roots.json
 f7bb4edb69604598c7f5c12b9db8800f8da51079 assets/lotmcraft/models/item/crystal_ball.json
 5bed7e7bf1e2d8c330cc662b8b6e44fbc1f434bf assets/lotmcraft/models/item/crystal_sunflower.json
+9d6fcabb71ffc21a6b446966e86f297c90eb62a8 assets/lotmcraft/models/item/darkness_revival_ability.json
 8bc61abe6fa1571e9e6b0bad8ccdb7d1374181ad assets/lotmcraft/models/item/deep_sleeper_skull.json
 a5851523c9f6e597c054270b142883e9a1c91a94 assets/lotmcraft/models/item/demon.json
 a5851523c9f6e597c054270b142883e9a1c91a94 assets/lotmcraft/models/item/demoness_of_affliction.json
@@ -206,6 +207,7 @@ f5f82cd2d74d4f90d50a94802a8b7ebfbb039142 assets/lotmcraft/models/item/marionetti
 a5851523c9f6e597c054270b142883e9a1c91a94 assets/lotmcraft/models/item/mentor_of_deceit.json
 75ea1730f6f6ceb24ed30acd2a47d2514601335e assets/lotmcraft/models/item/mentor_of_deceit_characteristic.json
 95febc7a7197ab5ef77872f08ad3c25f7b1e6d85 assets/lotmcraft/models/item/mentor_of_deceit_potion.json
+be2083d719434aba96f5f168c6156551fbc7e671 assets/lotmcraft/models/item/meta_awareness_ability.json
 9518ea379b0f5465b15bb1448430225518a3269a assets/lotmcraft/models/item/meteorite_crystal.json
 69b334c6c265489944694142ddedb3250bd81507 assets/lotmcraft/models/item/midnight_beauty_flower.json
 a5851523c9f6e597c054270b142883e9a1c91a94 assets/lotmcraft/models/item/midnight_poet.json
@@ -392,6 +394,7 @@ a5851523c9f6e597c054270b142883e9a1c91a94 assets/lotmcraft/models/item/unshadowed
 a5851523c9f6e597c054270b142883e9a1c91a94 assets/lotmcraft/models/item/unwinged_angel.json
 ff9f27fdd18fe144d00221800523dbf8cef49722 assets/lotmcraft/models/item/unwinged_angel_characteristic.json
 e666510632c1525aa90b0b935dd1534f054e0872 assets/lotmcraft/models/item/unwinged_angel_potion.json
+d4a2bb24f9f2c8f3036318e88ca91241482fe278 assets/lotmcraft/models/item/virtual_avatar_ability.json
 84debc220c429a5e41a15d6959fc219f3e348191 assets/lotmcraft/models/item/void_immunity_ability.json
 a5851523c9f6e597c054270b142883e9a1c91a94 assets/lotmcraft/models/item/wanderer.json
 b781850caac670924619db09ac575a21d0b70d39 assets/lotmcraft/models/item/wanderer_characteristic.json

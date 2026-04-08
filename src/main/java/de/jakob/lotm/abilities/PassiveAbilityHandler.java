@@ -4,6 +4,7 @@ import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.abyss.passives.FireResistanceAbyssAbility;
 import de.jakob.lotm.abilities.abyss.passives.PhysicalEnhancementsAbyssAbility;
 import de.jakob.lotm.abilities.abyss.passives.WordImmunityAbility;
+import de.jakob.lotm.abilities.darkness.passives.DarknessRevivalAbility;
 import de.jakob.lotm.abilities.darkness.passives.NocturnalityAbility;
 import de.jakob.lotm.abilities.darkness.passives.PhysicalEnhancementsDarknessAbility;
 import de.jakob.lotm.abilities.demoness.passives.BloodLossAbility;
@@ -25,7 +26,9 @@ import de.jakob.lotm.abilities.red_priest.passive.PhysicalEnhancementsRedPriestA
 import de.jakob.lotm.abilities.sun.passives.PhysicalEnhancementsSunAbility;
 import de.jakob.lotm.abilities.tyrant.passives.PhysicalEnhancementsTyrantAbility;
 import de.jakob.lotm.abilities.tyrant.passives.RiptideAbility;
+import de.jakob.lotm.abilities.visionary.passives.MetaAwarenessAbility;
 import de.jakob.lotm.abilities.visionary.passives.PhysicalEnhancementsVisionaryAbility;
+import de.jakob.lotm.abilities.visionary.passives.VirtualAvatarAbility;
 import de.jakob.lotm.abilities.wheel_of_fortune.passives.PassiveCalamityAttraction;
 import de.jakob.lotm.abilities.wheel_of_fortune.passives.PassiveLuckAbility;
 import de.jakob.lotm.abilities.wheel_of_fortune.passives.PassiveLuckAccumulationAbility;
