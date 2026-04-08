@@ -1,7 +1,8 @@
 package de.jakob.lotm.abilities.fool;
-
 import de.jakob.lotm.abilities.core.SelectableAbility;
 import de.jakob.lotm.entity.custom.BeyonderNPCEntity;
+import de.jakob.lotm.potions.BeyonderCharacteristicItem;
+import de.jakob.lotm.potions.BeyonderPotion;
 import de.jakob.lotm.item.ModItems;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AllyUtil;
@@ -161,6 +162,8 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
                             ItemStack clickedItem = displayContainer.getItem(slotId);
                             if(!clickedItem.isEmpty()) {
                                 if (clickedItem.is(Items.SHULKER_BOX)) return;
+                                if (clickedItem.getItem() instanceof BeyonderCharacteristicItem) return;
+                                if (clickedItem.getItem() instanceof BeyonderPotion) return;
                                 // Re-check count before summoning
                                 if(getSummonedCount(player) < getMaxSummoned(player)) {
                                     createTemporaryItem(level, player, clickedItem.copy());
@@ -702,6 +705,11 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
 
         CompoundTag entityNBT = new CompoundTag();
         closest.save(entityNBT);
+        entityNBT.remove("HandItems");
+        entityNBT.remove("ArmorItems");
+        if (entityNBT.contains("neoforge:attachments")) {
+            entityNBT.getCompound("neoforge:attachments").remove("lotmcraft:copied_inventory");
+        }
         entityData.put("EntityNBT", entityNBT);
 
         // Special handling for BeyonderNPCEntity
