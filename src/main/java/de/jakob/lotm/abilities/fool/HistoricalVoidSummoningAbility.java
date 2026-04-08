@@ -573,6 +573,10 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
                 entityNBT.remove("skin");
                 entityNBT.remove("hostile");
 
+                if (entityNBT.contains("neoforge:attachments")) {
+                    entityNBT.getCompound("neoforge:attachments").remove("lotmcraft:copied_inventory");
+                }
+                
                 // Load remaining data (health, position, etc.)
                 entity.load(entityNBT);
             }
