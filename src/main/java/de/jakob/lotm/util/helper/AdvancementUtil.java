@@ -31,6 +31,8 @@ import org.joml.Vector3f;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -55,6 +57,20 @@ public class AdvancementUtil {
                 player.getInventory().removeItem(index, 1);
             }
         }
+    }
+
+    // Domain groups for pathway switching at sequence 4
+    private static final List<HashSet<String>> PATHWAY_DOMAINS = List.of(
+            new HashSet<>(Set.of("fool", "error", "door")),
+            new HashSet<>(Set.of("red_priest", "demoness")),
+            new HashSet<>(Set.of("sun", "tyrant", "visionary"))
+    );
+
+    private static boolean sameDomain(String pathway1, String pathway2) {
+        for (HashSet<String> domain : PATHWAY_DOMAINS) {
+            if (domain.contains(pathway1) && domain.contains(pathway2)) return true;
+        }
+        return false;
     }
 
     public static void advance(LivingEntity entity, String pathway, int sequence) {
@@ -127,10 +143,15 @@ public class AdvancementUtil {
         }
 
         String prevPathway = getPathway(entity);
+        int prevSequenceForSwitch = getSequence(entity);
 
-        // Wrong pathway - automatic failure
+        // Wrong pathway
         if(!prevPathway.equals(pathway)) {
-            double failureChance = 1.0f;
+            // Same-domain pathway switch: allowed when advancing to sequence 4 or lower (more powerful)
+            // The player must be exactly one sequence step above the target, and both pathways share a domain
+            boolean isSameDomainSwitch = sequence == 4 && prevSequenceForSwitch == 5 && sameDomain(prevPathway, pathway);
+
+            double failureChance = isSameDomainSwitch ? 0.0 : 1.0f;
             int duration = calculateAdvancementDuration(sequence);
 
             StartAdvanceSequencePathwayEvent event = new StartAdvanceSequencePathwayEvent(entity, sequence, pathway, failureChance, duration);
@@ -159,13 +180,24 @@ public class AdvancementUtil {
                     if (!entity.isDeadOrDying())
                         entity.hurt(ModDamageTypes.source(entity.level(), ModDamageTypes.LOOSING_CONTROL), Float.MAX_VALUE);
                 });
+                return;
             }
+
+            final boolean isFinalSameDomainSwitch = isSameDomainSwitch;
+            final String capturedPrevPathway = prevPathway;
+            final int capturedPrevSequence = prevSequenceForSwitch;
 
             ServerScheduler.scheduleDelayed(duration, () -> {
                 if(!activeAdvancements.containsKey(entity.getUUID())) {
                     return; // Player logged out and back in during advancement, potion was removed from inventory, cancel advancement
                 }
                 activeAdvancements.remove(entity.getUUID());
+                // Record the previous pathway at the sequence being left, so regressing back past the
+                // switch point restores the original pathway (e.g. Fool seq5 → Error seq4 records
+                // history[5]="fool", so dying as Error seq4 reverts to Fool seq5)
+                if (isFinalSameDomainSwitch) {
+                    beyonderMap.recordPathwaySwitch(entity, capturedPrevSequence, capturedPrevPathway);
+                }
                 setBeyonder(entity, finalPathway, finalSequence);
                 if(entity instanceof ServerPlayer serverPlayer) {
                     PacketHandler.sendToPlayer(serverPlayer, new ChangePlayerPerspectivePacket(entity.getId(), ChangePlayerPerspectivePacket.PERSPECTIVE.THIRD.getValue()));

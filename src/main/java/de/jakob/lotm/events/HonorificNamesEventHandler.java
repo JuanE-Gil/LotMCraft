@@ -22,6 +22,10 @@ public class HonorificNamesEventHandler {
 
     public static LinkedList<Pair<UUID, UUID>> answerState = new LinkedList<>();
 
+    public static void addPendingPrayer(UUID targetUUID, PendingPrayer prayer) {
+        pendingPrayers.computeIfAbsent(targetUUID, k -> new LinkedList<>()).add(prayer);
+    }
+
     /** Pending prayers per target player UUID: target → list of prayers addressed to them. */
     private static final HashMap<UUID, LinkedList<PendingPrayer>> pendingPrayers = new HashMap<>();
 
@@ -134,7 +138,7 @@ public class HonorificNamesEventHandler {
     /**
      * Stores the incoming prayer so the target can respond via the Honorific Names menu.
      */
-    private static void storePendingPrayer(LivingEntity sender, LivingEntity target) {
+    public static void storePendingPrayer(LivingEntity sender, LivingEntity target) {
         answerState.add(new Pair<>(target.getUUID(), sender.getUUID()));
 
         PendingPrayer prayer = new PendingPrayer(

@@ -71,7 +71,8 @@ public class PassiveAbilityHandler {
     public static final DeferredItem<Item> PUPPETEERING_ENHANCEMENTS = ITEMS.registerItem("puppeteering_enhancements_ability", PuppeteeringEnhancementsAbility::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
 
     public static final DeferredItem<Item> NOCTURNALITY = ITEMS.registerItem("nocturnality_ability", NocturnalityAbility::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
-
+    public static final DeferredItem<Item> DARKNESS_REVIVAL = ITEMS.registerItem("darkness_revival_ability", DarknessRevivalAbility::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
+    
     public static final DeferredItem<Item> PASSIVE_THEFT = ITEMS.registerItem("passive_theft_ability", PassiveTheftAbility::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
 
     public static final DeferredItem<Item> FEATHER_FALL = ITEMS.registerItem("feather_fall_ability", FeatherFallAbility::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
@@ -79,7 +80,11 @@ public class PassiveAbilityHandler {
     public static final DeferredItem<Item> MIRROR_REVIVAL = ITEMS.registerItem("mirror_revival_ability", MirrorRevivalAbility::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
 
     public static final DeferredItem<Item> RIPTIDE = ITEMS.registerItem("riptide_ability", RiptideAbility::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
+    
+    public static final DeferredItem<Item> VIRTUAL_AVATAR = ITEMS.registerItem("virtual_avatar_ability", VirtualAvatarAbility::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
+    public static final DeferredItem<Item> META_AWARENESS = ITEMS.registerItem("meta_awareness_ability", MetaAwarenessAbility::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
 
+    
     public static void registerAbilities(IEventBus eventBus) {
         ITEMS.register(eventBus);
     }

@@ -479,6 +479,22 @@ public class BeyonderMap extends SavedData {
         setStack(entity, buff.get(BeyonderData.getSequence(entity)) + value);
     }
 
+    /**
+     * Records that the player switched pathways at the given sequence.
+     * The previousPathway is stored so regression can restore it.
+     */
+    public void recordPathwaySwitch(LivingEntity entity, int sequence, String previousPathway) {
+        if (!contains(entity)) put(entity);
+
+        var current = beyonderMap.get(entity.getUUID()).get();
+        map.put(entity.getUUID(), StoredData.builder
+                .copyFrom(current)
+                .pathwayHistory(current.pathwayHistory().set(sequence, previousPathway))
+                .build());
+
+        setDirty();
+    }
+
     public void setStack(LivingEntity entity, int seq, int value){
         if(!contains(entity)) put(entity);
 

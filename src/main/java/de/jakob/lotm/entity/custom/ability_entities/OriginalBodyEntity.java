@@ -19,6 +19,15 @@ import java.util.*;
 public class OriginalBodyEntity extends LivingEntity {
     private final Map<EquipmentSlot, ItemStack> equipment = new EnumMap<>(EquipmentSlot.class);
     private ChunkPos lastLockedChunk = null;
+    private boolean parasiteControlled = false;
+
+    public void setParasiteControlled(boolean parasiteControlled) {
+        this.parasiteControlled = parasiteControlled;
+    }
+
+    public boolean isParasiteControlled() {
+        return parasiteControlled;
+    }
 
 
     public final SimpleContainer inventory = new SimpleContainer(41);
@@ -73,8 +82,14 @@ public class OriginalBodyEntity extends LivingEntity {
         super.tick();
         if (!this.level().isClientSide && this.level() instanceof ServerLevel serverLevel) {
 
-            ChunkPos currentChunk = new ChunkPos(this.blockPosition());
+            if (parasiteControlled) {
+                this.setInvisible(true);
+                this.noPhysics = true;
+                this.setNoGravity(true);
+                this.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+            }
 
+            ChunkPos currentChunk = new ChunkPos(this.blockPosition());
             if (lastLockedChunk == null || !currentChunk.equals(lastLockedChunk)) {
 
                 // release the old chunk so it can unload normally
