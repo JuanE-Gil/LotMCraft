@@ -67,6 +67,12 @@ public class ModEntities {
             ENTITY_TYPES.register("wind_blade", () -> EntityType.Builder.<WindBladeEntity>of(WindBladeEntity::new, MobCategory.MISC)
                     .sized(.75f, 2f).noSave().build("wind_blade"));
 
+    //Ability Entities - Darkness Pathway
+    
+     public static final Supplier<EntityType<ConcealedDomainEntity>> CONCEALED_DOMAIN =
+            ENTITY_TYPES.register("concealed_domain", () -> EntityType.Builder.<ConcealedDomainEntity>of(ConcealedDomainEntity::new, MobCategory.MISC)
+                    .sized(0.5F, 0.5F).clientTrackingRange(64).updateInterval(1).noSummon().fireImmune().build("concealed_domain"));
+    
     // Ability Entities - Door Pathway
 
     public static final Supplier<EntityType<ApprenticeDoorEntity>> APPRENTICE_DOOR =
