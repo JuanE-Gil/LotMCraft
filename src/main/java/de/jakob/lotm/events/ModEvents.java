@@ -67,14 +67,23 @@ import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
+import de.jakob.lotm.abilities.tyrant.LightningStormAbility;
+import net.neoforged.neoforge.event.ServerChatEvent;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static de.jakob.lotm.abilities.fool.HistoricalVoidSummoningAbility.MARKED_ENTITIES_TAG;
 import static de.jakob.lotm.util.BeyonderData.*;
 
 @EventBusSubscriber(modid = LOTMCraft.MOD_ID)
 public class ModEvents {
+
+    public static final Map<UUID, Integer> leoderoUsesLeft = new ConcurrentHashMap<>();
+    private static final LightningStormAbility LIGHTNING_STORM = new LightningStormAbility("lightning_storm_leodero");
 
     @SubscribeEvent
     public static void registerLayers(EntityRenderersEvent.RegisterLayerDefinitions event) {
@@ -312,6 +321,28 @@ public class ModEvents {
                 float progress = 1;
                 SpiritualityProgressTracker.setProgress(newPlayer.getUUID(), progress);
             }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onServerChat(ServerChatEvent event) {
+        if (!event.getMessage().getString().equalsIgnoreCase("LEODERO!")) return;
+
+        ServerPlayer player = event.getPlayer();
+        UUID uuid = player.getUUID();
+
+        int usesLeft = leoderoUsesLeft.getOrDefault(uuid, 1);
+        if (usesLeft <= 0) return;
+
+        leoderoUsesLeft.put(uuid, usesLeft - 1);
+
+        if (player.level() instanceof ServerLevel serverLevel) {
+            net.minecraft.world.entity.decoration.ArmorStand dummy = new net.minecraft.world.entity.decoration.ArmorStand(serverLevel, player.getX(), player.getY(), player.getZ());
+            dummy.setYRot(player.getYRot());
+            dummy.setXRot(player.getXRot());
+            serverLevel.addFreshEntity(dummy);
+            LIGHTNING_STORM.onAbilityUse(serverLevel, dummy);
+            dummy.discard();
         }
     }
 }
