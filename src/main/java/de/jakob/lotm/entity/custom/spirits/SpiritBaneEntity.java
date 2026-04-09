@@ -16,6 +16,7 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.FlyingMoveControl;
+import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
@@ -53,8 +54,7 @@ public class SpiritBaneEntity extends Animal {
 
     public SpiritBaneEntity(EntityType<? extends Animal> entityType, Level level) {
         super(entityType, level);
-        this.moveControl = new FlyingMoveControl(this, 20, true);
-        this.navigation = new FlyingPathNavigation(this, level);
+        this.moveControl = new MoveControl(this);
     }
 
     @Override
@@ -74,7 +74,7 @@ public class SpiritBaneEntity extends Animal {
                 .add(Attributes.MOVEMENT_SPEED, 1)
                 .add(Attributes.FLYING_SPEED, 1.2)
                 .add(Attributes.SCALE, 1.35)
-                .add(Attributes.ATTACK_DAMAGE, 180.0)
+                .add(Attributes.ATTACK_DAMAGE, 100.0)
                 .add(Attributes.ARMOR, 20.0)
                 .add(Attributes.FOLLOW_RANGE, 60.0);
     }
@@ -104,23 +104,8 @@ public class SpiritBaneEntity extends Animal {
     }
 
     @Override
-    protected PathNavigation createNavigation(Level level) {
-        FlyingPathNavigation flyingNavigation = new FlyingPathNavigation(this, level);
-        flyingNavigation.setCanOpenDoors(false);
-        flyingNavigation.setCanFloat(false);
-        flyingNavigation.setCanPassDoors(false);
-        return flyingNavigation;
-    }
-
-    @Override
     public void aiStep() {
         super.aiStep();
-        if (!this.level().isClientSide && this.isAlive()) {
-            BlockPos belowPos = this.blockPosition().below(2);
-            if (!this.level().isEmptyBlock(belowPos) && this.getDeltaMovement().y < 0.1) {
-                this.setDeltaMovement(this.getDeltaMovement().add(0, 0.02, 0));
-            }
-        }
     }
 
     @Override
@@ -280,7 +265,8 @@ public class SpiritBaneEntity extends Animal {
 
         private void tickLifting(ServerLevel serverLevel) {
             // Lift the target upward over 20 ticks
-            liftSlamTarget.setDeltaMovement(0, 0.6, 0);
+            liftSlamTarget.setDeltaMovement(0, 0.7, 0);
+            liftSlamTarget.hurtMarked = true;
             liftSlamTarget.hasImpulse = true;
             liftSlamTarget.fallDistance = 0;
 
@@ -297,6 +283,7 @@ public class SpiritBaneEntity extends Animal {
         private void tickHolding(ServerLevel serverLevel) {
             // Hold target in the air for 15 ticks
             liftSlamTarget.setDeltaMovement(0, 0.05, 0); // slight upward to counter gravity
+            liftSlamTarget.hurtMarked = true;
             liftSlamTarget.hasImpulse = true;
             liftSlamTarget.fallDistance = 0;
 
@@ -310,11 +297,10 @@ public class SpiritBaneEntity extends Animal {
         }
 
         private void tickSlamming(ServerLevel serverLevel) {
-            if (liftSlamTimer == 0) {
-                // Apply massive downward velocity
-                liftSlamTarget.setDeltaMovement(0, -3.0, 0);
-                liftSlamTarget.hasImpulse = true;
-            }
+            // Apply massive downward velocity
+            liftSlamTarget.setDeltaMovement(0, -5.0, 0);
+            liftSlamTarget.hurtMarked = true;
+            liftSlamTarget.hasImpulse = true;
 
             // Trailing particles
             ParticleUtil.spawnParticles(serverLevel, BANE_DUST, liftSlamTarget.position(), 5, 0.3);

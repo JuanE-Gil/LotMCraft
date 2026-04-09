@@ -15,6 +15,7 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.FlyingMoveControl;
+import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
@@ -37,18 +38,18 @@ public class SpiritTranslucentWizardEntity extends Animal {
     public final AnimationState WALK_ANIMATION = new AnimationState();
 
     private static final int FREEZE_DURATION = 20;
-    private static final float AOE_RADIUS = 6.0f;
+    private static final float AOE_RADIUS = 9.0f;
     private static final float AOE_DAMAGE_FRACTION = 0.5f;
     private static final double JUMP_SLAM_DISTANCE = 3.0;
 
     // Translucent wizard uses purple/pink colors
-    private static final DustParticleOptions TRANSLUCENT_DUST = new DustParticleOptions(new Vector3f(0.7f, 0.2f, 0.9f), 1.5f);
-    private static final DustParticleOptions TRANSLUCENT_DUST_SMALL = new DustParticleOptions(new Vector3f(0.8f, 0.4f, 1.0f), 1.0f);
+    private static final DustParticleOptions TRANSLUCENT_DUST = new DustParticleOptions(new Vector3f(0.7f, 0.2f, 0.9f), 2.5f);
+    private static final DustParticleOptions TRANSLUCENT_DUST_SMALL = new DustParticleOptions(new Vector3f(0.8f, 0.4f, 1.0f), 1.7f);
 
     public SpiritTranslucentWizardEntity(EntityType<? extends Animal> entityType, Level level) {
         super(entityType, level);
-        this.moveControl = new FlyingMoveControl(this, 20, true);
-        this.navigation = new FlyingPathNavigation(this, level);
+
+        this.moveControl = new MoveControl(this);
     }
 
     @Override
@@ -98,23 +99,8 @@ public class SpiritTranslucentWizardEntity extends Animal {
     }
 
     @Override
-    protected PathNavigation createNavigation(Level level) {
-        FlyingPathNavigation flyingNavigation = new FlyingPathNavigation(this, level);
-        flyingNavigation.setCanOpenDoors(false);
-        flyingNavigation.setCanFloat(false);
-        flyingNavigation.setCanPassDoors(false);
-        return flyingNavigation;
-    }
-
-    @Override
     public void aiStep() {
         super.aiStep();
-        if (!this.level().isClientSide && this.isAlive()) {
-            BlockPos belowPos = this.blockPosition().below(2);
-            if (!this.level().isEmptyBlock(belowPos) && this.getDeltaMovement().y < 0.1) {
-                this.setDeltaMovement(this.getDeltaMovement().add(0, 0.02, 0));
-            }
-        }
     }
 
     @Override
@@ -224,8 +210,8 @@ public class SpiritTranslucentWizardEntity extends Animal {
             Vec3 center = wizard.position();
 
             // Purple/pink sphere particles
-            ParticleUtil.spawnSphereParticles(serverLevel, TRANSLUCENT_DUST, center.add(0, 1, 0), AOE_RADIUS, 60);
-            ParticleUtil.spawnSphereParticles(serverLevel, ParticleTypes.WITCH, center.add(0, 1, 0), AOE_RADIUS * 0.7, 30);
+            ParticleUtil.spawnSphereParticles(serverLevel, TRANSLUCENT_DUST, center.add(0, 1, 0), AOE_RADIUS, 250);
+            ParticleUtil.spawnSphereParticles(serverLevel, ParticleTypes.WITCH, center.add(0, 1, 0), AOE_RADIUS * 0.7, 120);
 
             AbilityUtil.damageNearbyEntities(serverLevel, wizard, AOE_RADIUS, damage, center, true, true);
 
@@ -242,8 +228,8 @@ public class SpiritTranslucentWizardEntity extends Animal {
             target.addEffect(new MobEffectInstance(MobEffects.JUMP, FREEZE_DURATION, 128, false, false));
 
             // Purple freeze visual particles on target
-            ParticleUtil.spawnSphereParticles(serverLevel, ParticleTypes.WITCH, target.position().add(0, 1, 0), 1.0, 15);
-            ParticleUtil.spawnParticles(serverLevel, TRANSLUCENT_DUST_SMALL, target.position().add(0, 1, 0), 10, 0.5);
+            ParticleUtil.spawnSphereParticles(serverLevel, ParticleTypes.WITCH, target.position().add(0, 1, 0), 1.0, 60);
+            ParticleUtil.spawnParticles(serverLevel, TRANSLUCENT_DUST_SMALL, target.position().add(0, 1, 0), 40, 0.5);
 
             // Fire a magical projectile at the frozen target
             Vec3 projectilePos = wizard.position().add(0, 1.5, 0);
