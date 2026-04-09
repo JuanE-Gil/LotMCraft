@@ -64,6 +64,10 @@ public class ModEntities {
             ENTITY_TYPES.register("spirit_ball", () -> EntityType.Builder.<SpiritBallEntity>of(SpiritBallEntity::new, MobCategory.MISC)
                     .sized(.55f, .55f).noSave().build("spirit_ball"));
 
+    public static final Supplier<EntityType<SpiritBlockProjectileEntity>> SPIRIT_BLOCK_PROJECTILE =
+            ENTITY_TYPES.register("spirit_block_projectile", () -> EntityType.Builder.<SpiritBlockProjectileEntity>of(SpiritBlockProjectileEntity::new, MobCategory.MISC)
+                    .sized(0.98f, 0.98f).noSave().build("spirit_block_projectile"));
+
     public static final Supplier<EntityType<WindBladeEntity>> WIND_BLADE =
             ENTITY_TYPES.register("wind_blade", () -> EntityType.Builder.<WindBladeEntity>of(WindBladeEntity::new, MobCategory.MISC)
                     .sized(.75f, 2f).noSave().build("wind_blade"));

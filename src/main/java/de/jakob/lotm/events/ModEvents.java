@@ -144,7 +144,7 @@ public class ModEvents {
         event.put(ModEntities.SPIRIT_GHOST.get(), SpiritGhostEntity.createAttributes().build());
         event.put(ModEntities.SPIRIT_BIZARRO_BANE.get(), SpiritBizarroBaneEntity.createAttributes().build());
         event.put(ModEntities.SPIRIT_BANE.get(), SpiritBaneEntity.createAttributes().build());
-        event.put(ModEntities.SPIRIT_MALMOUTH.get(), SpiritBaneEntity.createAttributes().build());
+        event.put(ModEntities.SPIRIT_MALMOUTH.get(), SpiritMalmouthEntity.createAttributes().build());
     }
 
     @SubscribeEvent
