@@ -97,7 +97,8 @@ public class EffectManager {
         CONCEALMENT(26),
         ABYSS_PILLAR(27),
         ACID_SWAMP(28),
-        ARTIFACT_EXPLOSION(29);
+        ARTIFACT_EXPLOSION(29),
+        BLOOD_INFERNO(30);
 
         private final int index;
 

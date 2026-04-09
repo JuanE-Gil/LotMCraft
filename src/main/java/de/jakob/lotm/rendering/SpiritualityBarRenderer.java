@@ -1,6 +1,7 @@
 package de.jakob.lotm.rendering;
 
 import de.jakob.lotm.LOTMCraft;
+import de.jakob.lotm.util.ClientSacrificeCache;
 import de.jakob.lotm.util.ClientBeyonderCache;
 import de.jakob.lotm.util.SpiritualityProgressTracker;
 import net.minecraft.client.Minecraft;
@@ -11,14 +12,26 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 
 @EventBusSubscriber(modid = LOTMCraft.MOD_ID, value = Dist.CLIENT)
 public class SpiritualityBarRenderer {
 
     @SubscribeEvent
+    public static void onClientTick(ClientTickEvent.Post event) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player != null && mc.player.isDeadOrDying()) {
+            ClientSacrificeCache.resetSacrificeDuration();
+            return;
+        }
+        ClientSacrificeCache.tickDown();
+    }
+
+    @SubscribeEvent
     public static void onRegisterGuiLayers(RegisterGuiLayersEvent event) {
         event.registerAbove(VanillaGuiLayers.HOTBAR, ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "progress_bar"), (guiGraphics, deltaTracker) -> {
             renderProgressBar(guiGraphics);
+            renderSacrificeBar(guiGraphics);
         });
     }
 
@@ -57,6 +70,32 @@ public class SpiritualityBarRenderer {
             ResourceLocation backgroundTexture = ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "textures/gui/spirituality_bar_background.png");
             guiGraphics.blit(backgroundTexture, barX - 4, barY - 4, barWidth + 8, barHeight + 8, 0, 0, 44, 256, 44, 256);
         }
+    }
+
+    private static void renderSacrificeBar(GuiGraphics guiGraphics) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null || mc.options.hideGui) return;
+        if (ClientSacrificeCache.getTotalTicks() <= 0 || ClientSacrificeCache.getRemainingTicks() <= 0) return;
+        if (!ClientBeyonderCache.isBeyonder(mc.player.getUUID())) return;
+
+        int barWidth = 14;
+        int barHeight = 120;
+        int barX = 6 + barWidth + 6; // right of the spirituality bar
+        int barY = 60;
+
+        float progress = (float) ClientSacrificeCache.getRemainingTicks() / ClientSacrificeCache.getTotalTicks();
+
+        guiGraphics.fill(barX, barY, barX + barWidth, barY + barHeight, 0x80000000);
+
+        int progressHeight = (int) (barHeight * progress);
+        int progressStartY = barY + barHeight - progressHeight;
+        if (progressHeight > 0) {
+            drawVerticalGradient(guiGraphics, barX, progressStartY, barWidth, progressHeight,
+                    0xFFFF4444, 0xFFAA0000);
+        }
+
+        ResourceLocation backgroundTexture = ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "textures/gui/spirituality_bar_background.png");
+        guiGraphics.blit(backgroundTexture, barX - 4, barY - 4, barWidth + 8, barHeight + 8, 0, 0, 44, 256, 44, 256);
     }
 
     private static void drawVerticalGradient(GuiGraphics guiGraphics, int x, int y, int width, int height,

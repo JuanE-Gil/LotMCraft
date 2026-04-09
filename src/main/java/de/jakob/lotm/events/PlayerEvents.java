@@ -8,10 +8,12 @@ import de.jakob.lotm.attachments.AbilityCooldownComponent;
 import de.jakob.lotm.attachments.DisabledAbilitiesComponent;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.attachments.NewPlayerComponent;
+import de.jakob.lotm.attachments.SacrificeRevertComponent;
 import de.jakob.lotm.gamerule.ModGameRules;
 import de.jakob.lotm.item.ModItems;
 import de.jakob.lotm.network.PacketHandler;
 import de.jakob.lotm.network.packets.toClient.SyncGriefingGamerulePacket;
+import de.jakob.lotm.network.packets.toClient.SyncSacrificeDurationPacket;
 import de.jakob.lotm.potions.BeyonderCharacteristicItemHandler;
 import de.jakob.lotm.potions.PotionRecipeItemHandler;
 import de.jakob.lotm.util.BeyonderData;
@@ -61,6 +63,20 @@ public class PlayerEvents {
 
             if(BeyonderData.isBeyonder(player))
                 BeyonderData.beyonderMap.addLastPosition(player);
+
+            // Revert sacrifice upgrade if active when logging out
+            SacrificeRevertComponent revert = player.getData(ModAttachments.SACRIFICE_REVERT_COMPONENT);
+            if (revert.isActive()) {
+                if (BeyonderData.isBeyonder(player)
+                        && BeyonderData.getPathway(player).equals(revert.getPathway())
+                        && BeyonderData.getSequence(player) == revert.getRevertToSequence() - 1) {
+                    float digestion = revert.getSavedDigestion();
+                    BeyonderData.setBeyonder(player, revert.getPathway(), revert.getRevertToSequence(), true);
+                    player.getPersistentData().putFloat(BeyonderData.NBT_DIGESTION_PROGRESS, digestion);
+                    // No sync needed on logout — player reads NBT fresh on next login
+                }
+                revert.clear();
+            }
         }
     }
 
@@ -94,6 +110,7 @@ public class PlayerEvents {
         }
 
         ToggleAbility.cleanUp(level, event.getEntity());
+
     }
 
     private static final Random random = new Random();

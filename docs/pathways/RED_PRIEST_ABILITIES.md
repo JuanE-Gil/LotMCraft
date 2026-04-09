@@ -4,6 +4,21 @@
 
 ---
 
+### Sacrifice
+**Sequence Requirement:** 1–3
+**Spirituality Cost:** 3000
+**Cooldown:** 12 hours
+*(Cannot be copied, replicated, used in artifacts, stolen, shared with teammates, or used by NPCs)*
+
+- Requires at least **500 kills** to activate.
+- Consumes accumulated kills at a rate of 500 kills per second of duration, up to a maximum of 60 seconds. The ability will always consume enough kills to activate the maximum possible duration.
+- After the animation (35 ticks), the caster's sequence is **temporarily reduced by 1** (e.g. Seq 1 → Seq 0) and gains the corresponding rank and abilities.
+- While Sacrifice is active:
+  - A red bar on the HUD shows remaining duration.
+  - Sun Pathway's purification powers cannot drain digestion or regress the caster's sequence.
+- When the duration expires, the caster **reverts to their original sequence** with digestion restored.
+---
+
 ### Conquering
 **Sequence Requirement:** 1
 **Spirituality Cost:** 1900
@@ -333,7 +348,7 @@ Provides passive buffs that scale with the caster's current sequence. Includes f
 | 3        | +3       | +14        | +4    | +17          | +3           | Fire Resistance +3 |
 | 2        | +4       | +17        | +5    | +25          | +4           | Fire Resistance +3 |
 | 1        | +4       | +18        | +5    | +30          | +4           | Fire Resistance +4 |
-| 0        | +5       | +18        | +5    | +20          | +5           | Fire Resistance +5 |
+| 0        | +5       | +18        | +5    | +35          | +5           | Fire Resistance +5 |
 
 ---
 

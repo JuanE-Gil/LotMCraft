@@ -55,7 +55,8 @@ public class WarBannerEntity extends Entity {
         if(getRadius() <= 0)
             setRadius(25);
 
-        ParticleUtil.createParticleSpirals(ParticleTypes.FLAME, new Location(position(), level()), 3, 3, 5.5, .35, 5, 20 * 30, 15, 8);
+        if (!skipEffects)
+            ParticleUtil.createParticleSpirals(ParticleTypes.FLAME, new Location(position(), level()), 3, 3, 5.5, .35, 5, 20 * 30, 15, 8);
     }
 
     public WarBannerEntity(EntityType<?> entityType, Level level, int ticks, UUID casterUUID) {
@@ -64,6 +65,13 @@ public class WarBannerEntity extends Entity {
         this.noCulling = true;
         this.setDuration(ticks);
         this.setCasterUUID(casterUUID);
+    }
+
+    private boolean skipEffects = false;
+
+    public WarBannerEntity(EntityType<?> entityType, Level level, int ticks, UUID casterUUID, boolean skipEffects) {
+        this(entityType, level, ticks, casterUUID);
+        this.skipEffects = skipEffects;
     }
 
     int lifetime = 0;
@@ -83,7 +91,9 @@ public class WarBannerEntity extends Entity {
             return;
         }
 
-        spawnParticles();
+        if (!skipEffects) spawnParticles();
+
+        if (skipEffects) return;
 
         Entity casterEntity = getCasterEntity();
 
