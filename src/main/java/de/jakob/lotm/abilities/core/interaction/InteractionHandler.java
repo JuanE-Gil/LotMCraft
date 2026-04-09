@@ -26,7 +26,7 @@ import java.util.UUID;
  * "explosion", "poison", "calming", "water", "water_strong", "sealing", "darkness",
  * "unluck", "morale_boost", "soul_burn", "blooming", "cleansing", "corruption",
  * "blink_escape", "charm", "petrification", "fog", "curse", "disease", "plague",
- * "lightning"
+ * "lightning", "destruction", "space_warp"
  */
 @EventBusSubscriber(modid = LOTMCraft.MOD_ID)
 public class InteractionHandler {

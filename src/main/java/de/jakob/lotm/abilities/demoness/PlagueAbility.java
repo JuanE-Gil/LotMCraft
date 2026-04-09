@@ -23,7 +23,7 @@ import java.util.Map;
 
 public class PlagueAbility extends Ability {
     public PlagueAbility(String id) {
-        super(id, 120, "plague");
+        super(id, 120, "plague", "disease");
         autoClear = false;
     }
 

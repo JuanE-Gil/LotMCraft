@@ -1,6 +1,7 @@
 package de.jakob.lotm.abilities.darkness;
 
 import de.jakob.lotm.abilities.core.Ability;
+import de.jakob.lotm.abilities.core.AbilityUsedEvent;
 import de.jakob.lotm.attachments.DisabledAbilitiesComponent;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.sound.ModSounds;
@@ -23,6 +24,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.common.NeoForge;
 import org.joml.Vector3f;
 
 import java.util.*;
@@ -34,7 +36,8 @@ public class RequiemAbility extends Ability {
     private static final HashSet<UUID> pacifiedEntities = new HashSet<>();
 
     public RequiemAbility(String id) {
-        super(id, 3);
+        super(id, 3, "calming");
+        postsUsedAbilityEventManually = true;
     }
 
     @Override
@@ -75,6 +78,8 @@ public class RequiemAbility extends Ability {
             }
             return;
         }
+
+        NeoForge.EVENT_BUS.post(new AbilityUsedEvent((ServerLevel) level, entity.position(), entity, targetEntity, this, interactionFlags, interactionRadius, interactionCacheTicks));
 
         pacifiedEntities.add(targetEntity.getUUID());
         int duration = 20 * 15;
