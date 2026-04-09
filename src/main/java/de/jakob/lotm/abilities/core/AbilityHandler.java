@@ -72,6 +72,7 @@ public class AbilityHandler {
         abilities.add(new WarSongAbility("war_song_ability"));
         abilities.add(new FogOfWarAbility("fog_of_war_ability"));
         abilities.add(new EssenceOfWarAbility("essence_of_war_ability"));
+        abilities.add(new SacrificeAbility("sacrifice_ability"));
         abilities.add(new FlightAbility("flight_ability"));
         abilities.add(new WeatherManipulationAbility("weather_manipulation_ability"));
         abilities.add(new ConqueringAbility("conquering_ability"));

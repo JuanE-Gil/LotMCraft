@@ -4,12 +4,15 @@ import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.artifacts.SealedArtifactData;
 import de.jakob.lotm.damage.ModDamageTypes;
 import de.jakob.lotm.attachments.DisabledFlightComponent;
+import de.jakob.lotm.attachments.KillCountComponent;
 import de.jakob.lotm.attachments.ModAttachments;
+import de.jakob.lotm.attachments.SacrificeRevertComponent;
 import de.jakob.lotm.data.ModDataComponents;
 import de.jakob.lotm.effect.ModEffects;
 import de.jakob.lotm.gamerule.ModGameRules;
 import de.jakob.lotm.item.PotionIngredient;
 import de.jakob.lotm.network.PacketHandler;
+import de.jakob.lotm.network.packets.toClient.SyncKillCountPacket;
 import de.jakob.lotm.potions.BeyonderCharacteristicItem;
 import de.jakob.lotm.potions.BeyonderCharacteristicItemHandler;
 import de.jakob.lotm.potions.BeyonderPotion;
@@ -21,8 +24,11 @@ import de.jakob.lotm.util.beyonderMap.StoredData;
 import de.jakob.lotm.attachments.SharedAbilitiesComponent;
 import de.jakob.lotm.attachments.TeamComponent;
 import de.jakob.lotm.util.helper.AbilityUtil;
+import de.jakob.lotm.util.helper.TeamUtils;
+import de.jakob.lotm.util.scheduling.ServerScheduler;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -116,14 +122,48 @@ public class BeyonderEventHandler {
         if (event.getEntity() instanceof ServerPlayer serverPlayer) {
             // Re-sync data on respawn
             PacketHandler.syncBeyonderDataToPlayer(serverPlayer);
+            // Clear sacrifice bar if it was active when the player died
+            if (serverPlayer.getPersistentData().getBoolean("sacrifice_bar_clear")) {
+                serverPlayer.getPersistentData().remove("sacrifice_bar_clear");
+                PacketHandler.sendToPlayer(serverPlayer, new de.jakob.lotm.network.packets.toClient.SyncSacrificeDurationPacket(0));
+            }
         }
     }
 
     @SubscribeEvent
     public static void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
-        if (event.getEntity().level().isClientSide()) {
-            // Clear client cache when player logs out
+        if (!(event.getEntity() instanceof ServerPlayer player)) {
+            // Client side — clear cache
             ClientBeyonderCache.removePlayer(event.getEntity().getUUID());
+            return;
+        }
+        if (player.getServer() == null) return;
+
+        TeamComponent team = player.getData(ModAttachments.TEAM_COMPONENT.get());
+
+        if (!team.isInTeam() && team.memberCount() > 0) {
+            // Player is the leader logging out — schedule a clear to online members after disconnect completes
+            java.util.List<String> memberUUIDs = new java.util.ArrayList<>(team.memberUUIDs());
+            ServerScheduler.scheduleDelayed(1, () -> {
+                for (String memberUUID : memberUUIDs) {
+                    ServerPlayer member = player.getServer().getPlayerList().getPlayer(
+                            java.util.UUID.fromString(memberUUID));
+                    if (member != null) {
+                        PacketHandler.sendToPlayer(member, new de.jakob.lotm.network.packets.toClient.SyncSharedAbilitiesDataPacket(
+                                "", new java.util.ArrayList<>(), new java.util.ArrayList<>(), new java.util.HashMap<>(), 0, 0));
+                    }
+                }
+            });
+        } else if (team.isInTeam()) {
+            // Player is a member logging out — schedule a re-sync from leader after disconnect completes
+            String leaderUUID = team.leaderUUID();
+            ServerScheduler.scheduleDelayed(1, () -> {
+                ServerPlayer leader = player.getServer().getPlayerList().getPlayer(
+                        java.util.UUID.fromString(leaderUUID));
+                if (leader != null) {
+                    TeamUtils.syncToTeam(leader);
+                }
+            });
         }
     }
 
@@ -141,22 +181,30 @@ public class BeyonderEventHandler {
         if (!BeyonderData.isBeyonder(player)) return;
         if (!player.serverLevel().getGameRules().getBoolean(ModGameRules.REGRESS_SEQUENCE_ON_DEATH)) return;
 
-        var stack = new ItemStack(Objects.requireNonNull(BeyonderCharacteristicItemHandler
-                .selectCharacteristicOfPathwayAndSequence(
-                        BeyonderData.getPathway(player), BeyonderData.getSequence(player))).asItem());
+        // onDeath (LivingDeathEvent) already handled regression and cleared the revert component.
+        // Here we only need to drop the correct characteristic item.
+        // The sequence to drop is the one onDeath regressed FROM, stored temporarily in NBT.
+        int dropSequence = player.getPersistentData().contains("sacrifice_drop_sequence")
+                ? player.getPersistentData().getInt("sacrifice_drop_sequence")
+                : BeyonderData.getSequence(player);
+        player.getPersistentData().remove("sacrifice_drop_sequence");
+
+        if(beyonderMap.get(player).isEmpty()) return;
+
+        var data = beyonderMap.get(player).get();
+        BeyonderData.setBeyonder(player, data.pathway(), data.sequence(), true);
+
+        BeyonderCharacteristicItem charItem = BeyonderCharacteristicItemHandler
+                .selectCharacteristicOfPathwayAndSequence(BeyonderData.getPathway(player), dropSequence);
+        if (charItem == null) return;
 
         ItemEntity itemEntity = new ItemEntity(
                 player.level(),
                 player.getX(),
                 player.getY(),
                 player.getZ(),
-                stack
+                new ItemStack(charItem.asItem())
         );
-
-        if(beyonderMap.get(player).isEmpty()) return;
-
-        var data = beyonderMap.get(player).get();
-        BeyonderData.setBeyonder(player, data.pathway(), data.sequence());
 
         event.getDrops().add(itemEntity);
     }
@@ -181,7 +229,19 @@ public class BeyonderEventHandler {
             StoredData data = beyonderMap.get(player).get();
             StoredData regressed = data.regressSeq(false);
 
-            beyonderMap.put(player, regressed);
+            SacrificeRevertComponent revert = player.getData(ModAttachments.SACRIFICE_REVERT_COMPONENT);
+            if (revert.isActive()) {
+                int originalSeq = revert.getRevertToSequence();
+                // Store the original sequence so onPlayerDrops drops the right characteristic
+                player.getPersistentData().putInt("sacrifice_drop_sequence", originalSeq);
+                player.getPersistentData().putBoolean("sacrifice_bar_clear", true);
+                revert.clear();
+                // Regress from the original sequence, not the temporary sacrificed one
+                StoredData dataAtOriginalSeq = StoredData.builder.copyFrom(data).sequence(originalSeq).build();
+                beyonderMap.put(player, dataAtOriginalSeq.regressSeq());
+            } else {
+                beyonderMap.put(player, regressed);
+            }
             player.getPersistentData().putFloat(BeyonderData.NBT_DIGESTION_PROGRESS, 1.0f);
 
             BeyonderData.recalculateCharStackModifiers(player);
@@ -192,6 +252,21 @@ public class BeyonderEventHandler {
                 ClientBeyonderCache.updateData(player.getUUID(), regressed.pathway(), regressed.sequence(),
                         0.0f, false, true, 0.0f);
         }
+    }
+
+    @SubscribeEvent
+    public static void onMobKilled(LivingDeathEvent event) {
+        if (event.getEntity() instanceof ServerPlayer) return; // only track mob kills, not player kills
+        Entity causeEntity = event.getSource().getEntity();
+        if (causeEntity == null) causeEntity = event.getSource().getDirectEntity();
+        if (!(causeEntity instanceof ServerPlayer player)) return;
+        if (!BeyonderData.isBeyonder(player)) return;
+        if (!BeyonderData.getPathway(player).equals("red_priest")) return;
+        if (BeyonderData.getSequence(player) > 3) return;
+
+        KillCountComponent killCount = player.getData(ModAttachments.KILL_COUNT_COMPONENT);
+        killCount.increment();
+        PacketHandler.sendToPlayer(player, new SyncKillCountPacket(killCount.getKillCount()));
     }
 
     @SubscribeEvent
@@ -288,6 +363,10 @@ public class BeyonderEventHandler {
         if (!(victim instanceof Player victimPlayer)) return;
         if (!BeyonderData.isBeyonder(victim)) return;
         if (victim.level().isClientSide()) return;
+
+        // Sacrifice ability protects the victim from digestion drain and regression while active
+        if (victim instanceof ServerPlayer victimSp
+                && victimSp.getData(ModAttachments.SACRIFICE_REVERT_COMPONENT).isActive()) return;
 
         int victimSeq = BeyonderData.getSequence(victim);
 

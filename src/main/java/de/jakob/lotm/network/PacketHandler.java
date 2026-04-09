@@ -138,6 +138,18 @@ public class PacketHandler {
         );
 
         registrar.playToClient(
+                SyncKillCountPacket.TYPE,
+                SyncKillCountPacket.STREAM_CODEC,
+                SyncKillCountPacket::handle
+        );
+
+        registrar.playToClient(
+                SyncSacrificeDurationPacket.TYPE,
+                SyncSacrificeDurationPacket.STREAM_CODEC,
+                SyncSacrificeDurationPacket::handle
+        );
+
+        registrar.playToClient(
                 AddEffectPacket.TYPE,
                 AddEffectPacket.STREAM_CODEC,
                 AddEffectPacket::handle
