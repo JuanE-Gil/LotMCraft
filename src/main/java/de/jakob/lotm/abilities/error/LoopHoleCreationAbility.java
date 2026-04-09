@@ -91,7 +91,7 @@ public class LoopHoleCreationAbility extends Ability {
             });
         });
 
-        ServerScheduler.scheduleForDuration(0, 20, 20 * 14, () -> {
+        ServerScheduler.scheduleForDuration(0, 45, 20 * 14, () -> {
             AbilityUtil.getNearbyEntities(entity, serverLevel, targetLoc, 3).forEach(e -> {
                     if(BeyonderData.isBeyonder(e))
                         TheftHandler.performAbilityTheft(serverLevel, entity, e, random, true, this);
