@@ -1,5 +1,6 @@
 package de.jakob.lotm.abilities.error;
 
+import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.entity.ModEntities;
 import de.jakob.lotm.entity.custom.AvatarEntity;
@@ -43,28 +44,27 @@ public class AvatarCreationAbility extends Ability {
         }
 
         if(entity instanceof AvatarEntity previousAvatar) {
-//            Entity originalOwner = serverLevel.getEntity(previousAvatar.getOriginalOwner());
-//            if(!(originalOwner instanceof LivingEntity originalLivingOwner)) {
-//                return;
-//            }
-//
-//            if(!BeyonderData.isBeyonder(originalLivingOwner) || BeyonderData.getSequence(originalLivingOwner) > 2) {
-//                return;
-//            }
-//
-//            if(BeyonderData.getSequence(previousAvatar) - BeyonderData.getSequence(originalLivingOwner) > 1) {
-//                return;
-//            }
-//            int sequence = BeyonderData.getSequence(entity) + 1;
-//            AvatarEntity avatar = new AvatarEntity(ModEntities.ERROR_AVATAR.get(), level, previousAvatar.getOriginalOwner(), "error", sequence);
-//            avatar.setPos(entity.getX(), entity.getY(), entity.getZ());
-//            level.addFreshEntity(avatar);
             return;
         }
 
-        int sequence = BeyonderData.getSequence(entity) + 1;
+        var stacks = BeyonderData.beyonderMap.get(entity).get().charStack();
+        int sequence = LOTMCraft.NON_BEYONDER_SEQ;
+        int entitySeq = BeyonderData.getSequence(entity);
+
+        for (int i = 1; i < LOTMCraft.NON_BEYONDER_SEQ; i++){
+            if(entitySeq >= i) continue;
+
+            if(stacks.get(i) > 1){
+                sequence = i;
+                break;
+            }
+        }
+
         AvatarEntity avatar = new AvatarEntity(ModEntities.ERROR_AVATAR.get(), level, entity.getUUID(), "error", sequence);
         avatar.setPos(entity.getX(), entity.getY(), entity.getZ());
         level.addFreshEntity(avatar);
+
+        if(sequence != LOTMCraft.NON_BEYONDER_SEQ)
+            BeyonderData.setCharStack(entity, sequence, stacks.get(sequence) - 1, true);
     }
 }
