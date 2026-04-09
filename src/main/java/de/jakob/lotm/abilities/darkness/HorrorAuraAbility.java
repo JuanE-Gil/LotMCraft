@@ -1,6 +1,7 @@
 package de.jakob.lotm.abilities.darkness;
 
 import de.jakob.lotm.abilities.core.Ability;
+import de.jakob.lotm.abilities.core.AbilityUsedEvent;
 import de.jakob.lotm.abilities.core.ToggleAbility;
 import de.jakob.lotm.abilities.core.interaction.InteractionHandler;
 import de.jakob.lotm.abilities.sun.HolyOathAbility;
@@ -18,6 +19,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,9 +28,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class HorrorAuraAbility extends Ability {
     public HorrorAuraAbility(String id) {
-        super(id, 30);
+        super(id, 30, "darkness");
         this.canBeCopied = false;
         autoClear = false;
+        postsUsedAbilityEventManually = true;
+        interactionRadius = 20;
+        interactionCacheTicks = 5;
     }
 
     @Override
@@ -56,6 +61,8 @@ public class HorrorAuraAbility extends Ability {
             loc.setPosition(entity.position());
             loc.setLevel(serverLevel);
             MovableEffectManager.updateEffectPosition(effectID, loc, serverLevel);
+
+            NeoForge.EVENT_BUS.post(new AbilityUsedEvent(serverLevel, entity.position(), entity, this, interactionFlags, interactionRadius, interactionCacheTicks));
 
             // Horror Aura is suppressed by purification
             int seq = AbilityUtil.getSeqWithArt(entity, this);

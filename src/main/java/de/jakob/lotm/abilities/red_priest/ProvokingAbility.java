@@ -23,7 +23,7 @@ import java.util.Map;
 
 public class ProvokingAbility extends Ability {
     public ProvokingAbility(String id) {
-        super(id, 5);
+        super(id, 5, "morale_boost");
     }
 
     @Override

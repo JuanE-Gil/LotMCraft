@@ -1,6 +1,7 @@
 package de.jakob.lotm.abilities.tyrant;
 
 import de.jakob.lotm.abilities.core.Ability;
+import de.jakob.lotm.abilities.core.AbilityUsedEvent;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.data.Location;
 import de.jakob.lotm.util.helper.AbilityUtil;
@@ -20,14 +21,18 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.common.NeoForge;
 import org.joml.Vector3f;
 
 import java.util.*;
 
 public class TorrentialDownpourAbility extends Ability {
     public TorrentialDownpourAbility(String id) {
-        super(id, 40);
+        super(id, 40, "water", "water_strong");
         canBeCopied = false;
+        postsUsedAbilityEventManually = true;
+        interactionRadius = 25;
+        interactionCacheTicks = 20 * 30;
     }
 
     @Override
@@ -73,6 +78,8 @@ public class TorrentialDownpourAbility extends Ability {
         Vec3 startPos = AbilityUtil.getTargetLocation(entity, 25, 2);
         Vec3 cloudPos = startPos.add(0, 12, 0);
         Vec3 rainPos = startPos.add(0, 7, 0);
+
+        NeoForge.EVENT_BUS.post(new AbilityUsedEvent(serverLevel, startPos, entity, this, interactionFlags, interactionRadius, interactionCacheTicks));
 
         List<BlockPos> blocks = new ArrayList<>(AbilityUtil.getBlocksInCircle((ServerLevel) level, startPos.add(0, -2, 0), 27));
         for(int i = -12; i < 13; i++) {

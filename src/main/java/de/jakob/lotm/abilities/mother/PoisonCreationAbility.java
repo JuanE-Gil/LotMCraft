@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class PoisonCreationAbility extends SelectableAbility {
     public PoisonCreationAbility(String id) {
-        super(id, 3);
+        super(id, 3, "poison");
     }
 
     @Override

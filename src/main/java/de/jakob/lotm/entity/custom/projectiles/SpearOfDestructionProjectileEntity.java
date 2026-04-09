@@ -1,5 +1,6 @@
 package de.jakob.lotm.entity.custom.projectiles;
 
+import de.jakob.lotm.abilities.core.AbilityUsedEvent;
 import de.jakob.lotm.damage.ModDamageTypes;
 import de.jakob.lotm.entity.ModEntities;
 import de.jakob.lotm.item.ModItems;
@@ -17,6 +18,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
+import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.NotNull;
 
 public class SpearOfDestructionProjectileEntity extends AbstractArrow {
@@ -94,6 +96,8 @@ public class SpearOfDestructionProjectileEntity extends AbstractArrow {
         }
 
         EffectManager.playEffect(EffectManager.Effect.CONQUERING, target.getX(), target.getY() + target.getBbHeight() / 2, target.getZ(), serverLevel);
+        if(owner != null)
+            NeoForge.EVENT_BUS.post(new AbilityUsedEvent(serverLevel, target.position(), owner, null, new String[]{"burning", "explosion"}, 9, 15));
     }
 
     @Override
@@ -110,6 +114,9 @@ public class SpearOfDestructionProjectileEntity extends AbstractArrow {
         serverLevel.explode(getOwner(), result.getLocation().x, result.getLocation().y, result.getLocation().z, 9, griefing, griefing ? Level.ExplosionInteraction.TNT : Level.ExplosionInteraction.NONE);
         serverLevel.explode(getOwner(), result.getLocation().x, result.getLocation().y, result.getLocation().z, 9, griefing, griefing ? Level.ExplosionInteraction.TNT : Level.ExplosionInteraction.NONE);
         serverLevel.explode(getOwner(), result.getLocation().x, result.getLocation().y, result.getLocation().z, 9, griefing, griefing ? Level.ExplosionInteraction.TNT : Level.ExplosionInteraction.NONE);
+
+        if(owner != null)
+            NeoForge.EVENT_BUS.post(new AbilityUsedEvent(serverLevel, result.getLocation(), owner, null, new String[]{"burning", "explosion"}, 9, 15));
     }
 
 

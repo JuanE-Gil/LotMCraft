@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TrapAbility extends Ability {
     public TrapAbility(String id) {
-        super(id, 1);
+        super(id, 1, "explosion");
     }
 
     @Override
