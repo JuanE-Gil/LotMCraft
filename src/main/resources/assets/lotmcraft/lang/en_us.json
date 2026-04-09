@@ -831,7 +831,6 @@
   "item.lotmcraft.virtual_avatar_ability.description": "Virtual Persona: Other can now split off a Identity Avatar into reality",
   "item.lotmcraft.meta_awareness_ability": "Meta Awareness",
   "item.lotmcraft.meta_awareness_ability.description": "Whoever says your username or divines you will automatically pray to you",
-  
 
   "_comment003": "Effects-----------------------------------------------------------------------------",
   "effect.lotmcraft.asleep": "Asleep",
@@ -861,6 +860,14 @@
   "entity.lotmcraft.lightning": "Lightning",
   "entity.lotmcraft.beyonder_npc": "Rogue Beyonder",
   "entity.lotmcraft.tsunami": "Tsunami",
+  "entity.lotmcraft.spirit_dervish": "Dervish",
+  "entity.lotmcraft.spirit_bubbles": "Bubbles",
+  "entity.lotmcraft.spirit_ghost": "Ghost",
+  "entity.lotmcraft.spirit_malmouth": "Malmouth",
+  "entity.lotmcraft.spirit_bane": "Bane",
+  "entity.lotmcraft.spirit_bizarro_bane": "Bizarro Bane",
+  "entity.lotmcraft.spirit_blue_wizard": "Blue Wizard",
+  "entity.lotmcraft.spirit_translucent_wizard": "Translucent Wizard",
   "entity.minecraft.villager.lotmcraft.beyonder_merchant": "Beyonder Merchant",
   "entity.minecraft.villager.lotmcraft.evernight_clergyman": "Evernight Clergyman",
   "entity.minecraft.villager.lotmcraft.eternal_blazing_sun_clergyman": "Eternal Blazing Sun Clergyman",
@@ -1406,6 +1413,9 @@
   "lotm.quest.impl.deliver_item": "Deliver the Package",
   "lotm.quest.impl.deliver_item.description": "Deliver an item to the marked location.",
   "lotm.quest.impl.deliver_item.lore": "Discrete delivery. No mistakes.",
+
+  "_comment015": "Uniquenesses-------------------------------------------------------------------------",
+  "item.lotmcraft.red_priest_uniqueness": "Salinger's Blood Banner",
 
   "lotm.griefing": "Griefing Enabled",
   "lotm.griefing_required": "Griefing must be enabled",

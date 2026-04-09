@@ -5,6 +5,7 @@ import de.jakob.lotm.network.packets.toClient.*;
 import de.jakob.lotm.network.packets.toServer.*;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.beyonderMap.PathwayHistory;
+import de.jakob.lotm.util.beyonderMap.StoredData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerLevel;
@@ -15,6 +16,10 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
+
+import java.util.Optional;
+
+import static de.jakob.lotm.util.BeyonderData.beyonderMap;
 
 public class PacketHandler {
 
@@ -696,12 +701,14 @@ public class PacketHandler {
         float spirituality = BeyonderData.getSpirituality(player);
         boolean griefingEnabled = BeyonderData.isGriefingEnabled(player);
         float digestionProgress = BeyonderData.getDigestionProgress(player);
+        Optional<StoredData> storedData = beyonderMap.get(player);
+        int charStackCount = storedData.map(data -> data.charStack().get(sequence)).orElse(0);
 
         PathwayHistory history = BeyonderData.beyonderMap != null && BeyonderData.beyonderMap.get(player).isPresent()
                 ? BeyonderData.beyonderMap.get(player).get().pathwayHistory()
                 : new PathwayHistory();
 
-        SyncBeyonderDataPacket packet = new SyncBeyonderDataPacket(pathway, sequence, spirituality, griefingEnabled, digestionProgress, history);
+        SyncBeyonderDataPacket packet = new SyncBeyonderDataPacket(pathway, sequence, spirituality, griefingEnabled, digestionProgress, history, charStackCount);
         sendToPlayer(player, packet);
     }
 
@@ -747,8 +754,10 @@ public class PacketHandler {
         float spirituality = BeyonderData.getSpirituality(targetPlayer);
         boolean griefingEnabled = BeyonderData.isGriefingEnabled(targetPlayer);
         float digestionProgress = BeyonderData.getDigestionProgress(targetPlayer);
+        Optional<StoredData> storedData = beyonderMap.get(targetPlayer);
+        int charStackCount = storedData.map(data -> data.charStack().get(sequence)).orElse(0);
 
-        SyncBeyonderDataPacket packet = new SyncBeyonderDataPacket(pathway, sequence, spirituality, griefingEnabled, digestionProgress, new PathwayHistory());
+        SyncBeyonderDataPacket packet = new SyncBeyonderDataPacket(pathway, sequence, spirituality, griefingEnabled, digestionProgress, new PathwayHistory(), charStackCount);
 
         targetPlayer.getServer().getPlayerList().getPlayers().forEach(player -> {
             sendToPlayer(player, packet);

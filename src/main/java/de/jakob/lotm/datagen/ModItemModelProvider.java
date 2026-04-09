@@ -34,6 +34,7 @@ public class ModItemModelProvider extends ItemModelProvider {
         basicItem(ModItems.GUIDING_BOOK.get());
         basicItem(ModItems.CRYSTAL_BALL.get());
         basicItem(ModItems.CANE.get());
+        basicItem(ModItems.RED_PRIEST_UNIQUENESS.get());
         tintableItem(ModItems.SEALED_ARTIFACT.get());
         tintableItem(ModItems.SEALED_ARTIFACT_BELL.get());
         tintableItem(ModItems.SEALED_ARTIFACT_CHAIN.get());

@@ -1,4 +1,4 @@
-// 1.21.1	2026-04-08T18:51:00.4256064	Item Models: lotmcraft
+// 1.21.1	2026-04-09T15:39:22.6849484	Item Models: lotmcraft
 f73b18465ecc4c7209da8e28508db3e3a9a348de assets/lotmcraft/models/item/abyss_demonic_fish_blood.json
 ff1f40acc559743c518a78f4d8d99df759005e37 assets/lotmcraft/models/item/agate_peacock_egg.json
 65b6c713526448dd94ab6c94da2487f1a4242daf assets/lotmcraft/models/item/ancient_logbook.json
@@ -297,6 +297,7 @@ a5851523c9f6e597c054270b142883e9a1c91a94 assets/lotmcraft/models/item/reaper.jso
 a704ca7b9163942be958fe4b8493c101ebd5e5fe assets/lotmcraft/models/item/reaper_potion.json
 f87acda52ddb81dc800bf18d4a35b4e309bcd885 assets/lotmcraft/models/item/redcrown_balsam_powder.json
 22bcac033250485b8ccd65314821997edffcc4fe assets/lotmcraft/models/item/red_chestnut_flower.json
+8b7d1ed3ff8e353f08159423a206a765d849b4d9 assets/lotmcraft/models/item/red_priest_uniqueness.json
 7c911e8ed81a9fe625956c25fa247bcec96c49a8 assets/lotmcraft/models/item/riptide_ability.json
 a5851523c9f6e597c054270b142883e9a1c91a94 assets/lotmcraft/models/item/robot.json
 74fed5f94dff2e1561ee7ffea83413071be10ab6 assets/lotmcraft/models/item/robot_characteristic.json

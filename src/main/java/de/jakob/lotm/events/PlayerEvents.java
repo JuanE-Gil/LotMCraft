@@ -9,6 +9,7 @@ import de.jakob.lotm.attachments.DisabledAbilitiesComponent;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.attachments.NewPlayerComponent;
 import de.jakob.lotm.attachments.SacrificeRevertComponent;
+import de.jakob.lotm.entity.custom.ability_entities.darkness_pathway.ConcealedDomainEntity;
 import de.jakob.lotm.gamerule.ModGameRules;
 import de.jakob.lotm.item.ModItems;
 import de.jakob.lotm.network.PacketHandler;
@@ -56,10 +57,18 @@ public class PlayerEvents {
         if (event.getEntity() instanceof ServerPlayer player) {
             DisabledAbilitiesComponent disabledAbilitiesComponent = player.getData(ModAttachments.DISABLED_ABILITIES_COMPONENT);
             disabledAbilitiesComponent.enableAllAbilities();
+
             AbilityCooldownComponent abilityCooldownComponent = player.getData(ModAttachments.COOLDOWN_COMPONENT);
             abilityCooldownComponent.removeAllCooldowns();
+
             ToggleAbility.cleanUp(player.serverLevel(), player);
             DivinationAbility.cleanupOnLogout(player);
+
+            // Clean up concealed domain entities
+            ConcealedDomainEntity concealedDomainEntity = ConcealedDomainEntity.getActiveForOwner(player.getUUID());
+            if(concealedDomainEntity != null) {
+                concealedDomainEntity.discard();
+            }
 
             if(BeyonderData.isBeyonder(player))
                 BeyonderData.beyonderMap.addLastPosition(player);

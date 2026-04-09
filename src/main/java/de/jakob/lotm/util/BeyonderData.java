@@ -11,10 +11,7 @@ import de.jakob.lotm.gamerule.ModGameRules;
 import de.jakob.lotm.network.PacketHandler;
 import de.jakob.lotm.network.packets.toClient.SyncBeyonderDataPacket;
 import de.jakob.lotm.network.packets.toClient.SyncLivingEntityBeyonderDataPacket;
-import de.jakob.lotm.util.beyonderMap.BeyonderMap;
-import de.jakob.lotm.util.beyonderMap.CharacteristicStack;
-import de.jakob.lotm.util.beyonderMap.HonorificName;
-import de.jakob.lotm.util.beyonderMap.StoredData;
+import de.jakob.lotm.util.beyonderMap.*;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.ParticleUtil;
 import de.jakob.lotm.util.helper.TeamUtils;
@@ -153,6 +150,7 @@ public class BeyonderData {
         pathwayInfos.put("chained", new PathwayInfos("chained", 0xFFb18fbf, new String[]{"chained", "abomination", "ancient_bane", "disciple_of_silence", "puppet", "wraith", "zombie", "werewolf", "lunatic", "prisoner"}, new String[]{"abyss"}));
         pathwayInfos.put("black_emperor", new PathwayInfos("black_emperor", 0xFF181040, new String[]{"black_emperor", "prince_of_abolition", "duke_of_entropy", "frenzied_mage", "ear_of_the_fallen", "mentor_of_disorder", "baron_of_corruption", "briber", "barbarian", "lawyer"}, new String[]{"justiciar"}));
         pathwayInfos.put("justiciar", new PathwayInfos("justiciar", 0xFFfcd99f, new String[]{"justiciar", "hand_of_order", "balancer", "chaos_hunter", "imperative_mage", "disciplinary_paladin", "judge", "interrogator", "sheriff", "arbiter"}, new String[]{"black_emperor"}));
+        pathwayInfos.put("placeholder", new PathwayInfos("placeholder", 0xFFfcd99f, new String[]{"", "", "", "", "", "", "", "", "", "",}, new String[]{}));
     }
 
     public static void setBeyonder(LivingEntity entity, String pathway, int sequence) {
@@ -202,7 +200,7 @@ public class BeyonderData {
                 PacketHandler.syncBeyonderDataToPlayer(serverPlayer);
                 beyonderMap.put(serverPlayer);
 
-                SyncBeyonderDataPacket packet = new SyncBeyonderDataPacket(pathway, sequence, 0.0f, false, 0.0f, new de.jakob.lotm.util.beyonderMap.PathwayHistory());
+                SyncBeyonderDataPacket packet = new SyncBeyonderDataPacket(pathway, sequence, 0.0f, false, 0.0f, new PathwayHistory(), 0);
                 PacketHandler.sendToAllPlayers(packet);
 
                 // Disband team if leader is no longer eligible (Red Priest seq <= 3)
@@ -434,7 +432,7 @@ public class BeyonderData {
         if (!entity.level().isClientSide()) {
             if(entity instanceof ServerPlayer serverPlayer) {
                 // Send empty data to clear client cache
-                SyncBeyonderDataPacket packet = new SyncBeyonderDataPacket("none", 10, 0.0f, false, 0.0f, new de.jakob.lotm.util.beyonderMap.PathwayHistory());
+                SyncBeyonderDataPacket packet = new SyncBeyonderDataPacket("none", 10, 0.0f, false, 0.0f, new de.jakob.lotm.util.beyonderMap.PathwayHistory(), 0);
                 PacketHandler.sendToPlayer(serverPlayer, packet);
             }
             else {
@@ -585,11 +583,11 @@ public class BeyonderData {
 
         beyonderMap.addStack(player, 1);
 
-        int seq = getSequence(player);
-
         player.getPersistentData().putFloat(NBT_DIGESTION_PROGRESS, 0.0f);
 
         recalculateCharStackModifiers(player);
+        if(player instanceof ServerPlayer serverPlayer) PacketHandler.syncBeyonderDataToPlayer(serverPlayer);
+
     }
 
     public static void setCharStack(LivingEntity player, int seq, int value, boolean ignoreDigestion){
@@ -601,6 +599,7 @@ public class BeyonderData {
             player.getPersistentData().putFloat(NBT_DIGESTION_PROGRESS, 0.0f);
 
         recalculateCharStackModifiers(player);
+        if(player instanceof ServerPlayer serverPlayer) PacketHandler.syncBeyonderDataToPlayer(serverPlayer);
     }
 
     public static void recalculateCharStackModifiers(LivingEntity player){

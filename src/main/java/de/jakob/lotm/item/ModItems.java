@@ -6,6 +6,7 @@ import de.jakob.lotm.block.ModBlocks;
 import de.jakob.lotm.item.custom.*;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Rarity;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
@@ -80,6 +81,13 @@ public class ModItems {
     public static final DeferredItem<BlockItem> MYSTICAL_RING = ITEMS.register("mystical_ring",
             () -> new BlockItem(ModBlocks.MYSTICAL_RING.get(), new Item.Properties())
     );
+
+
+    // Uniquenesses
+    public static final DeferredItem<Item> RED_PRIEST_UNIQUENESS = ITEMS.register("red_priest_uniqueness",
+            () -> new UniquenessItem(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC), "red_priest")
+    );
+
 
     public static PotionIngredient selectRandomIngredient(List<PotionIngredient> ingredients, Random random) {
         if (ingredients == null || ingredients.isEmpty()) {

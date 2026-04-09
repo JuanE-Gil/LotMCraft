@@ -21,6 +21,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
@@ -29,6 +30,7 @@ import java.util.stream.Collectors;
 
 public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
     private ResourceLocation containerBackground;
+    private Inventory playerInventory;
 
     // Abilities section
     private boolean showAbilities = false;
@@ -99,6 +101,7 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
 
     public IntrospectScreen(IntrospectMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
+        this.playerInventory = playerInventory;
 
         this.containerBackground = ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "textures/gui/introspect.png");
 
@@ -1559,7 +1562,17 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
 
     private void renderSequenceNumber(GuiGraphics guiGraphics, int x, int y) {
         int color = 0xDDDDDD;
-        Component sequenceText = Component.translatable("lotm.sequence").append(": ").append(Component.literal(menu.getSequence() + "")).withStyle(ChatFormatting.BOLD);
+        Player player = playerInventory.player;
+        int charStackCount = 0;
+        if(player.level().isClientSide) {
+            charStackCount = ClientBeyonderCache.getCharStack(player.getUUID());
+        }
+        Component sequenceText = Component.translatable("lotm.sequence")
+                .append(": ")
+                .append(Component.literal(menu.getSequence() + ""))
+                .append(charStackCount > 0 ? " +" + charStackCount : "")
+                .withStyle(ChatFormatting.BOLD);
+
         int textX = 7;
         int textY = 7;
         guiGraphics.drawString(this.font, sequenceText, x + textX, y + textY, color, true);

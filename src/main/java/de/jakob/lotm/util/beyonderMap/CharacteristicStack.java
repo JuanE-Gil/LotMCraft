@@ -65,8 +65,8 @@ public record CharacteristicStack(ArrayList<Integer> stacks, Boolean isUsed) {
         return new CharacteristicStack(buff, zeroCheck(buff));
     }
 
-    public int get(int index){
-        return this.stacks.get(index);
+    public int get(int seq){
+        return this.stacks.get(seq);
     }
 
     public CompoundTag toNBT(){

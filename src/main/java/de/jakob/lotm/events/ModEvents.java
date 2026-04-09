@@ -50,6 +50,7 @@ import de.jakob.lotm.rendering.models.DoorMythicalCreatureModel;
 import de.jakob.lotm.rendering.models.TyrantMythicalCreatureModel;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.SpiritualityProgressTracker;
+import net.minecraft.client.telemetry.events.WorldUnloadEvent;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.MinecraftServer;
