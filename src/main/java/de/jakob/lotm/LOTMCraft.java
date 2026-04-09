@@ -27,6 +27,7 @@ import de.jakob.lotm.entity.client.projectiles.paper_dagger.PaperDaggerProjectil
 import de.jakob.lotm.entity.client.projectiles.spear_of_destruction.SpearOfDestructionProjectileRenderer;
 import de.jakob.lotm.entity.client.projectiles.spear_of_light.SpearOfLightProjectileRenderer;
 import de.jakob.lotm.entity.client.projectiles.spirit_ball.SpiritBallRenderer;
+import de.jakob.lotm.entity.client.projectiles.spirit_block.SpiritBlockProjectileRenderer;
 import de.jakob.lotm.entity.client.projectiles.unshadowed_spear.UnshadowedSpearProjectileRenderer;
 import de.jakob.lotm.entity.client.projectiles.wind_blade.WindBladeRenderer;
 import de.jakob.lotm.entity.client.ability_entities.red_priest_pathway.war_banner.WarBannerRenderer;
@@ -266,6 +267,7 @@ public class LOTMCraft
             EntityRenderers.register(ModEntities.DAMAGE_TRACKER.get(), DamageTrackerRenderer::new);
             EntityRenderers.register(ModEntities.TIME_CHANGE.get(), TimeChangeRenderer::new);
             EntityRenderers.register(ModEntities.SPIRIT_BALL.get(), SpiritBallRenderer::new);
+            EntityRenderers.register(ModEntities.SPIRIT_BLOCK_PROJECTILE.get(), SpiritBlockProjectileRenderer::new);
 
             // Spirits
             EntityRenderers.register(ModEntities.SPIRIT_DERVISH_ENTITY.get(), SpiritDervishRenderer::new);
