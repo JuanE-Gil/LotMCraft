@@ -1,11 +1,15 @@
 package de.jakob.lotm.entity.custom.spirits;
 
+import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.damage.ModDamageTypes;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.ParticleUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
@@ -21,6 +25,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
@@ -67,6 +72,14 @@ public class SpiritMalmouthEntity extends Animal {
                 .add(Attributes.ATTACK_DAMAGE, 50.0)
                 .add(Attributes.ARMOR, 5.0)
                 .add(Attributes.FOLLOW_RANGE, 40.0);
+    }
+
+    @Override
+    public @NotNull ResourceKey<LootTable> getDefaultLootTable() {
+        return ResourceKey.create(
+                Registries.LOOT_TABLE,
+                ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "entities/spirit_malmouth")
+        );
     }
 
     @Override
