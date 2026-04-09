@@ -20,7 +20,7 @@ import java.util.Map;
 
 public class ConqueringAbility extends Ability {
     public ConqueringAbility(String id) {
-        super(id, 1.5f);
+        super(id, 1.5f, "morale_boost");
         canBeCopied = false;
         canBeReplicated = false;
     }

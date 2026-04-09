@@ -19,9 +19,11 @@ import java.util.Map;
 
 public class ApocalypseAbility extends Ability {
     public ApocalypseAbility(String id) {
-        super(id, 10);
+        super(id, 10, "explosion");
         this.canBeCopied = false;
         autoClear = false;
+        interactionRadius = 50;
+        interactionCacheTicks = 110;
     }
 
     @Override

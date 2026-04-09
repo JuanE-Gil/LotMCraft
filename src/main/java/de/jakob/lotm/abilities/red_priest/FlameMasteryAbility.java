@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class FlameMasteryAbility extends SelectableAbility {
     private final HashSet<UUID> transformedEntities = new HashSet<>();
     public FlameMasteryAbility(String id) {
-        super(id, 2.5f);
+        super(id, 2.5f, "burning");
     }
 
     @Override

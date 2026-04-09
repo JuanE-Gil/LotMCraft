@@ -28,8 +28,10 @@ import java.util.Map;
 
 public class SealingAbility extends Ability {
     public SealingAbility(String id) {
-        super(id, 2);
+        super(id, 2, "sealing");
         canBeCopied = false;
+        interactionRadius = 5;
+        interactionCacheTicks = 20 * 14;
     }
 
     @Override
