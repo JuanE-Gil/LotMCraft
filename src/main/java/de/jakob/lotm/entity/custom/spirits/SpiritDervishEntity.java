@@ -60,7 +60,7 @@ public class SpiritDervishEntity extends Animal {
                 .add(Attributes.FLYING_SPEED, 2.5)
                 .add(Attributes.SCALE, 1)
                 .add(Attributes.ARMOR, 5.0)
-                .add(Attributes.ATTACK_DAMAGE, 18.0)
+                .add(Attributes.ATTACK_DAMAGE, 25.0)
                 .add(Attributes.FOLLOW_RANGE, 30.0);
     }
 
@@ -176,7 +176,7 @@ public class SpiritDervishEntity extends Animal {
                     }
 
                     if (this.attackTime <= 0) {
-                        this.attackTime = 20;
+                        this.attackTime = 10;
                         this.dervish.doHurtTarget(livingentity);
                     }
 
@@ -185,11 +185,11 @@ public class SpiritDervishEntity extends Animal {
                     if (this.attackTime <= 0) {
                         ++this.attackStep;
                         if (this.attackStep == 1) {
-                            this.attackTime = 60;
+                            this.attackTime = 40;
                         } else if (this.attackStep <= 4) {
                             this.attackTime = 6;
                         } else {
-                            this.attackTime = 100;
+                            this.attackTime = 60;
                             this.attackStep = 0;
                         }
 

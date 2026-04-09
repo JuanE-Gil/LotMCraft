@@ -1,8 +1,9 @@
 package de.jakob.lotm.abilities.error;
 
 import de.jakob.lotm.LOTMCraft;
+import de.jakob.lotm.abilities.core.Ability;
+import de.jakob.lotm.abilities.core.AbilityHandler;
 import de.jakob.lotm.abilities.core.SelectableAbility;
-import de.jakob.lotm.abilities.error.handler.AbilityTheftHandler;
 import de.jakob.lotm.abilities.error.handler.TheftHandler;
 import de.jakob.lotm.attachments.ControllingDataComponent;
 import de.jakob.lotm.attachments.ModAttachments;
@@ -255,12 +256,14 @@ public class ParasitationAbility extends SelectableAbility {
     private static boolean performExitSteal(ServerLevel serverLevel, ServerPlayer player, LivingEntity host) {
         float roll = new Random().nextFloat();
 
+        Ability instance = LOTMCraft.abilityHandler.getById("parasitation_ability");
+
         if (roll < 0.50f) {
             stealArmor(player, host);
         } else if (roll < 0.75f) {
-            TheftHandler.stealItemsFromEntity(host, player);
+            TheftHandler.stealItemsFromEntity(host, player, instance);
         } else if (roll < 0.90f) {
-            AbilityTheftHandler.performTheft(host.level(), player, host, new Random(), false);
+            TheftHandler.performAbilityTheft(serverLevel, player, host, new Random(), true, instance);
         } else {
             // Health drain — check if it kills
             float drain = host.getMaxHealth() * 0.2f;
@@ -274,6 +277,9 @@ public class ParasitationAbility extends SelectableAbility {
     }
 
     private static void stealArmor(ServerPlayer player, LivingEntity host) {
+        Ability instance = LOTMCraft.abilityHandler.getById("parasitation_ability");
+
+
         for (EquipmentSlot slot : new EquipmentSlot[]{EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET}) {
             ItemStack armor = host.getItemBySlot(slot);
             if (!armor.isEmpty()) {
@@ -284,7 +290,7 @@ public class ParasitationAbility extends SelectableAbility {
                 return;
             }
         }
-        TheftHandler.stealItemsFromEntity(host, player);
+        TheftHandler.stealItemsFromEntity(host, player, instance);
     }
 
     //concealmedode

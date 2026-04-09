@@ -3,6 +3,7 @@ package de.jakob.lotm.entity;
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.entity.custom.*;
 import de.jakob.lotm.entity.custom.ability_entities.*;
+import de.jakob.lotm.entity.custom.ability_entities.darkness_pathway.ConcealedDomainEntity;
 import de.jakob.lotm.entity.custom.ability_entities.door_pathway.*;
 import de.jakob.lotm.entity.custom.ability_entities.mother_pathway.BloomingAreaEntity;
 import de.jakob.lotm.entity.custom.ability_entities.mother_pathway.CoffinEntity;

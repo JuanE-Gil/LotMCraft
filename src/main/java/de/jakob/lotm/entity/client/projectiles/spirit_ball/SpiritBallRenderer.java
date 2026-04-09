@@ -31,17 +31,18 @@ public class SpiritBallRenderer extends EntityRenderer<SpiritBallEntity> {
         // --- Stable per-entity color from UUID ---
         Random random = new Random(entity.getUUID().getMostSignificantBits());
         float hue        = random.nextFloat();
-        float saturation = 0.7f + random.nextFloat() * 0.3f;
-        float brightness = 0.8f + random.nextFloat() * 0.2f;
+        // Lighter: lower saturation, much higher brightness
+        float saturation = 0.5f + random.nextFloat() * 0.3f;
+        float brightness = 0.92f + random.nextFloat() * 0.08f;
 
         int rgb   = Color.HSBtoRGB(hue, saturation, brightness);
         float red   = ((rgb >> 16) & 0xFF) / 255f;
         float green = ((rgb >> 8)  & 0xFF) / 255f;
         float blue  = ( rgb        & 0xFF) / 255f;
 
-        // --- Pulse: gentle sine wave on brightness (±12 %) ---
+        // --- Pulse: stronger sine wave on brightness (±20%) for a more vivid glow ---
         float time  = entity.tickCount + partialTicks;
-        float pulse = 1.0f + 0.12f * (float) Math.sin(time * 0.18f * Math.PI * 2.0);
+        float pulse = 1.0f + 0.20f * (float) Math.sin(time * 0.18f * Math.PI * 2.0);
 
         float pr = Math.min(1f, red   * pulse);
         float pg = Math.min(1f, green * pulse);
@@ -49,7 +50,7 @@ public class SpiritBallRenderer extends EntityRenderer<SpiritBallEntity> {
 
         ResourceLocation texture = getTextureLocation(entity);
 
-        // --- Inner solid sphere ---
+        // --- Inner solid octahedron-faceted shape ---
         poseStack.pushPose();
         poseStack.scale(0.125f, 0.125f, 0.125f);
         Matrix4f matrix = poseStack.last().pose();
@@ -66,9 +67,9 @@ public class SpiritBallRenderer extends EntityRenderer<SpiritBallEntity> {
         Matrix4f glowMatrix = poseStack.last().pose();
 
         // Alpha pulses opposite phase for a "breathing" glow
-        int glowAlpha = (int) (80 + 40 * Math.sin(time * 0.18f * Math.PI * 2.0 + Math.PI));
+        int glowAlpha = (int) (90 + 50 * Math.sin(time * 0.18f * Math.PI * 2.0 + Math.PI));
         VertexConsumer transVc = buffer.getBuffer(RenderType.entityTranslucentCull(texture));
-        renderSphere(glowMatrix, transVc, pr * 1.1f, pg * 1.1f, pb * 1.1f, glowAlpha);
+        renderSphere(glowMatrix, transVc, Math.min(1f, pr * 1.15f), Math.min(1f, pg * 1.15f), Math.min(1f, pb * 1.15f), glowAlpha);
 
         poseStack.popPose();
     }
@@ -88,8 +89,8 @@ public class SpiritBallRenderer extends EntityRenderer<SpiritBallEntity> {
 
     private void renderSphere(Matrix4f matrix, VertexConsumer buffer,
                               float red, float green, float blue, int alpha) {
-        int rings    = 24;
-        int segments = 48;
+        int rings    = 4;
+        int segments = 4;
 
         for (int i = 0; i < rings; i++) {
             float theta1 = (float) (Math.PI * i       / rings);
