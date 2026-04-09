@@ -135,14 +135,13 @@ public class SpiritBaneEntity extends Animal {
 
     /**
      * Checks whether the target can be affected by the lift-slam attack.
-     * Only targets with sequence 4 or below (i.e., seq number >= 4, or non-beyonders) can be lifted.
-     * In this system: lower sequence number = stronger. So seq <= 4 means the entity is sequence 4 or higher power.
-     * We want to only lift entities that are sequence 4 or BELOW in power, meaning seq number >= 4 or non-beyonder.
+     * Only targets at sequence 4 or weaker can be lifted.
+     * In this system lower sequence numbers are more powerful (0 is strongest).
+     * A target whose sequence number is >= 4 (i.e., 4, 5, 6, 7, 8, 9, or non-beyonder)
+     * is considered weak enough to be lifted.
      */
     private static boolean canLiftTarget(LivingEntity target) {
         int targetSequence = BeyonderData.getSequence(target);
-        // NON_BEYONDER_SEQ = 10, meaning non-beyonder
-        // Sequence 4 or below (weaker) means sequence number >= 4 (4,5,6,7,8,9,10)
         return targetSequence >= LIFT_SLAM_MAX_SEQUENCE;
     }
 

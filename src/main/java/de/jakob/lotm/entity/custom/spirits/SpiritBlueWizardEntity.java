@@ -127,12 +127,15 @@ public class SpiritBlueWizardEntity extends Animal {
      * Returns the particle color used for this wizard's effects.
      * Subclass-friendly so the translucent wizard can use different colors.
      */
+    private static final DustParticleOptions WIZARD_DUST = new DustParticleOptions(new Vector3f(0.2f, 0.4f, 1.0f), 1.5f);
+    private static final DustParticleOptions WIZARD_DUST_SMALL = new DustParticleOptions(new Vector3f(0.3f, 0.5f, 1.0f), 1.0f);
+
     protected DustParticleOptions getWizardDust() {
-        return new DustParticleOptions(new Vector3f(0.2f, 0.4f, 1.0f), 1.5f); // Blue
+        return WIZARD_DUST;
     }
 
     protected DustParticleOptions getWizardDustSmall() {
-        return new DustParticleOptions(new Vector3f(0.3f, 0.5f, 1.0f), 1.0f); // Light blue
+        return WIZARD_DUST_SMALL;
     }
 
     static class WizardAttackGoal extends Goal {

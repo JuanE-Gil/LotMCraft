@@ -37,6 +37,7 @@ public class SpiritMalmouthEntity extends Animal {
 
     private static final float SOUL_BREATH_RANGE = 8.0f;
     private static final float SOUL_BREATH_ANGLE = 45.0f; // degrees, half-angle of the cone
+    private static final double SOUL_BREATH_COS_THRESHOLD = Math.cos(Math.toRadians(SOUL_BREATH_ANGLE));
     private static final DustParticleOptions SOUL_DUST = new DustParticleOptions(new Vector3f(0.1f, 0.8f, 0.6f), 1.2f); // Teal/soul color
     private static final DustParticleOptions SOUL_DUST_DARK = new DustParticleOptions(new Vector3f(0.05f, 0.4f, 0.3f), 1.5f); // Dark soul
 
@@ -243,7 +244,7 @@ public class SpiritMalmouthEntity extends Animal {
             );
             List<LivingEntity> entities = serverLevel.getEntitiesOfClass(LivingEntity.class, detectionBox);
 
-            double cosThreshold = Math.cos(Math.toRadians(SOUL_BREATH_ANGLE));
+            double cosThreshold = SOUL_BREATH_COS_THRESHOLD;
 
             for (LivingEntity entity : entities) {
                 if (entity == malmouth) continue;
