@@ -25,8 +25,10 @@ import java.util.*;
 
 public class SurgeOfDarknessAbility extends Ability {
     public SurgeOfDarknessAbility(String id) {
-        super(id, 11);
+        super(id, 11, "darkness");
         autoClear = false;
+        interactionRadius = 45;
+        interactionCacheTicks = 20 * 15;
     }
 
     @Override

@@ -40,7 +40,7 @@ public class CharmAbility extends Ability {
     private static final HashSet<UUID> onCharmedCooldown = new HashSet<>();
 
     public CharmAbility(String id) {
-        super(id, 2);
+        super(id, 2, "charm");
 
         this.canBeCopied = false;
         this.canBeReplicated = false;

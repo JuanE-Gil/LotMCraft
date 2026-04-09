@@ -28,11 +28,12 @@ public class MindFogAbility extends ToggleAbility {
     private final DustParticleOptions fogDustStrong = new DustParticleOptions(new Vector3f(0.88f, 0.9f, 1.0f), 1.5f);
 
     public MindFogAbility(String id) {
-        super(id);
+        super(id, "fog");
         canBeUsedByNPC = false;
         this.canBeCopied = false;
         this.canBeReplicated = false;
         autoClear = false;
+        interactionRadius = 20;
     }
 
     @Override
