@@ -1,11 +1,13 @@
 package de.jakob.lotm.entity.custom.projectiles;
 
+import de.jakob.lotm.abilities.core.AbilityUsedEvent;
 import de.jakob.lotm.damage.ModDamageTypes;
 import de.jakob.lotm.entity.ModEntities;
 import de.jakob.lotm.item.ModItems;
 import de.jakob.lotm.util.helper.ParticleUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -15,6 +17,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
+import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.NotNull;
 
 public class FlamingSpearProjectileEntity extends AbstractArrow {
@@ -88,6 +91,8 @@ public class FlamingSpearProjectileEntity extends AbstractArrow {
         if(owner != null) target.hurt(ModDamageTypes.source(level, ModDamageTypes.HUNTER_FIRE, owner), (float) damage);
         else              target.hurt(ModDamageTypes.source(level, ModDamageTypes.HUNTER_FIRE), (float) damage);
         target.setRemainingFireTicks(target.getRemainingFireTicks() + 20 * 6);
+        if(!level.isClientSide && owner != null)
+            NeoForge.EVENT_BUS.post(new AbilityUsedEvent((ServerLevel) level, position(), owner, null, new String[]{"burning", "explosion"}, 3.5, 10));
     }
 
     @Override
@@ -99,6 +104,8 @@ public class FlamingSpearProjectileEntity extends AbstractArrow {
         else {
             level.explode(owner, result.getLocation().x, result.getLocation().y, result.getLocation().z, 4f, false, Level.ExplosionInteraction.NONE);
         }
+        if(!level.isClientSide && owner != null)
+            NeoForge.EVENT_BUS.post(new AbilityUsedEvent((ServerLevel) level, result.getLocation(), owner, null, new String[]{"burning", "explosion"}, 4, 10));
     }
 
 

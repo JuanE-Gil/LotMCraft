@@ -1,11 +1,13 @@
 package de.jakob.lotm.entity.custom.ability_entities.tyrant_pathway;
 
+import de.jakob.lotm.abilities.core.AbilityUsedEvent;
 import de.jakob.lotm.damage.ModDamageTypes;
 import de.jakob.lotm.entity.ModEntities;
 import de.jakob.lotm.item.ModItems;
 import de.jakob.lotm.util.helper.ParticleUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -15,6 +17,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.NotNull;
 
 public class WindBladeEntity extends AbstractArrow {
@@ -87,6 +90,8 @@ public class WindBladeEntity extends AbstractArrow {
             return;
         if(owner != null) target.hurt(ModDamageTypes.source(target.level(), ModDamageTypes.BEYONDER_GENERIC, owner), (float) damage);
         else              target.hurt(ModDamageTypes.source(target.level(), ModDamageTypes.BEYONDER_GENERIC), (float) damage);
+        if(!level.isClientSide && owner != null)
+            NeoForge.EVENT_BUS.post(new AbilityUsedEvent((ServerLevel) level, target.position(), owner, null, new String[]{"explosion"}, 1.75, 10));
     }
 
     @Override
@@ -98,6 +103,8 @@ public class WindBladeEntity extends AbstractArrow {
         else {
             level.explode(owner, result.getLocation().x, result.getLocation().y, result.getLocation().z, 1.75f, false, Level.ExplosionInteraction.NONE);
         }
+        if(!level.isClientSide && owner != null)
+            NeoForge.EVENT_BUS.post(new AbilityUsedEvent((ServerLevel) level, result.getLocation(), owner, null, new String[]{"explosion"}, 1.75, 10));
     }
 
 

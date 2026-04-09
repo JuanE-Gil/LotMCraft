@@ -1,5 +1,6 @@
 package de.jakob.lotm.entity.custom.ability_entities.tyrant_pathway;
 
+import de.jakob.lotm.abilities.core.AbilityUsedEvent;
 import de.jakob.lotm.abilities.tyrant.WaterMasteryAbility;
 import de.jakob.lotm.damage.ModDamageTypes;
 import de.jakob.lotm.entity.ModEntities;
@@ -26,6 +27,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -267,6 +269,8 @@ public class LightningEntity extends Entity {
         if (!level().isClientSide && source != null) {
             explode(pos);
 
+            NeoForge.EVENT_BUS.post(new AbilityUsedEvent((ServerLevel) level(), pos, source, null, new String[]{"lightning", "explosion"}, explosionPower, 10));
+
             // Check for water interaction - lightning deals more damage in water
             boolean inWater = isNearWater(pos);
             float waterMultiplier = inWater ? 2.0f : 1.0f;
@@ -297,8 +301,10 @@ public class LightningEntity extends Entity {
         // Handle block hit - particles, sound, etc.
         if (!level().isClientSide) {
             Vec3 pos = hit.getLocation();
-            if(source != null)
+            if(source != null) {
                 explode(pos);
+                NeoForge.EVENT_BUS.post(new AbilityUsedEvent((ServerLevel) level(), pos, source, null, new String[]{"lightning", "explosion"}, explosionPower, 10));
+            }
 
             // Check for water interaction
             if(isNearWater(pos)) {
