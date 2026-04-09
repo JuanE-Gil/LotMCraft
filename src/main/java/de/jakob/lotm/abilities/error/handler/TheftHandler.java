@@ -325,8 +325,8 @@ public class TheftHandler {
 
     public record TheftLoot(ItemStack loot, int minAmount, int maxAmount) {}
 
-    public static void performAbilityTheft(Level level, LivingEntity entity, LivingEntity target, Random random, boolean renderEffects, Ability skill) {
-        if (entity instanceof ServerPlayer serverPlayer && renderEffects) {
+    public static void performAbilityTheft(Level level, LivingEntity entity, LivingEntity target, Random random, boolean isLoopHole, Ability skill) {
+        if (entity instanceof ServerPlayer serverPlayer && !isLoopHole) {
             EffectManager.playEffect(EffectManager.Effect.ABILITY_THEFT, target.position().x, target.position().y + target.getEyeHeight(), target.position().z, serverPlayer, entity);
         }
 
@@ -366,7 +366,9 @@ public class TheftHandler {
             return;
         }
 
-        int abilityCount = getAbilityCountForSequence(sequence);
+
+        int abilityCount = isLoopHole? 1 : getAbilityCountForSequence(sequence);
+
         int abilityUses = getAbilityUsesForSequence(sequence);
         int disableTime = getDisablingTimeForSequenceInSeconds(sequence);
 
@@ -479,7 +481,7 @@ public class TheftHandler {
             return;
         }
 
-        float baseSanity = (float) skill.multiplier(entity) / 200;
+        float baseSanity = (float) skill.multiplier(entity) / 50;
         float sanityToSteal = getSeqDifferenceMultiplier(AbilityUtil.getSeqWithArt(entity, skill), BeyonderData.getSequence(target)) * baseSanity;
 
         var targetSanity = target.getData(ModAttachments.SANITY_COMPONENT);
@@ -511,7 +513,7 @@ public class TheftHandler {
         int userSeq = AbilityUtil.getSeqWithArt(entity, skill);
         int targetSeq = BeyonderData.getSequence(target);
 
-        float baseDigestion = (float)(skill.multiplier(entity) / 200);
+        float baseDigestion = (float)(skill.multiplier(entity) / 50);
 
         float multiplier = getSeqDifferenceMultiplier(userSeq, targetSeq);
         float digestionToSteal = baseDigestion * multiplier;

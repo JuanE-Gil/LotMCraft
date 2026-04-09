@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 
 public class SpiritualBaptismAbility extends SelectableAbility {
     public SpiritualBaptismAbility(String id) {
-        super(id, 10, "cleansing");
+        super(id, 5, "cleansing");
         canBeCopied = false;
         canBeReplicated = false;
     }

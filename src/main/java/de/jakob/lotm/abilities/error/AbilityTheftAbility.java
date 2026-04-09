@@ -68,7 +68,7 @@ public class AbilityTheftAbility extends SelectableAbility {
             return;
         }
 
-        TheftHandler.performAbilityTheft(level, entity, target, random, true, this);
+        TheftHandler.performAbilityTheft(level, entity, target, random, false, this);
     }
 
 }

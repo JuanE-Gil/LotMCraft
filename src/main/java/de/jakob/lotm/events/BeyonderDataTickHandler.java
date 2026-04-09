@@ -87,14 +87,14 @@ public class BeyonderDataTickHandler {
         }
 
         // Remove Unluck gradually
-        LuckComponent luckComponent = livingEntity.getData(ModAttachments.LUCK_COMPONENT);
-        if(luckComponent.getLuck() < 0) {
-            luckComponent.addLuckWithMax((int) (3 * BeyonderData.getMultiplier(livingEntity)), 0);
-        }
+        if(entity.tickCount % 10 == 0) {
+            LuckComponent luckComponent = livingEntity.getData(ModAttachments.LUCK_COMPONENT);
 
-        // Remove Luck gradually
-        if(luckComponent.getLuck() > PassiveLuckAbility.getNormalLuckForEntity(livingEntity)) {
-            luckComponent.addLuckWithMax(-3, PassiveLuckAbility.getNormalLuckForEntity(livingEntity));
+            if (luckComponent.getLuck() < 0) {
+                luckComponent.addLuckWithMax((int) (BeyonderData.getMultiplier(livingEntity)), 0);
+            } else if (luckComponent.getLuck() > PassiveLuckAbility.getNormalLuckForEntity(livingEntity)) {
+                luckComponent.addLuckWithMax(-3, PassiveLuckAbility.getNormalLuckForEntity(livingEntity));
+            }
         }
 
         if(BeyonderData.isBeyonder(livingEntity)) {

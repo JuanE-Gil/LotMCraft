@@ -54,7 +54,7 @@ public class LuckReleaseAbility extends Ability {
         int additionalLuck = getAdditionalLuckByTicks(ticks);
 
         LuckComponent luckComponent = entity.getData(ModAttachments.LUCK_COMPONENT.get());
-        luckComponent.addLuck(additionalLuck);
+        luckComponent.addLuck(-additionalLuck);
 
         EntityLocation loc = new EntityLocation(entity);
         ParticleUtil.createParticleSpirals(dust, loc, 1.75, 1.75, 2.25, .35, 5, 20 * 35, 15, 8);

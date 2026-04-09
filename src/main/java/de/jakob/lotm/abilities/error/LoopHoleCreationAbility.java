@@ -38,7 +38,7 @@ public class LoopHoleCreationAbility extends Ability {
     private static final Map<UUID, UUID> entityToLoophole = new ConcurrentHashMap<>();
 
     public LoopHoleCreationAbility(String id) {
-        super(id, 3.5f);
+        super(id, 16f);
         canBeCopied = false;
         canBeReplicated = false;
         autoClear = false;
@@ -87,10 +87,14 @@ public class LoopHoleCreationAbility extends Ability {
                 double resistance = AbilityUtil.getSequenceResistanceFactor(entity, e);
                 if (ThreadLocalRandom.current().nextDouble() >= resistance) {
                     e.teleportTo(targetLoc.x, targetLoc.y, targetLoc.z);
-
-                    if(BeyonderData.isBeyonder(e))
-                        TheftHandler.performAbilityTheft(serverLevel, entity, e, random, false, this);
                 }
+            });
+        });
+
+        ServerScheduler.scheduleForDuration(0, 20, 20 * 14, () -> {
+            AbilityUtil.getNearbyEntities(entity, serverLevel, targetLoc, 3).forEach(e -> {
+                    if(BeyonderData.isBeyonder(e))
+                        TheftHandler.performAbilityTheft(serverLevel, entity, e, random, true, this);
             });
         });
 
