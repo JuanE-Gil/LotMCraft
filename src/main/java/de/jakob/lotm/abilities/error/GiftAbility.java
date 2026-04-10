@@ -1,6 +1,9 @@
 package de.jakob.lotm.abilities.error;
 
+import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.Ability;
+import de.jakob.lotm.abilities.core.SelectableAbility;
+import de.jakob.lotm.abilities.error.handler.TheftHandler;
 import de.jakob.lotm.rendering.effectRendering.EffectManager;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import net.minecraft.core.BlockPos;
@@ -16,19 +19,24 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.capabilities.Capabilities;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-public class GiftAbility extends Ability {
+public class GiftAbility extends SelectableAbility {
     public GiftAbility(String id) {
         super(id, 0.1f);
         canBeCopied = false;
         canBeReplicated = false;
+        canBeUsedByNPC = false;
     }
 
     @Override
@@ -42,7 +50,85 @@ public class GiftAbility extends Ability {
     }
 
     @Override
-    public void onAbilityUse(Level level, LivingEntity entity) {
+    protected String[] getAbilityNames() {
+        return new String[]{
+                "ability.lotmcraft.gift_ability.item",
+                "ability.lotmcraft.gift_ability.distance",
+                "ability.lotmcraft.gift_ability.health",
+                "ability.lotmcraft.gift_ability.digestion",
+                "ability.lotmcraft.gift_ability.sanity"
+        };
+    }
+
+    @Override
+    protected void castSelectedAbility(Level level, LivingEntity entity, int selectedAbility) {
+        switch(selectedAbility){
+            case 0 -> giftItem(level, entity);
+            case 1 -> giftDistance(level, entity);
+        }
+    }
+
+    private void giftDistance(Level level, LivingEntity entity){
+        if(!(entity instanceof ServerPlayer player)) {
+            if(entity instanceof Player player && entity.level().isClientSide) {
+                player.playSound(SoundEvents.BELL_RESONATE, 1, 1);
+            }
+            return;
+        }
+
+        LivingEntity target = AbilityUtil.getTargetEntity(entity, 20, 2);
+        if(target == null) {
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.gift.no_target").withColor(0x6d32a8));
+            return;
+        }
+
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+        int distance = (int) TheftHandler.getDistancePerSeq(entitySeq);
+
+        if(!MundaneConceptualTheft.stolenDistanceMap.containsKey(entity.getUUID())){
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.gift.failed").withColor(0x6d32a8));
+            return;
+        }
+
+        int storedDistance = MundaneConceptualTheft.stolenDistanceMap.get(entity.getUUID());
+
+        LOTMCraft.LOGGER.info("stored: {}, dist: {}", storedDistance, distance);
+
+        if(storedDistance - distance < 0){
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.gift.failed").withColor(0x6d32a8));
+            return;
+        }
+
+        EffectManager.playEffect(EffectManager.Effect.GIFTING_PARTICLES, target.getX(), target.getY() + target.getBbHeight() / 2, target.getZ(), player, entity);
+
+        MundaneConceptualTheft.stolenDistanceMap.put(entity.getUUID(), storedDistance - distance);
+
+        Vec3 eyePos = entity.getEyePosition();
+        Vec3 lookVec = entity.getLookAngle();
+        Vec3 reach = eyePos.add(lookVec.scale(distance));
+
+        ClipContext context = new ClipContext(
+                eyePos,
+                reach,
+                ClipContext.Block.COLLIDER,
+                ClipContext.Fluid.NONE,
+                entity
+        );
+
+        BlockHitResult hitResult = level.clip(context);
+
+        Vec3 finalPos;
+
+        if (hitResult.getType() != HitResult.Type.MISS) {
+            finalPos = hitResult.getLocation().subtract(lookVec.scale(0.5));
+        } else {
+            finalPos = reach;
+        }
+
+        target.teleportTo(finalPos.x, finalPos.y, finalPos.z);
+    }
+
+    private void giftItem(Level level, LivingEntity entity){
         if(!(entity instanceof ServerPlayer player)) {
             if(entity instanceof Player player && entity.level().isClientSide) {
                 player.playSound(SoundEvents.BELL_RESONATE, 1, 1);

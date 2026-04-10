@@ -525,4 +525,8 @@ public class TheftHandler {
         BeyonderData.digest((ServerPlayer) target, - digestionToSteal, false);
         BeyonderData.digest((ServerPlayer) entity, digestionToSteal * entityDigestionMultiplier,false);
     }
+
+    public static double getDistancePerSeq(int seq){
+       return (1 << (9 - seq));
+    }
 }
