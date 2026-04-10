@@ -25,7 +25,7 @@ import java.util.Map;
 
 public class ConceptualTheftAbility extends SelectableAbility {
     public ConceptualTheftAbility(String id) {
-        super(id, 15);
+        super(id, 10);
 
         canBeUsedByNPC = false;
         canBeCopied = false;

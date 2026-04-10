@@ -61,11 +61,18 @@ public class BeyonderDataTickHandler {
             }
         }
 
-        return cachedAbilities.computeIfAbsent(entity.getUUID(), k ->
-                passiveAbilities.stream()
-                        .filter(a -> a.shouldApplyTo(entity))
-                        .collect(Collectors.toSet())
-        );
+        UUID id = entity.getUUID();
+
+        Set<PassiveAbilityItem> abilities = cachedAbilities.get(id);
+        if (abilities == null) {
+            abilities = passiveAbilities.stream()
+                    .filter(a -> a.shouldApplyTo(entity))
+                    .collect(Collectors.toSet());
+
+            cachedAbilities.put(id, abilities);
+        }
+
+        return abilities;
     }
 
     @SubscribeEvent

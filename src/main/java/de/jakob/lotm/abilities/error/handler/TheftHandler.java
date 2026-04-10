@@ -11,6 +11,7 @@ import de.jakob.lotm.rendering.effectRendering.EffectManager;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.CopiedAbilityHelper;
+import de.jakob.lotm.util.helper.DamageLookup;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -465,7 +466,7 @@ public class TheftHandler {
 
     public static float getSeqDifferenceMultiplier(int userSeq, int targetSeq){
         int diff = Math.abs(targetSeq - userSeq);
-        float multiplier = 1.0f - diff * 0.15f;
+        float multiplier = diff * 0.15f;
         return Math.max(0.1f, multiplier);
     }
 
@@ -480,8 +481,11 @@ public class TheftHandler {
             return;
         }
 
-        float baseSanity = (float) skill.multiplier(entity) / 50;
-        float sanityToSteal = getSeqDifferenceMultiplier(AbilityUtil.getSeqWithArt(entity, skill), BeyonderData.getSequence(target)) * baseSanity;
+        float mult = skill.multiplier(entity);
+        float baseSanity = (mult / (mult + 1.0f));
+        float seqMultiplier = getSeqDifferenceMultiplier(AbilityUtil.getSeqWithArt(entity, skill), BeyonderData.getSequence(target));
+        float sanityToSteal = seqMultiplier * baseSanity;
+        float entitySanityMultiplier = Math.max(0.0f, 1.0f - seqMultiplier);
 
         var targetSanity = target.getData(ModAttachments.SANITY_COMPONENT);
         var entitySanity = entity.getData(ModAttachments.SANITY_COMPONENT);
@@ -489,13 +493,8 @@ public class TheftHandler {
         float targetSanityValue = targetSanity.getSanity();
         float userSanityValue = entitySanity.getSanity();
 
-        float result = targetSanityValue - sanityToSteal;
-        sanityToSteal = result < 0f ? sanityToSteal - result: sanityToSteal;
-
-        LOTMCraft.LOGGER.info("SANITY base: {}, mult: {}, steal: {}, result: {}", baseSanity, getSeqDifferenceMultiplier(AbilityUtil.getSeqWithArt(entity, skill), BeyonderData.getSequence(target)), sanityToSteal, result);
-
         targetSanity.setSanityAndSync(targetSanityValue - sanityToSteal, target);
-        entitySanity.setSanityAndSync(userSanityValue + (sanityToSteal/2.0f), entity);
+        entitySanity.setSanityAndSync(userSanityValue + (sanityToSteal*entitySanityMultiplier), entity);
     }
 
     public static void performDigestionTheft(LivingEntity entity, LivingEntity target, Random random, Ability skill){
@@ -509,20 +508,21 @@ public class TheftHandler {
             return;
         }
 
-        int userSeq = AbilityUtil.getSeqWithArt(entity, skill);
-        int targetSeq = BeyonderData.getSequence(target);
+        float mult = skill.multiplier(entity);
+        float baseDigestion = (mult / (mult + 1.0f));
 
-        float baseDigestion = (float)(skill.multiplier(entity) / 50);
+        float seqMultiplier = getSeqDifferenceMultiplier(AbilityUtil.getSeqWithArt(entity, skill), BeyonderData.getSequence(target));
+        float entityDigestionMultiplier = Math.max(0.0f, 1.0f - seqMultiplier);
 
-        float multiplier = getSeqDifferenceMultiplier(userSeq, targetSeq);
-        float digestionToSteal = baseDigestion * multiplier;
+        float digestionToSteal = baseDigestion * seqMultiplier;
 
-        float targetResult = BeyonderData.getDigestionProgress((Player) target) - digestionToSteal;
-        digestionToSteal = targetResult < 0.0f ? digestionToSteal - targetResult : digestionToSteal;
+        float targetDigestion = BeyonderData.getDigestionProgress((ServerPlayer) target);
 
-        LOTMCraft.LOGGER.info("DIGESTION base: {}, mult: {}, steal: {}, result: {}", baseDigestion, multiplier, digestionToSteal, targetResult);
+        if(targetDigestion - digestionToSteal < 0f){
+            digestionToSteal = digestionToSteal + (targetDigestion - digestionToSteal);
+        }
 
         BeyonderData.digest((ServerPlayer) target, - digestionToSteal, false);
-        BeyonderData.digest((ServerPlayer) entity, digestionToSteal,false);
+        BeyonderData.digest((ServerPlayer) entity, digestionToSteal * entityDigestionMultiplier,false);
     }
 }
