@@ -1,5 +1,6 @@
 package de.jakob.lotm.entity.custom.ability_entities.door_pathway;
 
+import de.jakob.lotm.abilities.core.AbilityUsedEvent;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -9,6 +10,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -75,6 +77,9 @@ public class DistortionFieldEntity extends Entity {
             discard();
             return;
         }
+
+
+        NeoForge.EVENT_BUS.post(new AbilityUsedEvent(serverLevel, position(), getCasterEntity(), null, new String[]{"space_warp", "burning"}, getRadius(), 3));
     }
 
     @Override
