@@ -300,14 +300,14 @@ public class ModEvents {
             CompoundTag newTag = newPlayer.getPersistentData();
             newTag.putString(NBT_PATHWAY, pathway);
             newTag.putInt(NBT_SEQUENCE, sequence);
-            newTag.putFloat(NBT_SPIRITUALITY, BeyonderData.getMaxSpirituality(sequence));
+            newTag.putFloat(NBT_SPIRITUALITY, BeyonderData.getMaxSpirituality(pathway, sequence));
             newTag.putBoolean(NBT_GRIEFING_ENABLED, griefingEnabled);
             if (markedEntities != null) {
                 newTag.put(MARKED_ENTITIES_TAG, markedEntities.copy());
             }
 
             // Update spirituality progress tracker
-            if (getMaxSpirituality(sequence) > 0) {
+            if (getMaxSpirituality(pathway, sequence) > 0) {
                 float progress = 1;
                 SpiritualityProgressTracker.setProgress(newPlayer.getUUID(), progress);
             }

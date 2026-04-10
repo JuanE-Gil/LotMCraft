@@ -234,7 +234,7 @@ public class BeyonderNPCEntity extends PathfinderMob {
                         this.getUUID(),
                         pathway,
                         sequence,
-                        BeyonderData.getMaxSpirituality(sequence),
+                        BeyonderData.getMaxSpirituality(pathway, sequence),
                         false,
                         false,
                         0.0f

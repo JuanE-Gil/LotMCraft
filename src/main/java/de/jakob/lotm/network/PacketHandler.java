@@ -695,7 +695,7 @@ public class PacketHandler {
         int sequence = BeyonderData.getSequence(entity);
 
         SyncLivingEntityBeyonderDataPacket packet =
-                new SyncLivingEntityBeyonderDataPacket(entity.getId(), pathway, sequence, BeyonderData.getMaxSpirituality(sequence));
+                new SyncLivingEntityBeyonderDataPacket(entity.getId(), pathway, sequence, BeyonderData.getMaxSpirituality(pathway, sequence));
 
         sendToAllPlayers(packet);
     }

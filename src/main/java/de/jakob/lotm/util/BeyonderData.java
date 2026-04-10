@@ -177,10 +177,12 @@ public class BeyonderData {
 
         boolean griefing = !BeyonderData.isBeyonder(entity) || BeyonderData.isGriefingEnabled(entity);
 
+        float maxSp = getMaxSpirituality(pathway, sequence);
+
         CompoundTag tag = entity.getPersistentData();
         tag.putString(NBT_PATHWAY, pathway);
         tag.putInt(NBT_SEQUENCE, sequence);
-        tag.putFloat(NBT_SPIRITUALITY, getMaxSpirituality(sequence));
+        tag.putFloat(NBT_SPIRITUALITY, maxSp);
         tag.putBoolean(NBT_GRIEFING_ENABLED, griefing);
         tag.putFloat(NBT_DIGESTION_PROGRESS, 0.0f);
 
@@ -197,9 +199,6 @@ public class BeyonderData {
             if(entity instanceof ServerPlayer serverPlayer) {
                 PacketHandler.syncBeyonderDataToPlayer(serverPlayer);
                 beyonderMap.put(serverPlayer);
-
-                SyncBeyonderDataPacket packet = new SyncBeyonderDataPacket(pathway, sequence, 0.0f, false, 0.0f);
-                PacketHandler.sendToAllPlayers(packet);
 
                 // Disband team if leader is no longer eligible (Red Priest seq <= 3)
                 if (!TeamUtils.isEligibleLeader(serverPlayer)) {
@@ -289,9 +288,10 @@ public class BeyonderData {
             return ClientBeyonderCache.getSpirituality(entity.getUUID());
         }
         if(!(entity instanceof Player player))
-            return getMaxSpirituality(getSequence(entity));
+            return getMaxSpirituality(getPathway(entity), getSequence(entity));
+
         float spirituality = entity.getPersistentData().getFloat(NBT_SPIRITUALITY);
-        float maxSpirituality = getMaxSpirituality(getSequence(entity));
+        float maxSpirituality = getMaxSpirituality(getPathway(entity), getSequence(entity));
 
         if(maxSpirituality <= 0) {
             return 0.0f;
@@ -309,7 +309,7 @@ public class BeyonderData {
         float current = getSpirituality(entity);
         entity.getPersistentData().putFloat(NBT_SPIRITUALITY, Math.max(0, current - amount));
 
-        float maxSpirituality = getMaxSpirituality(getSequence(entity));
+        float maxSpirituality = getMaxSpirituality(getPathway(entity), getSequence(entity));
 
         if(maxSpirituality <= 0) {
             return;
@@ -377,10 +377,10 @@ public class BeyonderData {
             return;
 
         float current = getSpirituality(player);
-        float newAmount = Math.min(getMaxSpirituality(getSequence(player)), current + amount);
+        float newAmount = Math.min(getMaxSpirituality(getPathway(player), getSequence(player)), current + amount);
         player.getPersistentData().putFloat(NBT_SPIRITUALITY, newAmount);
 
-        float maxSpirituality = getMaxSpirituality(getSequence(player));
+        float maxSpirituality = getMaxSpirituality(getPathway(player), getSequence(player));
 
         if(maxSpirituality <= 0) {
             return;
@@ -400,18 +400,35 @@ public class BeyonderData {
             return;
 
         int sequence = getSequence(player);
-        player.getPersistentData().putFloat(NBT_SPIRITUALITY, getMaxSpirituality(sequence));
+        player.getPersistentData().putFloat(NBT_SPIRITUALITY, getMaxSpirituality(getPathway(entity), sequence));
 
-        if(getMaxSpirituality(sequence) <= 0) {
+        if(getMaxSpirituality(getPathway(entity) , sequence) <= 0) {
             return;
         }
 
-        float progress = player.getPersistentData().getFloat(NBT_SPIRITUALITY) / getMaxSpirituality(sequence);
+        float progress = player.getPersistentData().getFloat(NBT_SPIRITUALITY) / getMaxSpirituality(getPathway(entity), sequence);
         SpiritualityProgressTracker.setProgress(player.getUUID(), progress);
     }
 
-    public static float getMaxSpirituality(int sequence) {
-        return sequence > -1 && sequence != LOTMCraft.NON_BEYONDER_SEQ && sequence < spiritualityLookup.length ? spiritualityLookup[sequence] : 0.0f;
+    public static float getMaxSpirituality(String path, int seq){
+        if(seq >= LOTMCraft.NON_BEYONDER_SEQ || !(seq < spiritualityLookup.length))
+            return 0f;
+        
+        return switch (path){
+            case "darkness", "fool", "wheel_of_fortune" -> getMaxSpirituality(seq, 3.5f);
+            case "door", "death" -> getMaxSpirituality(seq, 3);
+            case "twilight_giant", "hermit", "error" -> getMaxSpirituality(seq, 2);
+            case "demoness", "white_tower", "visionary", "sun", "tyrant", "hanged_man", "moon",
+                 "mother", "abyss", "black_emperor", "justiciar", "chained"
+                    -> getMaxSpirituality(seq, 1);
+            case "red_priest" -> getMaxSpirituality(seq, 0.8f);
+            case "paragon" -> getMaxSpirituality(seq, 0.6f);
+            default -> 0f;
+        };
+    }
+
+    private static float getMaxSpirituality(int sequence, float mult) {
+        return spiritualityLookup[sequence] * mult;
     }
 
     public static void clearBeyonderData(LivingEntity entity) {
@@ -538,7 +555,7 @@ public class BeyonderData {
 
     public static void setSequence(LivingEntity entity, int sequence) {
         entity.getPersistentData().putInt(NBT_SEQUENCE, sequence);
-        entity.getPersistentData().putFloat(NBT_SPIRITUALITY, getMaxSpirituality(sequence));
+        entity.getPersistentData().putFloat(NBT_SPIRITUALITY, getMaxSpirituality(getPathway(entity), sequence));
 
         // Sync to client if this is server-side
         if (!entity.level().isClientSide()) {
@@ -550,7 +567,7 @@ public class BeyonderData {
     }
 
     private static float getRelativeSpirituality(Player player) {
-        float maxSpirituality = getMaxSpirituality(getSequence(player));
+        float maxSpirituality = getMaxSpirituality(getPathway(player), getSequence(player));
         if (maxSpirituality <= 0) {
             return 0.0f;
         }

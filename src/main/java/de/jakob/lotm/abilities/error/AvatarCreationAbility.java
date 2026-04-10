@@ -15,7 +15,7 @@ import java.util.Map;
 
 public class AvatarCreationAbility extends Ability {
     public AvatarCreationAbility(String id) {
-        super(id, 2);
+        super(id, 5);
 
         canBeUsedByNPC = false;
         canBeCopied = false;

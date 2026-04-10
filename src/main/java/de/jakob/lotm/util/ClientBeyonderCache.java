@@ -14,7 +14,7 @@ public class ClientBeyonderCache {
         dataCache.put(playerUUID, new BeyonderClientData(pathway, sequence, spirituality, griefingEnabled, digestionProgress));
 
         if(isPlayer) {
-            float progress = spirituality / BeyonderData.getMaxSpirituality(sequence);
+            float progress = spirituality / BeyonderData.getMaxSpirituality(pathway, sequence);
             SpiritualityProgressTracker.setProgress(playerUUID, progress);
         }
     }
@@ -36,6 +36,9 @@ public class ClientBeyonderCache {
 
     public static float getSpirituality(UUID playerUUID) {
         BeyonderClientData data = dataCache.get(playerUUID);
+
+        boolean hasData = data != null;
+
         return data != null ? Math.max(0, data.spirituality()) : 0.0f;
     }
 

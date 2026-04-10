@@ -131,7 +131,7 @@ public class BeyonderDataTickHandler {
 
         if (BeyonderData.isBeyonder(player)) {
             // Regenerate Spirituality
-            float amount = BeyonderData.getMaxSpirituality(BeyonderData.getSequence(player)) * 0.0006f;
+            float amount = BeyonderData.getMaxSpirituality(BeyonderData.getPathway(player), BeyonderData.getSequence(player)) * 0.0006f;
             BeyonderData.incrementSpirituality(player, amount);
 
             // Slowly digest potion

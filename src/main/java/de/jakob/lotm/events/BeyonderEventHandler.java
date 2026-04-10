@@ -403,7 +403,9 @@ public class BeyonderEventHandler {
                 BeyonderData.digest(player, (0.01f + (diff * 0.1f)), true);
             }
 
-           victim.addEffect(new MobEffectInstance(ModEffects.CONCEALMENT, 20 * 30, 99));
+           victim.addEffect(new MobEffectInstance(ModEffects.CONCEALMENT, 20 * 30, 99, false, false));
+
+            victim.getData(ModAttachments.LUCK_COMPONENT).setLuck(0);
         }
     }
 
