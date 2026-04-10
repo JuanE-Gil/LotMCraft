@@ -42,15 +42,17 @@ import de.jakob.lotm.entity.client.spirits.translucent_wizard.SpiritTranslucentW
 import de.jakob.lotm.entity.custom.*;
 import de.jakob.lotm.entity.custom.ability_entities.OriginalBodyEntity;
 import de.jakob.lotm.entity.custom.spirits.*;
-import de.jakob.lotm.gamerule.ModGameRules;
 import de.jakob.lotm.network.PacketHandler;
 import de.jakob.lotm.network.packets.toClient.SyncSharedAbilitiesDataPacket;
+import de.jakob.lotm.rendering.models.fool.FoolMythicalCreatureModel;
+import de.jakob.lotm.rendering.models.red_priest.RedPriestMythicalCreatureModel;
+import de.jakob.lotm.rendering.models.sun.SunMythicalCreatureModel;
+import de.jakob.lotm.rendering.models.wheel_of_fortune.WheelOfFortuneMythicalCreatureModel;
 import de.jakob.lotm.util.helper.TeamUtils;
-import de.jakob.lotm.rendering.models.DoorMythicalCreatureModel;
-import de.jakob.lotm.rendering.models.TyrantMythicalCreatureModel;
+import de.jakob.lotm.rendering.models.door.DoorMythicalCreatureModel;
+import de.jakob.lotm.rendering.models.tyrant.TyrantMythicalCreatureModel;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.SpiritualityProgressTracker;
-import net.minecraft.client.telemetry.events.WorldUnloadEvent;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.MinecraftServer;
@@ -128,6 +130,10 @@ public class ModEvents {
         // Mythical Creature Forms
         event.registerLayerDefinition(TyrantMythicalCreatureModel.LAYER_LOCATION, TyrantMythicalCreatureModel::createBodyLayer);
         event.registerLayerDefinition(DoorMythicalCreatureModel.LAYER_LOCATION, DoorMythicalCreatureModel::createBodyLayer);
+        event.registerLayerDefinition(FoolMythicalCreatureModel.LAYER_LOCATION, FoolMythicalCreatureModel::createBodyLayer);
+        event.registerLayerDefinition(WheelOfFortuneMythicalCreatureModel.LAYER_LOCATION, WheelOfFortuneMythicalCreatureModel::createBodyLayer);
+        event.registerLayerDefinition(RedPriestMythicalCreatureModel.LAYER_LOCATION, RedPriestMythicalCreatureModel::createBodyLayer);
+        event.registerLayerDefinition(SunMythicalCreatureModel.LAYER_LOCATION, SunMythicalCreatureModel::createBodyLayer);
     }
 
     @SubscribeEvent

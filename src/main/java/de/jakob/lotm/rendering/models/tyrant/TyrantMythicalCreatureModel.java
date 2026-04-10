@@ -1,4 +1,4 @@
-package de.jakob.lotm.rendering.models;// Made with Blockbench 5.0.3
+package de.jakob.lotm.rendering.models.tyrant;// Made with Blockbench 5.0.3
 // Exported for Minecraft version 1.17 or later with Mojang mappings
 // Paste this class into your mod and generate all required imports
 

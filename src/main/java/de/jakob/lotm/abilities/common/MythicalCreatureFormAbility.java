@@ -1,5 +1,6 @@
 package de.jakob.lotm.abilities.common;
 
+import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.ToggleAbility;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.attachments.TransformationComponent;
@@ -8,10 +9,12 @@ import de.jakob.lotm.entity.custom.ability_entities.tyrant_pathway.LightningEnti
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.DamageLookup;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.Level;
 
@@ -38,19 +41,13 @@ public class MythicalCreatureFormAbility extends ToggleAbility {
             return;
         }
 
-        AttributeInstance scaleAttribute = entity.getAttribute(Attributes.SCALE);
-        if(scaleAttribute != null) {
-            scaleAttribute.setBaseValue(2.0);
-        }
-
         int seq = BeyonderData.getSequence(entity);
         if(seq > 2){
             var sanity = entity.getData(ModAttachments.SANITY_COMPONENT.get());
             sanity.setSanityAndSync(Math.max(0.0f, sanity.getSanity() - (seq == 4 ? 0.01f : 0.005f)), entity);
         }
 
-        // Buff user
-
+        //Buff user
         int amplifier = (seq > 2 ? 3 : 6);
 
         // Make all entities lower than you loose control when seeing you
@@ -65,7 +62,7 @@ public class MythicalCreatureFormAbility extends ToggleAbility {
 
                     if (!entity.getData(ModAttachments.ALLY_COMPONENT.get()).isAlly(e.getUUID())) {
 
-                        if (!e.hasEffect(ModEffects.LOOSING_CONTROL)) { // Only apply effect when effect wasn't applied already, otherwise they would never actually die
+                        if (!e.hasEffect(ModEffects.LOOSING_CONTROL)) {
                             e.addEffect(new MobEffectInstance(ModEffects.LOOSING_CONTROL, 20 * 4, amplifier));
                         }
 
@@ -73,7 +70,6 @@ public class MythicalCreatureFormAbility extends ToggleAbility {
                     }
         });
 
-        // Stop when overridden by another transformation
         TransformationComponent transformationComponent = entity.getData(ModAttachments.TRANSFORMATION_COMPONENT);
         if (!transformationComponent.isTransformed() || transformationComponent.getTransformationIndex() != TransformationComponent.TransformationType.MYTHICAL_CREATURE.getIndex()) {
             cancel((ServerLevel) level, entity);
@@ -89,7 +85,7 @@ public class MythicalCreatureFormAbility extends ToggleAbility {
 
         AttributeInstance scaleAttribute = entity.getAttribute(Attributes.SCALE);
         if(scaleAttribute != null) {
-            previousScale.put(entity.getUUID(), scaleAttribute.getValue());
+            scaleAttribute.addTransientModifier(new AttributeModifier(ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "mythical_creature_form"), 1.9, AttributeModifier.Operation.ADD_VALUE));
         }
 
         BeyonderData.addModifier(entity, "mythical_creature_form", (BeyonderData.getSequence(entity) > 2 ? 1.25 : 1.5));
@@ -97,6 +93,7 @@ public class MythicalCreatureFormAbility extends ToggleAbility {
         TransformationComponent transformationComponent = entity.getData(ModAttachments.TRANSFORMATION_COMPONENT);
         transformationComponent.setTransformedAndSync(true, entity);
         transformationComponent.setTransformationIndexAndSync(TransformationComponent.TransformationType.MYTHICAL_CREATURE, entity);
+        transformationComponent.setAdditionalDataAndSync(BeyonderData.getPathway(entity), entity);
     }
 
     @Override
@@ -106,9 +103,8 @@ public class MythicalCreatureFormAbility extends ToggleAbility {
         }
 
         AttributeInstance scaleAttribute = entity.getAttribute(Attributes.SCALE);
-        if(scaleAttribute != null && previousScale.containsKey(entity.getUUID())) {
-            scaleAttribute.setBaseValue(previousScale.get(entity.getUUID()));
-            previousScale.remove(entity.getUUID());
+        if(scaleAttribute != null) {
+            scaleAttribute.removeModifier(ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "mythical_creature_form"));
         }
 
         // Remove buff

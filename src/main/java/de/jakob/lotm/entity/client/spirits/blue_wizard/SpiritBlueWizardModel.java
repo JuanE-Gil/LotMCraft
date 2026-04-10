@@ -6,10 +6,7 @@ package de.jakob.lotm.entity.client.spirits.blue_wizard;// Made with Blockbench 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import de.jakob.lotm.LOTMCraft;
-import de.jakob.lotm.entity.client.fire_raven.FireRavenAnimations;
-import de.jakob.lotm.entity.client.spirits.bubbles.SpiritBubblesAnimations;
 import de.jakob.lotm.entity.custom.spirits.SpiritBlueWizardEntity;
-import de.jakob.lotm.rendering.models.TyrantMythicalCreatureAnimations;
 import net.minecraft.client.model.HierarchicalModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
@@ -17,8 +14,6 @@ import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
 
 public class SpiritBlueWizardModel<T extends SpiritBlueWizardEntity> extends HierarchicalModel<T> {
 	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor

@@ -190,6 +190,7 @@ public class ClientHandler {
 
         entity.getData(ModAttachments.TRANSFORMATION_COMPONENT.get()).setTransformed(packet.isTransformed());
         entity.getData(ModAttachments.TRANSFORMATION_COMPONENT.get()).setTransformationIndex(packet.transformationIndex());
+        entity.getData(ModAttachments.TRANSFORMATION_COMPONENT.get()).setAdditionalData(packet.additionalData());
     }
 
     public static void changeToThirdPerson(LivingEntity entity) {

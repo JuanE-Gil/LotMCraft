@@ -1,4 +1,4 @@
-package de.jakob.lotm.rendering.models;// Save this class in your mod and generate all required imports
+package de.jakob.lotm.rendering.models.tyrant;// Save this class in your mod and generate all required imports
 
 import net.minecraft.client.animation.AnimationChannel;
 import net.minecraft.client.animation.AnimationDefinition;
