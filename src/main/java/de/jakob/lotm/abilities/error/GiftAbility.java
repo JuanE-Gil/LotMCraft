@@ -7,7 +7,9 @@ import de.jakob.lotm.abilities.error.handler.TheftHandler;
 import de.jakob.lotm.network.PacketHandler;
 import de.jakob.lotm.network.packets.toServer.AbilitySelectionPacket;
 import de.jakob.lotm.rendering.effectRendering.EffectManager;
+import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityUtil;
+import net.minecraft.client.multiplayer.chat.report.ReportEnvironment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -35,7 +37,7 @@ import java.util.Random;
 
 public class GiftAbility extends SelectableAbility {
     public GiftAbility(String id) {
-        super(id, 0.1f);
+        super(id, 1f);
         canBeCopied = false;
         canBeReplicated = false;
         canBeUsedByNPC = false;
@@ -57,8 +59,7 @@ public class GiftAbility extends SelectableAbility {
                 "ability.lotmcraft.gift_ability.item",
                 "ability.lotmcraft.gift_ability.distance",
                 "ability.lotmcraft.gift_ability.health",
-                "ability.lotmcraft.gift_ability.digestion",
-                "ability.lotmcraft.gift_ability.sanity"
+                "ability.lotmcraft.gift_ability.digestion"
         };
     }
 
@@ -80,7 +81,7 @@ public class GiftAbility extends SelectableAbility {
         }
 
         if((entitySeq > 5 && selectedAbility >= 1)
-                || (entitySeq > 2 && selectedAbility >= 3)){
+                || (entitySeq > 1 && selectedAbility >= 3)){
             selectedAbility = 0;
         }
 
@@ -105,7 +106,7 @@ public class GiftAbility extends SelectableAbility {
 
         int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
         if((entitySeq > 5 && selectedAbility >= 1)
-                || (entitySeq > 2 && selectedAbility >= 3)){
+                || (entitySeq > 1 && selectedAbility >= 3)){
             selectedAbility = 0;
         }
 
@@ -118,7 +119,78 @@ public class GiftAbility extends SelectableAbility {
         switch(selectedAbility){
             case 0 -> giftItem(level, entity);
             case 1 -> giftDistance(level, entity);
+            case 2 -> giftHealth(level, entity);
+            case 3 -> giftDigestion(level, entity);
         }
+    }
+
+
+    private void giftDigestion(Level level, LivingEntity entity){
+        if(!(entity instanceof ServerPlayer player)) {
+            if(entity instanceof Player player && entity.level().isClientSide) {
+                player.playSound(SoundEvents.BELL_RESONATE, 1, 1);
+            }
+            return;
+        }
+
+        LivingEntity target = AbilityUtil.getTargetEntity(entity, 20, 2);
+        if(target == null) {
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.gift.no_target").withColor(0x6d32a8));
+            return;
+        }
+
+        if(!BeyonderData.isBeyonder(target) || !(target instanceof ServerPlayer targetPlayer)){
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.gift.failed").withColor(0x6d32a8));
+            return;
+        }
+
+        float targetDigestion = BeyonderData.getDigestionProgress(targetPlayer);
+        if(targetDigestion == 1.0f){
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.gift.failed").withColor(0x6d32a8));
+            return;
+        }
+
+        if(BeyonderData.getDigestionProgress(player) <= 0.0f){
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.gift.failed").withColor(0x6d32a8));
+            return;
+        }
+
+        EffectManager.playEffect(EffectManager.Effect.GIFTING_PARTICLES, target.getX(), target.getY() + target.getBbHeight() / 2, target.getZ(), player, entity);
+
+        float base = 0.25f;
+        float actual = BeyonderData.getDigestionProgress(player) - base < 0 ? (base + (BeyonderData.getDigestionProgress(player) - base)) : base;
+
+        BeyonderData.digest(targetPlayer, actual, false);
+        BeyonderData.digest(player, -actual, false);
+    }
+
+    private void giftHealth(Level level, LivingEntity entity){
+        if(!(entity instanceof ServerPlayer player)) {
+            if(entity instanceof Player player && entity.level().isClientSide) {
+                player.playSound(SoundEvents.BELL_RESONATE, 1, 1);
+            }
+            return;
+        }
+
+        LivingEntity target = AbilityUtil.getTargetEntity(entity, 20, 2);
+        if(target == null) {
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.gift.no_target").withColor(0x6d32a8));
+            return;
+        }
+
+        float maxHealth = entity.getMaxHealth();
+        float healthToGift = maxHealth/4;
+        float currentHealth = entity.getHealth();
+
+        if(currentHealth - healthToGift <= maxHealth/2){
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.gift.failed").withColor(0x6d32a8));
+            return;
+        }
+
+        EffectManager.playEffect(EffectManager.Effect.GIFTING_PARTICLES, target.getX(), target.getY() + target.getBbHeight() / 2, target.getZ(), player, entity);
+
+        target.setHealth(target.getHealth() + healthToGift);
+        entity.setHealth(currentHealth - healthToGift);
     }
 
     private void giftDistance(Level level, LivingEntity entity){
