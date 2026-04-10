@@ -26,7 +26,7 @@ import java.util.Random;
 
 public class GiftAbility extends Ability {
     public GiftAbility(String id) {
-        super(id, 1);
+        super(id, 0.1f);
         canBeCopied = false;
         canBeReplicated = false;
     }

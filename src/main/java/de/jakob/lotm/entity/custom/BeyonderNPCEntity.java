@@ -178,7 +178,7 @@ public class BeyonderNPCEntity extends PathfinderMob {
 
         int nearby = level.getEntitiesOfClass(
                 BeyonderNPCEntity.class,
-                new AABB(pos).inflate(32)
+                new AABB(pos).inflate(60)
         ).size();
 
         return nearby < 2;

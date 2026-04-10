@@ -626,6 +626,7 @@
   "lotmcraft.calamity_attraction_ability.description": "Call upon a calamity to befall your enemies",
   "lotmcraft.luck_release_ability": "Luck Release",
   "lotmcraft.luck_release_ability.description": "Release all of your accumulated luck",
+  "lotmcraft.luck_perception_ability": "Luck Perception",
   "lotmcraft.misfortune_gifting_ability": "Misfortune Gifting",
   "lotmcraft.misfortune_gifting_ability.description": "Give to your enemies, a misfortune onto them",
   "ability.lotmcraft.misfortune_gifting.no_target": "No Target found",
