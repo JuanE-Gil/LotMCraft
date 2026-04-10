@@ -1,0 +1,396 @@
+package de.jakob.lotm.abilities.black_emperor;
+
+import de.jakob.lotm.LOTMCraft;
+import de.jakob.lotm.abilities.core.SelectableAbility;
+import de.jakob.lotm.util.BeyonderData;
+import de.jakob.lotm.util.helper.AbilityUtil;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
+@EventBusSubscriber(modid = LOTMCraft.MOD_ID)
+public final class MausoleumDomainAbility extends SelectableAbility {
+
+    private static final ResourceKey<Level> MAUSOLEUM_DIMENSION = ResourceKey.create(
+            Registries.DIMENSION,
+            ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "mausoleum")
+    );
+
+    private static final BlockPos MAUSOLEUM_SPAWN = new BlockPos(0, 77, 0);
+    private static final int ROOM_HALF_XZ = 10;
+    private static final int ROOM_HALF_Y = 6;
+    private static final double CAST_RANGE = 25.0D;
+
+    private static final Map<BlockPos, BlockState> ROOM_SNAPSHOT = new HashMap<>();
+    private static long LAST_ROOM_REPAIR_TICK = -1L;
+
+    private static final Map<UUID, Session> SESSIONS = new HashMap<>();
+    private static final Map<UUID, UUID> PLAYER_TO_CASTER = new HashMap<>();
+
+    private static final Set<UUID> PENDING_DEATHS = new HashSet<>();
+
+    private record SavedReturn(
+            ResourceKey<Level> dimension,
+            Vec3 position,
+            float yRot,
+            float xRot,
+            Vec3 motion
+    ) {}
+
+    private static final class Session {
+        private final UUID casterId;
+        private final int casterSeq;
+        private final Map<UUID, SavedReturn> returns = new HashMap<>();
+        private final Set<UUID> members = new HashSet<>();
+
+        private Session(UUID casterId, int casterSeq) {
+            this.casterId = casterId;
+            this.casterSeq = casterSeq;
+        }
+    }
+
+    public MausoleumDomainAbility(String id) {
+        super(id, 1.0f);
+        canBeCopied = false;
+        canBeReplicated = false;
+    }
+
+    @Override
+    public Map<String, Integer> getRequirements() {
+        return new HashMap<>(Map.of("black_emperor", 1));
+    }
+
+    @Override
+    public float getSpiritualityCost() {
+        return 80.0f;
+    }
+
+    @Override
+    protected String[] getAbilityNames() {
+        return new String[] {
+                "ability.lotmcraft.black_emperor.mausoleum_domain"
+        };
+    }
+
+    @Override
+    protected void castSelectedAbility(Level level, LivingEntity entity, int abilityIndex) {
+        if (abilityIndex != 0) return;
+        if (!(level instanceof ServerLevel serverLevel)) return;
+
+        if (!(entity instanceof ServerPlayer caster)) {
+            AbilityUtil.sendActionBar(entity,
+                    Component.literal("Mausoleum Domain is for players.").withColor(0xFF5555));
+            return;
+        }
+
+        castMausoleumDomain(serverLevel, caster);
+    }
+
+    private void castMausoleumDomain(ServerLevel overworld, ServerPlayer caster) {
+        ServerLevel mausoleum = overworld.getServer().getLevel(MAUSOLEUM_DIMENSION);
+        if (mausoleum == null) {
+            AbilityUtil.sendActionBar(caster,
+                    Component.literal("Mausoleum dimension is missing.").withColor(0xFF5555));
+            return;
+        }
+
+        if (SESSIONS.containsKey(caster.getUUID())) {
+            AbilityUtil.sendActionBar(caster,
+                    Component.literal("The mausoleum is already sealed.").withColor(0xFF5555));
+            return;
+        }
+
+        ensureRoomSnapshot(mausoleum);
+
+        AABB range = caster.getBoundingBox().inflate(CAST_RANGE);
+        Set<ServerPlayer> targets = new HashSet<>(overworld.getEntitiesOfClass(
+                ServerPlayer.class,
+                range,
+                player -> player.isAlive()
+        ));
+
+        if (targets.isEmpty()) {
+            AbilityUtil.sendActionBar(caster,
+                    Component.literal("No players in range.").withColor(0xFF5555));
+            return;
+        }
+
+        int casterSeq = BeyonderData.isBeyonder(caster) ? BeyonderData.getSequence(caster) : 999;
+        Session session = new Session(caster.getUUID(), casterSeq);
+        SESSIONS.put(caster.getUUID(), session);
+
+        for (ServerPlayer player : targets) {
+            session.members.add(player.getUUID());
+            session.returns.put(player.getUUID(), snapshot(player));
+            PLAYER_TO_CASTER.put(player.getUUID(), caster.getUUID());
+        }
+
+        teleportGroupIntoMausoleum(mausoleum, caster, targets);
+
+        AbilityUtil.sendActionBar(caster,
+                Component.literal("The mausoleum seals shut.").withColor(0xAA77FF));
+    }
+
+    private void teleportGroupIntoMausoleum(ServerLevel mausoleum, ServerPlayer caster, Set<ServerPlayer> targets) {
+        Vec3 center = new Vec3(0.5D, 77.0D, 0.5D);
+
+        int index = 0;
+        int total = Math.max(1, targets.size());
+
+        for (ServerPlayer player : targets) {
+            Vec3 destination;
+            if (player.getUUID().equals(caster.getUUID())) {
+                destination = center;
+            } else {
+                double angle = (Math.PI * 2.0D) * (index / (double) total);
+                double radius = 2.5D + (index % 3) * 1.5D;
+
+                double x = Mth.clamp(Math.cos(angle) * radius, -(ROOM_HALF_XZ - 1), ROOM_HALF_XZ - 1);
+                double z = Mth.clamp(Math.sin(angle) * radius, -(ROOM_HALF_XZ - 1), ROOM_HALF_XZ - 1);
+
+                destination = center.add(x, 0.0D, z);
+                index++;
+            }
+
+            teleportPlayer(player, mausoleum, destination);
+        }
+    }
+
+    private static void teleportPlayer(ServerPlayer player, ServerLevel targetLevel, Vec3 destination) {
+        player.teleportTo(targetLevel, destination.x, destination.y, destination.z, player.getYRot(), player.getXRot());
+        player.setDeltaMovement(Vec3.ZERO);
+        player.fallDistance = 0;
+        player.hurtMarked = true;
+    }
+
+    private static SavedReturn snapshot(ServerPlayer player) {
+        return new SavedReturn(
+                player.level().dimension(),
+                player.position(),
+                player.getYRot(),
+                player.getXRot(),
+                player.getDeltaMovement()
+        );
+    }
+
+    @SubscribeEvent
+    public static void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+
+        UUID playerId = player.getUUID();
+        if (!PLAYER_TO_CASTER.containsKey(playerId)) return;
+
+        PENDING_DEATHS.add(playerId);
+
+        UUID casterId = PLAYER_TO_CASTER.get(playerId);
+        Session session = SESSIONS.get(casterId);
+        if (session != null) {
+            session.members.remove(playerId);
+            session.returns.remove(playerId);
+        }
+
+        PLAYER_TO_CASTER.remove(playerId);
+    }
+
+    @SubscribeEvent
+    public static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+
+        if (PENDING_DEATHS.contains(player.getUUID())) {
+            player.invulnerableTime = 0;
+            killPlayer(player);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer sp)) return;
+
+        if (PENDING_DEATHS.contains(sp.getUUID())) {
+            sp.invulnerableTime = 0;
+            killPlayer(sp);
+
+            if (!sp.isAlive()) {
+                PENDING_DEATHS.remove(sp.getUUID());
+            }
+            return;
+        }
+
+        UUID casterId = PLAYER_TO_CASTER.get(sp.getUUID());
+        if (casterId == null) return;
+
+        Session session = SESSIONS.get(casterId);
+        if (session == null) {
+            PLAYER_TO_CASTER.remove(sp.getUUID());
+            return;
+        }
+
+        MinecraftServer server = sp.getServer();
+        if (server == null) return;
+
+        if (sp.getUUID().equals(casterId) && BeyonderData.getSpirituality(sp) <= 0.0f) {
+            endSession(server, casterId);
+            return;
+        }
+
+        ServerLevel mausoleum = server.getLevel(MAUSOLEUM_DIMENSION);
+        if (mausoleum == null) return;
+
+        if (mausoleum.getGameTime() != LAST_ROOM_REPAIR_TICK) {
+            LAST_ROOM_REPAIR_TICK = mausoleum.getGameTime();
+            restoreRoomSnapshot(mausoleum);
+        }
+
+        if (!sp.level().dimension().equals(MAUSOLEUM_DIMENSION)) {
+            Vec3 inside = clampInsideRoom(new Vec3(sp.getX(), sp.getY(), sp.getZ()));
+            teleportPlayer(sp, mausoleum, inside);
+            return;
+        }
+
+        if (!isInsideMausoleum(sp.position())) {
+            Vec3 inside = clampInsideRoom(sp.position());
+            teleportPlayer(sp, mausoleum, inside);
+        }
+
+        if (mausoleum.getGameTime() % 20 == 0) {
+            float drain = getDrainAmount(sp, session);
+            if (drain > 0.0f && BeyonderData.isBeyonder(sp)) {
+                BeyonderData.reduceSpirituality(sp, drain);
+            }
+
+            if (sp.getUUID().equals(casterId) && BeyonderData.getSpirituality(sp) <= 0.0f) {
+                endSession(server, casterId);
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onBlockBreak(BlockEvent.BreakEvent event) {
+        if (!(event.getPlayer() instanceof ServerPlayer player)) return;
+        if (!isSealed(player)) return;
+
+        event.setCanceled(true);
+    }
+
+    @SubscribeEvent
+    public static void onBlockPlace(BlockEvent.EntityPlaceEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        if (!isSealed(player)) return;
+
+        event.setCanceled(true);
+    }
+
+    private static boolean isSealed(ServerPlayer player) {
+        return PLAYER_TO_CASTER.containsKey(player.getUUID());
+    }
+
+    private static float getDrainAmount(ServerPlayer player, Session session) {
+        if (player.getUUID().equals(session.casterId)) {
+            return 550.0f;
+        }
+
+        int playerSeq = BeyonderData.isBeyonder(player) ? BeyonderData.getSequence(player) : 999;
+        return 0.5f + Math.max(0, playerSeq - session.casterSeq) * 0.15f;
+    }
+
+    private static boolean isInsideMausoleum(Vec3 pos) {
+        double dx = Math.abs(pos.x - 0.5D);
+        double dy = Math.abs(pos.y - 77.0D);
+        double dz = Math.abs(pos.z - 0.5D);
+        return dx <= ROOM_HALF_XZ && dy <= ROOM_HALF_Y && dz <= ROOM_HALF_XZ;
+    }
+
+    private static Vec3 clampInsideRoom(Vec3 pos) {
+        double x = Mth.clamp(pos.x, -ROOM_HALF_XZ + 1.0D, ROOM_HALF_XZ - 1.0D);
+        double y = Mth.clamp(pos.y, 77.0D - ROOM_HALF_Y + 1.0D, 77.0D + ROOM_HALF_Y - 1.0D);
+        double z = Mth.clamp(pos.z, -ROOM_HALF_XZ + 1.0D, ROOM_HALF_XZ - 1.0D);
+        return new Vec3(x + 0.5D, y, z + 0.5D);
+    }
+
+    private static void ensureRoomSnapshot(ServerLevel mausoleum) {
+        if (!ROOM_SNAPSHOT.isEmpty()) return;
+
+        for (int x = MAUSOLEUM_SPAWN.getX() - ROOM_HALF_XZ; x <= MAUSOLEUM_SPAWN.getX() + ROOM_HALF_XZ; x++) {
+            for (int y = MAUSOLEUM_SPAWN.getY() - ROOM_HALF_Y; y <= MAUSOLEUM_SPAWN.getY() + ROOM_HALF_Y; y++) {
+                for (int z = MAUSOLEUM_SPAWN.getZ() - ROOM_HALF_XZ; z <= MAUSOLEUM_SPAWN.getZ() + ROOM_HALF_XZ; z++) {
+                    BlockPos pos = new BlockPos(x, y, z);
+                    ROOM_SNAPSHOT.put(pos, mausoleum.getBlockState(pos));
+                }
+            }
+        }
+    }
+
+    private static void restoreRoomSnapshot(ServerLevel mausoleum) {
+        for (Map.Entry<BlockPos, BlockState> entry : ROOM_SNAPSHOT.entrySet()) {
+            BlockPos pos = entry.getKey();
+            BlockState expected = entry.getValue();
+            if (!mausoleum.getBlockState(pos).equals(expected)) {
+                mausoleum.setBlockAndUpdate(pos, expected);
+            }
+        }
+    }
+
+    private static void endSession(MinecraftServer server, UUID casterId) {
+        Session session = SESSIONS.remove(casterId);
+        if (session == null) return;
+
+        Set<UUID> members = new HashSet<>(session.members);
+        for (UUID memberId : members) {
+            PLAYER_TO_CASTER.remove(memberId);
+            PENDING_DEATHS.remove(memberId);
+        }
+
+        for (UUID memberId : members) {
+            ServerPlayer player = server.getPlayerList().getPlayer(memberId);
+            if (player == null) continue;
+
+            SavedReturn ret = session.returns.get(memberId);
+            if (ret == null) continue;
+
+            ServerLevel targetLevel = server.getLevel(ret.dimension());
+            if (targetLevel == null) continue;
+
+            player.teleportTo(
+                    targetLevel,
+                    ret.position().x,
+                    ret.position().y,
+                    ret.position().z,
+                    ret.yRot(),
+                    ret.xRot()
+            );
+            player.setDeltaMovement(ret.motion());
+            player.fallDistance = 0;
+            player.hurtMarked = true;
+        }
+    }
+
+    private static void killPlayer(ServerPlayer player) {
+        player.hurt(player.damageSources().fellOutOfWorld(), Float.MAX_VALUE);
+    }
+
+    public static boolean isInsideMausoleumDomain(UUID playerId) {
+        return PLAYER_TO_CASTER.containsKey(playerId);
+    }
+}

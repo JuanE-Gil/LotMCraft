@@ -19,6 +19,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.Nullable;
+import de.jakob.lotm.abilities.black_emperor.MausoleumDomainAbility;
+import de.jakob.lotm.util.helper.AbilityUtil;
 
 import java.util.Map;
 import java.util.Random;
@@ -157,6 +159,14 @@ public abstract class Ability {
 
     public boolean canUse(LivingEntity entity, boolean hasToHaveAbility, boolean doesConsumeSpirituality) {
         if(!hasAbility(entity) && hasToHaveAbility) return false;
+
+        if (MausoleumDomainAbility.isInsideMausoleumDomain(entity.getUUID())) {
+            if (entity instanceof ServerPlayer player) {
+                AbilityUtil.sendActionBar(player,
+                        Component.literal("Your abilities are sealed.").withColor(0xFF5555));
+            }
+            return false;
+        }
 
         AbilityCooldownComponent component = entity.getData(ModAttachments.COOLDOWN_COMPONENT);
         if(component.isOnCooldown(id)) return false;

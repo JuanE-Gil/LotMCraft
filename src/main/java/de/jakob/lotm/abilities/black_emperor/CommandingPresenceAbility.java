@@ -1,6 +1,7 @@
 package de.jakob.lotm.abilities.black_emperor;
 
 import de.jakob.lotm.LOTMCraft;
+import de.jakob.lotm.abilities.common.MythicalCreatureFormAbility;
 import de.jakob.lotm.abilities.core.ToggleAbility;
 import de.jakob.lotm.particle.ModParticles;
 import de.jakob.lotm.util.BeyonderData;
@@ -9,6 +10,7 @@ import de.jakob.lotm.util.helper.ParticleUtil;
 import de.jakob.lotm.util.helper.RingEffectManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -25,6 +27,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -51,9 +54,11 @@ public class CommandingPresenceAbility extends ToggleAbility {
     private static final Map<UUID, Long> PRESENCE_SPIRITUALITY_DRAIN_UNTIL = new HashMap<>();
 
     // S4: restore caster movement
-    private static final String COMMANDING_SCALE_BACKUP_KEY = "lotm_commanding_presence_scale_backup";
+    private static final String SHARED_SCALE_BACKUP_KEY = "lotm_shared_scale_backup";
     private static final String COMMANDING_STEP_BACKUP_KEY = "lotm_commanding_presence_step_backup";
-    private static final String COMMANDING_JUMP_BACKUP_KEY = "lotm_commanding_presence_jump_backup";
+
+    // Seq 2: step over a full block and keep the boost alive.
+    private static final float DUKE_STEP_HEIGHT = 2.0F;
 
     private static final String[] REVERENCE_MESSAGES = {
             "An overwhelming sense of authority washes over you...",
@@ -90,26 +95,16 @@ public class CommandingPresenceAbility extends ToggleAbility {
         // S2: Duke tier gets the bigger body.
         AttributeInstance scaleAttr = entity.getAttribute(Attributes.SCALE);
         if (scaleAttr != null) {
-            entity.getPersistentData().putDouble(COMMANDING_SCALE_BACKUP_KEY, scaleAttr.getBaseValue());
+            if (!entity.getPersistentData().contains(SHARED_SCALE_BACKUP_KEY)) {
+                entity.getPersistentData().putDouble(SHARED_SCALE_BACKUP_KEY, scaleAttr.getBaseValue());
+            }
             scaleAttr.setBaseValue(dukeTier ? 2.0D : 1.5D);
             entity.refreshDimensions();
         }
 
-        // S2: step up one block easier.
-        AttributeInstance stepAttr = entity.getAttribute(Attributes.STEP_HEIGHT);
-        if (stepAttr != null && dukeTier) {
-            entity.getPersistentData().putDouble(COMMANDING_STEP_BACKUP_KEY, stepAttr.getBaseValue());
-            stepAttr.setBaseValue(1.05D);
-        }
-
-        // S2: jump boost while active.
-        AttributeInstance jumpAttr = entity.getAttribute(Attributes.JUMP_STRENGTH);
-        if (jumpAttr != null && dukeTier) {
-            entity.getPersistentData().putDouble(COMMANDING_JUMP_BACKUP_KEY, jumpAttr.getBaseValue());
-            jumpAttr.setBaseValue(1.0D);
-        }
-
+        // S2: step height is enabled once, then restored on stop.
         if (dukeTier) {
+            saveAndForceStepHeight(entity, DUKE_STEP_HEIGHT);
             entity.addEffect(new MobEffectInstance(MobEffects.JUMP, 40, 1, false, false, false));
         }
 
@@ -156,9 +151,9 @@ public class CommandingPresenceAbility extends ToggleAbility {
         if (!(level instanceof ServerLevel serverLevel)) return;
 
         int selfSeq = BeyonderData.getSequence(entity);
-        boolean presenceAuraTier = selfSeq <= 3; // Seq 3 and stronger
-        boolean dukeTier = selfSeq <= 2;         // Seq 2 Duke of Entropy and stronger
-        boolean seq5LegacyTier = selfSeq == 5;   // old package
+        boolean presenceAuraTier = selfSeq <= 3;
+        boolean dukeTier = selfSeq <= 2;
+        boolean seq5LegacyTier = selfSeq == 5;
 
         double presenceScale = getPresenceScale(entity);
         double auraRange = dukeTier ? 36.0D : 18.0D;
@@ -166,9 +161,21 @@ public class CommandingPresenceAbility extends ToggleAbility {
         long gameTick = level.getGameTime();
         UUID casterId = entity.getUUID();
 
+
+        AttributeInstance scaleAttr = entity.getAttribute(Attributes.SCALE);
+        if (scaleAttr != null) {
+            double wantedScale = dukeTier ? 2.0D : 1.5D;
+            if (scaleAttr.getBaseValue() != wantedScale) {
+                scaleAttr.setBaseValue(wantedScale);
+                entity.refreshDimensions();
+            }
+        }
+
         // S2: keep jump boost alive while active.
+        // Step height is not forced here anymore; it is only enabled in start() and restored in stop().
         if (dukeTier && gameTick % 20 == 0) {
             entity.addEffect(new MobEffectInstance(MobEffects.JUMP, 40, 1, false, false, false));
+            entity.fallDistance = Math.max(0.0F, entity.fallDistance - 2.0F);
         }
 
         Set<UUID> seenSubjects = new HashSet<>();
@@ -181,16 +188,15 @@ public class CommandingPresenceAbility extends ToggleAbility {
             boolean isBeyonder = BeyonderData.isBeyonder(target);
             int targetSeq = isBeyonder ? BeyonderData.getSequence(target) : Integer.MAX_VALUE;
 
-            // Stronger Beyonders ignore the aura.
-            if (isBeyonder && targetSeq < selfSeq) {
+            if (isBeyonder && targetSeq < selfSeq && !(target instanceof Player)) {
                 continue;
             }
+
 
             seenSubjects.add(target.getUUID());
             UNDER_PRESENCE.put(target.getUUID(), casterId);
 
-            // S1: who gets the head-down pressure
-            boolean headDownTarget = isHeavilyPressured(target, selfSeq);
+            boolean headDownTarget = target instanceof Player || isHeavilyPressured(target, selfSeq);
 
             if (target instanceof Mob mob) {
                 UUID mobId = mob.getUUID();
@@ -210,19 +216,16 @@ public class CommandingPresenceAbility extends ToggleAbility {
                     mob.getNavigation().stop();
                 }
 
-                // S1: head-down pressure
                 if (presenceAuraTier && headDownTarget) {
                     lockHeadDown(target, entity, selfSeq);
                 }
 
-                // S2: legacy slowdown
                 if (seq5LegacyTier && gameTick % 40 == 0) {
                     mob.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 0, false, false, false));
                 }
             }
 
             if (target instanceof Player player) {
-                // S2: legacy package
                 if (seq5LegacyTier && gameTick % 40 == 0) {
                     player.addEffect(new MobEffectInstance(
                             MobEffects.MOVEMENT_SLOWDOWN, 50, 0, false, false, false));
@@ -233,7 +236,6 @@ public class CommandingPresenceAbility extends ToggleAbility {
                     }
                 }
 
-                // S1: head-down + confusion
                 if (presenceAuraTier && headDownTarget) {
                     lockHeadDown(target, entity, selfSeq);
 
@@ -243,7 +245,6 @@ public class CommandingPresenceAbility extends ToggleAbility {
                     }
                 }
 
-                // S2: ground shake for every player in range
                 if (dukeTier && gameTick % 4 == 0) {
                     player.setDeltaMovement(player.getDeltaMovement().add(
                             (serverLevel.random.nextDouble() - 0.5D) * 0.06D,
@@ -266,13 +267,11 @@ public class CommandingPresenceAbility extends ToggleAbility {
                 }
             }
 
-            // S2: spirituality drain inside the duke aura
             if (dukeTier && isBeyonder && targetSeq >= selfSeq && gameTick % 20 == 0) {
                 float drainAmount = 0.75f + Math.max(0, targetSeq - selfSeq) * 0.35f;
                 drainSpirituality(target, drainAmount);
             }
 
-            // S3: legacy drain
             UUID drainCaster = PRESENCE_SPIRITUALITY_DRAIN.get(target.getUUID());
             Long drainUntil = PRESENCE_SPIRITUALITY_DRAIN_UNTIL.get(target.getUUID());
 
@@ -290,7 +289,6 @@ public class CommandingPresenceAbility extends ToggleAbility {
             }
         }
 
-        // S1: stronger aura at Seq 3 and above
         if (presenceAuraTier && gameTick % 6 == 0) {
             RingEffectManager.createRingForAll(
                     entity.position(),
@@ -320,7 +318,6 @@ public class CommandingPresenceAbility extends ToggleAbility {
             );
         }
 
-        // S2: Duke of Entropy pressure burst
         if (dukeTier && gameTick % 4 == 0) {
             RingEffectManager.createRingForAll(
                     entity.position(),
@@ -337,7 +334,6 @@ public class CommandingPresenceAbility extends ToggleAbility {
             );
         }
 
-        // S2: legacy aura
         if (seq5LegacyTier && gameTick % 18 == 0) {
             double offsetX = (serverLevel.random.nextDouble() - 0.5D) * 2.5D;
             double offsetZ = (serverLevel.random.nextDouble() - 0.5D) * 2.5D;
@@ -355,7 +351,6 @@ public class CommandingPresenceAbility extends ToggleAbility {
             );
         }
 
-        // S9: cleanup
         UNDER_PRESENCE.entrySet().removeIf(e -> e.getValue().equals(casterId) && !seenSubjects.contains(e.getKey()));
         LAST_MSG_TICK.keySet().removeIf(id -> !seenSubjects.contains(id));
         RETALIATING_MOBS.keySet().removeIf(id -> !seenSubjects.contains(id));
@@ -375,32 +370,19 @@ public class CommandingPresenceAbility extends ToggleAbility {
 
         // S4: restore size
         AttributeInstance scaleAttr = entity.getAttribute(Attributes.SCALE);
-        if (scaleAttr != null && entity.getPersistentData().contains(COMMANDING_SCALE_BACKUP_KEY)) {
-            double previousScale = entity.getPersistentData().getDouble(COMMANDING_SCALE_BACKUP_KEY);
-            scaleAttr.setBaseValue(previousScale);
+        if (scaleAttr != null) {
+            if (MythicalCreatureFormAbility.isActive(entity.getUUID())) {
+                scaleAttr.setBaseValue(2.75D);
+            } else if (entity.getPersistentData().contains(SHARED_SCALE_BACKUP_KEY)) {
+                scaleAttr.setBaseValue(entity.getPersistentData().getDouble(SHARED_SCALE_BACKUP_KEY));
+                entity.getPersistentData().remove(SHARED_SCALE_BACKUP_KEY);
+            }
             entity.refreshDimensions();
-            entity.getPersistentData().remove(COMMANDING_SCALE_BACKUP_KEY);
         }
 
         // S4: restore step height
-        AttributeInstance stepAttr = entity.getAttribute(Attributes.STEP_HEIGHT);
-        if (stepAttr != null && entity.getPersistentData().contains(COMMANDING_STEP_BACKUP_KEY)) {
-            double previousStep = entity.getPersistentData().getDouble(COMMANDING_STEP_BACKUP_KEY);
-            stepAttr.setBaseValue(previousStep);
-            entity.getPersistentData().remove(COMMANDING_STEP_BACKUP_KEY);
-        }
+        restoreStepHeight(entity);
 
-        // S4: restore jump strength
-        AttributeInstance jumpAttr = entity.getAttribute(Attributes.JUMP_STRENGTH);
-        if (jumpAttr != null && entity.getPersistentData().contains(COMMANDING_JUMP_BACKUP_KEY)) {
-            double previousJump = entity.getPersistentData().getDouble(COMMANDING_JUMP_BACKUP_KEY);
-            jumpAttr.setBaseValue(previousJump);
-            entity.getPersistentData().remove(COMMANDING_JUMP_BACKUP_KEY);
-        }
-
-        entity.removeEffect(MobEffects.JUMP);
-
-        // S4: shutdown burst
         RingEffectManager.createPulsingRingForAll(entity.position(), 18, 2, 24, 10,
                 0.15f, 0.0f, 0.25f, 1.0f, 0.20f, 1.2f, serverLevel);
         ParticleUtil.spawnSphereParticles(serverLevel, ModParticles.BLACK.get(),
@@ -434,7 +416,6 @@ public class CommandingPresenceAbility extends ToggleAbility {
         LivingEntity attacker = resolveAttacker(event.getSource());
         if (attacker == null) return;
 
-        // S2: retaliation window
         if (ACTIVE_CASTERS.contains(attacker.getUUID()) && victim instanceof Monster) {
             RETALIATING_MOBS.put(victim.getUUID(), attacker.getUUID());
             RETALIATING_MOBS_UNTIL.put(victim.getUUID(), victim.level().getGameTime() + 20 * 8);
@@ -445,7 +426,6 @@ public class CommandingPresenceAbility extends ToggleAbility {
         UUID presenceCaster = UNDER_PRESENCE.get(attacker.getUUID());
         if (presenceCaster == null || !presenceCaster.equals(victim.getUUID())) return;
 
-        // S3: legacy drain package
         if (BeyonderData.isBeyonder(attacker)) {
             int attackerSeq = BeyonderData.getSequence(attacker);
             int casterSeq = BeyonderData.getSequence(victim);
@@ -483,7 +463,6 @@ public class CommandingPresenceAbility extends ToggleAbility {
         return null;
     }
 
-    // S8: spirit helper
     private static void drainSpirituality(LivingEntity entity, float amount) {
         float current = BeyonderData.getSpirituality(entity);
         float next = Math.max(0.0f, current - amount);
@@ -517,24 +496,23 @@ public class CommandingPresenceAbility extends ToggleAbility {
         }
     }
 
-    // S1: 2+ sequences weaker than caster
     private static boolean isHeavilyPressured(LivingEntity target, int casterSeq) {
         if (!BeyonderData.isBeyonder(target)) return true;
         return BeyonderData.getSequence(target) >= casterSeq + 2;
     }
 
-    // S1: force head down
     private static void lockHeadDown(LivingEntity target, LivingEntity caster, int casterSeq) {
+        float forcedPitch;
+
         if (!BeyonderData.isBeyonder(target)) {
-            target.setXRot(Math.max(target.getXRot(), 40.0f));
-            target.xRotO = target.getXRot();
-            return;
+            forcedPitch = Math.max(target.getXRot(), 40.0f);
+        } else {
+            int targetSeq = BeyonderData.getSequence(target);
+            if (targetSeq < casterSeq + 2 && !(target instanceof Player)) {
+                return;
+            }
+            forcedPitch = 36.0f + Math.min(18.0f, Math.max(0, targetSeq - casterSeq) * 4.0f);
         }
-
-        int targetSeq = BeyonderData.getSequence(target);
-        if (targetSeq < casterSeq + 2) return;
-
-        float forcedPitch = 36.0f + Math.min(18.0f, (targetSeq - casterSeq) * 4.0f);
 
         target.setXRot(forcedPitch);
         target.xRotO = forcedPitch;
@@ -545,25 +523,73 @@ public class CommandingPresenceAbility extends ToggleAbility {
         target.yHeadRot = target.getYRot();
         target.yHeadRotO = target.getYRot();
         target.setDeltaMovement(target.getDeltaMovement().multiply(0.88D, 1.0D, 0.88D));
+
+        if (target instanceof ServerPlayer player) {
+            player.teleportTo(player.serverLevel(), player.getX(), player.getY(), player.getZ(), player.getYRot(), forcedPitch);
+            player.hurtMarked = true;
+        }
     }
 
-    // S0: public check
     public static boolean isActive(UUID uuid) {
         return ACTIVE_CASTERS.contains(uuid);
     }
 
-    // S1 helper
     private static boolean isPresenceAuraTier(LivingEntity entity) {
         return BeyonderData.getSequence(entity) <= 3;
     }
 
-    // S2 helper
     private static boolean isDukeTier(LivingEntity entity) {
         return BeyonderData.getSequence(entity) <= 2;
     }
 
-    // S1 helper
     private static double getPresenceScale(LivingEntity entity) {
         return isDukeTier(entity) ? 2.0D : 1.0D + Math.max(0, 3 - BeyonderData.getSequence(entity)) * 0.20D;
+    }
+
+    private static void saveAndForceStepHeight(LivingEntity entity, float value) {
+        if (!entity.getPersistentData().contains(COMMANDING_STEP_BACKUP_KEY)) {
+            entity.getPersistentData().putFloat(COMMANDING_STEP_BACKUP_KEY, readStepHeight(entity));
+        }
+        setStepHeight(entity, value);
+    }
+
+    private static void restoreStepHeight(LivingEntity entity) {
+        if (!entity.getPersistentData().contains(COMMANDING_STEP_BACKUP_KEY)) return;
+
+        setStepHeight(entity, entity.getPersistentData().getFloat(COMMANDING_STEP_BACKUP_KEY));
+        entity.getPersistentData().remove(COMMANDING_STEP_BACKUP_KEY);
+    }
+
+    private static float readStepHeight(LivingEntity entity) {
+        try {
+            Field field = net.minecraft.world.entity.Entity.class.getDeclaredField("maxUpStep");
+            field.setAccessible(true);
+            return field.getFloat(entity);
+        } catch (ReflectiveOperationException ignored) {
+        }
+
+        try {
+            Method getter = entity.getClass().getMethod("getMaxUpStep");
+            return ((Number) getter.invoke(entity)).floatValue();
+        } catch (ReflectiveOperationException ignored) {
+        }
+
+        return 0.6F;
+    }
+
+    private static void setStepHeight(LivingEntity entity, float value) {
+        try {
+            Field field = net.minecraft.world.entity.Entity.class.getDeclaredField("maxUpStep");
+            field.setAccessible(true);
+            field.setFloat(entity, value);
+            return;
+        } catch (ReflectiveOperationException ignored) {
+        }
+
+        try {
+            Method setter = entity.getClass().getMethod("setMaxUpStep", float.class);
+            setter.invoke(entity, value);
+        } catch (ReflectiveOperationException ignored) {
+        }
     }
 }

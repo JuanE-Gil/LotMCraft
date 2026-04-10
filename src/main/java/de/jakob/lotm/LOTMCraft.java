@@ -4,7 +4,6 @@ import com.zigythebird.playeranim.animation.PlayerAnimationController;
 import com.zigythebird.playeranim.api.PlayerAnimationFactory;
 import com.zigythebird.playeranimcore.enums.PlayState;
 import de.jakob.lotm.abilities.PassiveAbilityHandler;
-import de.jakob.lotm.abilities.black_emperor.LawDamageHandler;
 import de.jakob.lotm.abilities.core.AbilityHandler;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.block.ModBlockEntities;

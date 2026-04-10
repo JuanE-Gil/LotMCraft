@@ -252,7 +252,7 @@ public class AbilityHandler {
 
         //Black Emperor PATHWAY
         abilities.add(new Eloquence("eloquence_ability"));
-        abilities.add(new LawProficiency("law_proficiency_ability"));
+        abilities.add(new MausoleumDomainAbility("mausoleum_domain_ability"));
         abilities.add(new BriberAbility("briber_ability"));
         abilities.add(new WeaknessDetectionAbility("weakness_detection_ability"));
         abilities.add(new DistortionAbility("distortion_ability"));

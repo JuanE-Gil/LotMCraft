@@ -45,7 +45,7 @@ public class Eloquence extends Ability {
                 target.addEffect(new MobEffectInstance(
                         MobEffects.WEAKNESS,
                         200,
-                        1
+                        2
                 ));
             }
         }
@@ -53,7 +53,7 @@ public class Eloquence extends Ability {
         entity.addEffect(new MobEffectInstance(
                 MobEffects.HERO_OF_THE_VILLAGE,
                 20 * 10,
-                0
+                1
         ));
     }
 

@@ -8,21 +8,23 @@ import de.jakob.lotm.particle.ModParticles;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.ParticleUtil;
-import de.jakob.lotm.util.scheduling.ServerScheduler;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.ServerChatEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
+import net.neoforged.neoforge.event.tick.EntityTickEvent;
 
 import java.util.HashMap;
 import java.util.List;
@@ -35,8 +37,16 @@ public class CommandingOrdersAbility extends ToggleAbility {
 
     private static final String COMMAND_ORDER_LAST_TICK_KEY = "lotm_commanding_orders_last_tick";
     private static final long COMMAND_ORDER_COOLDOWN_TICKS = 40;
-
     private static final int COMMAND_ORDER_RANGE = 25;
+
+    private static final Map<UUID, ActiveOrder> ACTIVE_ORDERS = new HashMap<>();
+
+    private record ActiveOrder(
+            UUID casterId,
+            int casterSeq,
+            String command,
+            long expiresAtTick
+    ) {}
 
     public CommandingOrdersAbility(String id) {
         super(id);
@@ -70,29 +80,12 @@ public class CommandingOrdersAbility extends ToggleAbility {
         entity.sendSystemMessage(Component.literal("§cCommanding Orders: OFF"));
     }
 
-    /**
-     * Chat format:
-     *   TargetName command
-     *
-     * Examples:
-     *   Steve kneel
-     *   Zombie halt
-     */
     public static boolean handleAuthorityChat(LivingEntity caster, String rawMessage) {
         if (caster == null || caster.level().isClientSide) return false;
         if (!(caster.level() instanceof ServerLevel serverLevel)) return false;
 
-        // This only works while Commanding Presence is active.
-        if (!CommandingPresenceAbility.isActive(caster.getUUID())) return false;
-
-        String message = rawMessage.trim();
-        if (message.isEmpty()) return false;
-
-        String[] parts = message.split("\\s+", 2);
-        if (parts.length < 2) return false;
-
-        String targetName = parts[0].trim();
-        String commandRaw = parts[1].trim().toLowerCase(Locale.ROOT);
+        String commandRaw = rawMessage.trim().toLowerCase(Locale.ROOT);
+        if (commandRaw.isEmpty()) return false;
 
         String command;
         if (commandRaw.startsWith("kneel")) {
@@ -119,19 +112,11 @@ public class CommandingOrdersAbility extends ToggleAbility {
             return true;
         }
 
-        LivingEntity target = findNamedTarget(serverLevel, caster, targetName);
-        if (target == null) {
+        List<ServerPlayer> targets = findNearbyPlayers(serverLevel, caster);
+        if (targets.isEmpty()) {
             if (caster instanceof Player player) {
                 AbilityUtil.sendActionBar(player,
-                        Component.literal("No named target in range.").withColor(0xFF5555));
-            }
-            return true;
-        }
-
-        if (!canBeCommandedBy(caster, target)) {
-            if (caster instanceof Player player) {
-                AbilityUtil.sendActionBar(player,
-                        Component.literal("That target resists the order.").withColor(0xFF5555));
+                        Component.literal("No players in range.").withColor(0xFF5555));
             }
             return true;
         }
@@ -139,106 +124,155 @@ public class CommandingOrdersAbility extends ToggleAbility {
         caster.getPersistentData().putLong(COMMAND_ORDER_LAST_TICK_KEY, now);
 
         int casterSeq = BeyonderData.getSequence(caster);
-        applyAuthorityOrder(serverLevel, caster, target, casterSeq, command);
+        applyAuthorityOrder(serverLevel, caster, targets, casterSeq, command);
 
         if (caster instanceof Player player) {
             AbilityUtil.sendActionBar(player,
-                    Component.literal("Order issued: " + targetName + " " + command)
+                    Component.literal("Order issued: " + command + " (" + targets.size() + " players)")
                             .withColor(0xAA77FF));
         }
 
         return true;
     }
 
-    private static LivingEntity findNamedTarget(ServerLevel level, LivingEntity caster, String targetName) {
-        String wanted = targetName.toLowerCase(Locale.ROOT);
-
-        List<LivingEntity> nearby = level.getEntitiesOfClass(
-                LivingEntity.class,
-                caster.getBoundingBox().inflate(COMMAND_ORDER_RANGE),
-                target -> target != caster && target.isAlive()
-        );
-
-        for (LivingEntity target : nearby) {
-            String actual = target.getName().getString().toLowerCase(Locale.ROOT);
-            if (actual.equals(wanted)) {
-                return target;
-            }
+    @SubscribeEvent
+    public static void onServerChat(ServerChatEvent event) {
+        if (handleAuthorityChat(event.getPlayer(), event.getRawText())) {
+            event.setCanceled(true);
         }
-
-        return null;
     }
 
-    private static void applyAuthorityOrder(ServerLevel level, LivingEntity caster, LivingEntity target, int casterSeq, String command) {
-        if (target instanceof Mob mob) {
-            mob.setTarget(null);
-            mob.getNavigation().stop();
+    private static List<ServerPlayer> findNearbyPlayers(ServerLevel level, LivingEntity caster) {
+        AABB area = caster.getBoundingBox().inflate(COMMAND_ORDER_RANGE);
+        return level.getEntitiesOfClass(
+                ServerPlayer.class,
+                area,
+                player -> player.isAlive() && player != caster
+        );
+    }
+
+    private static void applyAuthorityOrder(ServerLevel level, LivingEntity caster, List<ServerPlayer> targets, int casterSeq, String command) {
+        long durationTicks = getOrderDuration(command);
+
+        for (ServerPlayer target : targets) {
+            ACTIVE_ORDERS.put(target.getUUID(), new ActiveOrder(
+                    caster.getUUID(),
+                    casterSeq,
+                    command,
+                    level.getGameTime() + durationTicks
+            ));
+
+            enforceAuthorityOrder(level, caster, target, casterSeq, command);
+        }
+    }
+
+    private static long getOrderDuration(String command) {
+        return switch (command) {
+            case "kneel" -> 50L;
+            case "halt" -> 60L;
+            case "retreat" -> 40L;
+            case "advance" -> 40L;
+            case "silence" -> 70L;
+            default -> 40L;
+        };
+    }
+
+    @SubscribeEvent
+    public static void onEntityTick(EntityTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        if (player.level().isClientSide) return;
+        if (!(player.level() instanceof ServerLevel serverLevel)) return;
+
+        ActiveOrder order = ACTIVE_ORDERS.get(player.getUUID());
+        if (order == null) return;
+
+        if (serverLevel.getGameTime() >= order.expiresAtTick()) {
+            clearActiveOrder(player);
+            return;
         }
 
-        Vec3 away = target.position().subtract(caster.position()).normalize();
+        LivingEntity caster = resolveCaster(serverLevel, order.casterId());
+        if (caster == null || !caster.isAlive()) {
+            clearActiveOrder(player);
+            return;
+        }
+
+        enforceAuthorityOrder(serverLevel, caster, player, order.casterSeq(), order.command());
+    }
+
+    private static LivingEntity resolveCaster(ServerLevel level, UUID casterId) {
+        return level.getServer().getPlayerList().getPlayer(casterId);
+    }
+
+    private static void clearActiveOrder(LivingEntity entity) {
+        ACTIVE_ORDERS.remove(entity.getUUID());
+    }
+
+    private static void enforceAuthorityOrder(ServerLevel level, LivingEntity caster, LivingEntity target, int casterSeq, String command) {
+        if (!(target instanceof ServerPlayer player)) {
+            return;
+        }
+
+        Vec3 away = player.position().subtract(caster.position()).normalize();
+        Vec3 toward = caster.position().subtract(player.position()).normalize();
 
         switch (command) {
             case "kneel" -> {
-                target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 50, 1, false, false, false));
-                target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 40, 0, false, false, false));
-                target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 25, 0, false, false, false));
-                target.setDeltaMovement(target.getDeltaMovement().scale(0.20D));
-                lockHeadDown(target, caster, casterSeq);
+                player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 50, 2, false, false, false));
+                player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 40, 2, false, false, false));
+                player.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 25, 2, false, false, false));
+                lockHeadDown(player, caster, casterSeq);
+                syncPlayerPosition(player, level, player.position(), player.getYRot(), player.getXRot());
             }
             case "halt" -> {
-                target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 2, false, false, false));
-                target.setDeltaMovement(Vec3.ZERO);
-                lockHeadDown(target, caster, casterSeq);
-
-                // This is what makes Zombie halt etc. actually feel like a stop.
-                if (target instanceof Mob mob) {
-                    mob.setNoAi(true);
-                    ServerScheduler.scheduleDelayed(20 * 3, () -> {
-                        if (mob.isAlive()) {
-                            mob.setNoAi(false);
-                        }
-                    }, level);
-                }
+                player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 10, false, false, false));
+                lockHeadDown(player, caster, casterSeq);
+                syncPlayerPosition(player, level, player.position(), player.getYRot(), player.getXRot());
             }
             case "retreat" -> {
-                target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 0, false, false, false));
-                target.setDeltaMovement(
+                player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 0, false, false, false));
+                Vec3 next = player.position().add(
                         away.x * 0.65D,
                         0.12D,
                         away.z * 0.65D
                 );
-                target.hasImpulse = true;
+                syncPlayerPosition(player, level, next, player.getYRot(), player.getXRot());
             }
             case "advance" -> {
-                Vec3 toCaster = caster.position().subtract(target.position()).normalize();
-                target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 25, 0, false, false, false));
-
-                if (target instanceof Mob mob) {
-                    mob.setNoAi(false);
-                    mob.getNavigation().moveTo(caster.getX(), caster.getY(), caster.getZ(), 1.0D);
-                } else {
-                    target.setDeltaMovement(target.getDeltaMovement().add(
-                            toCaster.x * 0.35D,
-                            0.04D,
-                            toCaster.z * 0.35D
-                    ));
-                    target.hasImpulse = true;
-                }
+                player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 25, 0, false, false, false));
+                Vec3 next = player.position().add(
+                        toward.x * 0.55D,
+                        0.04D,
+                        toward.z * 0.55D
+                ).add(
+                        toward.x * 0.12D,
+                        0.0D,
+                        toward.z * 0.12D
+                );
+                syncPlayerPosition(player, level, next, player.getYRot(), player.getXRot());
             }
             case "silence" -> {
-                target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 50, 0, false, false, false));
-                target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 35, 0, false, false, false));
-                lockHeadDown(target, caster, casterSeq);
+                player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 50, 0, false, false, false));
+                player.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 35, 0, false, false, false));
+                lockHeadDown(player, caster, casterSeq);
 
-                if (BeyonderData.isBeyonder(target)) {
-                    DisabledAbilitiesComponent component = target.getData(ModAttachments.DISABLED_ABILITIES_COMPONENT);
-                    component.disableAbilityUsageForTime("commanding_silence", 20 * 14, target);
+                if (BeyonderData.isBeyonder(player)) {
+                    DisabledAbilitiesComponent component = player.getData(ModAttachments.DISABLED_ABILITIES_COMPONENT);
+                    component.disableAbilityUsageForTime("commanding_silence", 20 * 14, player);
                 }
+
+                syncPlayerPosition(player, level, player.position(), player.getYRot(), player.getXRot());
             }
         }
 
         ParticleUtil.spawnSphereParticles(level, ModParticles.BLACK.get(),
-                target.position().add(0, 1, 0), 0.8, 12);
+                player.position().add(0, 1, 0), 0.8, 12);
+    }
+
+    private static void syncPlayerPosition(ServerPlayer player, ServerLevel level, Vec3 pos, float yRot, float xRot) {
+        player.teleportTo(level, pos.x, pos.y, pos.z, yRot, xRot);
+        player.setDeltaMovement(Vec3.ZERO);
+        player.hurtMarked = true;
     }
 
     private static boolean canBeCommandedBy(LivingEntity caster, LivingEntity target) {
@@ -251,16 +285,17 @@ public class CommandingOrdersAbility extends ToggleAbility {
     }
 
     private static void lockHeadDown(LivingEntity target, LivingEntity caster, int casterSeq) {
+        float forcedPitch;
+
         if (!BeyonderData.isBeyonder(target)) {
-            target.setXRot(Math.max(target.getXRot(), 40.0f));
-            target.xRotO = target.getXRot();
-            return;
+            forcedPitch = Math.max(target.getXRot(), 40.0f);
+        } else {
+            int targetSeq = BeyonderData.getSequence(target);
+            if (targetSeq < casterSeq + 2 && !(target instanceof Player)) {
+                return;
+            }
+            forcedPitch = 36.0f + Math.min(18.0f, Math.max(0, targetSeq - casterSeq) * 4.0f);
         }
-
-        int targetSeq = BeyonderData.getSequence(target);
-        if (targetSeq < casterSeq + 2) return;
-
-        float forcedPitch = 36.0f + Math.min(18.0f, (targetSeq - casterSeq) * 4.0f);
 
         target.setXRot(forcedPitch);
         target.xRotO = forcedPitch;
@@ -271,19 +306,24 @@ public class CommandingOrdersAbility extends ToggleAbility {
         target.yHeadRot = target.getYRot();
         target.yHeadRotO = target.getYRot();
         target.setDeltaMovement(target.getDeltaMovement().multiply(0.88D, 1.0D, 0.88D));
+
+        if (target instanceof ServerPlayer player) {
+            player.teleportTo(player.serverLevel(), player.getX(), player.getY(), player.getZ(), player.getYRot(), forcedPitch);
+            player.hurtMarked = true;
+        }
     }
 
     public static boolean isActive(UUID uuid) {
-        return false;
+        return ACTIVE_ORDERS.containsKey(uuid);
     }
 
     @SubscribeEvent
     public static void onPresenceChallenged(LivingDamageEvent.Pre event) {
         LivingEntity victim = event.getEntity();
-        if (!CommandingPresenceAbility.isActive(victim.getUUID())) return;
-
         LivingEntity attacker = resolveAttacker(event.getSource());
         if (attacker == null) return;
+
+        if (!CommandingPresenceAbility.isActive(victim.getUUID())) return;
 
         if (BeyonderData.isBeyonder(attacker)) {
             int attackerSeq = BeyonderData.getSequence(attacker);
@@ -298,6 +338,12 @@ public class CommandingOrdersAbility extends ToggleAbility {
         Vec3 pushDir = attacker.position().subtract(victim.position()).normalize();
         attacker.setDeltaMovement(pushDir.x * 0.45, 0.28, pushDir.z * 0.45);
         attacker.hasImpulse = true;
+
+        if (attacker instanceof Player player) {
+            AbilityUtil.sendActionBar(player,
+                    Component.literal("Fighting the presence exhausts you.")
+                            .withColor(0x8800CC));
+        }
     }
 
     private static LivingEntity resolveAttacker(DamageSource source) {

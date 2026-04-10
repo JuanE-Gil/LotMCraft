@@ -363,7 +363,7 @@ Three selectable modes, all lasting **100 ticks**:
 - Caster receives **Hero of the Village** (Level 0, 10 seconds).
 
 ---
-
+### Shit Got Murked
 ### Law Proficiency
 **Sequence Requirement:** 9 *(superseded by Weakness Detection at Sequence 6 and below)*
 **Spirituality Cost:** 1.5 per tick (toggle)

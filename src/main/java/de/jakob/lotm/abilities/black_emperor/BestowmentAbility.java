@@ -13,6 +13,7 @@ import de.jakob.lotm.util.scheduling.ServerScheduler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
@@ -24,6 +25,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+
 
 import java.util.HashMap;
 import java.util.List;
@@ -116,9 +118,11 @@ public class BestowmentAbility extends SelectableAbility {
      * Making the target only focused on money.
      * Target ignores everything and moves toward the nearest ore at a walking pace.
      */
+    private static final int MONEY_TOOL_BREAK_LIMIT = 2;
+    private static final double MONEY_TOOL_STEP = 0.85D;
+
     private void bestowMoneyFocus(ServerLevel level, LivingEntity caster, LivingEntity target) {
         int duration = BlackEmperorProgression.scaleTicks(caster, 20 * 8, 20, 20 * 16);
-        // Tweak this line if you want the money effect to last longer or shorter.
         long until = level.getGameTime() + duration;
 
         target.getPersistentData().putLong(MONEY_UNTIL_KEY, until);
@@ -148,7 +152,6 @@ public class BestowmentAbility extends SelectableAbility {
                     long stored = target.getPersistentData().getLong(MONEY_TARGET_POS_KEY);
                     BlockPos currentOre = BlockPos.of(stored);
 
-                    // If the saved ore is gone, re-scan for the nearest one.
                     if (level.getBlockState(currentOre).isAir()) {
                         BlockPos nextOre = findNearestMoneyOre(level, target, MONEY_SEARCH_RADIUS);
                         if (nextOre != null) {
@@ -165,8 +168,20 @@ public class BestowmentAbility extends SelectableAbility {
 
                     Vec3 dir = toOre.normalize();
 
-                    // Mobs walk there normally instead of being yanked around.
-                    if (target instanceof Mob mob) {
+                    if (target instanceof ServerPlayer player) {
+                        clearMoneyPath(level, player, dir);
+
+                        player.setDeltaMovement(player.getDeltaMovement().add(
+                                dir.x * 0.08D,
+                                0.0D,
+                                dir.z * 0.08D
+                        ));
+                        player.hasImpulse = true;
+                        player.hurtMarked = true;
+
+                        AbilityUtil.sendActionBar(player,
+                                Component.literal("Money... ore... treasure...").withColor(0xAA77FF));
+                    } else if (target instanceof Mob mob) {
                         mob.setTarget(null);
                         mob.getNavigation().moveTo(
                                 oreCenter.x,
@@ -175,17 +190,12 @@ public class BestowmentAbility extends SelectableAbility {
                                 MONEY_MOB_WALK_SPEED
                         );
                     } else {
-                        // Players and non-mob entities get a light pull instead of a hard drag.
                         target.setDeltaMovement(target.getDeltaMovement().add(
                                 dir.x * MONEY_ENTITY_PULL,
                                 dir.y * 0.02D,
                                 dir.z * MONEY_ENTITY_PULL
                         ));
-                    }
-
-                    if (target instanceof Player player) {
-                        AbilityUtil.sendActionBar(player,
-                                Component.literal("Money... ore... treasure...").withColor(0xAA77FF));
+                        target.hurtMarked = true;
                     }
                 },
                 () -> {
@@ -194,6 +204,37 @@ public class BestowmentAbility extends SelectableAbility {
                 },
                 level
         );
+    }
+
+    private void clearMoneyPath(ServerLevel level, LivingEntity target, Vec3 dir) {
+        Vec3 eye = target.position().add(0.0D, target.getBbHeight() * 0.5D, 0.0D);
+
+        int broken = 0;
+
+        BlockPos feet = target.blockPosition();
+        broken += tryBreakMoneyBlock(level, target, feet) ? 1 : 0;
+        if (broken < MONEY_TOOL_BREAK_LIMIT) {
+            broken += tryBreakMoneyBlock(level, target, feet.above()) ? 1 : 0;
+        }
+
+        double[] steps = {MONEY_TOOL_STEP, MONEY_TOOL_STEP * 2.0D, MONEY_TOOL_STEP * 3.0D};
+        for (double step : steps) {
+            if (broken >= MONEY_TOOL_BREAK_LIMIT) break;
+
+            BlockPos front = BlockPos.containing(eye.add(dir.scale(step)));
+            broken += tryBreakMoneyBlock(level, target, front) ? 1 : 0;
+
+            if (broken >= MONEY_TOOL_BREAK_LIMIT) break;
+            broken += tryBreakMoneyBlock(level, target, front.above()) ? 1 : 0;
+        }
+    }
+
+    private boolean tryBreakMoneyBlock(ServerLevel level, LivingEntity breaker, BlockPos pos) {
+        BlockState state = level.getBlockState(pos);
+        if (state.isAir()) return false;
+        if (state.getDestroySpeed(level, pos) < 0.0F) return false;
+
+        return level.destroyBlock(pos, true, breaker);
     }
 
     /**

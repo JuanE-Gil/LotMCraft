@@ -14,12 +14,25 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.Level;
+import de.jakob.lotm.abilities.black_emperor.CommandingPresenceAbility;import de.jakob.lotm.abilities.black_emperor.CommandingPresenceAbility;
+
+
+
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.UUID;
 
 public class MythicalCreatureFormAbility extends ToggleAbility {
+
+
+    public static boolean isActive(UUID uuid) {
+        return ACTIVE.contains(uuid);
+    }
+    private static final String SHARED_SCALE_BACKUP_KEY = "lotm_shared_scale_backup";
+    private static final HashSet<UUID> ACTIVE = new HashSet<>();
+
     private static final HashMap<UUID, Double> previousScale = new HashMap<>();
 
     public MythicalCreatureFormAbility(String id) {
@@ -38,7 +51,7 @@ public class MythicalCreatureFormAbility extends ToggleAbility {
         }
 
         AttributeInstance scaleAttribute = entity.getAttribute(Attributes.SCALE);
-        if(scaleAttribute != null) {
+        if(scaleAttribute != null && !CommandingPresenceAbility.isActive(entity.getUUID())) {
             scaleAttribute.setBaseValue(2.75);
         }
 
@@ -87,9 +100,13 @@ public class MythicalCreatureFormAbility extends ToggleAbility {
             return;
         }
 
+        ACTIVE.add(entity.getUUID());
+
         AttributeInstance scaleAttribute = entity.getAttribute(Attributes.SCALE);
         if(scaleAttribute != null) {
-            previousScale.put(entity.getUUID(), scaleAttribute.getValue());
+            if (!entity.getPersistentData().contains(SHARED_SCALE_BACKUP_KEY)) {
+                entity.getPersistentData().putDouble(SHARED_SCALE_BACKUP_KEY, scaleAttribute.getBaseValue());
+            }
         }
 
         TransformationComponent transformationComponent = entity.getData(ModAttachments.TRANSFORMATION_COMPONENT);
@@ -103,20 +120,26 @@ public class MythicalCreatureFormAbility extends ToggleAbility {
             return;
         }
 
+        ACTIVE.remove(entity.getUUID());
+
         AttributeInstance scaleAttribute = entity.getAttribute(Attributes.SCALE);
-        if(scaleAttribute != null && previousScale.containsKey(entity.getUUID())) {
-            scaleAttribute.setBaseValue(previousScale.get(entity.getUUID()));
-            previousScale.remove(entity.getUUID());
+        if(scaleAttribute != null) {
+            if (CommandingPresenceAbility.isActive(entity.getUUID())) {
+                int seq = BeyonderData.getSequence(entity);
+                scaleAttribute.setBaseValue(seq <= 2 ? 2.0D : 1.5D);
+            } else if (entity.getPersistentData().contains(SHARED_SCALE_BACKUP_KEY)) {
+                scaleAttribute.setBaseValue(entity.getPersistentData().getDouble(SHARED_SCALE_BACKUP_KEY));
+                entity.getPersistentData().remove(SHARED_SCALE_BACKUP_KEY);
+            }
+            entity.refreshDimensions();
         }
 
-        // Remove buff
         BeyonderData.removeModifier(entity, "mythical_creature_form");
 
         TransformationComponent transformationComponent = entity.getData(ModAttachments.TRANSFORMATION_COMPONENT);
         if(transformationComponent.isTransformed() && transformationComponent.getTransformationIndex() == TransformationComponent.TransformationType.MYTHICAL_CREATURE.getIndex()) {
             transformationComponent.setTransformedAndSync(false, entity);
         }
-
     }
 
     @Override
