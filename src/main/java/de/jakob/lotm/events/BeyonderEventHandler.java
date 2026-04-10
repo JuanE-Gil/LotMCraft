@@ -298,11 +298,11 @@ public class BeyonderEventHandler {
 
         float digestionDrain;
         if (isDirect) {
-            // Base 3%, +1% per level attacker is stronger, -1% per level attacker is weaker, floor 1%
-            digestionDrain = Math.max(0.01f, 0.03f + seqDiff * 0.01f);
+            // Base 0.3%, +0.1% per level attacker is stronger, -0.1% per level attacker is weaker, floor 0.1%
+            digestionDrain = Math.max(0.001f, 0.003f + seqDiff * 0.001f);
         } else {
-            // Base 0.5%, +0.1% per level attacker is stronger, -0.1% per level attacker is weaker, floor 0.1%
-            digestionDrain = Math.max(0.001f, 0.005f + seqDiff * 0.001f);
+            // Base 0.05%, +0.01% per level attacker is stronger, -0.001% per level attacker is weaker, floor 0.01%
+            digestionDrain = Math.max(0.0001f, 0.0005f + seqDiff * 0.0001f);
         }
 
         float currentDigestion = BeyonderData.getDigestionProgress(victimPlayer);
@@ -313,7 +313,7 @@ public class BeyonderEventHandler {
         }
 
         // If digestion is fully drained, 10% chance to regress victim and reward attacker
-        if (newDigestion <= 0f && new Random().nextFloat() < 0.1f) {
+        if (newDigestion <= 0f && new Random().nextFloat() < 0.01f) {
             // Check if victim has a characteristic stack at their current sequence
             boolean hasStack = BeyonderData.beyonderMap != null
                     && BeyonderData.beyonderMap.get(victim.getUUID()).isPresent()
