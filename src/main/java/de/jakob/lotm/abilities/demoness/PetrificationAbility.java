@@ -76,11 +76,11 @@ public class PetrificationAbility extends SelectableAbility {
 
         AtomicDouble radius = new AtomicDouble(0.5);
         Vec3 startPos = entity.position();
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
 
         final UUID[] taskIdHolder = new UUID[1];
         taskIdHolder[0] = ServerScheduler.scheduleForDuration(0, 1, 120, () -> {
             Location petrifyLoc = new Location(startPos, serverLevel);
-            int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
 
             if(InteractionHandler.isInteractionPossible(petrifyLoc, "explosion", entitySeq)) {
                 if(taskIdHolder[0] != null) ServerScheduler.cancel(taskIdHolder[0]);

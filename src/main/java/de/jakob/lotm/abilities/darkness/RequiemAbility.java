@@ -30,7 +30,6 @@ import org.joml.Vector3f;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class RequiemAbility extends Ability {
     private final DustParticleOptions dust = new DustParticleOptions(new Vector3f(250 / 255f, 40 / 255f, 64 / 255f), .5f);
@@ -114,10 +113,10 @@ public class RequiemAbility extends Ability {
             ParticleUtil.createParticleSpirals(bigDust, loc, .8, .8, targetEntity.getEyeHeight(), .35, 5, finalDuration, 15, 5);
         });
 
-        AtomicReference<UUID> taskIdRef = new AtomicReference<>();
-        UUID taskId = ServerScheduler.scheduleForDuration(0, 5, duration, () -> {
+        final UUID[] taskIdHolder = new UUID[1];
+        taskIdHolder[0] = ServerScheduler.scheduleForDuration(0, 5, duration, () -> {
             if(InteractionHandler.isInteractionPossible(loc, "explosion", entitySeq)) {
-                ServerScheduler.cancel(taskIdRef.get());
+                if(taskIdHolder[0] != null) ServerScheduler.cancel(taskIdHolder[0]);
 
                 targetEntity.removeEffect(MobEffects.MOVEMENT_SLOWDOWN);
                 targetEntity.removeEffect(MobEffects.WEAKNESS);
@@ -140,7 +139,6 @@ public class RequiemAbility extends Ability {
             loc.setLevel(targetEntity.level());
             loc.setPosition(targetEntity.position());
         }, null, (ServerLevel) level, () -> AbilityUtil.getTimeInArea(entity, new Location(entity.position(), level)));
-        taskIdRef.set(taskId);
 
 
         ServerScheduler.scheduleDelayed(duration, () -> pacifiedEntities.remove(targetEntity.getUUID()));
