@@ -1,5 +1,7 @@
 package de.jakob.lotm.abilities.fool;
 import de.jakob.lotm.abilities.core.SelectableAbility;
+import de.jakob.lotm.attachments.CopiedInventoryComponent;
+import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.entity.custom.BeyonderNPCEntity;
 import de.jakob.lotm.potions.BeyonderCharacteristicItem;
 import de.jakob.lotm.potions.BeyonderPotion;
@@ -39,6 +41,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
@@ -427,6 +430,8 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
         activeSummons.keySet().removeIf(uuid -> !onlinePlayers.contains(uuid));
     }
 
+
+
     private void summonEntity(ServerLevel level, ServerPlayer player) {
         int currentSummoned = getSummonedCount(player);
         if(currentSummoned >= getMaxSummoned(player)) {
@@ -536,7 +541,7 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
         String customName = entityData.getString("CustomName");
 
         // Create a spawn egg or representation item
-        ItemStack display = new ItemStack(net.minecraft.world.item.Items.PLAYER_HEAD);
+        ItemStack display = new ItemStack(Items.PLAYER_HEAD);
         display.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME,
                 Component.literal(customName.isEmpty() ? entityId : customName));
 
@@ -544,7 +549,7 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
         customTag.put("EntityData", entityData);
 
         display.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA,
-                net.minecraft.world.item.component.CustomData.of(customTag)
+                CustomData.of(customTag)
         );
 
         return display;
@@ -609,14 +614,27 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
                 entityNBT.remove("sequence");
                 entityNBT.remove("skin");
                 entityNBT.remove("hostile");
-
-                if (entityNBT.contains("neoforge:attachments")) {
-                    entityNBT.getCompound("neoforge:attachments").remove("lotmcraft:copied_inventory");
-                }
                 
                 // Load remaining data (health, position, etc.)
                 entity.load(entityNBT);
             }
+
+            CopiedInventoryComponent data = entity.getData(ModAttachments.COPIED_INVENTORY);
+            SimpleContainer container = data.getInv();
+            long summonTimeInv = level.getGameTime() + getSummonDurationTicks(player);
+
+            for (int i = 0; i < container.getContainerSize(); i++) {
+                ItemStack stack = container.getItem(i);
+
+                if (!stack.isEmpty()) {
+                    CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> {
+                        tag.putLong("VoidSummonTime", summonTimeInv);
+                        tag.putUUID("VoidSummonOwner", player.getUUID());
+
+                    });
+                }
+            }
+            entity.setData(ModAttachments.COPIED_INVENTORY, data);
 
             // Position in front of player (after loading NBT to override any position data)
             Vec3 lookVec = player.getLookAngle();
@@ -627,7 +645,7 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
             entity.setUUID(UUID.randomUUID());
 
             // Mark as temporary
-            long summonTime = level.getGameTime();
+            long summonTime = level.getGameTime() + getSummonDurationTicks(player);
             CompoundTag tag = entity.getPersistentData();
             tag.putLong("VoidSummonTime", summonTime);
             tag.putUUID("VoidSummonOwner", player.getUUID());
@@ -709,6 +727,24 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
         }
     }
 
+    @SubscribeEvent
+    public static void onSummonedEntityTick(EntityTickEvent.Post event) {
+        // method to check every xx mins for summoned entities and remove them
+        Entity entity = event.getEntity();
+        Level level = entity.level();
+
+        // run every minute
+        if (entity.tickCount % 300 != 0) return;
+        if (level.isClientSide || !(level instanceof ServerLevel serverLevel)) return;
+
+        if(entity.getPersistentData().getBoolean("VoidSummoned")) {
+            System.out.println("entity : "+entity);
+            if (entity.getPersistentData().getLong("VoidSummonTime") < serverLevel.getGameTime()) {
+                entity.remove(Entity.RemovalReason.DISCARDED);
+            }
+        }
+    }
+
     private void markItems(ServerLevel level, ServerPlayer player) {
         // Open the player's ender chest for them to add items
         Container enderChest = player.getEnderChestInventory();
@@ -746,11 +782,6 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
 
         CompoundTag entityNBT = new CompoundTag();
         closest.save(entityNBT);
-        entityNBT.remove("HandItems");
-        entityNBT.remove("ArmorItems");
-        if (entityNBT.contains("neoforge:attachments")) {
-            entityNBT.getCompound("neoforge:attachments").remove("lotmcraft:copied_inventory");
-        }
         entityData.put("EntityNBT", entityNBT);
 
         // Special handling for BeyonderNPCEntity
@@ -850,11 +881,12 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
 
     // scale max summoned items
     private static int getSummonDurationTicks(ServerPlayer serverPlayer){
-        return switch (BeyonderData.getSequence(serverPlayer)){
-            case 0 -> 60 * 60 * 20;
-            case 1 -> 10 * 60 * 20;
-            case 2 -> 3 * 60 * 20;
-            default -> 30 * 20;
-        };
+        return 100;
+//        return switch (BeyonderData.getSequence(serverPlayer)){
+//            case 0 -> 60 * 60 * 20;
+//            case 1 -> 10 * 60 * 20;
+//            case 2 -> 3 * 60 * 20;
+//            default -> 30 * 20;
+//        };
     }
 }

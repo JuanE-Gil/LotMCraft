@@ -190,7 +190,7 @@ public class ControllingUtil {
             }
             originalBodyEntity.discard();
         } else {
-            // only a fallback in case the body didn't exist or was unloaded for some reason (it's not tested if this works or not)
+            // only a fallback in case the body didn't exist or was unloaded for some reason
             CompoundTag bodyTag = data.getBodyEntity();
             if (bodyTag != null) {
                 Entity bodyEntity = EntityType.loadEntityRecursive(bodyTag, level, (entity) -> {
@@ -283,22 +283,14 @@ public class ControllingUtil {
         if (sourceData.getString("beyonder_pathway").isEmpty()) {
             targetData.remove("beyonder_pathway");
             targetData.remove("beyonder_sequence");
-            targetData.remove("beyonder_spirituality");
             targetData.remove("beyonder_digestion_progress");
             targetData.remove("beyonder_griefing_enabled");
-            targetData.remove("VoidSummoned");
             PhysicalEnhancementsAbility.resetEnhancements(target.getUUID());
         } else {
             targetData.putString("beyonder_pathway", sourceData.getString("beyonder_pathway"));
             targetData.putInt("beyonder_sequence", sourceData.getInt("beyonder_sequence"));
-            targetData.putFloat("beyonder_spirituality", sourceData.getFloat("beyonder_spirituality"));
             targetData.putFloat("beyonder_digestion_progress", sourceData.getFloat("beyonder_digestion_progress"));
             targetData.putBoolean("beyonder_griefing_enabled", sourceData.getBoolean("beyonder_griefing_enabled"));
-            if (sourceData.getBoolean("VoidSummoned")) {
-                targetData.putBoolean("VoidSummoned", true);
-            } else {
-                targetData.remove("VoidSummoned");
-            }
         }
 
         // sync the changes to the client
