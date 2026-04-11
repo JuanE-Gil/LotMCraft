@@ -2,6 +2,7 @@ package de.jakob.lotm.abilities.darkness;
 
 import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.abilities.core.AbilityUsedEvent;
+import de.jakob.lotm.abilities.core.interaction.InteractionHandler;
 import de.jakob.lotm.attachments.DisabledAbilitiesComponent;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.sound.ModSounds;
@@ -29,6 +30,7 @@ import org.joml.Vector3f;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class RequiemAbility extends Ability {
     private final DustParticleOptions dust = new DustParticleOptions(new Vector3f(250 / 255f, 40 / 255f, 64 / 255f), .5f);
@@ -112,7 +114,23 @@ public class RequiemAbility extends Ability {
             ParticleUtil.createParticleSpirals(bigDust, loc, .8, .8, targetEntity.getEyeHeight(), .35, 5, finalDuration, 15, 5);
         });
 
-        ServerScheduler.scheduleForDuration(0, 5, duration, () -> {
+        AtomicReference<UUID> taskIdRef = new AtomicReference<>();
+        UUID taskId = ServerScheduler.scheduleForDuration(0, 5, duration, () -> {
+            if(InteractionHandler.isInteractionPossible(loc, "explosion", entitySeq)) {
+                ServerScheduler.cancel(taskIdRef.get());
+
+                targetEntity.removeEffect(MobEffects.MOVEMENT_SLOWDOWN);
+                targetEntity.removeEffect(MobEffects.WEAKNESS);
+                targetEntity.removeEffect(MobEffects.DIG_SLOWDOWN);
+                if (targetEntity instanceof Mob mob) mob.setNoAi(false);
+                if(BeyonderData.isBeyonder(targetEntity)) {
+                    DisabledAbilitiesComponent component = targetEntity.getData(ModAttachments.DISABLED_ABILITIES_COMPONENT);
+                    component.enableAbilityUsage("requiem");
+                }
+                pacifiedEntities.remove(targetEntity.getUUID());
+                return;
+            }
+
             targetEntity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, 10, false, false, false));
             targetEntity.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 20, 10, false, false, false));
             targetEntity.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 20, 10, false, false, false));
@@ -122,6 +140,7 @@ public class RequiemAbility extends Ability {
             loc.setLevel(targetEntity.level());
             loc.setPosition(targetEntity.position());
         }, null, (ServerLevel) level, () -> AbilityUtil.getTimeInArea(entity, new Location(entity.position(), level)));
+        taskIdRef.set(taskId);
 
 
         ServerScheduler.scheduleDelayed(duration, () -> pacifiedEntities.remove(targetEntity.getUUID()));

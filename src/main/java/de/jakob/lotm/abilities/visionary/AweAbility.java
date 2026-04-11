@@ -1,7 +1,9 @@
 package de.jakob.lotm.abilities.visionary;
 
 import de.jakob.lotm.abilities.core.Ability;
+import de.jakob.lotm.abilities.core.interaction.InteractionHandler;
 import de.jakob.lotm.util.BeyonderData;
+import de.jakob.lotm.util.data.Location;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.DamageLookup;
 import de.jakob.lotm.util.helper.ParticleUtil;
@@ -49,6 +51,7 @@ public class AweAbility extends Ability {
         level.playSound(null, BlockPos.containing(entity.position()), SoundEvents.ENDER_DRAGON_GROWL, SoundSource.BLOCKS, 1, 1);
         ParticleUtil.spawnParticles((ServerLevel) level, dust, entity.position(), 1300, 17, 3, 17, 0);
 
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
         AbilityUtil.addPotionEffectToNearbyEntities((ServerLevel) level, entity, 25, entity.position(), new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20 * 10, 11, false, false, false), new MobEffectInstance(MobEffects.WEAKNESS, 20 * 10, 6, false, false, false));
         AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 25, DamageLookup.lookupDamage(7, .675) * multiplier(entity), entity.position(), true, false);
         AbilityUtil.getNearbyEntities(entity, (ServerLevel) level, entity.position(), 25).forEach(e -> {
@@ -56,6 +59,16 @@ public class AweAbility extends Ability {
                 BeyonderData.addModifier(e,"awe", .625);
             }
             ServerScheduler.scheduleForDuration(0, 8, 20 * 10, () -> {
+                Location eLoc = new Location(e.position(), e.level());
+                if(InteractionHandler.isInteractionPossibleForEntity(eLoc, "morale_boost", entitySeq, e)) {
+                    if(BeyonderData.isBeyonder(e)) {
+                        BeyonderData.removeModifier(e, "awe");
+                    }
+                    e.removeEffect(MobEffects.MOVEMENT_SLOWDOWN);
+                    e.removeEffect(MobEffects.WEAKNESS);
+                    return;
+                }
+
                 e.setDeltaMovement((new Vec3(random.nextDouble(-1, 1), random.nextDouble(0, .1), random.nextDouble(-1, 1))).normalize().scale(0.3));
                 e.hurtMarked = true;
             }, () -> {
