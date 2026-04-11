@@ -11,6 +11,7 @@
   "item.lotmcraft.mirror": "Mirror",
   "item.lotmcraft.spacer": "",
 
+
   "creativetab.lotmcraft.lotm_tab": "Lord of the Mysteries",
   "creativetab.lotmcraft.abilities_tab": "Beyonder Abilities",
   "creativetab.lotmcraft.passive_abilities_tab": "Passive Beyonder Abilities",
@@ -608,7 +609,8 @@
   "lotmcraft.dragon_scales_ability.description": "Create dragon scales that cover your skin to protect you",
   "lotmcraft.sleep_inducement_ability": "Sleep Inducement",
   "lotmcraft.sleep_inducement_ability.description": "Cause your enemies to fall asleep",
- "ability.lotmcraft.dream_traversal.jump": "Dream Jump",
+  "lotmcraft.dream_traversal_ability": "Dream Traversal",
+  "ability.lotmcraft.dream_traversal.jump": "Dream Jump",
   "ability.lotmcraft.dream_traversal.hide": "Dream Hide",
   "ability.lotmcraft.dream_traversal.guidance": "Guidance",
   "ability.lotmcraft.dream_traversal.must_be_asleep": "Target must be asleep",
@@ -648,6 +650,7 @@
   "lotmcraft.disaster_fantasia_ability": "Disaster Fantasia",
   "lotmcraft.disaster_fantasia_ability.description": "Envision fantasies of disaster into reality",
   "ability.lotmcraft.disaster_fantasia.earthquake": "Envision: Earthquake",
+  "ability.lotmcraft.disaster_fantasia.downpour": "Envision: Downpour",
   "ability.lotmcraft.disaster_fantasia.meteor": "Envision: Meteor Shower",
   "lotmcraft.story_writing_ability": "Story Writing",
   "lotmcraft.story_writing_ability.description": "Put your target into a story of your creation",

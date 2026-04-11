@@ -67,6 +67,10 @@ public class ModDimensions {
             ResourceKey.create(Registries.DIMENSION_TYPE,
                     ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "dream_maze"));
 
+    public static final ResourceKey<Biome> DREAM_MAZE_BIOME_KEY =
+            ResourceKey.create(Registries.BIOME,
+                    ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "dream_maze_biome"));
+
     
     // =========================================================================
     // SPACE dimension

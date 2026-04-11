@@ -70,7 +70,6 @@ public class StoryWritingAbility extends SelectableAbility {
         return new String[]{
                 "ability.lotmcraft.story_writing.player",
                 "ability.lotmcraft.story_writing.target",
-                "ability.lotmcraft.story_writing.disaster",
                 "ability.lotmcraft.story_writing.assault",
                 "ability.lotmcraft.story_writing.guidance",
         };
@@ -85,9 +84,8 @@ public class StoryWritingAbility extends SelectableAbility {
         switch (abilityIndex) {
             case 0 -> castPlayer(serverLevel, author);
             case 1 -> castTarget(serverLevel, author);
-            case 2 -> castDisaster(serverLevel, author);
-            case 3 -> castAssault(serverLevel, author);
-            case 4 -> castGuidance(serverLevel, author);
+            case 2 -> castAssault(serverLevel, author);
+            case 3 -> castGuidance(serverLevel, author);
         }
     }
 
@@ -162,30 +160,6 @@ public class StoryWritingAbility extends SelectableAbility {
                 Component.literal("Story of " + targetName + " created.").withColor(0xFFe3ffff));
     }
 
-
-    private void castDisaster(ServerLevel level, ServerPlayer author) {
-        UUID targetUUID = AUTHOR_TARGET.get(author.getUUID());
-        if (targetUUID == null) {
-            AbilityUtil.sendActionBar(author,
-                    Component.translatable("ability.lotmcraft.story_writing.no_target").withColor(0xFFff124d));
-            return;
-        }
-
-        LivingEntity target = level.getEntity(targetUUID) instanceof LivingEntity le ? le : null;
-        if (target == null || !target.isAlive()) {
-            AbilityUtil.sendActionBar(author,
-                    Component.translatable("ability.lotmcraft.story_writing.target_unavailable").withColor(0xFFff124d));
-            return;
-        }
-
-        int disasterIndex = getAuthorDisasterIndex(author);
-        float multiplier = (float) multiplier(author);
-        boolean griefing = BeyonderData.isGriefingEnabled(author);
-
-        DisasterFantasiaAbility.spawnCurrentDisaster(disasterIndex, level,
-                target.position(), multiplier, griefing);
-        consumeBookUse(author);
-    }
 
     private int getAuthorDisasterIndex(ServerPlayer author) {
         DisasterFantasiaAbility fantasia = (DisasterFantasiaAbility)

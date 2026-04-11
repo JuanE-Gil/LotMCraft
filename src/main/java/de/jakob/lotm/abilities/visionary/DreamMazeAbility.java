@@ -6,8 +6,10 @@ import de.jakob.lotm.attachments.DreamMazeData;
 import de.jakob.lotm.dimension.DreamMazeEventHandler;
 import de.jakob.lotm.dimension.ModDimensions;
 import de.jakob.lotm.effect.ModEffects;
+import de.jakob.lotm.util.helper.ParticleUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
@@ -38,7 +40,7 @@ public class DreamMazeAbility extends SelectableAbility {
     private boolean[][] removedVertWalls;
 
     public DreamMazeAbility(String id) {
-        super(id, 60);
+        super(id, 7);
         this.canBeCopied = false;
         this.canBeReplicated = false;
         this.canBeUsedByNPC = false;
@@ -74,6 +76,8 @@ public class DreamMazeAbility extends SelectableAbility {
         if (!(level instanceof ServerLevel serverLevel)) return;
         if (!(entity instanceof ServerPlayer player)) return;
 
+        ParticleUtil.spawnParticles(serverLevel, ParticleTypes.END_ROD, entity.position(),1000, 1, .5, 1, .05);
+
         DreamMazeData data = DreamMazeData.get(serverLevel.getServer());
 
         // If already inside the dream maze, send them back out
@@ -92,6 +96,8 @@ public class DreamMazeAbility extends SelectableAbility {
         if (level.isClientSide) return;
         if (!(level instanceof ServerLevel serverLevel)) return;
         if (!(entity instanceof ServerPlayer caster)) return;
+
+        ParticleUtil.spawnParticles(serverLevel, ParticleTypes.END_ROD, entity.position(),500, SURROUNDING_RADIUS, .5, SURROUNDING_RADIUS, .05);
 
         // Cannot use from inside the maze
         if (serverLevel.dimension().equals(ModDimensions.DREAM_MAZE_DIMENSION_KEY)) return;
