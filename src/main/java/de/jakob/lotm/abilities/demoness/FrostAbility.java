@@ -3,6 +3,7 @@ package de.jakob.lotm.abilities.demoness;
 import com.google.common.util.concurrent.AtomicDouble;
 import de.jakob.lotm.abilities.core.AbilityUsedEvent;
 import de.jakob.lotm.abilities.core.SelectableAbility;
+import de.jakob.lotm.abilities.core.interaction.InteractionHandler;
 import de.jakob.lotm.damage.ModDamageTypes;
 import de.jakob.lotm.entity.custom.projectiles.FrostSpearProjectileEntity;
 import de.jakob.lotm.util.BeyonderData;
@@ -25,6 +26,7 @@ import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -75,7 +77,16 @@ public class FrostAbility extends SelectableAbility {
 
         AtomicDouble radius = new AtomicDouble(.5);
 
-        ServerScheduler.scheduleForDuration(0, 2, 20 * 3, () -> {
+        final UUID[] taskIdHolder = new UUID[1];
+        taskIdHolder[0] = ServerScheduler.scheduleForDuration(0, 2, 20 * 3, () -> {
+            de.jakob.lotm.util.data.Location freezeLoc = new de.jakob.lotm.util.data.Location(startPos, level);
+            int seq = AbilityUtil.getSeqWithArt(entity, this);
+
+            if(InteractionHandler.isInteractionPossible(freezeLoc, "burning", seq)) {
+                if(taskIdHolder[0] != null) ServerScheduler.cancel(taskIdHolder[0]);
+                return;
+            }
+
             ParticleUtil.spawnParticles((ServerLevel) level, ParticleTypes.SNOWFLAKE, startPos, 70, radius.get(), 0.3, radius.get(), 0);
 
             AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, radius.get() - .4, radius.get() + .4, DamageLookup.lookupDamage(7, .8) * (float) multiplier(entity), startPos, true, false, true, 0, 0, ModDamageTypes.source(level, ModDamageTypes.DEMONESS_GENERIC, entity));

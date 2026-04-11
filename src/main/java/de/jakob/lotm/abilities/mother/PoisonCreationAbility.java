@@ -2,6 +2,8 @@ package de.jakob.lotm.abilities.mother;
 
 import com.google.common.util.concurrent.AtomicDouble;
 import de.jakob.lotm.abilities.core.SelectableAbility;
+import de.jakob.lotm.abilities.core.interaction.InteractionHandler;
+import de.jakob.lotm.damage.ModDamageTypes;
 import de.jakob.lotm.util.data.Location;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.DamageLookup;
@@ -9,7 +11,10 @@ import de.jakob.lotm.util.helper.ParticleUtil;
 import de.jakob.lotm.util.helper.VectorUtil;
 import de.jakob.lotm.util.scheduling.ServerScheduler;
 import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
@@ -20,6 +25,7 @@ import org.joml.Vector3f;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class PoisonCreationAbility extends SelectableAbility {
@@ -105,8 +111,37 @@ public class PoisonCreationAbility extends SelectableAbility {
         Vec3 startPos = entity.position().add(0, 0.185, 0);
 
         double multiplier = multiplier(entity);
+        int seq = AbilityUtil.getSeqWithArt(entity, this);
 
-        ServerScheduler.scheduleForDuration(0, 2, 20 * 5, () -> {
+        final UUID[] taskIdHolder = new UUID[1];
+        taskIdHolder[0] = ServerScheduler.scheduleForDuration(0, 2, 20 * 5, () -> {
+            Location poisonLoc = new Location(startPos, serverLevel);
+
+            if(InteractionHandler.isInteractionPossible(poisonLoc, "burning", seq)) {
+                AbilityUtil.damageNearbyEntities(serverLevel,
+                        null,
+                        radius.get() + 2,
+                        DamageLookup.lookupDamage(6, 1.1) * (float) multiplier,
+                        startPos,
+                        true,
+                        false,
+                        true,
+                        0,
+                        ModDamageTypes.source(serverLevel, ModDamageTypes.BEYONDER_GENERIC, entity)
+                );
+                ParticleUtil.spawnParticles(serverLevel, ParticleTypes.EXPLOSION_EMITTER, startPos, 30, radius.get(), .02);
+                ParticleUtil.spawnParticles(serverLevel, ParticleTypes.LARGE_SMOKE, startPos, 100, radius.get(), .02);
+                ParticleUtil.spawnParticles(serverLevel, ParticleTypes.FLAME, startPos, 150, radius.get(), .02);
+                serverLevel.playSound(null, startPos.x, startPos.y, startPos.z, SoundEvents.GENERIC_EXPLODE, SoundSource.BLOCKS, 1, 1);
+                if(taskIdHolder[0] != null) ServerScheduler.cancel(taskIdHolder[0]);
+                return;
+            }
+
+            if(InteractionHandler.isInteractionPossible(poisonLoc, "purification", seq)) {
+                if(taskIdHolder[0] != null) ServerScheduler.cancel(taskIdHolder[0]);
+                return;
+            }
+
             radius.addAndGet(0.5);
             ParticleUtil.spawnParticles(serverLevel, dustBig, startPos, (int) (radius.get() * 12), radius.get(), 0.1, radius.get(), 0);
             AbilityUtil.damageNearbyEntities(serverLevel, entity, radius.get(), DamageLookup.lookupDps(6, .95, 2, 20) * multiplier, startPos, true, false);

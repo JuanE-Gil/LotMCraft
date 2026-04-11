@@ -2,7 +2,9 @@ package de.jakob.lotm.abilities.abyss;
 
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.Ability;
+import de.jakob.lotm.abilities.core.interaction.InteractionHandler;
 import de.jakob.lotm.effect.ModEffects;
+import de.jakob.lotm.util.data.Location;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.ParticleUtil;
 import de.jakob.lotm.util.scheduling.ServerScheduler;
@@ -87,10 +89,19 @@ public class MaliceSeedAbility extends Ability {
         target.addEffect(new MobEffectInstance(ModEffects.LOOSING_CONTROL, 20 * 60 * 5, 0, false, false, true));
 
         AtomicInteger growth = new AtomicInteger(0);
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
 
         // Grow one stage every 30 seconds for 5 minutes (10 stages total)
-        ServerScheduler.scheduleForDuration(20 * 30, 20 * 30, 20 * 30 * MAX_GROWTH, () -> {
+        final UUID[] taskIdHolder = new UUID[1];
+        taskIdHolder[0] = ServerScheduler.scheduleForDuration(20 * 30, 20 * 30, 20 * 30 * MAX_GROWTH, () -> {
             if (!seedGrowth.containsKey(target.getUUID())) return;
+
+            if(InteractionHandler.isInteractionPossible(new Location(target.position(), target.level()), "purification", entitySeq)) {
+                purgeSeedFromTarget(target.getUUID(), target);
+                if(taskIdHolder[0] != null) ServerScheduler.cancel(taskIdHolder[0]);
+                return;
+            }
+
             int newGrowth = Math.min(growth.incrementAndGet(), MAX_GROWTH);
             seedGrowth.put(target.getUUID(), newGrowth);
             growth.set(newGrowth);

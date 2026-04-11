@@ -3,11 +3,13 @@ package de.jakob.lotm.abilities.demoness;
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.abilities.core.AbilityUsedEvent;
+import de.jakob.lotm.abilities.core.interaction.InteractionHandler;
 import de.jakob.lotm.attachments.DisabledAbilitiesComponent;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.effect.ModEffects;
 import de.jakob.lotm.entity.custom.BeyonderNPCEntity;
 import de.jakob.lotm.util.BeyonderData;
+import de.jakob.lotm.util.data.Location;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.ParticleUtil;
 import de.jakob.lotm.util.helper.marionettes.MarionetteComponent;
@@ -24,6 +26,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.NeoForge;
@@ -147,6 +150,12 @@ public class CharmAbility extends Ability {
         ServerScheduler.scheduleForDuration(0, 5, 20 * 15, () -> {
            if(!charmed.containsKey(target.getUUID()))
                return;
+
+            if(InteractionHandler.isInteractionPossible(new Location(target.position(), target.level()), "purification", casterSequence)) {
+                charmed.remove(target.getUUID());
+                target.removeEffect(MobEffects.MOVEMENT_SLOWDOWN);
+                return;
+            }
 
             ParticleUtil.spawnParticles((ServerLevel) target.level(), ParticleTypes.HEART, target.getEyePosition().subtract(0, .4, 0), 6, .5);
             target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20 * 2, 3, false, false, false));
