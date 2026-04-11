@@ -4,6 +4,7 @@ import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.abilities.core.SelectableAbility;
 import de.jakob.lotm.abilities.error.handler.TheftHandler;
+import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.network.PacketHandler;
 import de.jakob.lotm.network.packets.toServer.AbilitySelectionPacket;
 import de.jakob.lotm.rendering.effectRendering.EffectManager;
@@ -23,6 +24,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.BlockEventData;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -59,7 +61,8 @@ public class GiftAbility extends SelectableAbility {
                 "ability.lotmcraft.gift_ability.item",
                 "ability.lotmcraft.gift_ability.distance",
                 "ability.lotmcraft.gift_ability.health",
-                "ability.lotmcraft.gift_ability.digestion"
+                "ability.lotmcraft.gift_ability.digestion",
+                "ability.lotmcraft.gift_ability.luck"
         };
     }
 
@@ -121,9 +124,48 @@ public class GiftAbility extends SelectableAbility {
             case 1 -> giftDistance(level, entity);
             case 2 -> giftHealth(level, entity);
             case 3 -> giftDigestion(level, entity);
+            case 4 -> giftLuck(level, entity);
         }
     }
 
+    private void giftLuck(Level level, LivingEntity entity){
+        if(!(entity instanceof ServerPlayer player)) {
+            if(entity instanceof Player player && entity.level().isClientSide) {
+                player.playSound(SoundEvents.BELL_RESONATE, 1, 1);
+            }
+            return;
+        }
+
+        LivingEntity target = AbilityUtil.getTargetEntity(entity, 20, 2);
+        if(target == null) {
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.gift.no_target").withColor(0x6d32a8));
+            return;
+        }
+
+        if(!BeyonderData.isBeyonder(target) || !(target instanceof ServerPlayer targetPlayer)){
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.gift.failed").withColor(0x6d32a8));
+            return;
+        }
+
+        float targetDigestion = BeyonderData.getDigestionProgress(targetPlayer);
+        if(targetDigestion == 1.0f){
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.gift.failed").withColor(0x6d32a8));
+            return;
+        }
+
+        var luck = entity.getData(ModAttachments.LUCK_COMPONENT.get());
+        if(luck.getLuck() == 0){
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.gift.failed").withColor(0x6d32a8));
+            return;
+        }
+
+        EffectManager.playEffect(EffectManager.Effect.GIFTING_PARTICLES, target.getX(), target.getY() + target.getBbHeight() / 2, target.getZ(), player, entity);
+
+        var targetLuck = target.getData(ModAttachments.LUCK_COMPONENT.get());
+
+        targetLuck.setLuck(targetLuck.getLuck() + luck.getLuck());
+        luck.setLuck(0);
+    }
 
     private void giftDigestion(Level level, LivingEntity entity){
         if(!(entity instanceof ServerPlayer player)) {

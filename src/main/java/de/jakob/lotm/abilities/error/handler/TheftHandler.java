@@ -443,7 +443,7 @@ public class TheftHandler {
         int userLuck = userLuckComponent.getLuck();
         int targetLuck = targetLuckComponent.getLuck();
 
-        double luckMultiplier = (double) (userLuck - targetLuck) / (120 * 10);
+        double luckMultiplier = (double) (userLuck - targetLuck) / (1200 * 10);
 
         double baseFailPerStep = 0.15;
 
@@ -524,6 +524,24 @@ public class TheftHandler {
 
         BeyonderData.digest((ServerPlayer) target, - digestionToSteal, false);
         BeyonderData.digest((ServerPlayer) entity, digestionToSteal * entityDigestionMultiplier,false);
+    }
+
+    public static void performLuckTheft(LivingEntity entity, LivingEntity target, Random random, Ability skill){
+        if (!BeyonderData.isBeyonder(target)) {
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.ability_theft.not_beyonder").withColor(0x6d32a8));
+            return;
+        }
+
+        if (doesTheftFail(entity, target, random, skill)) {
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.conceptual_theft.failed.luck").withColor(0x6d32a8));
+            return;
+        }
+
+        var luck = entity.getData(ModAttachments.LUCK_COMPONENT.get());
+        var targetLuck = target.getData(ModAttachments.LUCK_COMPONENT.get());
+
+        luck.setLuck(luck.getLuck() + targetLuck.getLuck());
+        targetLuck.setLuck(0);
     }
 
     public static double getDistancePerSeq(int seq){
