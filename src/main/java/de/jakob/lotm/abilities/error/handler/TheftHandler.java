@@ -449,7 +449,7 @@ public class TheftHandler {
 
         double failChance = difference * baseFailPerStep - luckMultiplier;
 
-        failChance = Math.min(Math.max(failChance, 0.0), 0.95);
+        failChance = Math.min(Math.max(failChance, 0.0), 0.6);
 
         return random.nextDouble() < failChance;
     }
@@ -545,6 +545,6 @@ public class TheftHandler {
     }
 
     public static double getDistancePerSeq(int seq){
-       return (1 << (9 - seq));
+        return (1 << (9 - seq));
     }
 }

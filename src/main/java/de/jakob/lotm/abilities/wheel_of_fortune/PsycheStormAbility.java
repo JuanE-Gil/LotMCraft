@@ -49,11 +49,11 @@ public class PsycheStormAbility extends Ability {
         }
         float multiplier = multiplier(entity);
         AbilityUtil.damageNearbyEntities(serverLevel, entity, Math.min(multiplier/10, 1), DamageLookup.lookupDamage(6, 1.2), entity.getEyePosition(), true, false);
-        AbilityUtil.getNearbyEntities(entity, serverLevel, entity.getEyePosition(), Math.min(multiplier/10, 1)).forEach(e ->
+        AbilityUtil.getNearbyEntities(entity, serverLevel, entity.getEyePosition(), Math.max(multiplier/10, 1)).forEach(e ->
                 e.addEffect(new MobEffectInstance(ModEffects.LOOSING_CONTROL, 20 * 7, getAmplifier(entity, e))));
         int seq = BeyonderData.getSequence(entity);
         if(seq <= 4){
-            AbilityUtil.getNearbyEntities(entity, serverLevel, entity.getEyePosition(), Math.min(multiplier/10, 1)).forEach(e -> e.getData(ModAttachments.SANITY_COMPONENT).increaseSanityAndSync((float) (-0.25f * multiplier(entity)), e));
+            AbilityUtil.getNearbyEntities(entity, serverLevel, entity.getEyePosition(), Math.max(multiplier/10, 1)).forEach(e -> e.getData(ModAttachments.SANITY_COMPONENT).increaseSanityAndSync((float) (-0.25f * multiplier(entity)), e));
 
         }
         Location loc = new Location(entity.position(), serverLevel);

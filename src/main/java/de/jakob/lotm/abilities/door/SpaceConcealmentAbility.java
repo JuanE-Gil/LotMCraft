@@ -227,8 +227,8 @@ public class SpaceConcealmentAbility extends SelectableAbility {
 
         public boolean contains(Vec3 position) {
             return Math.abs(position.x - center.x) <= radius &&
-                   Math.abs(position.y - center.y) <= radius &&
-                   Math.abs(position.z - center.z) <= radius;
+                    Math.abs(position.y - center.y) <= radius &&
+                    Math.abs(position.z - center.z) <= radius;
         }
 
         public void spawnDoorAtValidPosition() {

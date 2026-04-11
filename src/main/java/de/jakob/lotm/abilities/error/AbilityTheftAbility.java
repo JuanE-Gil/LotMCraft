@@ -17,7 +17,7 @@ import java.util.Map;
 
 public class AbilityTheftAbility extends SelectableAbility {
     public AbilityTheftAbility(String id) {
-        super(id, 1.5f);
+        super(id, 3f);
         canBeCopied = false;
         canBeReplicated = false;
     }
