@@ -25,6 +25,7 @@ import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
@@ -36,9 +37,9 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.item.ItemTossEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 import java.util.*;
@@ -162,6 +163,7 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
                         if(slotId >= 0 && slotId < 27) {
                             ItemStack clickedItem = displayContainer.getItem(slotId);
                             if(!clickedItem.isEmpty()) {
+                                // excluding some items from being summoned
                                 if (clickedItem.is((ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", "shulker_boxes"))))) return;
                                 if (clickedItem.getItem() instanceof BeyonderCharacteristicItem) return;
                                 if (clickedItem.getItem() instanceof BeyonderPotion) return;
@@ -185,13 +187,14 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
 
     private void createTemporaryItem(ServerLevel level, ServerPlayer player, ItemStack item) {
         // Give the item to the player with NBT marking it as temporary
-        long summonTime = level.getGameTime();
+        // make the summon time tracker for when to remove the item as well
+        long summonTime = level.getGameTime() + getSummonDurationTicks(player);
         CompoundTag customTag = new CompoundTag();
         customTag.putLong("VoidSummonTime", summonTime);
         customTag.putUUID("VoidSummonOwner", player.getUUID());
 
-        item.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA,
-                net.minecraft.world.item.component.CustomData.of(customTag)
+        item.set(DataComponents.CUSTOM_DATA,
+                CustomData.of(customTag)
         );
 
         player.getInventory().add(item);
@@ -215,7 +218,7 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
         for(int i = 0; i < player.getInventory().getContainerSize(); i++) {
             ItemStack stack = player.getInventory().getItem(i);
             if(!stack.isEmpty()) {
-                net.minecraft.world.item.component.CustomData customData = stack.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
+                CustomData customData = stack.get(DataComponents.CUSTOM_DATA);
                 if(customData != null) {
                     CompoundTag tag = customData.copyTag();
                     if(tag.contains("VoidSummonTime") && tag.contains("VoidSummonOwner")) {
@@ -239,6 +242,37 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
             decrementSummonedCount(player, summonTime);
             if(player.isAlive()) {
                 player.sendSystemMessage(Component.translatable("ability.lotmcraft.historical_void_summoning.item_returned").withStyle(ChatFormatting.GRAY));
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onItemTickInPlayerInventory(PlayerTickEvent.Post event) {
+        // method to check every xx mins for summoned items and remove them
+        Player player = event.getEntity();
+        Level level = player.level();
+
+        // run every minute
+        if (player.tickCount % 1200 != 0) return;
+        if (level.isClientSide || !(level instanceof ServerLevel serverLevel) || !(player instanceof ServerPlayer serverPlayer)) return;
+
+        for (int i = 0; i < serverPlayer.getInventory().getContainerSize(); i++) {
+            ItemStack stack = serverPlayer.getInventory().getItem(i);
+
+            if (!stack.isEmpty()) {
+                CustomData customData = stack.get(DataComponents.CUSTOM_DATA);
+                if(customData != null) {
+                    CompoundTag tag = customData.copyTag();
+                    if (tag.contains("VoidSummonTime") && tag.contains("VoidSummonOwner")) {
+                        if (tag.getLong("VoidSummonTime") < serverLevel.getGameTime()) {
+                            player.getInventory().removeItem(i, stack.getCount());
+                            decrementSummonedCount(serverPlayer, tag.getLong("VoidSummonTime"));
+                            if(player.isAlive()) {
+                                player.sendSystemMessage(Component.translatable("ability.lotmcraft.historical_void_summoning.item_returned").withStyle(ChatFormatting.GRAY));
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -304,30 +338,30 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
         }
     }
 
-    // Event handler for item toss
-    @SubscribeEvent
-    public static void onItemToss(ItemTossEvent event) {
-        ItemStack tossedItem = event.getEntity().getItem();
-
-        net.minecraft.world.item.component.CustomData customData = tossedItem.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
-        if(customData != null) {
-            CompoundTag tag = customData.copyTag();
-            if(tag.contains("VoidSummonTime") && tag.contains("VoidSummonOwner")) {
-                // This is a summoned item being tossed - make it disappear
-                long summonTime = tag.getLong("VoidSummonTime");
-                UUID ownerId = tag.getUUID("VoidSummonOwner");
-
-                event.getEntity().discard();
-                event.setCanceled(true);
-
-                // Notify player and decrement count
-                if(event.getPlayer() instanceof ServerPlayer player && player.getUUID().equals(ownerId)) {
-                    decrementSummonedCount(player, summonTime);
-                    player.sendSystemMessage(Component.translatable("ability.lotmcraft.historical_void_summoning.item_returned").withStyle(ChatFormatting.GRAY));
-                }
-            }
-        }
-    }
+//    // Event handler for item toss
+//    @SubscribeEvent
+//    public static void onItemToss(ItemTossEvent event) {
+//        ItemStack tossedItem = event.getEntity().getItem();
+//
+//        net.minecraft.world.item.component.CustomData customData = tossedItem.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
+//        if(customData != null) {
+//            CompoundTag tag = customData.copyTag();
+//            if(tag.contains("VoidSummonTime") && tag.contains("VoidSummonOwner")) {
+//                // This is a summoned item being tossed - make it disappear
+//                long summonTime = tag.getLong("VoidSummonTime");
+//                UUID ownerId = tag.getUUID("VoidSummonOwner");
+//
+//                event.getEntity().discard();
+//                event.setCanceled(true);
+//
+//                // Notify player and decrement count
+//                if(event.getPlayer() instanceof ServerPlayer player && player.getUUID().equals(ownerId)) {
+//                    decrementSummonedCount(player, summonTime);
+//                    player.sendSystemMessage(Component.translatable("ability.lotmcraft.historical_void_summoning.item_returned").withStyle(ChatFormatting.GRAY));
+//                }
+//            }
+//        }
+//    }
 
     // Event handler for player logout - cleanup all summoned items/entities
     @SubscribeEvent
@@ -818,9 +852,9 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
     private static int getSummonDurationTicks(ServerPlayer serverPlayer){
         return switch (BeyonderData.getSequence(serverPlayer)){
             case 0 -> 60 * 60 * 20;
-            case 1 -> 5 * 60 * 20;
-            case 2 -> 60 * 20;
-            default -> 20 * 20;
+            case 1 -> 10 * 60 * 20;
+            case 2 -> 3 * 60 * 20;
+            default -> 30 * 20;
         };
     }
 }
