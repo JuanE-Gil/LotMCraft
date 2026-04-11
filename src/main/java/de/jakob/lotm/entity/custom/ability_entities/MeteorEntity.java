@@ -206,7 +206,7 @@ public class MeteorEntity extends Entity {
         if(position().distanceTo(targetPos.subtract(0, 1, 0)) < .5 || (lastPos != null && position().distanceTo(targetPos.subtract(0, 1, 0)) > lastPos.distanceTo(targetPos.subtract(0, 1, 0))) || !level().getBlockState(BlockPos.containing(position())).isAir()) {
             AbilityUtil.damageNearbyEntities(serverLevel, getCaster() instanceof LivingEntity l ? l : null, getRadius(), getDamage(), position(), true, false);
             EffectManager.playEffect(EffectManager.Effect.EXPLOSION, position().x, position().y, position().z, serverLevel);
-            PerformantExplosion.create(serverLevel, getCaster(), position(), getExplosionSize(), isGriefing(), isGriefing() ? Explosion.BlockInteraction.DESTROY_WITH_DECAY : Explosion.BlockInteraction.KEEP);
+            PerformantExplosion.create(serverLevel, getCaster(), position(), getExplosionSize() * 1.5f, isGriefing(), isGriefing() ? Explosion.BlockInteraction.DESTROY_WITH_DECAY : Explosion.BlockInteraction.KEEP);
 
             if(getCaster() instanceof LivingEntity livingCaster) {
                 String[] flags = isAbyssImpact() ? new String[]{"explosion", "corruption"} : new String[]{"explosion", "burning"};

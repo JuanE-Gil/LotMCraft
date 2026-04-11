@@ -4,6 +4,7 @@ import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.PassiveAbilityHandler;
 import de.jakob.lotm.abilities.PassiveAbilityItem;
 import de.jakob.lotm.abilities.PhysicalEnhancementsAbility;
+import de.jakob.lotm.attachments.LuckComponent;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.attachments.MultiplierModifierComponent;
 import de.jakob.lotm.events.BeyonderDataTickHandler;
@@ -169,6 +170,8 @@ public class BeyonderData {
             if(!BeyonderData.getPathway(player).equals(pathway)
                     || BeyonderData.getSequence(player) < sequence)
                 beyonderMap.removeHonorificName(player);
+
+            beyonderMap.get(player).ifPresent(data -> data.charStack().clear());
         }
 
         if(Objects.equals(sequence, LOTMCraft.NON_BEYONDER_SEQ)
@@ -190,6 +193,9 @@ public class BeyonderData {
             SpiritualityProgressTracker.setProgress(player.getUUID(), 1.0f);
 
         BeyonderDataTickHandler.invalidateCache(entity);
+
+        LuckComponent luckComponent = entity.getData(ModAttachments.LUCK_COMPONENT);
+        luckComponent.setLuck(0);
 
         // Sync to client if this is server-side
         if (entity.level() instanceof ServerLevel serverLevel) {
