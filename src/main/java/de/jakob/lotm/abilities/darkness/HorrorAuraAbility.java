@@ -62,7 +62,8 @@ public class HorrorAuraAbility extends Ability {
             if(InteractionHandler.isInteractionPossible(loc, "purification", seq))
                 return;
 
-            AbilityUtil.getNearbyEntities(entity, serverLevel, entity.position(), 20*multiplier).forEach(e -> {
+
+            AbilityUtil.getNearbyEntities(entity, serverLevel, entity.position(), 20*Math.max(multiplier/20, 1)).forEach(e -> {
                 // Entity is freed from Horror Aura by morale-boosting abilities
                 Location eLoc = new Location(e.position(), serverLevel);
                 int eSeq = BeyonderData.getSequence(e);
@@ -86,7 +87,7 @@ public class HorrorAuraAbility extends Ability {
                 }
 
                 SanityComponent sanityComponent = e.getData(ModAttachments.SANITY_COMPONENT);
-                sanityComponent.increaseSanityAndSync(-0.0825f*(int) Math.max(multiplier/20,1), e);
+                sanityComponent.increaseSanityAndSync(-0.01625f*(int) Math.max(multiplier/20,1), e);
             });
             ticks.getAndIncrement();
         }, () -> this.clearArtifactScaling(entity), serverLevel, () -> AbilityUtil.getTimeInArea(entity, new Location(entity.position(), serverLevel)));

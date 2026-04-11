@@ -49,7 +49,8 @@ public class SpiritVisionAbility extends ToggleAbility {
                 "hermit", 9,
                 "demoness", 7,
                 "mother", 8,
-                "wheel_of_fortune", 9
+                "wheel_of_fortune", 9,
+                "darkness", 7
         ));
     }
 

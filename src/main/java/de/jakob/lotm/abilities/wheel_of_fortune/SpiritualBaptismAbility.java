@@ -69,7 +69,7 @@ public class SpiritualBaptismAbility extends SelectableAbility {
             return;
         }
 
-        LivingEntity target = AbilityUtil.getTargetEntity(entity, 20, 2, false, true);
+        LivingEntity target = AbilityUtil.getTargetEntity(entity, (int) (15 * (multiplier(entity) * multiplier(entity))), 2, false, true);
 
         if(target == null) {
             target = entity;

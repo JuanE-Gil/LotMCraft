@@ -443,7 +443,7 @@ public class TheftHandler {
         int userLuck = userLuckComponent.getLuck();
         int targetLuck = targetLuckComponent.getLuck();
 
-        double luckMultiplier = (double) (userLuck - targetLuck) / (1200 * 10);
+        double luckMultiplier = (double) (userLuck - targetLuck) / (600 * 10);
 
         double baseFailPerStep = 0.15;
 

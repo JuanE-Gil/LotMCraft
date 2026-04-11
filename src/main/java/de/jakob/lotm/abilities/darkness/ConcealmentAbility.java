@@ -246,7 +246,7 @@ public class ConcealmentAbility extends SelectableAbility {
 
         EffectManager.playEffect(EffectManager.Effect.CONCEALMENT, entity.getX(), entity.getY(), entity.getZ(), serverLevel, entity);
 
-        AtomicDouble radius = new AtomicDouble(2);
+        AtomicDouble radius = new AtomicDouble(2 * (int) (Math.max(multiplier(entity)/20,1)));
         Vec3 finalTargetLoc = entity.position();
 
         final HashSet<BlockPos> processedBlocks = new HashSet<>();

@@ -619,7 +619,6 @@ public class BeyonderData {
     public static void recalculateCharStackModifiers(LivingEntity player){
         if(!isBeyonder(player)) return;
 
-        int seq = getSequence(player);
         var stacks = beyonderMap.get(player.getUUID()).get().charStack();
 
         for(int i = 0; i <= 9; i++){

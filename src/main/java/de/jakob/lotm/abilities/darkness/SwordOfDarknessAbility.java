@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class SwordOfDarknessAbility extends Ability {
     public SwordOfDarknessAbility(String id) {
-        super(id, 2);
+        super(id, 8);
         this.canBeCopied = false;
         autoClear = false;
     }

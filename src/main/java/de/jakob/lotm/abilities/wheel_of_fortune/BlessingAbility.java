@@ -53,7 +53,7 @@ public class BlessingAbility extends Ability {
             return;
         }
 
-        LivingEntity target = AbilityUtil.getTargetEntity(entity, 20, 2, false, true);
+        LivingEntity target = AbilityUtil.getTargetEntity(entity, (int) (15 * (multiplier(entity) * multiplier(entity))), 2, false, true);
 
         if(target == null) {
             if(entity instanceof ServerPlayer player) {

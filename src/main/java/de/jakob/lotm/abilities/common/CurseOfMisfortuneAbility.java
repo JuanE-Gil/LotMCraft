@@ -50,7 +50,7 @@ public class CurseOfMisfortuneAbility extends Ability {
             return;
         }
 
-        LivingEntity target = AbilityUtil.getTargetEntity(entity, 20, 2);
+        LivingEntity target = AbilityUtil.getTargetEntity(entity, (int) (15 * (multiplier(entity) * multiplier(entity))), 2);
 
         if(target == null) {
             if(entity instanceof ServerPlayer player) {
