@@ -13,7 +13,9 @@ import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.data.Location;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.DamageLookup;
+import de.jakob.lotm.util.helper.ParticleUtil;
 import de.jakob.lotm.util.scheduling.ServerScheduler;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -66,8 +68,10 @@ public class HorrorAuraAbility extends Ability {
 
             // Horror Aura is suppressed by purification
             int seq = AbilityUtil.getSeqWithArt(entity, this);
-            if(InteractionHandler.isInteractionPossible(loc, "purification", seq))
+            if(InteractionHandler.isInteractionPossible(loc, "purification", seq)) {
+                ParticleUtil.spawnSphereParticles(serverLevel, ParticleTypes.END_ROD, entity.getEyePosition().subtract(0, .5, 0), 1, 30);
                 return;
+            }
 
             AbilityUtil.getNearbyEntities(entity, serverLevel, entity.position(), 20).forEach(e -> {
                 // Entity is freed from Horror Aura by morale-boosting abilities

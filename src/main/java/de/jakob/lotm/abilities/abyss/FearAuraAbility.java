@@ -10,7 +10,9 @@ import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.data.Location;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.DamageLookup;
+import de.jakob.lotm.util.helper.ParticleUtil;
 import de.jakob.lotm.util.scheduling.ServerScheduler;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -62,6 +64,7 @@ public class FearAuraAbility extends Ability {
 
             if(InteractionHandler.isInteractionPossible(new Location(entity.position(), serverLevel), "purification", AbilityUtil.getSeqWithArt(entity, this)) ||
                     InteractionHandler.isInteractionPossible(new Location(entity.position(), serverLevel), "sealing", AbilityUtil.getSeqWithArt(entity, this))) {
+                ParticleUtil.spawnSphereParticles(serverLevel, ParticleTypes.END_ROD, entity.getEyePosition().subtract(0, .5, 0), 1, 30);
                 return;
             }
 

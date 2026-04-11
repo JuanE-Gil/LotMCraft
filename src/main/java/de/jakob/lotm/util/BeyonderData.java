@@ -171,7 +171,7 @@ public class BeyonderData {
                     || BeyonderData.getSequence(player) < sequence)
                 beyonderMap.removeHonorificName(player);
 
-            beyonderMap.get(player).ifPresent(data -> data.charStack().clear());
+            beyonderMap.get(player).ifPresent(data -> data.charStack().set(sequence, 0));
         }
 
         if(Objects.equals(sequence, LOTMCraft.NON_BEYONDER_SEQ)

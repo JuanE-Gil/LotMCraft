@@ -1,6 +1,7 @@
 package de.jakob.lotm.abilities.door;
 
 import de.jakob.lotm.abilities.core.Ability;
+import de.jakob.lotm.abilities.core.AbilityUsedEvent;
 import de.jakob.lotm.abilities.core.interaction.InteractionHandler;
 import de.jakob.lotm.attachments.DisabledAbilitiesComponent;
 import de.jakob.lotm.attachments.ModAttachments;
@@ -22,6 +23,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.common.NeoForge;
 import org.joml.Vector3f;
 
 import java.util.HashMap;
@@ -35,6 +37,7 @@ public class SealingAbility extends Ability {
         canBeCopied = false;
         interactionRadius = 5;
         interactionCacheTicks = 20 * 14;
+        postsUsedAbilityEventManually = true;
     }
 
     @Override
@@ -60,6 +63,8 @@ public class SealingAbility extends Ability {
         Vec3 targetLoc = AbilityUtil.getTargetLocation(entity, 20, 2);
 
         int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+
+        NeoForge.EVENT_BUS.post(new AbilityUsedEvent((ServerLevel) level, targetLoc, entity, this, interactionFlags, interactionRadius, interactionCacheTicks));
 
         List<LivingEntity> sealedEntities = AbilityUtil.getNearbyEntities(entity, (ServerLevel) level, targetLoc, radius, false).stream().filter(e -> !AbilityUtil.isTargetSignificantlyStronger(entity, e)).toList();
         sealedEntities.forEach(e -> {
