@@ -237,6 +237,7 @@ public class ModEvents {
         CharacteristicsStackCommand.register(event.getDispatcher());
         TeamCommand.register(event.getDispatcher());
         TeamInviteResponseCommand.register(event.getDispatcher());
+        SetBeyonderLogCommand.register(event.getDispatcher());
         KillCountCommand.register(event.getDispatcher());
     }
 
