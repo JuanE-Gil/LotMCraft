@@ -51,7 +51,7 @@ public class HorrorAuraAbility extends Ability {
         UUID effectID = MovableEffectManager.playEffect(MovableEffectManager.MovableEffect.HORROR_AURA, loc, 20 * 25, false, serverLevel, entity);
 
         AtomicInteger ticks = new AtomicInteger(0);
-
+        float multiplier = multiplier(entity);
         ServerScheduler.scheduleForDuration(0, 1, 20 * 30, () -> {
             loc.setPosition(entity.position());
             loc.setLevel(serverLevel);
@@ -62,7 +62,7 @@ public class HorrorAuraAbility extends Ability {
             if(InteractionHandler.isInteractionPossible(loc, "purification", seq))
                 return;
 
-            AbilityUtil.getNearbyEntities(entity, serverLevel, entity.position(), 20).forEach(e -> {
+            AbilityUtil.getNearbyEntities(entity, serverLevel, entity.position(), 20*multiplier).forEach(e -> {
                 // Entity is freed from Horror Aura by morale-boosting abilities
                 Location eLoc = new Location(e.position(), serverLevel);
                 int eSeq = BeyonderData.getSequence(e);
@@ -86,7 +86,7 @@ public class HorrorAuraAbility extends Ability {
                 }
 
                 SanityComponent sanityComponent = e.getData(ModAttachments.SANITY_COMPONENT);
-                sanityComponent.increaseSanityAndSync(-.0033f, e);
+                sanityComponent.increaseSanityAndSync(-0.0825f*(int) Math.max(multiplier/20,1), e);
             });
             ticks.getAndIncrement();
         }, () -> this.clearArtifactScaling(entity), serverLevel, () -> AbilityUtil.getTimeInArea(entity, new Location(entity.position(), serverLevel)));

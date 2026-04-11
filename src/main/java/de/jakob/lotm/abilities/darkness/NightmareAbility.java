@@ -142,7 +142,7 @@ public class NightmareAbility extends SelectableAbility {
         ServerScheduler.scheduleUntil((ServerLevel) level, () -> {
             Vec3 pos = currentPos.get();
 
-            if(AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 1.2f, DamageLookup.lookupDamage(7, 1) * multiplier(entity), pos, true, false, true, 0)) {
+            if(AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 1.2f, DamageLookup.lookupDamage(7, 1.3) * multiplier(entity), pos, true, false, true, 0)) {
                 hasHit.set(true);
                 return;
             }
@@ -288,7 +288,7 @@ public class NightmareAbility extends SelectableAbility {
             return;
         }
 
-        int radius = 40;
+        int radius = 40*(int) Math.min (multiplier(entity),25);
         NightmareCenter center = new NightmareCenter(level, entity.position(), radius * radius);
 
         for(NightmareCenter c : activeNightmaresServer.values()) {

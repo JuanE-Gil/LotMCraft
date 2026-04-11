@@ -88,7 +88,7 @@ public class CurseOfMisfortuneAbility extends Ability {
         }
 
         LuckComponent luckComponent = target.getData(ModAttachments.LUCK_COMPONENT);
-        luckComponent.addLuckWithMax(amplifier, -3000);
+        luckComponent.addLuckWithMax(amplifier, -3000*(int)Math.max((multiplier/10),1));
         NeoForge.EVENT_BUS.post(new AbilityUsedEvent(serverLevel, target.position(), entity, target, this, interactionFlags, interactionRadius, interactionCacheTicks));
     }
 }

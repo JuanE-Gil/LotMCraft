@@ -411,9 +411,9 @@ public class BeyonderData {
     }
 
     public static float getMaxSpirituality(String path, int seq){
-        if(seq >= LOTMCraft.NON_BEYONDER_SEQ || !(seq < spiritualityLookup.length))
+        if(seq >= LOTMCraft.NON_BEYONDER_SEQ || !(seq < spiritualityLookup.length) || seq <= -1)
             return 0f;
-        
+
         return switch (path){
             case "darkness", "fool", "wheel_of_fortune" -> getMaxSpirituality(seq, 3.5f);
             case "door", "death" -> getMaxSpirituality(seq, 3);

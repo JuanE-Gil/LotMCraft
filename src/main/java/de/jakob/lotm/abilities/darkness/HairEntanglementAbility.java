@@ -70,18 +70,18 @@ public class HairEntanglementAbility extends Ability {
             }
             return;
         }
-
+        float multiplier = multiplier(entity);
         pacifiedEntities.add(targetEntity.getUUID());
-        int duration = 20 * 60;
+        int duration = 20 * 60*(int) Math.min(multiplier/20,1);
 
         int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
         int targetSeq = BeyonderData.getSequence(targetEntity);
 
         if(AbilityUtil.isTargetSignificantlyStronger(entitySeq, targetSeq)) {
-            duration = 35;
+            duration = 35*(int) Math.min(multiplier/20,1);;
         }
         if(AbilityUtil.isTargetSignificantlyWeaker(entitySeq, targetSeq)) {
-            duration = 20 * 90;
+            duration = 20 * 90*(int) Math.min(multiplier/20,1);;
         }
 
         if(!BeyonderData.isBeyonder(targetEntity) || BeyonderData.getSequence(targetEntity) - 1 > entitySeq) {

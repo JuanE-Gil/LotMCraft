@@ -77,16 +77,17 @@ public class RequiemAbility extends Ability {
         }
 
         pacifiedEntities.add(targetEntity.getUUID());
-        int duration = 20 * 15;
+        float multiplier = multiplier(entity);
+        int duration = 20 * 15*(int) Math.min(multiplier/20,1);
 
         int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
         int targetEntitySeq = BeyonderData.getSequence(targetEntity);
 
         if(AbilityUtil.isTargetSignificantlyStronger(entitySeq, targetEntitySeq)) {
-            duration = 35;
+            duration = 35*(int) Math.min(multiplier/20,1);
         }
         if(AbilityUtil.isTargetSignificantlyWeaker(entitySeq, targetEntitySeq)) {
-            duration = 20 * 65;
+            duration = 20 * 65*(int) Math.min(multiplier/20,1);
         }
 
         if(!BeyonderData.isBeyonder(targetEntity) || targetEntitySeq - 1 > entitySeq) {

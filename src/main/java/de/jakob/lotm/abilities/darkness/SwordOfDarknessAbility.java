@@ -71,7 +71,7 @@ public class SwordOfDarknessAbility extends Ability {
                     float damageMult = purified ? 0.3f : 1f;
 
                     ParticleUtil.spawnParticles(serverLevel, ModParticles.BLACK.get(), point, 3, 0.2, 0);
-                    AbilityUtil.damageNearbyEntities(serverLevel, entity, 3, (multiplier(entity)/3) * DamageLookup.lookupDamage(1, .85) * damageMult, point, true, false, false, 10, ModDamageTypes.source(level, ModDamageTypes.DARKNESS_GENERIC, entity));
+                    AbilityUtil.damageNearbyEntities(serverLevel, entity, 3, (multiplier(entity)/2.5) * DamageLookup.lookupDamage(1, .85) * damageMult, point, true, false, false, 10, ModDamageTypes.source(level, ModDamageTypes.DARKNESS_GENERIC, entity));
                     if(BeyonderData.isGriefingEnabled(entity)) {
                         if(serverLevel.getBlockState(BlockPos.containing(point)).getDestroySpeed(level, BlockPos.containing(point)) < 0)
                             continue;
@@ -91,6 +91,6 @@ public class SwordOfDarknessAbility extends Ability {
 
     @Override
     protected float getSpiritualityCost() {
-        return 500;
+        return 2000;
     }
 }
