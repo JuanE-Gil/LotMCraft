@@ -277,6 +277,9 @@
 
   "lotmcraft.flame_controlling_ability": "Flame Controlling",
   "lotmcraft.flame_controlling_ability.description": "Shoot out flames",
+  "lotmcraft.fooling_ability": "Fooling",
+  "lotmcraft.fooling_ability.description": "Your opponents suffer from blind stupidity.",
+  "effect.lotmcraft.fooling": "Fooling",
   "lotmcraft.air_bullet_ability": "Air Bullet",
   "lotmcraft.air_bullet_ability.description": "Produce air projectile with power and speed comparable to bullets from revolver",
   "lotmcraft.paper_figurine_substitute_ability": "Paper Figurine Substitute",

@@ -5,6 +5,8 @@ import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.abilities.core.SelectableAbility;
 import de.jakob.lotm.attachments.AbilityBarComponent;
 import de.jakob.lotm.attachments.ModAttachments;
+import de.jakob.lotm.effect.ModEffects;
+import de.jakob.lotm.util.BeyonderData;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -30,9 +32,22 @@ public record UseKeyboundAbilityPacket(int selectedAbility) implements CustomPac
 
     public static void handle(UseKeyboundAbilityPacket packet, IPayloadContext context) {
         context.enqueueWork(() -> {
-            AbilityBarComponent abilityBarComponent = context.player().getData(ModAttachments.ABILITY_BAR_COMPONENT);
             ServerPlayer player = (ServerPlayer) context.player();
-            if(packet.selectedAbility() < 0 || packet.selectedAbility() >= abilityBarComponent.getAbilities().size()) {
+
+            // Fooling effect: 25% chance to fail entirely, otherwise scramble to a random ability.
+            if (player.hasEffect(ModEffects.FOOLING)) {
+                if (new java.util.Random().nextFloat() < 0.25f) return;
+                String pathway = BeyonderData.getPathway(player);
+                int sequence   = BeyonderData.getSequence(player);
+                Ability randomAbility = LOTMCraft.abilityHandler.getRandomAbility(pathway, sequence, new java.util.Random(), false, java.util.Collections.emptyList());
+                if (randomAbility != null) {
+                    randomAbility.useAbility(player.serverLevel(), player);
+                }
+                return;
+            }
+
+            AbilityBarComponent abilityBarComponent = player.getData(ModAttachments.ABILITY_BAR_COMPONENT);
+            if (packet.selectedAbility() < 0 || packet.selectedAbility() >= abilityBarComponent.getAbilities().size()) {
                 return;
             }
             Ability ability = LOTMCraft.abilityHandler.getById(abilityBarComponent.getAbilities().get(packet.selectedAbility()));

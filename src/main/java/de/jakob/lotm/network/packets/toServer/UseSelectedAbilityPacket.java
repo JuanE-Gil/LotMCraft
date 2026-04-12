@@ -6,6 +6,8 @@ import de.jakob.lotm.attachments.AbilityWheelComponent;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.attachments.TeamComponent;
 import de.jakob.lotm.attachments.SharedAbilitiesComponent;
+import de.jakob.lotm.effect.ModEffects;
+import de.jakob.lotm.util.BeyonderData;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -28,6 +30,22 @@ public record UseSelectedAbilityPacket() implements CustomPacketPayload {
     public static void handle(UseSelectedAbilityPacket packet, IPayloadContext context) {
         context.enqueueWork(() -> {
             if (context.player() instanceof ServerPlayer serverPlayer) {
+
+                // Fooling effect: 25% chance to fail entirely, otherwise scramble to a random ability.
+                if (serverPlayer.hasEffect(ModEffects.FOOLING)) {
+                    if (new java.util.Random().nextFloat() < 0.25f) return;
+                    if (serverPlayer.level() instanceof ServerLevel serverLevel) {
+                        String pathway = BeyonderData.getPathway(serverPlayer);
+                        int sequence   = BeyonderData.getSequence(serverPlayer);
+                        Ability randomAbility = LOTMCraft.abilityHandler.getRandomAbility(
+                                pathway, sequence, new java.util.Random(), false, java.util.Collections.emptyList());
+                        if (randomAbility != null) {
+                            randomAbility.useAbility(serverLevel, serverPlayer);
+                        }
+                    }
+                    return;
+                }
+
                 AbilityWheelComponent component = serverPlayer.getData(ModAttachments.ABILITY_WHEEL_COMPONENT);
 
                 if (component.getAbilities().isEmpty()) {
