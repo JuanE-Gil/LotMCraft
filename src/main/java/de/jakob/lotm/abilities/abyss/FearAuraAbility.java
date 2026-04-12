@@ -85,7 +85,7 @@ public class FearAuraAbility extends Ability {
                 }
 
                 SanityComponent sanityComponent = e.getData(ModAttachments.SANITY_COMPONENT);
-                sanityComponent.increaseSanityAndSync(-.0033f, e);
+                sanityComponent.decreaseSanityWithSequenceDifference(.0033f, e, AbilityUtil.getSeqWithArt(entity, this), BeyonderData.getSequence(e));
             });
             ticks.getAndIncrement();
         }, () -> this.clearArtifactScaling(entity), serverLevel);

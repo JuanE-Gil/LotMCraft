@@ -99,7 +99,7 @@ public class DoorHighMythicalCreatureModel<T extends Entity> extends Hierarchica
 
 		PartDefinition door1 = doors.addOrReplaceChild("door1", CubeListBuilder.create(), PartPose.offset(0.0F, -11.0F, -1.0F));
 
-		PartDefinition door1a = door1.addOrReplaceChild("door1a", CubeListBuilder.create().texOffs(2, 6).addBox(-6.0F, -11.0F, -1.0F, 12.0F, 22.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, -0.2233F, -0.2129F, -0.1702F));
+		PartDefinition door1a = door1.addOrReplaceChild("door1a", CubeListBuilder.create().texOffs(1, 5).addBox(-6.0F, -11.0F, -1.0F, 12.0F, 22.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, -0.2233F, -0.2129F, -0.1702F));
 
 		PartDefinition frame1a = door1.addOrReplaceChild("frame1a", CubeListBuilder.create().texOffs(0, 32).addBox(-7.0F, -12.0F, -2.0F, 14.0F, 24.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, -0.2233F, -0.2129F, -0.1702F));
 
@@ -107,11 +107,11 @@ public class DoorHighMythicalCreatureModel<T extends Entity> extends Hierarchica
 
 		PartDefinition frame2a = door2.addOrReplaceChild("frame2a", CubeListBuilder.create().texOffs(0, 32).addBox(-7.0F, -14.0F, 2.0F, 14.0F, 24.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.1309F, -0.8727F, 0.0F));
 
-		PartDefinition door2a = door2.addOrReplaceChild("door2a", CubeListBuilder.create().texOffs(30, 6).addBox(-6.0F, -13.0F, 3.0F, 12.0F, 22.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.1309F, -0.8727F, 0.0F));
+		PartDefinition door2a = door2.addOrReplaceChild("door2a", CubeListBuilder.create().texOffs(29, 5).addBox(-6.0F, -13.0F, 3.0F, 12.0F, 22.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.1309F, -0.8727F, 0.0F));
 
 		PartDefinition door3 = doors.addOrReplaceChild("door3", CubeListBuilder.create(), PartPose.offset(-7.0F, -13.0F, 2.0F));
 
-		PartDefinition door3a = door3.addOrReplaceChild("door3a", CubeListBuilder.create().texOffs(58, 6).addBox(-7.6905F, -11.0F, 3.6252F, 12.0F, 22.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.0F, 0.4363F, 0.4363F));
+		PartDefinition door3a = door3.addOrReplaceChild("door3a", CubeListBuilder.create().texOffs(57, 5).addBox(-7.6905F, -11.0F, 3.6252F, 12.0F, 22.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.0F, 0.4363F, 0.4363F));
 
 		PartDefinition frame3a = door3.addOrReplaceChild("frame3a", CubeListBuilder.create().texOffs(0, 32).addBox(-8.6905F, -12.0F, 2.6252F, 13.0F, 24.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.0F, 0.4363F, 0.4363F));
 

@@ -91,7 +91,7 @@ public class DesireControlAbility extends SelectableAbility {
 
         if (target.hasData(ModAttachments.SANITY_COMPONENT)) {
             target.getData(ModAttachments.SANITY_COMPONENT)
-                    .increaseSanityAndSync(-0.3f * (float) multiplier(entity), target);
+                    .decreaseSanityWithSequenceDifference(0.3f * (float) multiplier(entity), target, AbilityUtil.getSeqWithArt(entity, this), BeyonderData.getSequence(target));
         }
 
         target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, duration, 2, false, false));
@@ -129,7 +129,7 @@ public class DesireControlAbility extends SelectableAbility {
 
                     if (target.hasData(ModAttachments.SANITY_COMPONENT)) {
                         target.getData(ModAttachments.SANITY_COMPONENT)
-                                .increaseSanityAndSync(-0.15f * (float) multiplier(entity), target);
+                                .decreaseSanityWithSequenceDifference(0.15f * (float) multiplier(entity), target, AbilityUtil.getSeqWithArt(entity, this), BeyonderData.getSequence(target));
                     }
 
                     target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 20 * 4, 1, false, false));

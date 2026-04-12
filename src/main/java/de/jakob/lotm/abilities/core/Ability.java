@@ -236,12 +236,16 @@ public abstract class Ability {
 
         int requiredSequence = getRequirements().get(BeyonderData.getPathway(entity));
 
-        // If user's sequence is numerically higher (weaker) → cannot digest at all
         if (sequence > requiredSequence) {
             return 0f;
         }
 
-        return (1f / (100f * Math.max(.5f, ((10 - sequence) * .5f)))) * (entity.level().getGameRules().getInt(ModGameRules.DIGESTION_RATE) / 100f);
+        float cooldownMultiplier = Math.clamp(((float) cooldown) / (20 * 7), .1f, 2.25f);
+
+        float rawDigestion = (1f / (100f * Math.max(.5f, ((10 - requiredSequence) * .5f)))) * cooldownMultiplier;
+        float digestion = rawDigestion * (entity.level().getGameRules().getInt(ModGameRules.DIGESTION_RATE) / 100f);
+
+        return digestion;
     }
 
     public ResourceLocation getTextureLocation() {
