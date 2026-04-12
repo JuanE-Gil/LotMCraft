@@ -101,11 +101,11 @@ public class ControllingDataComponent {
                 public ControllingDataComponent read(IAttachmentHolder holder, CompoundTag tag, HolderLookup.Provider lookup) {
                     ControllingDataComponent component = new ControllingDataComponent();
                     if (tag.hasUUID("ownerUUID")) component.ownerUUID = tag.getUUID("ownerUUID");
-                    if (tag.hasUUID("ownerName")) component.ownerName = tag.getString("ownerName");
+                    if (tag.contains("ownerName")) component.ownerName = tag.getString("ownerName");
                     if (tag.hasUUID("bodyUUID")) component.bodyUUID = tag.getUUID("bodyUUID");
                     if (tag.hasUUID("targetUUID")) component.targetUUID = tag.getUUID("targetUUID");
-                    if (tag.hasUUID("targetEntity")) component.targetEntity = tag.getCompound("targetEntity");
-                    if (tag.hasUUID("bodyEntity")) component.bodyEntity = tag.getCompound("bodyEntity");
+                    if (tag.contains("targetEntity")) component.targetEntity = tag.getCompound("targetEntity");
+                    if (tag.contains("bodyEntity")) component.bodyEntity = tag.getCompound("bodyEntity");
                     return component;
                 }
 

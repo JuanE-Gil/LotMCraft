@@ -82,7 +82,7 @@ public class ControllingUtil {
         CompoundTag bodyTag = new CompoundTag();
         originalBody.saveWithoutId(bodyTag);
 
-            // save location as well
+        // save location as well
         ListTag posTag = new ListTag();
         posTag.add(DoubleTag.valueOf(player.getX()));
         posTag.add(DoubleTag.valueOf(player.getY()));
@@ -190,7 +190,7 @@ public class ControllingUtil {
             }
             originalBodyEntity.discard();
         } else {
-            // only a fallback in case the body didn't exist or was unloaded for some reason
+            // only a fallback in case the body didn't exist or was unloaded for some reason (it's not tested if this works or not)
             CompoundTag bodyTag = data.getBodyEntity();
             if (bodyTag != null) {
                 Entity bodyEntity = EntityType.loadEntityRecursive(bodyTag, level, (entity) -> {
@@ -291,6 +291,9 @@ public class ControllingUtil {
             targetData.putInt("beyonder_sequence", sourceData.getInt("beyonder_sequence"));
             targetData.putFloat("beyonder_digestion_progress", sourceData.getFloat("beyonder_digestion_progress"));
             targetData.putBoolean("beyonder_griefing_enabled", sourceData.getBoolean("beyonder_griefing_enabled"));
+            if (!(target instanceof ServerPlayer)) {
+                targetData.putFloat("beyonder_spirituality", sourceData.getFloat("beyonder_spirituality"));
+            }
         }
 
         // sync the changes to the client

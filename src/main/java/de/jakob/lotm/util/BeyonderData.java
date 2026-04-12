@@ -3,6 +3,10 @@ package de.jakob.lotm.util;
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.PassiveAbilityHandler;
 import de.jakob.lotm.abilities.PassiveAbilityItem;
+import de.jakob.lotm.attachments.ControllingDataComponent;
+import de.jakob.lotm.attachments.LuckComponent;
+import de.jakob.lotm.attachments.ModAttachments;
+import de.jakob.lotm.attachments.MultiplierModifierComponent;
 import de.jakob.lotm.attachments.*;
 import de.jakob.lotm.events.BeyonderDataTickHandler;
 import de.jakob.lotm.gamerule.ModGameRules;
@@ -16,6 +20,7 @@ import de.jakob.lotm.util.helper.TeamUtils;
 import de.jakob.lotm.util.helper.marionettes.MarionetteComponent;
 import de.jakob.lotm.util.pathways.PathwayInfos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -391,6 +396,18 @@ public class BeyonderData {
         player.getData(ModAttachments.BEYONDER_COMPONENT).setSpirituality(newAmount);
 
         float maxSpirituality = getMaxSpirituality(getPathway(player), getSequence(player));
+
+        // keep the spirituality the same for controlled puppets
+        ControllingDataComponent data = player.getData(ModAttachments.CONTROLLING_DATA);
+        if (data.getTargetUUID() != null) {
+            CompoundTag bodyData = data.getBodyEntity().getCompound("NeoForgeData");
+            if (bodyData != null) {
+                newAmount = Math.min(getMaxSpirituality("fool", bodyData.getInt("beyonder_sequence")), current + amount);
+                player.getData(ModAttachments.BEYONDER_COMPONENT).setSpirituality(newAmount);
+
+                maxSpirituality = getMaxSpirituality("fool", bodyData.getInt("beyonder_sequence"));
+            }
+        }
 
         if(maxSpirituality <= 0) {
             return;
