@@ -8,6 +8,7 @@ import net.neoforged.neoforge.attachment.IAttachmentSerializer;
 import java.util.UUID;
 
 public class ControllingDataComponent {
+    private boolean isControlling = false;
     private UUID ownerUUID = null;
     private String ownerName = null;
     private UUID bodyUUID = null;
@@ -17,16 +18,21 @@ public class ControllingDataComponent {
 
     public ControllingDataComponent() {}
 
+    public boolean isControlling() {
+        return isControlling;
+    }
+
+    public void setControlling(boolean isControlling) {
+        this.isControlling = isControlling;
+    }
+
+
     public UUID getOwnerUUID() {
         return ownerUUID;
     }
 
     public void setOwnerUUID(UUID controllerUUID) {
         this.ownerUUID = controllerUUID;
-    }
-
-    public void removeOwnerUUID() {
-        this.ownerUUID = null;
     }
 
 
@@ -38,10 +44,6 @@ public class ControllingDataComponent {
         this.ownerName = controllerUUID;
     }
 
-    public void removeOwnerName() {
-        this.ownerName = null;
-    }
-
 
     public UUID getBodyUUID() {
         return bodyUUID;
@@ -49,10 +51,6 @@ public class ControllingDataComponent {
 
     public void setBodyUUID(UUID controllerUUID) {
         this.bodyUUID = controllerUUID;
-    }
-
-    public void removeBodyUUID() {
-        this.bodyUUID = null;
     }
 
 
@@ -64,10 +62,6 @@ public class ControllingDataComponent {
         this.targetUUID = controllerUUID;
     }
 
-    public void removeTargetUUID() {
-        this.targetUUID = null;
-    }
-
 
     public CompoundTag getTargetEntity() {
         return targetEntity;
@@ -77,10 +71,6 @@ public class ControllingDataComponent {
         this.targetEntity = controllerUUID;
     }
 
-    public void removeTargetEntity() {
-        this.targetEntity = null;
-    }
-
 
     public CompoundTag getBodyEntity() {
         return bodyEntity;
@@ -88,10 +78,6 @@ public class ControllingDataComponent {
 
     public void setBodyEntity(CompoundTag controllerUUID) {
         this.bodyEntity = controllerUUID;
-    }
-
-    public void removeBodyEntity() {
-        this.bodyEntity = null;
     }
 
 

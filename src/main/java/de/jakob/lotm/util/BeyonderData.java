@@ -399,7 +399,7 @@ public class BeyonderData {
 
         // keep the spirituality the same for controlled puppets
         ControllingDataComponent data = player.getData(ModAttachments.CONTROLLING_DATA);
-        if (data.getTargetUUID() != null) {
+        if (data.isControlling()) {
             CompoundTag bodyData = data.getBodyEntity().getCompound("NeoForgeData");
             if (bodyData != null) {
                 newAmount = Math.min(getMaxSpirituality("fool", bodyData.getInt("beyonder_sequence")), current + amount);

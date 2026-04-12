@@ -53,7 +53,7 @@ public class ControllingUtil {
 
         ControllingDataComponent data = player.getData(ModAttachments.CONTROLLING_DATA);
 
-        if (data.getTargetUUID() != null) return ;
+        if (data.isControlling()) return ;
 
         // making the original body and setting his owner
         OriginalBodyEntity originalBody = new OriginalBodyEntity(ModEntities.ORIGINAL_BODY.get(), level);
@@ -61,6 +61,7 @@ public class ControllingUtil {
         // setting body data to the player
         data.setBodyUUID(originalBody.getUUID());
         data.setTargetUUID(target.getUUID());
+        data.setControlling(true);
 
         //copy the player and his position to original body
         copyEntities(player, originalBody);
@@ -175,7 +176,7 @@ public class ControllingUtil {
 
                 // clear data
                 if (resetData) {
-                    data.removeTargetEntity();
+                    data.setTargetEntity(null);
                 }
             }
         }
@@ -230,11 +231,12 @@ public class ControllingUtil {
         ShapeShiftingUtil.resetShape(player);
 
         // clearing data
-        data.removeBodyEntity();
+        data.setBodyEntity(null);
+        data.setControlling(false);
         if (resetData) {
-            data.removeOwnerUUID();
-            data.removeBodyUUID();
-            data.removeTargetUUID();
+            data.setOwnerUUID(null);
+            data.setBodyUUID(null);
+            data.setTargetUUID(null);
         }
     }
 
@@ -483,10 +485,11 @@ public class ControllingUtil {
 
                 // clean up data
                 ControllingDataComponent playerData = player.getData(ModAttachments.CONTROLLING_DATA);
-                playerData.removeTargetEntity();
-                playerData.removeOwnerUUID();
-                playerData.removeBodyUUID();
-                playerData.removeTargetUUID();
+                playerData.setControlling(false);
+                playerData.setTargetEntity(null);
+                playerData.setOwnerUUID(null);
+                playerData.setBodyUUID(null);
+                playerData.setTargetUUID(null);
 
                 // kill the player for he has sinned
                 player.hurt(event.getSource(), Float.MAX_VALUE);
@@ -501,7 +504,7 @@ public class ControllingUtil {
         if (damage >= entity.getHealth()) {
             if (entity instanceof ServerPlayer serverPlayer) {
                 ControllingDataComponent data = serverPlayer.getData(ModAttachments.CONTROLLING_DATA);
-                if (data.getTargetUUID() == null) return;
+                if (!data.isControlling()) return;
                 event.setCanceled(true);
 
                 // reset the player
@@ -509,10 +512,11 @@ public class ControllingUtil {
                     reset(serverPlayer, serverLevel, false);
                     // kill the target entity instead
                     serverLevel.getEntity(data.getTargetUUID()).hurt(event.getSource(), Float.MAX_VALUE);
-                    data.removeTargetEntity();
-                    data.removeOwnerUUID();
-                    data.removeBodyUUID();
-                    data.removeTargetUUID();
+                    data.setControlling(false);
+                    data.setTargetEntity(null);
+                    data.setOwnerUUID(null);
+                    data.setBodyUUID(null);
+                    data.setTargetUUID(null);
                 }
             }
         }
@@ -537,7 +541,7 @@ public class ControllingUtil {
         Player player = event.getEntity();
         if (player.level() instanceof ServerLevel serverLevel && player instanceof ServerPlayer serverPlayer) {
             ControllingDataComponent data = player.getData(ModAttachments.CONTROLLING_DATA);
-            if (data.getTargetUUID() != null || data.getBodyUUID() != null) {
+            if (data.isControlling() || data.getBodyUUID() != null) {
                 reset(serverPlayer,serverLevel, true);
             }
         }
@@ -549,7 +553,7 @@ public class ControllingUtil {
         if (event.getEntity().level() instanceof ServerLevel serverLevel && event.getEntity() instanceof ServerPlayer serverPlayer) {
             if (!serverPlayer.serverLevel().dimension().equals(event.getDimension())) {
                 ControllingDataComponent data = serverPlayer.getData(ModAttachments.CONTROLLING_DATA);
-                if (data.getTargetUUID() != null || data.getBodyUUID() != null) {
+                if (data.isControlling() || data.getBodyUUID() != null) {
                     event.setCanceled(true);
                     reset(serverPlayer,serverLevel, true);
                 }

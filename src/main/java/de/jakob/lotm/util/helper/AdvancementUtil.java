@@ -68,7 +68,7 @@ public class AdvancementUtil {
         }
 
         ControllingDataComponent data = entity.getData(ModAttachments.CONTROLLING_DATA);
-        if (data.getTargetUUID() != null) {
+        if (data.isControlling()) {
             entity.hurt(ModDamageTypes.source(entity.level(), ModDamageTypes.LOOSING_CONTROL), Float.MAX_VALUE);
             return;
         }

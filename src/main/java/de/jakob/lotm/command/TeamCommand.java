@@ -94,7 +94,7 @@ public class TeamCommand {
     private static boolean checkEligible(CommandSourceStack source, ServerPlayer player) {
         // If the player is currently controlling a marionette, check their original body's data
         ControllingDataComponent controlling = player.getData(ModAttachments.CONTROLLING_DATA);
-        if (controlling.getTargetUUID() != null) {
+        if (controlling.isControlling()) {
             net.minecraft.nbt.CompoundTag bodyTag = controlling.getBodyEntity();
             String pathway = bodyTag != null ? bodyTag.getCompound("NeoForgeData").getString("beyonder_pathway") : "";
             int sequence = bodyTag != null ? bodyTag.getCompound("NeoForgeData").getInt("beyonder_sequence") : LOTMCraft.NON_BEYONDER_SEQ;
