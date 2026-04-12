@@ -547,9 +547,12 @@ public class ControllingUtil {
     @SubscribeEvent
     public static void onPlayerChangedDimension (EntityTravelToDimensionEvent event){
         if (event.getEntity().level() instanceof ServerLevel serverLevel && event.getEntity() instanceof ServerPlayer serverPlayer) {
-            ControllingDataComponent data = serverPlayer.getData(ModAttachments.CONTROLLING_DATA);
-            if (data.getTargetUUID() != null || data.getBodyUUID() != null) {
-                reset(serverPlayer,serverLevel, true);
+            if (!serverPlayer.serverLevel().dimension().equals(event.getDimension())) {
+                ControllingDataComponent data = serverPlayer.getData(ModAttachments.CONTROLLING_DATA);
+                if (data.getTargetUUID() != null || data.getBodyUUID() != null) {
+                    event.setCanceled(true);
+                    reset(serverPlayer,serverLevel, true);
+                }
             }
         }
     }
