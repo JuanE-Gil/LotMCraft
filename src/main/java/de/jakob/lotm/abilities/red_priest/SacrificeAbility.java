@@ -1,6 +1,7 @@
 package de.jakob.lotm.abilities.red_priest;
 
 import de.jakob.lotm.abilities.core.Ability;
+import de.jakob.lotm.attachments.ControllingDataComponent;
 import de.jakob.lotm.attachments.KillCountComponent;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.attachments.SacrificeRevertComponent;
@@ -10,6 +11,7 @@ import de.jakob.lotm.network.PacketHandler;
 import de.jakob.lotm.network.packets.toClient.SyncKillCountPacket;
 import de.jakob.lotm.network.packets.toClient.SyncSacrificeDurationPacket;
 import de.jakob.lotm.rendering.effectRendering.EffectManager;
+import de.jakob.lotm.damage.ModDamageTypes;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityWheelHelper;
 import de.jakob.lotm.util.helper.ParticleUtil;
@@ -60,7 +62,15 @@ public class SacrificeAbility extends Ability {
         if (!(entity instanceof ServerPlayer player)) return;
         if (!(level instanceof ServerLevel serverLevel)) return;
 
-        int currentSeq = BeyonderData.getSequence(player);
+        ControllingDataComponent controllingData = player.getData(ModAttachments.CONTROLLING_DATA);
+        if (controllingData.getTargetUUID() != null) {
+            player.connection.send(new net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket(
+                    net.minecraft.network.chat.Component.literal("Sacrifice cannot be used while controlling a puppet")
+                            .withStyle(net.minecraft.ChatFormatting.RED)
+            ));
+            return;
+        }
+
         if (currentSeq > 3 || currentSeq < 1) return;
 
         KillCountComponent killCount = player.getData(ModAttachments.KILL_COUNT_COMPONENT);
