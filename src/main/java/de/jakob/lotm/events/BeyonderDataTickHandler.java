@@ -6,6 +6,7 @@ import de.jakob.lotm.abilities.PassiveAbilityItem;
 import de.jakob.lotm.abilities.PhysicalEnhancementsAbility;
 import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.abilities.core.ToggleAbility;
+import de.jakob.lotm.abilities.door.passives.VoidImmunityAbility;
 import de.jakob.lotm.abilities.wheel_of_fortune.passives.PassiveLuckAbility;
 import de.jakob.lotm.attachments.*;
 import de.jakob.lotm.item.ModItems;
@@ -119,7 +120,7 @@ public class BeyonderDataTickHandler {
             return;
         }
 
-        if(player.getY() < -200) {
+        if(player.getY() < -200 && !VoidImmunityAbility.IMMUNE_ENTITIES.contains(player)) {
             player.kill();
         }
 

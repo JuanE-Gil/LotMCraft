@@ -1,6 +1,8 @@
 package de.jakob.lotm.abilities.door;
 
 import de.jakob.lotm.abilities.core.Ability;
+import de.jakob.lotm.abilities.demoness.CharmAbility;
+import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.TeleportationUtil;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.ParticleUtil;
@@ -56,6 +58,11 @@ public class BlinkAbility extends Ability {
         level.playSound(null, targetLoc.x, targetLoc.y, targetLoc.z, SoundEvents.ENDERMAN_TELEPORT, SoundSource.BLOCKS, .5f, 1);
 
         entity.teleportTo(targetLoc.x, targetLoc.y, targetLoc.z);
+
+        if (BeyonderData.getSequence(entity) <= 5) {
+            CharmAbility.removeCharm(entity.getUUID());
+        }
+
         ParticleUtil.spawnParticles((ServerLevel) level, dust, targetLoc.add(0, .5, 0), 30, .4, 1, .4, 0);
         ParticleUtil.spawnParticles((ServerLevel) level, dust2, targetLoc.add(0, .5, 0), 30, .4, 1, .4, 0);
         ParticleUtil.spawnParticles((ServerLevel) level, ParticleTypes.END_ROD, targetLoc.add(0, .5, 0), 30, .4, 1, .4, 0);
