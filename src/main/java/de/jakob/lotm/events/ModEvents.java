@@ -44,6 +44,7 @@ import de.jakob.lotm.entity.custom.ability_entities.OriginalBodyEntity;
 import de.jakob.lotm.entity.custom.spirits.*;
 import de.jakob.lotm.network.PacketHandler;
 import de.jakob.lotm.network.packets.toClient.SyncSharedAbilitiesDataPacket;
+import de.jakob.lotm.rendering.models.door.DoorHighMythicalCreatureModel;
 import de.jakob.lotm.rendering.models.fool.FoolMythicalCreatureModel;
 import de.jakob.lotm.rendering.models.red_priest.RedPriestMythicalCreatureModel;
 import de.jakob.lotm.rendering.models.sun.SunMythicalCreatureModel;
@@ -134,6 +135,7 @@ public class ModEvents {
         event.registerLayerDefinition(WheelOfFortuneMythicalCreatureModel.LAYER_LOCATION, WheelOfFortuneMythicalCreatureModel::createBodyLayer);
         event.registerLayerDefinition(RedPriestMythicalCreatureModel.LAYER_LOCATION, RedPriestMythicalCreatureModel::createBodyLayer);
         event.registerLayerDefinition(SunMythicalCreatureModel.LAYER_LOCATION, SunMythicalCreatureModel::createBodyLayer);
+        event.registerLayerDefinition(DoorHighMythicalCreatureModel.LAYER_LOCATION, DoorHighMythicalCreatureModel::createBodyLayer);
     }
 
     @SubscribeEvent

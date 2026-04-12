@@ -6,12 +6,14 @@ package de.jakob.lotm.rendering.models.tyrant;// Made with Blockbench 5.0.3
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import de.jakob.lotm.LOTMCraft;
+import de.jakob.lotm.rendering.models.sun.SunMythicalCreatureAnimations;
 import net.minecraft.client.model.HierarchicalModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.AnimationState;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -339,30 +341,65 @@ public class TyrantMythicalCreatureModel<T extends Entity> extends HierarchicalM
 		return LayerDefinition.create(meshdefinition, 512, 512);
 	}
 
+	private float walkBlend = 0.0F;
+	private static final float BLEND_SPEED = 0.1F;
+
+	// Pre-allocate to avoid per-frame garbage
+	private float[] idlePose;
+	private float[] walkPose;
+	private static final int FLOATS_PER_PART = 6; // x, y, z, xRot, yRot, zRot
+
+	private void capturePoseInto(float[] buffer) {
+		int i = 0;
+		for (var part : (Iterable<ModelPart>) this.root().getAllParts()::iterator) {
+			buffer[i++] = part.x;    buffer[i++] = part.y;    buffer[i++] = part.z;
+			buffer[i++] = part.xRot; buffer[i++] = part.yRot; buffer[i++] = part.zRot;
+		}
+	}
+
+	private void applyBlendedPose(float[] from, float[] to, float blend) {
+		int i = 0;
+		for (var part : (Iterable<ModelPart>) this.root().getAllParts()::iterator) {
+			part.x    = Mth.lerp(blend, from[i], to[i]); i++;
+			part.y    = Mth.lerp(blend, from[i], to[i]); i++;
+			part.z    = Mth.lerp(blend, from[i], to[i]); i++;
+			part.xRot = Mth.lerp(blend, from[i], to[i]); i++;
+			part.yRot = Mth.lerp(blend, from[i], to[i]); i++;
+			part.zRot = Mth.lerp(blend, from[i], to[i]); i++;
+		}
+	}
+
 	@Override
-	public void setupAnim(Entity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-		// Reset all model parts to their default pose
-		this.root().getAllParts().forEach(ModelPart::resetPose);
+	public void setupAnim(Entity entity, float limbSwing, float limbSwingAmount,
+						  float ageInTicks, float netHeadYaw, float headPitch) {
+
+		// Lazy-init buffers once we know part count
+		if (this.idlePose == null) {
+			int partCount = (int) this.root().getAllParts().count();
+			this.idlePose = new float[partCount * FLOATS_PER_PART];
+			this.walkPose = new float[partCount * FLOATS_PER_PART];
+		}
 
 		if (entity instanceof LivingEntity living) {
-			// Calculate movement speed
 			boolean isWalking = limbSwingAmount > 0.01F;
+			this.walkBlend = Mth.lerp(BLEND_SPEED, this.walkBlend, isWalking ? 1.0F : 0.0F);
 
-			if (isWalking) {
-				// Stop idle animation and start/continue walk animation
-				this.idleAnimationState.stop();
-				if (!this.walkAnimationState.isStarted()) {
-					this.walkAnimationState.start((int) ageInTicks);
-				}
-				this.animate(this.walkAnimationState, TyrantMythicalCreatureAnimations.walk, ageInTicks, 1.0F);
-			} else {
-				// Stop walk animation and start/continue idle animation
-				this.walkAnimationState.stop();
-				if (!this.idleAnimationState.isStarted()) {
-					this.idleAnimationState.start((int) ageInTicks);
-				}
-				this.animate(this.idleAnimationState, TyrantMythicalCreatureAnimations.idle, ageInTicks, 1.0F);
-			}
+			// Keep both states running so their internal timers don't reset
+			if (!this.idleAnimationState.isStarted()) this.idleAnimationState.start((int) ageInTicks);
+			if (!this.walkAnimationState.isStarted()) this.walkAnimationState.start((int) ageInTicks);
+
+			// Sample idle into snapshot
+			this.root().getAllParts().forEach(ModelPart::resetPose);
+			this.animate(this.idleAnimationState, TyrantMythicalCreatureAnimations.idle, ageInTicks, 1.0F);
+			capturePoseInto(this.idlePose);
+
+			// Sample walk into snapshot
+			this.root().getAllParts().forEach(ModelPart::resetPose);
+			this.animate(this.walkAnimationState, TyrantMythicalCreatureAnimations.walk, ageInTicks, 1.0F);
+			capturePoseInto(this.walkPose);
+
+			// Write the lerped result
+			applyBlendedPose(this.idlePose, this.walkPose, this.walkBlend);
 		}
 	}
 	@Override

@@ -6,6 +6,7 @@ import com.mojang.math.Axis;
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.attachments.TransformationComponent;
+import de.jakob.lotm.rendering.models.door.DoorHighMythicalCreatureModel;
 import de.jakob.lotm.rendering.models.door.DoorMythicalCreatureModel;
 import de.jakob.lotm.rendering.models.fool.FoolMythicalCreatureModel;
 import de.jakob.lotm.rendering.models.red_priest.RedPriestMythicalCreatureModel;
@@ -52,6 +53,9 @@ public class TransformationRenderer {
     private static SunMythicalCreatureModel<Entity> sunMythicalCreatureModel;
     private static final ResourceLocation sunMythicalCreatureTexture = ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "textures/mythical_creatures/sun.png");
 
+    private static DoorHighMythicalCreatureModel<Entity> doorHighMythicalCreatureModel;
+    private static final ResourceLocation doorHighMythicalCreatureTexture = ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "textures/mythical_creatures/door_high.png");
+
 
 
     @SubscribeEvent(priority = EventPriority.HIGH)
@@ -94,6 +98,8 @@ public class TransformationRenderer {
                     packedLight, entity, partialTick);
             case "door" -> renderDoorMythicalCreature(poseStack, multiBufferSource,
                     packedLight, entity, partialTick);
+            case "door_high" -> renderDoorHighMythicalCreature(poseStack, multiBufferSource,
+                    packedLight, entity, partialTick);
             case "fool" -> renderFoolMythicalCreature(poseStack, multiBufferSource,
                     packedLight, entity, partialTick);
             case "wheel_of_fortune" -> renderWofMythicalCreature(poseStack, multiBufferSource,
@@ -131,13 +137,13 @@ public class TransformationRenderer {
         float limbSwing = 0;
         float limbSwingAmount = 0;
 
-//        if (entity instanceof LivingEntity living) {
-//            limbSwing = living.walkAnimation.position(partialTick);
-//            limbSwingAmount = living.walkAnimation.speed(partialTick);
-//        }
-//
-//        // Setup animation with proper parameters
-//        tyrantMythicalCreatureModel.setupAnim(entity, limbSwing, limbSwingAmount, entity.tickCount + partialTick, 0, 0);
+        if (entity instanceof LivingEntity living) {
+            limbSwing = living.walkAnimation.position(partialTick);
+            limbSwingAmount = living.walkAnimation.speed(partialTick);
+        }
+
+        // Setup animation with proper parameters
+        sunMythicalCreatureModel.setupAnim(entity, limbSwing, limbSwingAmount, entity.tickCount + partialTick, 0, 0);
 
         sunMythicalCreatureModel.renderToBuffer(poseStack, vertexConsumer, packedLight,
                 OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
@@ -236,13 +242,13 @@ public class TransformationRenderer {
         float limbSwing = 0;
         float limbSwingAmount = 0;
 
-//        if (entity instanceof LivingEntity living) {
-//            limbSwing = living.walkAnimation.position(partialTick);
-//            limbSwingAmount = living.walkAnimation.speed(partialTick);
-//        }
-//
-//        // Setup animation with proper parameters
-//        tyrantMythicalCreatureModel.setupAnim(entity, limbSwing, limbSwingAmount, entity.tickCount + partialTick, 0, 0);
+        if (entity instanceof LivingEntity living) {
+            limbSwing = living.walkAnimation.position(partialTick);
+            limbSwingAmount = living.walkAnimation.speed(partialTick);
+        }
+
+        // Setup animation with proper parameters
+        foolMythicalCreatureModel.setupAnim(entity, limbSwing, limbSwingAmount, entity.tickCount + partialTick, 0, 0);
 
         foolMythicalCreatureModel.renderToBuffer(poseStack, vertexConsumer, packedLight,
                 OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
@@ -261,7 +267,7 @@ public class TransformationRenderer {
         poseStack.pushPose();
 
         // Position at entity center
-        poseStack.translate(0.0, entity.getBbHeight() / 2.0 + 2, 0.0);
+        poseStack.translate(0.0, entity.getBbHeight() / 2.0 + 1.4, 0.0);
 
         // Rotate with the player's body rotation
         // Use yBodyRot for smooth rotation, or getYRot() for instant rotation
@@ -269,7 +275,7 @@ public class TransformationRenderer {
         poseStack.mulPose(Axis.YP.rotationDegrees(-yaw)); // 180.0F to face the correct direction
 
         // Scale if needed
-        poseStack.scale(2F, -2F, 2F);
+        poseStack.scale(3.5F, -3.5F, 3.5F);
 
         // Get the vertex consumer with your texture
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutoutNoCull(doorMythicalCreatureTexture));
@@ -277,16 +283,58 @@ public class TransformationRenderer {
         float limbSwing = 0;
         float limbSwingAmount = 0;
 
-//        if (entity instanceof LivingEntity living) {
-//            limbSwing = living.walkAnimation.position(partialTick);
-//            limbSwingAmount = living.walkAnimation.speed(partialTick);
-//        }
-//
-//        // Setup animation with proper parameters
-//        tyrantMythicalCreatureModel.setupAnim(entity, limbSwing, limbSwingAmount, entity.tickCount + partialTick, 0, 0);
+        if (entity instanceof LivingEntity living) {
+            limbSwing = living.walkAnimation.position(partialTick);
+            limbSwingAmount = living.walkAnimation.speed(partialTick);
+        }
+
+        // Setup animation with proper parameters
+        doorMythicalCreatureModel.setupAnim(entity, limbSwing, limbSwingAmount, entity.tickCount + partialTick, 0, 0);
 
         // Render the model
         doorMythicalCreatureModel.renderToBuffer(poseStack, vertexConsumer, packedLight,
+                OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
+
+        poseStack.popPose();
+    }
+
+    private static void renderDoorHighMythicalCreature(PoseStack poseStack, MultiBufferSource multiBufferSource, int packedLight, LivingEntity entity, float partialTick) {
+        // Lazy initialization - only bake the model when first needed
+        if (doorHighMythicalCreatureModel == null) {
+            doorHighMythicalCreatureModel = new DoorHighMythicalCreatureModel<>(
+                    Minecraft.getInstance().getEntityModels().bakeLayer(DoorHighMythicalCreatureModel.LAYER_LOCATION)
+            );
+        }
+
+        poseStack.pushPose();
+
+        // Position at entity center
+        poseStack.translate(0.0, entity.getBbHeight() / 2.0 + 1.4, 0.0);
+
+        // Rotate with the player's body rotation
+        // Use yBodyRot for smooth rotation, or getYRot() for instant rotation
+        float yaw = Mth.lerp(partialTick, entity.yBodyRotO, entity.yBodyRot);
+        poseStack.mulPose(Axis.YP.rotationDegrees(-yaw)); // 180.0F to face the correct direction
+
+        // Scale if needed
+        poseStack.scale(3.5F, -3.5F, 3.5F);
+
+        // Get the vertex consumer with your texture
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutoutNoCull(doorHighMythicalCreatureTexture));
+
+        float limbSwing = 0;
+        float limbSwingAmount = 0;
+
+        if (entity instanceof LivingEntity living) {
+            limbSwing = living.walkAnimation.position(partialTick);
+            limbSwingAmount = living.walkAnimation.speed(partialTick);
+        }
+
+        // Setup animation with proper parameters
+        doorHighMythicalCreatureModel.setupAnim(entity, limbSwing, limbSwingAmount, entity.tickCount + partialTick, 0, 0);
+
+        // Render the model
+        doorHighMythicalCreatureModel.renderToBuffer(poseStack, vertexConsumer, packedLight,
                 OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
 
         poseStack.popPose();
