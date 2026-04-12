@@ -4,6 +4,7 @@ import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.damage.ModDamageTypes;
 import de.jakob.lotm.effect.ModEffects;
+import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.DamageLookup;
 import de.jakob.lotm.util.helper.ParticleUtil;
@@ -71,7 +72,7 @@ public class NightmareSpectatorAbility extends Ability {
         target.addEffect(new MobEffectInstance(ModEffects.LOOSING_CONTROL, 20 * 4, 1));
 
         // Decrease Sanity
-        target.getData(ModAttachments.SANITY_COMPONENT).increaseSanityAndSync((float) (-0.165f * (multiplier(entity)/2)), target);
+        target.getData(ModAttachments.SANITY_COMPONENT).decreaseSanityWithSequenceDifference((float) (0.165f * (multiplier(entity)/2)), target, AbilityUtil.getSeqWithArt(entity, this), BeyonderData.getSequence(target));
 
         // Particles
         ParticleUtil.spawnParticles(serverLevel, dust, target.position().add(0, target.getEyeHeight() / 2, 0), 200, .35, target.getEyeHeight() / 2, .35, 0);

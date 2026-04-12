@@ -272,7 +272,7 @@ public class TransformationRenderer {
         // Rotate with the player's body rotation
         // Use yBodyRot for smooth rotation, or getYRot() for instant rotation
         float yaw = Mth.lerp(partialTick, entity.yBodyRotO, entity.yBodyRot);
-        poseStack.mulPose(Axis.YP.rotationDegrees(-yaw)); // 180.0F to face the correct direction
+        poseStack.mulPose(Axis.YP.rotationDegrees(yaw));
 
         // Scale if needed
         poseStack.scale(3.5F, -3.5F, 3.5F);
@@ -309,7 +309,7 @@ public class TransformationRenderer {
         poseStack.pushPose();
 
         // Position at entity center
-        poseStack.translate(0.0, entity.getBbHeight() / 2.0 + 1.4, 0.0);
+        poseStack.translate(0.0, entity.getBbHeight() / 2.0 + 2, 0.0);
 
         // Rotate with the player's body rotation
         // Use yBodyRot for smooth rotation, or getYRot() for instant rotation
@@ -317,10 +317,10 @@ public class TransformationRenderer {
         poseStack.mulPose(Axis.YP.rotationDegrees(-yaw)); // 180.0F to face the correct direction
 
         // Scale if needed
-        poseStack.scale(3.5F, -3.5F, 3.5F);
+        poseStack.scale(3.5F, -3.5F, -3.5F);
 
         // Get the vertex consumer with your texture
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutoutNoCull(doorHighMythicalCreatureTexture));
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(doorHighMythicalCreatureModel.renderType(doorHighMythicalCreatureTexture));
 
         float limbSwing = 0;
         float limbSwingAmount = 0;

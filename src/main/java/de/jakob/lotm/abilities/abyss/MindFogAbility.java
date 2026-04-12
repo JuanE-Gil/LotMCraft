@@ -82,7 +82,7 @@ public class MindFogAbility extends ToggleAbility {
                 .forEach(target -> {
                     if (target.hasData(ModAttachments.SANITY_COMPONENT)) {
                         target.getData(ModAttachments.SANITY_COMPONENT)
-                                .increaseSanityAndSync(-0.05f, target);
+                                .decreaseSanityWithSequenceDifference(0.05f, target, AbilityUtil.getSeqWithArt(entity, this), BeyonderData.getSequence(target));
                     }
 
                     if (random.nextInt(5) == 0) {
