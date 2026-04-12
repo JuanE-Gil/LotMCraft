@@ -1,10 +1,14 @@
 package de.jakob.lotm.effect;
 
+import de.jakob.lotm.LOTMCraft;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
 
 /**
  * Fooling effect applied by the Fool sequence 0 ability.
@@ -16,6 +20,7 @@ import net.minecraft.world.entity.LivingEntity;
  * Client-side behaviour lives in ClientFoolingCache.
  * Server-side input counter lives in ServerFoolingCache.
  */
+@EventBusSubscriber(modid = LOTMCraft.MOD_ID)
 public class FoolingEffect extends MobEffect {
 
     protected FoolingEffect(MobEffectCategory category, int color) {
@@ -41,5 +46,12 @@ public class FoolingEffect extends MobEffect {
     @Override
     public boolean shouldApplyEffectTickThisTick(int duration, int amplifier) {
         return true;
+    }
+
+    @SubscribeEvent
+    public static void onEffectRemoved(MobEffectEvent.Remove event) {
+        if (event.getEffect() != ModEffects.FOOLING) return;
+        if (!event.getEntity().isAlive()) return;
+        event.setCanceled(true);
     }
 }
