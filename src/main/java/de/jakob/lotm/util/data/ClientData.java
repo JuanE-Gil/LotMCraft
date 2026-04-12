@@ -20,7 +20,6 @@ public class ClientData {
 
     public static void setSharedWheelAbilities(List<String> abilities) {
         sharedWheelAbilities = new ArrayList<>(abilities);
-        selectedSharedAbility = 0;
     }
 
     public static int getSelectedSharedAbility() {

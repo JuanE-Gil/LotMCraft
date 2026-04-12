@@ -7,6 +7,7 @@ import de.jakob.lotm.abilities.PhysicalEnhancementsAbility;
 import de.jakob.lotm.attachments.LuckComponent;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.attachments.MultiplierModifierComponent;
+import de.jakob.lotm.attachments.TeamComponent;
 import de.jakob.lotm.events.BeyonderDataTickHandler;
 import de.jakob.lotm.gamerule.ModGameRules;
 import de.jakob.lotm.network.PacketHandler;
@@ -209,8 +210,11 @@ public class BeyonderData {
                 SyncBeyonderDataPacket packet = new SyncBeyonderDataPacket(pathway, sequence, 0.0f, false, 0.0f, new PathwayHistory(), 0);
                 PacketHandler.sendToAllPlayers(packet);
 
-                // Disband team if leader is no longer eligible (Red Priest seq <= 3)
-                if (!TeamUtils.isEligibleLeader(serverPlayer)) {
+                // Disband team if the leader is no longer eligible (Red Priest seq <= 3).
+                // Only applies when this player is actually the leader (has members) — members
+                // advancing their own sequence should never trigger a disband.
+                TeamComponent teamComp = serverPlayer.getData(ModAttachments.TEAM_COMPONENT.get());
+                if (teamComp.memberCount() > 0 && !TeamUtils.isEligibleLeader(serverPlayer)) {
                     TeamUtils.disbandTeam(serverPlayer, serverPlayer.getServer());
                 }
             }
