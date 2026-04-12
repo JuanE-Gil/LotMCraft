@@ -8,7 +8,6 @@ import de.jakob.lotm.entity.ModEntities;
 import de.jakob.lotm.entity.custom.ability_entities.OriginalBodyEntity;
 import de.jakob.lotm.network.PacketHandler;
 import de.jakob.lotm.network.packets.toClient.SyncOriginalBodyOwnerPacket;
-import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityWheelHelper;
 import de.jakob.lotm.util.helper.AllyUtil;
 import de.jakob.lotm.util.helper.marionettes.MarionetteUtils;
@@ -476,6 +475,14 @@ public class ControllingUtil {
                 ServerPlayer player = getPlayerByUUID(originalBodyData.getOwnerUUID());
 
                 if (player == null) return;
+                ControllingDataComponent playerData = player.getData(ModAttachments.CONTROLLING_DATA);
+
+                // if the player is not controlling anything => discard the main body so it doesn't drop anything
+                if (!playerData.isControlling()) {
+                    originalBody.discard();
+                    return;
+                }
+
                 event.setCanceled(true);
 
                 // reset the player
@@ -484,7 +491,7 @@ public class ControllingUtil {
                 }
 
                 // clean up data
-                ControllingDataComponent playerData = player.getData(ModAttachments.CONTROLLING_DATA);
+
                 playerData.setControlling(false);
                 playerData.setTargetEntity(null);
                 playerData.setOwnerUUID(null);
