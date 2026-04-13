@@ -1,57 +1,39 @@
 package de.jakob.lotm.effect;
 
-import de.jakob.lotm.LOTMCraft;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
 
 /**
- * Fooling effect applied by the Fool sequence 0 ability.
+ * Fooling effect — cosmetic HUD marker only.
  *
- * - Movement keys are inverted each tick: forward↔back, left↔right, jump↔sneak.
- * - Every 3rd distinct key press (any key) is suppressed entirely.
- * - Ability hotkeys trigger a random ability server-side instead of the bound one.
+ * The actual Fooling state is stored in FoolingComponent (an attachment) so it
+ * cannot be removed by milk or other effect-clearing mechanics.
+ * BeyonderDataTickHandler re-applies this effect for 2 ticks every tick while
+ * the attachment has ticks remaining, keeping the HUD icon visible.
  *
- * Client-side behaviour lives in ClientFoolingCache.
- * Server-side input counter lives in ServerFoolingCache.
+ * All gameplay logic (stun, input scrambling, ability scrambling) is driven by
+ * FoolingComponent.isFooled() / ticksRemaining, not by this effect's duration.
+ *
+ * Client-side input inversion lives in ClientFoolingCache.
  */
-@EventBusSubscriber(modid = LOTMCraft.MOD_ID)
 public class FoolingEffect extends MobEffect {
+
+    public static final int STUN_INTERVAL_TICKS = 200; // every 10 seconds
+    public static final int STUN_DURATION_TICKS  = 60;  // stun lasts 3 seconds
 
     protected FoolingEffect(MobEffectCategory category, int color) {
         super(category, color);
     }
 
-    private static final int STUN_INTERVAL_TICKS = 100; // every 5 seconds
-    private static final int STUN_DURATION_TICKS  = 20;  // stun lasts 1 second
-
     @Override
     public boolean applyEffectTick(LivingEntity livingEntity, int amplifier) {
-        if (livingEntity.level().isClientSide) return true;
-
-        MobEffectInstance instance = livingEntity.getEffect(ModEffects.FOOLING);
-        if (instance != null && instance.getDuration() % STUN_INTERVAL_TICKS == 0) {
-            livingEntity.addEffect(new MobEffectInstance(
-                    MobEffects.MOVEMENT_SLOWDOWN, STUN_DURATION_TICKS, 254, false, false, false));
-        }
-
         return true;
     }
 
     @Override
     public boolean shouldApplyEffectTickThisTick(int duration, int amplifier) {
-        return true;
+        return false;
     }
 
-    @SubscribeEvent
-    public static void onEffectRemoved(MobEffectEvent.Remove event) {
-        if (event.getEffect() != ModEffects.FOOLING) return;
-        if (!event.getEntity().isAlive()) return;
-        event.setCanceled(true);
-    }
 }

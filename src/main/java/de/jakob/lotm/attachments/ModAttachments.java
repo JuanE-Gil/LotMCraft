@@ -233,6 +233,11 @@ public class ModAttachments {
                             .build()
             );
 
+    public static final Supplier<AttachmentType<FoolingComponent>> FOOLING_COMPONENT =
+            ATTACHMENT_TYPES.register("fooling_component", () ->
+                    AttachmentType.serializable(FoolingComponent::new).build()
+            );
+
     public static void register(IEventBus eventBus) {
         ATTACHMENT_TYPES.register(eventBus);
     }

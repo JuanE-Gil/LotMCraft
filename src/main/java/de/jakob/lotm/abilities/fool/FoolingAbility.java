@@ -2,14 +2,15 @@ package de.jakob.lotm.abilities.fool;
 
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.Ability;
-import de.jakob.lotm.effect.ModEffects;
-import de.jakob.lotm.util.helper.AbilityUtil;
+import de.jakob.lotm.attachments.FoolingComponent;
+import de.jakob.lotm.attachments.ModAttachments;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
+
+import java.util.List;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -58,14 +59,16 @@ public class FoolingAbility extends Ability {
                 SoundEvents.AMETHYST_CLUSTER_BREAK,
                 entity.getSoundSource(), 1.5f, 0.6f);
 
-        // Spawn a flash of jester-themed particles around the caster
-        AbilityUtil.addPotionEffectToNearbyEntities(
-                serverLevel,
-                entity,
-                AOE_RADIUS,
-                entity.position(),
-                new MobEffectInstance(ModEffects.FOOLING, EFFECT_DURATION_TICKS, 0, false, true, true)
+        // Apply Fooling to all nearby entities via attachment
+        List<LivingEntity> nearby = serverLevel.getEntitiesOfClass(
+                LivingEntity.class,
+                entity.getBoundingBox().inflate(AOE_RADIUS),
+                e -> e != entity
         );
+        for (LivingEntity target : nearby) {
+            FoolingComponent component = target.getData(ModAttachments.FOOLING_COMPONENT);
+            component.setTicksRemaining(EFFECT_DURATION_TICKS);
+        }
 
         // Decorative particle ring so players can see the AoE boundary
         double radius = AOE_RADIUS;

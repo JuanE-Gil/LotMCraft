@@ -4,8 +4,8 @@ import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.abilities.core.SelectableAbility;
 import de.jakob.lotm.attachments.AbilityBarComponent;
+import de.jakob.lotm.attachments.FoolingComponent;
 import de.jakob.lotm.attachments.ModAttachments;
-import de.jakob.lotm.effect.ModEffects;
 import de.jakob.lotm.util.BeyonderData;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -35,7 +35,7 @@ public record UseKeyboundAbilityPacket(int selectedAbility) implements CustomPac
             ServerPlayer player = (ServerPlayer) context.player();
 
             // Fooling effect: 25% chance to fail entirely, otherwise scramble to a random ability.
-            if (player.hasEffect(ModEffects.FOOLING)) {
+            if (player.getData(ModAttachments.FOOLING_COMPONENT).isFooled()) {
                 if (new java.util.Random().nextFloat() < 0.25f) return;
                 String pathway = BeyonderData.getPathway(player);
                 int sequence   = BeyonderData.getSequence(player);

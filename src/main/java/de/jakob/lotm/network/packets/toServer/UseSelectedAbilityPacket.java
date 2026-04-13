@@ -3,10 +3,10 @@ package de.jakob.lotm.network.packets.toServer;
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.attachments.AbilityWheelComponent;
+import de.jakob.lotm.attachments.FoolingComponent;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.attachments.TeamComponent;
 import de.jakob.lotm.attachments.SharedAbilitiesComponent;
-import de.jakob.lotm.effect.ModEffects;
 import de.jakob.lotm.util.BeyonderData;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -32,7 +32,7 @@ public record UseSelectedAbilityPacket() implements CustomPacketPayload {
             if (context.player() instanceof ServerPlayer serverPlayer) {
 
                 // Fooling effect: 25% chance to fail entirely, otherwise scramble to a random ability.
-                if (serverPlayer.hasEffect(ModEffects.FOOLING)) {
+                if (serverPlayer.getData(ModAttachments.FOOLING_COMPONENT).isFooled()) {
                     if (new java.util.Random().nextFloat() < 0.25f) return;
                     if (serverPlayer.level() instanceof ServerLevel serverLevel) {
                         String pathway = BeyonderData.getPathway(serverPlayer);
