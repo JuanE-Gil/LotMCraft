@@ -3,6 +3,7 @@ package de.jakob.lotm.abilities.core;
 import de.jakob.lotm.abilities.abyss.*;
 import de.jakob.lotm.abilities.common.*;
 import de.jakob.lotm.abilities.darkness.*;
+import de.jakob.lotm.abilities.death.*;
 import de.jakob.lotm.abilities.demoness.*;
 import de.jakob.lotm.abilities.door.*;
 import de.jakob.lotm.abilities.error.*;
@@ -264,6 +265,10 @@ public class AbilityHandler {
         abilities.add(new ZombieDisguiseAbility("zombie_disguise_ability"));
         abilities.add(new RestructionAbility("restruction_ability"));
         abilities.add(new WordOfSpiritAbility("word_of_spirit_ability"));
+        abilities.add(new DoorToTheUnderworldAbility("door_to_the_underworld_ability"));
+        abilities.add(new DeathEnvoyAbility("death_envoy_ability"));
+        abilities.add(new InternalUnderworldAbility("internal_underworld_ability"));
+        abilities.add(new UndyingSealAbility("undying_seal_ability"));
     }
 
     public HashSet<Ability> getAbilities() {

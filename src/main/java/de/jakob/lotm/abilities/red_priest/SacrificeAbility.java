@@ -71,6 +71,7 @@ public class SacrificeAbility extends Ability {
             return;
         }
 
+        int currentSeq = BeyonderData.getSequence(player);
         if (currentSeq > 3 || currentSeq < 1) return;
 
         KillCountComponent killCount = player.getData(ModAttachments.KILL_COUNT_COMPONENT);
