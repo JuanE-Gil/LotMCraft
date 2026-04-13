@@ -13,6 +13,7 @@ import de.jakob.lotm.abilities.sun.*;
 import de.jakob.lotm.abilities.tyrant.*;
 import de.jakob.lotm.abilities.visionary.*;
 import de.jakob.lotm.abilities.wheel_of_fortune.*;
+import de.jakob.lotm.abilities.death.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -255,6 +256,14 @@ public class AbilityHandler {
         abilities.add(new FateSiphoningAbility("fate_siphoning_ability"));
         abilities.add(new ConceptualTheftAbility("conceptual_theft_ability"));
         abilities.add(new TimeManipulationAbility("time_manipulation_ability"));
+
+        // DEATH PATHWAY
+        abilities.add(new EyeOfDeathAbility("eye_of_death_ability"));
+        abilities.add(new SpiritChannelingAbility("spirit_channeling_ability"));
+        abilities.add(new SpiritCommunicationAbility("spirit_communication_ability"));
+        abilities.add(new ZombieDisguiseAbility("zombie_disguise_ability"));
+        abilities.add(new RestructionAbility("restruction_ability"));
+        abilities.add(new WordOfSpiritAbility("word_of_spirit_ability"));
     }
 
     public HashSet<Ability> getAbilities() {

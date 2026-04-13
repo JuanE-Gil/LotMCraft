@@ -24,6 +24,7 @@ public class ModDamageTypes {
     public static final ResourceKey<DamageType> DARKNESS_GENERIC = key("darkness_generic");
     public static final ResourceKey<DamageType> DEMONESS_GENERIC = key("demoness_generic");
     public static final ResourceKey<DamageType> BEYONDER_GENERIC = key("beyonder_generic");
+    public static final ResourceKey<DamageType> SPIRIT_CALLED = key("spirit_called");
 
     // -------------------------------------------------------------------------
     // Utility

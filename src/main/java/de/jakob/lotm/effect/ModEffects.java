@@ -40,6 +40,9 @@ public class ModEffects {
     public static final Holder<MobEffect> CONCEALMENT = MOB_EFFECTS.register("concealment",
             () -> new ConcealmentEffect(MobEffectCategory.BENEFICIAL, 0x161718));
 
+    public static final Holder<MobEffect> SPIRIT_CALLED = MOB_EFFECTS.register("spirit_called",
+            () -> new SpiritCalledEffect(MobEffectCategory.HARMFUL, 0x7ECFCF));
+
     public static void register(IEventBus eventBus) {
         MOB_EFFECTS.register(eventBus);
     }

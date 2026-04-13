@@ -281,6 +281,12 @@ public class PacketHandler {
         );
 
         registrar.playToClient(
+                SyncEyeOfDeathAbilityPacket.TYPE,
+                SyncEyeOfDeathAbilityPacket.STREAM_CODEC,
+                SyncEyeOfDeathAbilityPacket::handle
+        );
+
+        registrar.playToClient(
                 RingEffectPacket.TYPE,
                 RingEffectPacket.STREAM_CODEC,
                 RingEffectPacket::handle

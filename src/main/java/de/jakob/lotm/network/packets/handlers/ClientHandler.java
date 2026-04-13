@@ -104,6 +104,19 @@ public class ClientHandler {
         }
     }
 
+    public static void syncEyeOfDeathAbility(SyncEyeOfDeathAbilityPacket packet, Player player) {
+        if (packet.active()) {
+            Level level = Minecraft.getInstance().level;
+            if (level == null) return;
+
+            Entity entity = packet.entityId() == -1 ? null : level.getEntity(packet.entityId());
+            LivingEntity living = entity instanceof LivingEntity ? (LivingEntity) entity : null;
+            EyeOfDeathOverlayRenderer.entitiesLookedAt.put(player.getUUID(), living);
+        } else {
+            EyeOfDeathOverlayRenderer.entitiesLookedAt.remove(player.getUUID());
+        }
+    }
+
     public static void handleRingPacket(RingEffectPacket packet) {
         RingExpansionRenderer.handleRingEffectPacket(packet);
     }
