@@ -34,6 +34,7 @@ import net.neoforged.neoforge.event.entity.EntityTravelToDimensionEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
@@ -576,6 +577,48 @@ public class ControllingUtil {
                 PacketDistributor.sendToPlayer((ServerPlayer) event.getEntity(),
                         new SyncOriginalBodyOwnerPacket(body.getId(), data.getOwnerUUID(), data.getOwnerName())
                 );
+            }
+        }
+    }
+
+    // track the distance between the main body and the player
+    @SubscribeEvent
+    public static void onPlayerTickDistanceFromBody (PlayerTickEvent.Post event){
+        Player player = event.getEntity();
+
+        if (player.level() instanceof ServerLevel serverLevel && player instanceof ServerPlayer serverPlayer) {
+
+            // run every 15s
+            if (player.tickCount % 300 != 0) return;
+
+            ControllingDataComponent data = player.getData(ModAttachments.CONTROLLING_DATA);
+            if (data.isControlling() || data.getBodyUUID() != null) {
+                Entity mainBodyEntity = serverLevel.getEntity(data.getBodyUUID());
+                // dont reset if main body doesn't exist, could be abused, but we'll see.
+                if (mainBodyEntity == null) return;
+
+                CompoundTag bodyData = data.getBodyEntity().getCompound("NeoForgeData");
+
+                // get the seq of main body and not the current player
+                int sequence = bodyData.getInt("beyonder_sequence");
+                int controllingDistance;
+                switch (sequence) {
+                    case 5 -> controllingDistance = 500;
+                    case 4 -> controllingDistance = 1250;
+                    case 3 -> controllingDistance = 2000;
+                    case 2 -> controllingDistance = 5000;
+                    case 1 -> controllingDistance = 15000;
+                    default -> controllingDistance = 250;
+                }
+
+                // calculate the distance between main body and player
+                double dx = serverPlayer.getX() - mainBodyEntity.getX();
+                double dy = serverPlayer.getY() - mainBodyEntity.getY();
+                double dz = serverPlayer.getZ() - mainBodyEntity.getZ();
+
+                if (controllingDistance < Math.sqrt(dx * dx + dy * dy + dz * dz)) {
+                    reset(serverPlayer,serverLevel, true);
+                }
             }
         }
     }

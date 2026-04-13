@@ -430,8 +430,6 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
         activeSummons.keySet().removeIf(uuid -> !onlinePlayers.contains(uuid));
     }
 
-
-
     private void summonEntity(ServerLevel level, ServerPlayer player) {
         int currentSummoned = getSummonedCount(player);
         if(currentSummoned >= getMaxSummoned(player)) {
@@ -734,7 +732,7 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
         Level level = entity.level();
 
         // run every minute
-        if (entity.tickCount % 300 != 0) return;
+        if (entity.tickCount % 1200 != 0) return;
         if (level.isClientSide || !(level instanceof ServerLevel serverLevel)) return;
 
         if(entity.getPersistentData().getBoolean("VoidSummoned")) {
@@ -881,12 +879,11 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
 
     // scale max summoned items
     private static int getSummonDurationTicks(ServerPlayer serverPlayer){
-        return 100;
-//        return switch (BeyonderData.getSequence(serverPlayer)){
-//            case 0 -> 60 * 60 * 20;
-//            case 1 -> 10 * 60 * 20;
-//            case 2 -> 3 * 60 * 20;
-//            default -> 30 * 20;
-//        };
+        return switch (BeyonderData.getSequence(serverPlayer)){
+            case 0 -> 60 * 60 * 20;
+            case 1 -> 10 * 60 * 20;
+            case 2 -> 3 * 60 * 20;
+            default -> 30 * 20;
+        };
     }
 }
