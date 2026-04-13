@@ -29,7 +29,6 @@ public class LanguageOfFoulnessAbility extends SelectableAbility {
     public LanguageOfFoulnessAbility(String id) {
         super(id, 3);
         this.canBeCopied = false;
-        this.canBeReplicated = false;
     }
 
     @Override

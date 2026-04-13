@@ -40,7 +40,6 @@ public class LoopHoleCreationAbility extends Ability {
     public LoopHoleCreationAbility(String id) {
         super(id, 3.5f);
         canBeCopied = false;
-        canBeReplicated = false;
         autoClear = false;
     }
 

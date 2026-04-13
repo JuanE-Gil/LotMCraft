@@ -30,7 +30,6 @@ public class DesireControlAbility extends SelectableAbility {
     public DesireControlAbility(String id) {
         super(id, 5.0f);
         this.canBeCopied = false;
-        this.canBeReplicated = false;
     }
 
     @Override

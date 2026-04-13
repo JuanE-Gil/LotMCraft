@@ -29,7 +29,6 @@ public class ConceptualTheftAbility extends SelectableAbility {
 
         canBeUsedByNPC = false;
         canBeCopied = false;
-        canBeReplicated = false;
     }
 
     @Override

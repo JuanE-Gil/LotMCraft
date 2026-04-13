@@ -28,7 +28,6 @@ public class SpiritualBaptismAbility extends SelectableAbility {
     public SpiritualBaptismAbility(String id) {
         super(id, 10, "cleansing");
         canBeCopied = false;
-        canBeReplicated = false;
     }
 
     @Override

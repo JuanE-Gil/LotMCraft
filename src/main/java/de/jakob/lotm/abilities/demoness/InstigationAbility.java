@@ -31,7 +31,6 @@ public class InstigationAbility extends Ability {
         super(id, 1);
 
         canBeUsedByNPC = false;
-        canBeCopied = false;
     }
 
     @Override

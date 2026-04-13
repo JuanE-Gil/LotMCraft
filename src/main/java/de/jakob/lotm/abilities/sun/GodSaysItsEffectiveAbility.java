@@ -20,8 +20,6 @@ import java.util.Map;
 public class GodSaysItsEffectiveAbility extends Ability {
     public GodSaysItsEffectiveAbility(String id) {
         super(id, 20);
-        canBeCopied = false;
-        canBeReplicated = false;
     }
 
     @Override
