@@ -22,19 +22,6 @@ public class LoosingControlEffect extends MobEffect {
 
     Random random = new Random();
 
-    /**
-     * amplifier controls the chance of dying
-     * amplifier 0: 0%
-     * amplifier 1: 5%
-     * amplifier 2: 10%
-     * amplifier 3: 15%
-     * amplifier 4: 30%
-     * amplifier 5: 50%
-     * amplifier 6: 70%
-     * amplifier 7: 85%
-     * amplifier 8: 99%
-     * amplifier > 8: 100%
-    */
     @Override
     public boolean applyEffectTick(@NotNull LivingEntity livingEntity, int amplifier) {
         if(livingEntity.level().isClientSide) {
@@ -49,72 +36,8 @@ public class LoosingControlEffect extends MobEffect {
             return true;
         }
 
-        int effectiveAmplifier = Math.max(1, amplifier + 1);
-
-        if(random.nextInt(7) == 0 && livingEntity.getHealth() > effectiveAmplifier) {
-            livingEntity.hurt(createCustomDamageSource(livingEntity), effectiveAmplifier);
-
-            if(livingEntity instanceof ServerPlayer player){
-                var sanity = player.getData(ModAttachments.SANITY_COMPONENT);
-
-                sanity.setSanityAndSync(Math.max(0.0f, sanity.getSanity() - (effectiveAmplifier/2000.0f)), player);
-            }
-        }
-
-        float totalProbability = getProbability(amplifier);
-
-        MobEffectInstance instance = livingEntity.getEffect(ModEffects.LOOSING_CONTROL);
-        int duration = 100;
-        if (instance != null) {
-            duration = instance.getDuration(); // in ticks
-        }
-
-        if (amplifier >= 10 || shouldKillThisTick(totalProbability, duration)) {
-            livingEntity.removeEffect(ModEffects.LOOSING_CONTROL);
-            livingEntity.hurt(
-                    createCustomDamageSource(livingEntity),
-                    Math.max(livingEntity.getMaxHealth() + 5, 10000)
-            );
-        }
-
         return true;
     }
-
-    private boolean shouldKillThisTick(float totalProbability, int ticks) {
-        if(totalProbability == 0f) {
-            return false;
-        }
-
-        // Correct probability distribution:
-        float perTickChance = 1f - (float) Math.pow(1f - totalProbability, 1f / ticks);
-
-        return random.nextFloat() <= perTickChance;
-    }
-
-
-    private float getProbability(int amplifier) {
-        return switch(amplifier) {
-            case 0 -> 0.00f;
-            case 1 -> 0.05f;
-            case 2 -> 0.1f;
-            case 3 -> 0.15f;
-            case 4 -> 0.3f;
-            case 5 -> 0.5f;
-            case 6 -> 0.7f;
-            case 7 -> 0.85f;
-            case 8 -> 0.99f;
-            default -> 1f;
-        };
-    }
-
-    private DamageSource createCustomDamageSource(Entity entity) {
-        return new DamageSource(
-                entity.level().registryAccess()
-                        .registryOrThrow(Registries.DAMAGE_TYPE)
-                        .getHolderOrThrow(ModDamageTypes.LOOSING_CONTROL)
-        );
-    }
-
 
     @Override
     public boolean shouldApplyEffectTickThisTick(int duration, int amplifier) {

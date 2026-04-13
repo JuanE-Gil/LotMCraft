@@ -1419,6 +1419,8 @@
 
   "_comment015": "Uniquenesses-------------------------------------------------------------------------",
   "item.lotmcraft.red_priest_uniqueness": "Salinger's Blood Banner",
+  "lotm.uniqueness.fail": "You are not fit to advancing using this uniqueness",
+  "lotm.uniqueness.start": " has started his Apotheosis",
 
   "lotm.griefing": "Griefing Enabled",
   "lotm.griefing_required": "Griefing must be enabled",
