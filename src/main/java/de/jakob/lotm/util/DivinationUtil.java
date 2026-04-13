@@ -61,7 +61,7 @@ public class DivinationUtil {
 
     private static int getLowerSequenceDivinationPower(String pathway) {
         return switch (pathway) {
-            case "fool" -> 2;
+            case "fool" -> 1;
             case "wheel_of_fortune" -> 2;
             case "darkness" -> 1;
             default -> 0;
@@ -73,7 +73,7 @@ public class DivinationUtil {
             case "fool" -> 3;
             case "wheel_of_fortune" -> 2;
             case "darkness" -> 2;
-            case "door" -> 3;
+            case "door" -> 4;
             case "demoness" -> 2;
             default -> 1;
         };
@@ -84,14 +84,17 @@ public class DivinationUtil {
             case "fool" -> 4;
             case "wheel_of_fortune" -> 4;
             case "darkness" -> 3;
+            case "error" -> 4;
+            case "door" -> 4;
             default -> 2;
         };
     }
 
     private static int getSequenceTwoDivinationPower(String pathway) {
         return switch (pathway) {
-            case "fool" -> 5;
+            case "fool" -> 4;
             case "wheel_of_fortune" -> 5;
+            case "door" -> 4;
             default -> 3;
         };
     }
@@ -120,6 +123,10 @@ public class DivinationUtil {
 
         if (sequence <= 1) concealmentPower += getSequenceOneConcealmentPower(pathway);
 
+        if (serverPlayer.isCreative() || serverPlayer.isSpectator()) {
+            concealmentPower += 200;
+        }
+
         concealmentPower += getConcealmentItemInInventory(serverPlayer);
         concealmentPower += getConcealmentAbilities(serverPlayer);
         concealmentPower += getConcealmentDimension(serverPlayer);
@@ -138,7 +145,6 @@ public class DivinationUtil {
 
     private static int getMidSequenceConcealmentPower(String pathway) {
         return switch (pathway) {
-            case "fool" -> 2;
             case "door" -> 2;
             case "error" -> 2;
             case "darkness" -> 2;
