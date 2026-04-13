@@ -29,7 +29,6 @@ import java.util.UUID;
 public class NightDomainAbility extends Ability {
     public NightDomainAbility(String id) {
         super(id, 30, "darkness");
-        this.canBeCopied = false;
         autoClear = false;
         interactionRadius = 35;
         interactionCacheTicks = 20 * 25;

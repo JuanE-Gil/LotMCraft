@@ -35,7 +35,6 @@ public class DeceitAbility extends SelectableAbility {
     public DeceitAbility(String id) {
         super(id, 1);
         canBeCopied = false;
-        canBeReplicated = false;
         autoClear = false;
         canBeUsedInArtifact = false;
     }

@@ -20,7 +20,6 @@ public class DecryptionAbility extends ToggleAbility {
     public DecryptionAbility(String id) {
         super(id);
 
-        canBeCopied = false;
         canBeUsedByNPC = false;
         canBeReplicated = false;
     }

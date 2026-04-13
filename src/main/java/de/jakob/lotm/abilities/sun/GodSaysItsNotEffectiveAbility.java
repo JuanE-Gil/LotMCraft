@@ -21,8 +21,6 @@ import java.util.Map;
 public class GodSaysItsNotEffectiveAbility extends Ability {
     public GodSaysItsNotEffectiveAbility(String id) {
         super(id, 20);
-        canBeCopied = false;
-        canBeReplicated = false;
     }
 
     @Override
