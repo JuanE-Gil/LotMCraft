@@ -45,13 +45,16 @@ public class DoorToTheUnderworldAbility extends SelectableAbility {
     /** Tracks all mobs summoned per player so they can be despawned. */
     private static final HashMap<UUID, List<Mob>> summonedMobs = new HashMap<>();
 
+    /** Tracks the active portal scheduler task per player so it can be cancelled. */
+    private static final HashMap<UUID, UUID> activePortalTasks = new HashMap<>();
+
     private static final DustParticleOptions SOUL_DUST =
             new DustParticleOptions(new Vector3f(0.15f, 0.85f, 0.75f), 1.5f);
     private static final DustParticleOptions DARK_DUST =
             new DustParticleOptions(new Vector3f(0.05f, 0.0f, 0.15f), 2.0f);
 
     public DoorToTheUnderworldAbility(String id) {
-        super(id, 20 * 60 * 5f); // 5-minute cooldown
+        super(id, 20); // 1-second cooldown
         canBeCopied = false;
         canBeReplicated = false;
     }
@@ -69,6 +72,16 @@ public class DoorToTheUnderworldAbility extends SelectableAbility {
     @Override
     protected String[] getAbilityNames() {
         return MODES;
+    }
+
+    @Override
+    public void useAbility(ServerLevel serverLevel, LivingEntity entity, boolean consumeSpirituality, boolean hasToHaveAbility, boolean hasToMeetRequirements) {
+        // Release sub-ability bypasses cooldown and spirituality cost
+        if (getSelectedAbilityIndex(entity.getUUID()) == 1) {
+            onAbilityUse(serverLevel, entity);
+            return;
+        }
+        super.useAbility(serverLevel, entity, consumeSpirituality, hasToHaveAbility, hasToMeetRequirements);
     }
 
     @Override
@@ -93,25 +106,35 @@ public class DoorToTheUnderworldAbility extends SelectableAbility {
 
         AtomicInteger spawnTick = new AtomicInteger(0);
 
-        ServerScheduler.scheduleForDuration(0, 1, DURATION_TICKS, () -> {
+        UUID taskId = ServerScheduler.scheduleForDuration(0, 1, DURATION_TICKS, () -> {
             int tick = spawnTick.getAndIncrement();
             drawPortal(serverLevel, portalCenter, right, up, tick);
 
             if (tick % SPAWN_INTERVAL == 0) {
                 spawnWave(serverLevel, player, portalCenter);
             }
-        }, null, serverLevel, () -> 1.0);
+        }, () -> activePortalTasks.remove(player.getUUID()), serverLevel, () -> 1.0);
+
+        activePortalTasks.put(player.getUUID(), taskId);
     }
 
     private void release(ServerPlayer player) {
+        UUID taskId = activePortalTasks.remove(player.getUUID());
         List<Mob> mobs = summonedMobs.remove(player.getUUID());
-        if (mobs == null || mobs.isEmpty()) {
+
+        if (taskId == null && (mobs == null || mobs.isEmpty())) {
             AbilityUtil.sendActionBar(player, Component.translatable("ability.lotmcraft.door_to_the_underworld.none_summoned").withColor(0xFF4444));
             return;
         }
 
-        for (Mob mob : mobs) {
-            if (mob.isAlive()) mob.discard();
+        if (taskId != null) {
+            ServerScheduler.cancel(taskId);
+        }
+
+        if (mobs != null) {
+            for (Mob mob : mobs) {
+                if (mob.isAlive()) mob.discard();
+            }
         }
 
         AbilityUtil.sendActionBar(player, Component.translatable("ability.lotmcraft.door_to_the_underworld.released").withColor(0x44FF44));

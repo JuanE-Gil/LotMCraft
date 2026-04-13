@@ -35,7 +35,7 @@ public class RestructionAbility extends SelectableAbility {
     private static final HashMap<UUID, List<Mob>> summonedMobs = new HashMap<>();
 
     public RestructionAbility(String id) {
-        super(id, 20 * 60 * 3); // 3-minute cooldown
+        super(id, 20); // 1-second cooldown
         canBeCopied = false;
         canBeReplicated = false;
     }
@@ -53,6 +53,16 @@ public class RestructionAbility extends SelectableAbility {
     @Override
     protected String[] getAbilityNames() {
         return MODES;
+    }
+
+    @Override
+    public void useAbility(ServerLevel serverLevel, LivingEntity entity, boolean consumeSpirituality, boolean hasToHaveAbility, boolean hasToMeetRequirements) {
+        // Release sub-ability bypasses cooldown and spirituality cost
+        if (getSelectedAbilityIndex(entity.getUUID()) == 1) {
+            onAbilityUse(serverLevel, entity);
+            return;
+        }
+        super.useAbility(serverLevel, entity, consumeSpirituality, hasToHaveAbility, hasToMeetRequirements);
     }
 
     @Override

@@ -40,7 +40,7 @@ public class InternalUnderworldAbility extends SelectableAbility {
     private static final float CAPTURE_CHANCE = 0.5f;
 
     public InternalUnderworldAbility(String id) {
-        super(id, 20 * 5f); // 5-second cooldown (summon action only)
+        super(id, 20); // 1-second cooldown
         canBeCopied = false;
         canBeReplicated = false;
     }
@@ -128,6 +128,7 @@ public class InternalUnderworldAbility extends SelectableAbility {
         CompoundTag entityNBT = new CompoundTag();
         dying.save(entityNBT);
         entityNBT.remove("UUID");
+        entityNBT.remove("Health"); // remove death health so it spawns at full health
         if (entityNBT.contains("neoforge:attachments")) {
             entityNBT.getCompound("neoforge:attachments").remove("lotmcraft:copied_inventory");
         }
@@ -304,7 +305,7 @@ public class InternalUnderworldAbility extends SelectableAbility {
             boolean spawned = level.addFreshEntity(entity);
 
             if (spawned && entity instanceof LivingEntity livingEntity) {
-                SubordinateUtils.turnEntityIntoSubordinate(livingEntity, player);
+                SubordinateUtils.turnEntityIntoSubordinate(livingEntity, player, false);
                 removeStoredSoul(player, soulData);
                 player.sendSystemMessage(Component.translatable("ability.lotmcraft.internal_underworld.summoned",
                         entity.getName().getString()).withStyle(ChatFormatting.DARK_AQUA));
