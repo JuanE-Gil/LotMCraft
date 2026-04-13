@@ -2,6 +2,7 @@ package de.jakob.lotm.item.custom;
 
 import de.jakob.lotm.attachments.ApotheosisComponent;
 import de.jakob.lotm.attachments.ModAttachments;
+import de.jakob.lotm.damage.ModDamageTypes;
 import de.jakob.lotm.gamerule.ModGameRules;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.beyonderMap.StoredData;
@@ -51,6 +52,14 @@ public class UniquenessItem extends Item {
                 charStackCount < level.getGameRules().getInt(ModGameRules.CHARSTACK_REQUIRED_FOR_APOTHEOSIS)
         ) {
             player.displayClientMessage(Component.translatable("lotm.uniqueness.fail").withColor(color), false);
+            player.hurt(ModDamageTypes.source(level, ModDamageTypes.LOOSING_CONTROL), 1);
+            player.setHealth(1);
+            return InteractionResultHolder.fail(itemStack);
+        }
+
+        if(!level.dimension().equals(Level.OVERWORLD)) {
+            player.displayClientMessage(Component.translatable("lotm.uniqueness.overworld").withColor(color), false);
+            player.hurt(ModDamageTypes.source(level, ModDamageTypes.LOOSING_CONTROL), 1);
             player.setHealth(1);
             return InteractionResultHolder.fail(itemStack);
         }

@@ -34,7 +34,9 @@ public class ModItemModelProvider extends ItemModelProvider {
         basicItem(ModItems.GUIDING_BOOK.get());
         basicItem(ModItems.CRYSTAL_BALL.get());
         basicItem(ModItems.CANE.get());
-        basicItem(ModItems.RED_PRIEST_UNIQUENESS.get());
+
+        verticalRodItem(ModItems.RED_PRIEST_UNIQUENESS.get());
+
         tintableItem(ModItems.SEALED_ARTIFACT.get());
         tintableItem(ModItems.SEALED_ARTIFACT_BELL.get());
         tintableItem(ModItems.SEALED_ARTIFACT_CHAIN.get());
@@ -68,6 +70,8 @@ public class ModItemModelProvider extends ItemModelProvider {
         itemWithCustomDisplay(ModItems.FOOL_Card.get());
         basicItem(ModItems.MOD_ICON.get());
     }
+
+
 
     // Helper method for items that need custom display properties (auto-detects texture name)
     private void itemWithCustomDisplay(Item item) {
@@ -103,6 +107,47 @@ public class ModItemModelProvider extends ItemModelProvider {
                 .transform(ItemDisplayContext.FIRST_PERSON_LEFT_HAND)
                 .translation(1.25f, 4.25f, 0.75f)
                 .scale(0.39f, 0.39f, 0.39f)
+                .end()
+                .end();
+    }
+
+    private void verticalRodItem(Item item) {
+        String itemName = getItemName(item);
+        getBuilder(itemName)
+                .parent(getExistingFile(mcLoc("item/generated")))
+                .texture("layer0", modLoc("item/" + itemName))
+                .transforms()
+                .transform(ItemDisplayContext.THIRD_PERSON_RIGHT_HAND)
+                .rotation(0, -90, 0)
+                .translation(0, 8, 2)
+                .scale(1f, 1f, 1f)
+                .end()
+                .transform(ItemDisplayContext.THIRD_PERSON_LEFT_HAND)
+                .rotation(0, 90, 0)
+                .translation(0, 8, 2)
+                .scale(1f, 1f, 1f)
+                .end()
+                .transform(ItemDisplayContext.FIRST_PERSON_RIGHT_HAND)
+                .rotation(0, -90, 0)
+                .translation(1.13f, 4f, 1.13f)
+                .scale(0.68f, 0.68f, 0.68f)
+                .end()
+                .transform(ItemDisplayContext.FIRST_PERSON_LEFT_HAND)
+                .rotation(0, 90, 0)
+                .translation(1.13f, 4f, 1.13f)
+                .scale(0.68f, 0.68f, 0.68f)
+                .end()
+                .transform(ItemDisplayContext.GUI)
+                .rotation(0, 0, 0)
+                .translation(0, 0, 0)
+                .scale(1.5f, 1.5f, 1.5f)
+                .end()
+                .transform(ItemDisplayContext.GROUND)
+                .translation(0, 5, 0)
+                .scale(2.5f, 2.5f, 2.5f)
+                .end()
+                .transform(ItemDisplayContext.FIXED)
+                .scale(1, 1, 1)
                 .end()
                 .end();
     }

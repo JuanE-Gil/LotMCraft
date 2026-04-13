@@ -1421,6 +1421,7 @@
   "item.lotmcraft.red_priest_uniqueness": "Salinger's Blood Banner",
   "lotm.uniqueness.fail": "You are not fit to advancing using this uniqueness",
   "lotm.uniqueness.start": " has started his Apotheosis",
+  "lotm.uniqueness.overworld": "You can only ascend in the overworld",
 
   "lotm.griefing": "Griefing Enabled",
   "lotm.griefing_required": "Griefing must be enabled",
@@ -1434,6 +1435,7 @@
   "lotm.potion_recipe": "Potion Recipe",
   "lotm.beyonder_message.full": "Become a Beyonder of the %s Pathway at Sequence %s",
   "lotm.not_implemented_yet": "Not Implemented Yet",
+  "lotm.kills": "Kills",
   "lotm.pathway": "Pathway",
   "lotm.sequence": "Sequence",
   "lotm.digestion": "Digestion",

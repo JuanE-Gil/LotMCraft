@@ -5,6 +5,7 @@ import de.jakob.lotm.attachments.ApotheosisComponent;
 import de.jakob.lotm.attachments.DisabledAbilitiesComponent;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.network.packets.handlers.ClientHandler;
+import de.jakob.lotm.rendering.effectRendering.EffectManager;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.ParticleUtil;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -37,6 +38,8 @@ public class ApotheosisTickHandler {
         player.setDeltaMovement(new Vec3(0, 0.02, 0));
         player.hurtMarked = true;
 
+        player.getData(ModAttachments.DISABLED_ABILITIES_COMPONENT).disableAbilityUsageForTime("apotheosis", 20, player);
+
         int colorInt = BeyonderData.pathwayInfos.get(component.getPathway()).color();
         float red   = ((colorInt >> 16) & 0xFF) / 255.0f;
         float green = ((colorInt >>  8) & 0xFF) / 255.0f;
@@ -44,9 +47,12 @@ public class ApotheosisTickHandler {
 
         DustParticleOptions dustParticle = new DustParticleOptions(new Vector3f(red, green, blue), 2.5f);
 
-        player.getData(ModAttachments.DISABLED_ABILITIES_COMPONENT).disableAbilityUsageForTime("apotheosis", 20, player);
         Vec3 currentCenter = player.position().add(0, player.getBbHeight() / 2, 0);
         ParticleUtil.spawnSphereParticles((ServerLevel) player.level(), dustParticle, currentCenter, 1.5, 60);
+
+        if(component.getApotheosisTicksLeft() % (80) == 0) {
+            EffectManager.playEffect(EffectManager.Effect.BEAMS_OF_LIGHT, currentCenter.x, currentCenter.y + .25, currentCenter.z, (ServerLevel) player.level(), player);
+        }
 
         component.setApotheosisTicksLeftAndSync(component.getApotheosisTicksLeft() - 1, (ServerLevel) player.level(), player);
         if(component.getApotheosisTicksLeft() == 0) {
