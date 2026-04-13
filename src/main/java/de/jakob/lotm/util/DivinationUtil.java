@@ -204,7 +204,7 @@ public class DivinationUtil {
 
     private static int getDivinationItemInHand(ServerPlayer serverPlayer){
         int addedValue = 0;
-        if (serverPlayer.getItemInHand(InteractionHand.MAIN_HAND).is(ModItems.CANE) ||serverPlayer.getItemInHand(InteractionHand.OFF_HAND).is(ModItems.CANE)) {
+        if (serverPlayer.getItemInHand(InteractionHand.MAIN_HAND).is(ModItems.CANE) || serverPlayer.getItemInHand(InteractionHand.OFF_HAND).is(ModItems.CANE)) {
             addedValue += 2;
         }
         if (serverPlayer.getItemInHand(InteractionHand.MAIN_HAND).is(ModItems.CRYSTAL_BALL) ||serverPlayer.getItemInHand(InteractionHand.OFF_HAND).is(ModItems.CRYSTAL_BALL)) {

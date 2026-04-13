@@ -29,6 +29,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ChestMenu;
+import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -39,6 +40,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.item.ItemTossEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
@@ -162,7 +164,7 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
         player.openMenu(new SimpleMenuProvider(
                 (id, inv, p) -> new ChestMenu(MenuType.GENERIC_9x3, id, inv, displayContainer, 3) {
                     @Override
-                    public void clicked(int slotId, int button, net.minecraft.world.inventory.ClickType clickType, net.minecraft.world.entity.player.Player clickPlayer) {
+                    public void clicked(int slotId, int button, ClickType clickType, Player clickPlayer) {
                         if(slotId >= 0 && slotId < 27) {
                             ItemStack clickedItem = displayContainer.getItem(slotId);
                             if(!clickedItem.isEmpty()) {
@@ -311,7 +313,7 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
         }
 
         if(!heldItem.isEmpty()) {
-            net.minecraft.world.item.component.CustomData customData = heldItem.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
+            CustomData customData = heldItem.get(DataComponents.CUSTOM_DATA);
             if(customData != null) {
                 CompoundTag tag = customData.copyTag();
                 if(tag.contains("VoidSummonTime") && tag.contains("VoidSummonOwner")) {
@@ -341,30 +343,33 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
         }
     }
 
-//    // Event handler for item toss
-//    @SubscribeEvent
-//    public static void onItemToss(ItemTossEvent event) {
-//        ItemStack tossedItem = event.getEntity().getItem();
-//
-//        net.minecraft.world.item.component.CustomData customData = tossedItem.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
-//        if(customData != null) {
-//            CompoundTag tag = customData.copyTag();
-//            if(tag.contains("VoidSummonTime") && tag.contains("VoidSummonOwner")) {
-//                // This is a summoned item being tossed - make it disappear
-//                long summonTime = tag.getLong("VoidSummonTime");
-//                UUID ownerId = tag.getUUID("VoidSummonOwner");
-//
-//                event.getEntity().discard();
-//                event.setCanceled(true);
-//
-//                // Notify player and decrement count
-//                if(event.getPlayer() instanceof ServerPlayer player && player.getUUID().equals(ownerId)) {
-//                    decrementSummonedCount(player, summonTime);
-//                    player.sendSystemMessage(Component.translatable("ability.lotmcraft.historical_void_summoning.item_returned").withStyle(ChatFormatting.GRAY));
-//                }
-//            }
-//        }
-//    }
+    // Event handler for item toss
+    @SubscribeEvent
+    public static void onItemToss(ItemTossEvent event) {
+        ItemStack tossedItem = event.getEntity().getItem();
+
+        CustomData customData = tossedItem.get(DataComponents.CUSTOM_DATA);
+        if(customData != null) {
+            CompoundTag tag = customData.copyTag();
+            if(tag.contains("VoidSummonTime") && tag.contains("VoidSummonOwner")) {
+                // This is a summoned item being tossed - make it disappear
+                // only make it disappear if the player is crouching, good qol to force items to disappear
+                if (event.getPlayer().isCrouching()) {
+                    long summonTime = tag.getLong("VoidSummonTime");
+                    UUID ownerId = tag.getUUID("VoidSummonOwner");
+
+                    event.getEntity().discard();
+                    event.setCanceled(true);
+
+                    // Notify player and decrement count
+                    if(event.getPlayer() instanceof ServerPlayer player && player.getUUID().equals(ownerId)) {
+                        decrementSummonedCount(player, summonTime);
+                        player.sendSystemMessage(Component.translatable("ability.lotmcraft.historical_void_summoning.item_returned").withStyle(ChatFormatting.GRAY));
+                    }
+                }
+            }
+        }
+    }
 
     // Event handler for player logout - cleanup all summoned items/entities
     @SubscribeEvent
@@ -378,7 +383,7 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
         for(int i = 0; i < player.getInventory().getContainerSize(); i++) {
             ItemStack stack = player.getInventory().getItem(i);
             if(!stack.isEmpty()) {
-                net.minecraft.world.item.component.CustomData customData = stack.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
+                CustomData customData = stack.get(DataComponents.CUSTOM_DATA);
                 if(customData != null) {
                     CompoundTag tag = customData.copyTag();
                     if(tag.contains("VoidSummonOwner") && tag.getUUID("VoidSummonOwner").equals(playerUUID)) {
@@ -489,7 +494,7 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
                 (id, inv, p) -> new ChestMenu(MenuType.GENERIC_9x6, id, inv, entityContainer, 6) {
                     private boolean isDeleting = false;
                     @Override
-                    public void clicked(int slotId, int button, net.minecraft.world.inventory.ClickType clickType, net.minecraft.world.entity.player.Player clickPlayer) {
+                    public void clicked(int slotId, int button, ClickType clickType, Player clickPlayer) {
                         if(slotId >= 0 && slotId < finalContainerSize) {
                             ItemStack clickedItem = entityContainer.getItem(slotId);
 
@@ -540,13 +545,13 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
 
         // Create a spawn egg or representation item
         ItemStack display = new ItemStack(Items.PLAYER_HEAD);
-        display.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME,
+        display.set(DataComponents.CUSTOM_NAME,
                 Component.literal(customName.isEmpty() ? entityId : customName));
 
         CompoundTag customTag = new CompoundTag();
         customTag.put("EntityData", entityData);
 
-        display.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA,
+        display.set(DataComponents.CUSTOM_DATA,
                 CustomData.of(customTag)
         );
 
