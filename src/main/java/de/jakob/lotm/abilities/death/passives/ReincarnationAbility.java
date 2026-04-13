@@ -24,7 +24,7 @@ import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
+import net.minecraft.util.RandomSource;
 
 @EventBusSubscriber(modid = LOTMCraft.MOD_ID)
 public class ReincarnationAbility extends PassiveAbilityItem {
@@ -129,7 +129,7 @@ public class ReincarnationAbility extends PassiveAbilityItem {
      * Finds a random safe spawn position within the world border.
      * Tries up to 32 candidates; falls back to null if none found.
      */
-    private static BlockPos findSafeTeleportPos(ServerLevel level, Random random) {
+    private static BlockPos findSafeTeleportPos(ServerLevel level, RandomSource random) {
         WorldBorder border = level.getWorldBorder();
         double minX = border.getMinX();
         double maxX = border.getMaxX();

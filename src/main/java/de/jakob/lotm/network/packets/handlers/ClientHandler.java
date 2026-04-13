@@ -529,4 +529,8 @@ public class ClientHandler {
         ClientSacrificeCache.setTotalTicks(totalTicks);
         ClientSacrificeCache.setRemainingTicks(totalTicks);
     }
+
+    public static void handleSpiritChannelingPacket(de.jakob.lotm.network.packets.toClient.SyncSpiritChannelingPacket packet) {
+        de.jakob.lotm.abilities.death.SpiritChannelingAbility.setClientSpiritType(packet.spiritType());
+    }
 }

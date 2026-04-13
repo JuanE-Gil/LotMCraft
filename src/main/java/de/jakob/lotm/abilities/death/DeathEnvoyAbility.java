@@ -56,7 +56,7 @@ public class DeathEnvoyAbility extends Ability {
         level.playSound(null, entity.blockPosition(),
                 SoundEvents.WITHER_AMBIENT, SoundSource.PLAYERS, 3.0f, 0.5f);
         level.playSound(null, entity.blockPosition(),
-                SoundEvents.SOUL_ESCAPE, SoundSource.PLAYERS, 2.5f, 0.7f);
+                SoundEvents.SOUL_ESCAPE.value(), SoundSource.PLAYERS, 2.5f, 0.7f);
 
         // --- Visual: expanding ring burst then floating particles ---
         ParticleUtil.spawnCircleParticles(serverLevel, SOUL_DUST,

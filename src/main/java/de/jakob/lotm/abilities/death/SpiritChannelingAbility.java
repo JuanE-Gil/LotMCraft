@@ -4,10 +4,10 @@ import com.google.common.util.concurrent.AtomicDouble;
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.SelectableAbility;
 import de.jakob.lotm.damage.ModDamageTypes;
-import de.jakob.lotm.entity.ModEntities;
+import de.jakob.lotm.network.PacketHandler;
+import de.jakob.lotm.network.packets.toClient.SyncSpiritChannelingPacket;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.ParticleUtil;
-import de.jakob.lotm.util.helper.subordinates.SubordinateUtils;
 import de.jakob.lotm.util.scheduling.ServerScheduler;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -16,9 +16,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -39,8 +37,15 @@ public class SpiritChannelingAbility extends SelectableAbility {
 
     public enum SpiritType { FROST_GHOST, EARTH_SPIRIT }
 
-    /** Spirits captured per player: type only (for re-spawning). */
+    /** Spirits captured per player (server-side). */
     private static final HashMap<UUID, SpiritType> capturedSpirits = new HashMap<>();
+
+    /** Client-side mirror of the local player's captured spirit (-1 = none). */
+    private static int clientSpiritTypeOrdinal = -1;
+
+    public static void setClientSpiritType(int ordinal) {
+        clientSpiritTypeOrdinal = ordinal;
+    }
 
     /** Players who have the Glacial Aegis active (next hit negated). */
     private static final Set<UUID> glacialAegisActive = new HashSet<>();
@@ -94,6 +99,17 @@ public class SpiritChannelingAbility extends SelectableAbility {
 
     /** Returns the mode list for a specific player based on their captured spirit. */
     private String[] getAbilityNamesForPlayer(UUID uuid) {
+        // On the client the server map is empty — use the synced ordinal instead
+        if (capturedSpirits.isEmpty() && clientSpiritTypeOrdinal >= 0) {
+            SpiritType[] values = SpiritType.values();
+            if (clientSpiritTypeOrdinal < values.length) {
+                return switch (values[clientSpiritTypeOrdinal]) {
+                    case FROST_GHOST -> FROST_MODES;
+                    case EARTH_SPIRIT -> EARTH_MODES;
+                };
+            }
+            return BASE_MODES;
+        }
         SpiritType type = capturedSpirits.get(uuid);
         if (type == null) return BASE_MODES;
         return switch (type) {
@@ -104,8 +120,7 @@ public class SpiritChannelingAbility extends SelectableAbility {
 
     @Override
     public String[] getAbilityNamesCopy() {
-        // Called from client HUD — cannot be per-player here, return base. HUD cycling handles it.
-        return BASE_MODES.clone();
+        return getAbilityNamesForPlayer(null);
     }
 
     @Override
@@ -207,6 +222,10 @@ public class SpiritChannelingAbility extends SelectableAbility {
         SpiritType type = random.nextBoolean() ? SpiritType.FROST_GHOST : SpiritType.EARTH_SPIRIT;
         capturedSpirits.put(entity.getUUID(), type);
 
+        if (entity instanceof net.minecraft.server.level.ServerPlayer sp) {
+            PacketHandler.sendToPlayer(sp, new SyncSpiritChannelingPacket(type.ordinal()));
+        }
+
         String nameKey = type == SpiritType.FROST_GHOST
                 ? "ability.lotmcraft.spirit_channeling.got_frost_ghost"
                 : "ability.lotmcraft.spirit_channeling.got_earth_spirit";
@@ -218,24 +237,16 @@ public class SpiritChannelingAbility extends SelectableAbility {
         // Reset selection so they don't land on a now-invalid index
         selectedAbilities.put(entity.getUUID(), 0);
 
+        if (entity instanceof net.minecraft.server.level.ServerPlayer sp) {
+            PacketHandler.sendToPlayer(sp, new SyncSpiritChannelingPacket(-1));
+        }
+
         if (type == null) {
             AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.spirit_channeling.no_captured").withColor(0xFF4444));
             return;
         }
 
-        EntityType<?> entityType = type == SpiritType.FROST_GHOST
-                ? ModEntities.SPIRIT_BLUE_WIZARD.get()
-                : ModEntities.SPIRIT_BANE.get();
-
-        Mob spawned = (Mob) entityType.create((ServerLevel) level);
-        if (spawned == null) return;
-
-        spawned.setPos(entity.getX() + 1.5, entity.getY(), entity.getZ() + 1.5);
-        level.addFreshEntity(spawned);
-        SubordinateUtils.turnEntityIntoSubordinate(spawned, entity);
-
-        AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.spirit_channeling.released",
-                spawned.getName()).withColor(0x44FF44));
+        AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.spirit_channeling.released").withColor(0x44FF44));
     }
 
     // -------------------------------------------------------------------------

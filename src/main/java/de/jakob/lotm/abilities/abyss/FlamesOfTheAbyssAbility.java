@@ -25,8 +25,8 @@ import java.util.Map;
 public class FlamesOfTheAbyssAbility extends SelectableAbility {
 
     public FlamesOfTheAbyssAbility(String id) {
-        this.canBeCopied = false;
         super(id, 10);
+        this.canBeCopied = false;
     }
 
     @Override
