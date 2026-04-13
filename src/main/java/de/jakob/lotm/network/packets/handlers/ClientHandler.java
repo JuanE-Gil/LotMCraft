@@ -516,4 +516,15 @@ public class ClientHandler {
         ClientSacrificeCache.setTotalTicks(totalTicks);
         ClientSacrificeCache.setRemainingTicks(totalTicks);
     }
+
+    public static void handleApotheosisPacket(SyncApotheosisPacket packet) {
+        ClientLevel level = Minecraft.getInstance().level;
+        if (level == null) return;
+
+        Entity entity = level.getEntity(packet.entityId());
+        if (entity instanceof LivingEntity living) {
+            living.getData(ModAttachments.APOTHEOSIS_COMPONENT).setApotheosisTicksLeft(packet.ticks());
+            living.getData(ModAttachments.APOTHEOSIS_COMPONENT).setPathway(packet.pathway());
+        }
+    }
 }

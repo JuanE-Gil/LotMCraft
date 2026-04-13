@@ -44,6 +44,12 @@ public class PacketHandler {
         );
 
         registrar.playToClient(
+                SyncApotheosisPacket.TYPE,
+                SyncApotheosisPacket.STREAM_CODEC,
+                SyncApotheosisPacket::handle
+        );
+
+        registrar.playToClient(
                 DisableAbilityUsageForTimePacket.TYPE,
                 DisableAbilityUsageForTimePacket.STREAM_CODEC,
                 DisableAbilityUsageForTimePacket::handle
