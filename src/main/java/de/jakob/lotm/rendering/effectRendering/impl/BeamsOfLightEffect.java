@@ -4,6 +4,8 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import de.jakob.lotm.rendering.effectRendering.ActiveEffect;
+import de.jakob.lotm.rendering.effectRendering.ActiveMovableEffect;
+import de.jakob.lotm.util.data.Location;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.util.Mth;
@@ -35,9 +37,9 @@ import org.joml.Vector3f;
  *       wherever they overlap.</li>
  * </ol>
  */
-public class BeamsOfLightEffect extends ActiveEffect {
+public class BeamsOfLightEffect extends ActiveMovableEffect {
 
-    private static final int LOOP_PERIOD = 80;
+    private static int LOOP_PERIOD = 120;
 
     // ─── Counts ───────────────────────────────────────────────────────────────
     /** White + purple beams — additive pass. */
@@ -70,9 +72,10 @@ public class BeamsOfLightEffect extends ActiveEffect {
 
     // ─────────────────────────────────────────────────────────────────────────
 
-    public BeamsOfLightEffect(double x, double y, double z) {
+    public BeamsOfLightEffect(Location location, int duration) {
         // Infinite duration — caller controls lifetime via cancel().
-        super(x, y, z, LOOP_PERIOD);
+        super(location, duration);
+        LOOP_PERIOD = duration;
         bakeBeams();
     }
 
@@ -142,7 +145,7 @@ public class BeamsOfLightEffect extends ActiveEffect {
         Vector3f camUp     = new Vector3f(0f, 1f, 0f).rotate(camRot);
 
         poseStack.pushPose();
-        poseStack.translate(x, y, z);
+        poseStack.translate(location.getPosition().x, location.getPosition().y, location.getPosition().z);
         Matrix4f m = poseStack.last().pose();
 
         RenderSystem.depthMask(false);

@@ -63,23 +63,23 @@
       "translation": [
         0,
         8,
-        2
+        4
       ]
     },
     "thirdperson_righthand": {
       "rotation": [
+        90,
         0,
-        -90,
         0
       ],
       "translation": [
         0,
-        8,
-        2
+        2,
+        4
       ]
     }
   },
   "textures": {
-    "layer0": "lotmcraft:item/red_priest_uniqueness"
+    "layer0": "lotmcraft:item/error_uniqueness"
   }
 }

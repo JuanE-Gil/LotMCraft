@@ -1,4 +1,4 @@
-// 1.21.1	2026-04-13T23:23:24.6239572	Item Models: lotmcraft
+// 1.21.1	2026-04-14T12:41:22.2927979	Item Models: lotmcraft
 f73b18465ecc4c7209da8e28508db3e3a9a348de assets/lotmcraft/models/item/abyss_demonic_fish_blood.json
 ff1f40acc559743c518a78f4d8d99df759005e37 assets/lotmcraft/models/item/agate_peacock_egg.json
 65b6c713526448dd94ab6c94da2487f1a4242daf assets/lotmcraft/models/item/ancient_logbook.json
@@ -75,6 +75,7 @@ e5dd6827988440365a8eed0425f3632ad574b408 assets/lotmcraft/models/item/crystalliz
 f7bb4edb69604598c7f5c12b9db8800f8da51079 assets/lotmcraft/models/item/crystal_ball.json
 5bed7e7bf1e2d8c330cc662b8b6e44fbc1f434bf assets/lotmcraft/models/item/crystal_sunflower.json
 9d6fcabb71ffc21a6b446966e86f297c90eb62a8 assets/lotmcraft/models/item/darkness_revival_ability.json
+4914eca55e08eb0b5f732f9829582340ed7a3bea assets/lotmcraft/models/item/darkness_uniqueness.json
 8bc61abe6fa1571e9e6b0bad8ccdb7d1374181ad assets/lotmcraft/models/item/deep_sleeper_skull.json
 a5851523c9f6e597c054270b142883e9a1c91a94 assets/lotmcraft/models/item/demon.json
 a5851523c9f6e597c054270b142883e9a1c91a94 assets/lotmcraft/models/item/demoness_of_affliction.json
@@ -112,6 +113,7 @@ bc6df0e8880ecf18ac66253837cb2a23bffe81df assets/lotmcraft/models/item/discerner_
 a5851523c9f6e597c054270b142883e9a1c91a94 assets/lotmcraft/models/item/doctor.json
 53bf2e073a7be41175c64d01457176d8d7687e67 assets/lotmcraft/models/item/doctor_characteristic.json
 2a92cf27f930c351873b3177c3f94b8726fa16a9 assets/lotmcraft/models/item/doctor_potion.json
+06c082348eaeaf313033e33d40c92a2f4431ccc2 assets/lotmcraft/models/item/door_uniqueness.json
 2f4f1eb56203f8705824beffda3c7d29fcc3d3cf assets/lotmcraft/models/item/dragon_eyed_condor_eyeball.json
 a5851523c9f6e597c054270b142883e9a1c91a94 assets/lotmcraft/models/item/dreamwalker.json
 f74d4a7abdd11f6c6c7aefcefe7b2af27a0e0566 assets/lotmcraft/models/item/dreamwalker_characteristic.json
@@ -128,6 +130,7 @@ a5851523c9f6e597c054270b142883e9a1c91a94 assets/lotmcraft/models/item/druid.json
 53bf2e073a7be41175c64d01457176d8d7687e67 assets/lotmcraft/models/item/druid_characteristic.json
 335e37f89352a7664fa95cd93caf312ca8150d52 assets/lotmcraft/models/item/druid_potion.json
 b48664f6747f681c6ac1705854a61ddfaa968b02 assets/lotmcraft/models/item/empty_bottle.json
+c03cde0a13839fe65f8904c16a2ad26b57f9b847 assets/lotmcraft/models/item/error_uniqueness.json
 7043e58c3277a488cd3abbd02f63231812bc9971 assets/lotmcraft/models/item/excavated_area.json
 a5851523c9f6e597c054270b142883e9a1c91a94 assets/lotmcraft/models/item/faceless.json
 f5f82cd2d74d4f90d50a94802a8b7ebfbb039142 assets/lotmcraft/models/item/faceless_characteristic.json
@@ -143,6 +146,7 @@ a5851523c9f6e597c054270b142883e9a1c91a94 assets/lotmcraft/models/item/folk_of_ra
 bc079732c1039919d5215e7ecd82da8fe0d557ac assets/lotmcraft/models/item/folk_of_rage_characteristic.json
 cd31a2ff8f5df6704d22cd1d35aca7522db5610c assets/lotmcraft/models/item/folk_of_rage_potion.json
 cd79fc5e60945eafffb8c09e443d2b816d106570 assets/lotmcraft/models/item/fool_card.json
+d24d9a1c9a51174b8741200d7f2f3fd07630ff03 assets/lotmcraft/models/item/fool_uniqueness.json
 6148244133fc734e585cc01fe7d729baa49b80bc assets/lotmcraft/models/item/goat_horned_blackfish_blood.json
 ba973641ef5550da2597873305b02717284e8659 assets/lotmcraft/models/item/golden_blood.json
 f07135695348ab8e47f302514f4c413be2656cb1 assets/lotmcraft/models/item/golden_phoenix_eyes.json
@@ -297,7 +301,7 @@ a5851523c9f6e597c054270b142883e9a1c91a94 assets/lotmcraft/models/item/reaper.jso
 a704ca7b9163942be958fe4b8493c101ebd5e5fe assets/lotmcraft/models/item/reaper_potion.json
 f87acda52ddb81dc800bf18d4a35b4e309bcd885 assets/lotmcraft/models/item/redcrown_balsam_powder.json
 22bcac033250485b8ccd65314821997edffcc4fe assets/lotmcraft/models/item/red_chestnut_flower.json
-68637af894a4409fd7b9cb3542ca712e8eac7431 assets/lotmcraft/models/item/red_priest_uniqueness.json
+9c2981030d65ddf4faea3f734e6a2cdcbdd857e2 assets/lotmcraft/models/item/red_priest_uniqueness.json
 7c911e8ed81a9fe625956c25fa247bcec96c49a8 assets/lotmcraft/models/item/riptide_ability.json
 a5851523c9f6e597c054270b142883e9a1c91a94 assets/lotmcraft/models/item/robot.json
 74fed5f94dff2e1561ee7ffea83413071be10ab6 assets/lotmcraft/models/item/robot_characteristic.json
@@ -368,6 +372,7 @@ dfe01c91dea4f4857afed973d309c798da878c2f assets/lotmcraft/models/item/subordinat
 47500e8e101d09d23113f2683603ff979e913e47 assets/lotmcraft/models/item/succubus_eyes.json
 3d6381764d93ecb2d196b84f014949b3398ae0bd assets/lotmcraft/models/item/sun.json
 0741a3620cec71f31b0214b352136e0634568106 assets/lotmcraft/models/item/sun_orb.json
+ab47acef3ff710a12ebdfd21939fb8cdd539c2ea assets/lotmcraft/models/item/sun_uniqueness.json
 a5851523c9f6e597c054270b142883e9a1c91a94 assets/lotmcraft/models/item/swindler.json
 1867d61d6de2ed7a8b3fdfa7aa0019498e70b218 assets/lotmcraft/models/item/swindler_characteristic.json
 4e119cec344bab6b92712ce3221fed3d52a71cbb assets/lotmcraft/models/item/swindler_potion.json
@@ -389,6 +394,7 @@ a5851523c9f6e597c054270b142883e9a1c91a94 assets/lotmcraft/models/item/trojan_hor
 75ea1730f6f6ceb24ed30acd2a47d2514601335e assets/lotmcraft/models/item/trojan_horse_of_destiny_characteristic.json
 4d609ca0183136b73081ccbf40246672e1aa9ee1 assets/lotmcraft/models/item/trojan_horse_of_destiny_potion.json
 c0f93b03bc3b6cdbbd12076852f083d229f29c92 assets/lotmcraft/models/item/true_root_of_mist_treant.json
+3a7678ff4789a5d52f2ce489a48938439c0ae376 assets/lotmcraft/models/item/tyrant_uniqueness.json
 a5851523c9f6e597c054270b142883e9a1c91a94 assets/lotmcraft/models/item/unshadowed.json
 99cff99f102c193420828c35a0e5ec906cc5fbc3 assets/lotmcraft/models/item/unshadowed_characteristic.json
 7ccce73dc8adb99f9b4c611fa6c78aa3e1b15c6f assets/lotmcraft/models/item/unshadowed_potion.json
@@ -396,6 +402,7 @@ a5851523c9f6e597c054270b142883e9a1c91a94 assets/lotmcraft/models/item/unwinged_a
 ff9f27fdd18fe144d00221800523dbf8cef49722 assets/lotmcraft/models/item/unwinged_angel_characteristic.json
 e666510632c1525aa90b0b935dd1534f054e0872 assets/lotmcraft/models/item/unwinged_angel_potion.json
 d4a2bb24f9f2c8f3036318e88ca91241482fe278 assets/lotmcraft/models/item/virtual_avatar_ability.json
+66b679de26f5ab42f9ae0e8a132a229ac0e68e8a assets/lotmcraft/models/item/visionary_uniqueness.json
 84debc220c429a5e41a15d6959fc219f3e348191 assets/lotmcraft/models/item/void_immunity_ability.json
 a5851523c9f6e597c054270b142883e9a1c91a94 assets/lotmcraft/models/item/wanderer.json
 b781850caac670924619db09ac575a21d0b70d39 assets/lotmcraft/models/item/wanderer_characteristic.json
@@ -408,6 +415,7 @@ a5851523c9f6e597c054270b142883e9a1c91a94 assets/lotmcraft/models/item/weather_wa
 4709f35145c0fd5bd82d2087eced1cef575706da assets/lotmcraft/models/item/weather_warlock_characteristic.json
 8a9946993ca70fd5916e42a5aa2b79cbe4709902 assets/lotmcraft/models/item/weather_warlock_potion.json
 b11e45a0af334b9d5ba95766153ff18301c94e7e assets/lotmcraft/models/item/whale_of_punishment_stomach.json
+1e33291dfd764824b42261b3ed9273e7b5b5f27b assets/lotmcraft/models/item/wheel_of_fortune_uniqueness.json
 a5851523c9f6e597c054270b142883e9a1c91a94 assets/lotmcraft/models/item/white_angel.json
 99cff99f102c193420828c35a0e5ec906cc5fbc3 assets/lotmcraft/models/item/white_angel_characteristic.json
 ec2333a8e843044063a7962d155d966c8bb94b0c assets/lotmcraft/models/item/white_angel_potion.json

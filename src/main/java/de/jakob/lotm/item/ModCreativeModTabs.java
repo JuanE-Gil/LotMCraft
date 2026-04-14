@@ -33,13 +33,33 @@ public class ModCreativeModTabs {
                         output.accept(ModBlocks.BREWING_CAULDRON.get());
                         output.accept(ModBlocks.VOID);
                         output.accept(ModBlocks.SOLID_VOID);
+                    })
+                    .build());
+
+    public static final Supplier<CreativeModeTab> UNIQUENESSES_TAB = CREATIVE_MODE_TABS.register("uniquenesses_tab",
+            () -> CreativeModeTab.builder().icon(() -> new ItemStack(ModItems.FOOL_UNIQUENESS.get()))
+                    .withTabsBefore(ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "lotm_tab"))
+                    .title(Component.translatable("creativetab.lotmcraft.uniquenesses_tab"))
+                    .displayItems((parameters, output) -> {
+                        output.accept(ModItems.FOOL_UNIQUENESS);
+                        output.accept(ModItems.ERROR_UNIQUENESS);
+                        output.accept(ModItems.DOOR_UNIQUENESS);
+
+                        output.accept(ModItems.SUN_UNIQUENESS);
+                        output.accept(ModItems.TYRANT_UNIQUENESS);
+                        output.accept(ModItems.VISIONARY_UNIQUENESS);
+
                         output.accept(ModItems.RED_PRIEST_UNIQUENESS);
+
+                        output.accept(ModItems.DARKNESS_UNIQUENESS);
+
+                        output.accept(ModItems.WHEEL_OF_FORTUNE_UNIQUENESS);
                     })
                     .build());
 
     public static final Supplier<CreativeModeTab> PASSIVE_ABILITIES_TAB = CREATIVE_MODE_TABS.register("passive_abilities_tab",
             () -> CreativeModeTab.builder().icon(() -> new ItemStack(PassiveAbilityHandler.PHYSICAL_ENHANCEMENTS_RED_PRIEST.get()))
-                    .withTabsBefore(ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "lotm_tab"))
+                    .withTabsBefore(ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "uniquenesses_tab"))
                     .title(Component.translatable("creativetab.lotmcraft.passive_abilities_tab"))
                     .displayItems((parameters, output) -> {
                         PassiveAbilityHandler.ITEMS.getEntries().forEach(itemHolder -> {

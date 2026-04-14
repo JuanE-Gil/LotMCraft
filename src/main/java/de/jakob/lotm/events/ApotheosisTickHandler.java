@@ -6,7 +6,10 @@ import de.jakob.lotm.attachments.DisabledAbilitiesComponent;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.network.packets.handlers.ClientHandler;
 import de.jakob.lotm.rendering.effectRendering.EffectManager;
+import de.jakob.lotm.rendering.effectRendering.MovableEffectManager;
 import de.jakob.lotm.util.BeyonderData;
+import de.jakob.lotm.util.data.EntityLocation;
+import de.jakob.lotm.util.data.Location;
 import de.jakob.lotm.util.helper.ParticleUtil;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.particles.DustParticleOptions;
@@ -50,8 +53,8 @@ public class ApotheosisTickHandler {
         Vec3 currentCenter = player.position().add(0, player.getBbHeight() / 2, 0);
         ParticleUtil.spawnSphereParticles((ServerLevel) player.level(), dustParticle, currentCenter, 1.5, 60);
 
-        if(component.getApotheosisTicksLeft() % (80) == 0) {
-            EffectManager.playEffect(EffectManager.Effect.BEAMS_OF_LIGHT, currentCenter.x, currentCenter.y + .25, currentCenter.z, (ServerLevel) player.level(), player);
+        if(component.getApotheosisTicksLeft() % (120) == 0) {
+            MovableEffectManager.playEffect(MovableEffectManager.MovableEffect.BEAMS_OF_LIGHT, new EntityLocation(player), 120, false, (ServerLevel) player.level(), player);
         }
 
         component.setApotheosisTicksLeftAndSync(component.getApotheosisTicksLeft() - 1, (ServerLevel) player.level(), player);

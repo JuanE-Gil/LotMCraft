@@ -35,7 +35,15 @@ public class ModItemModelProvider extends ItemModelProvider {
         basicItem(ModItems.CRYSTAL_BALL.get());
         basicItem(ModItems.CANE.get());
 
-        verticalRodItem(ModItems.RED_PRIEST_UNIQUENESS.get());
+        redPriestUniqueness(ModItems.RED_PRIEST_UNIQUENESS.get());
+        foolUniqueness(ModItems.FOOL_UNIQUENESS.get());
+        redPriestUniqueness(ModItems.TYRANT_UNIQUENESS.get());
+        redPriestUniqueness(ModItems.SUN_UNIQUENESS.get());
+        foolUniqueness(ModItems.ERROR_UNIQUENESS.get());
+        darknessUniqueness(ModItems.DARKNESS_UNIQUENESS.get());
+        foolUniqueness(ModItems.DOOR_UNIQUENESS.get());
+        redPriestUniqueness(ModItems.VISIONARY_UNIQUENESS.get());
+        redPriestUniqueness(ModItems.WHEEL_OF_FORTUNE_UNIQUENESS.get());
 
         tintableItem(ModItems.SEALED_ARTIFACT.get());
         tintableItem(ModItems.SEALED_ARTIFACT_BELL.get());
@@ -111,7 +119,7 @@ public class ModItemModelProvider extends ItemModelProvider {
                 .end();
     }
 
-    private void verticalRodItem(Item item) {
+    private void redPriestUniqueness(Item item) {
         String itemName = getItemName(item);
         getBuilder(itemName)
                 .parent(getExistingFile(mcLoc("item/generated")))
@@ -140,7 +148,89 @@ public class ModItemModelProvider extends ItemModelProvider {
                 .transform(ItemDisplayContext.GUI)
                 .rotation(0, 0, 0)
                 .translation(0, 0, 0)
-                .scale(1.5f, 1.5f, 1.5f)
+                .scale(1.25f, 1.25f, 1.25f)
+                .end()
+                .transform(ItemDisplayContext.GROUND)
+                .translation(0, 5, 0)
+                .scale(2.5f, 2.5f, 2.5f)
+                .end()
+                .transform(ItemDisplayContext.FIXED)
+                .scale(1, 1, 1)
+                .end()
+                .end();
+    }
+
+    private void darknessUniqueness(Item item) {
+        String itemName = getItemName(item);
+        getBuilder(itemName)
+                .parent(getExistingFile(mcLoc("item/generated")))
+                .texture("layer0", modLoc("item/" + itemName))
+                .transforms()
+                .transform(ItemDisplayContext.THIRD_PERSON_RIGHT_HAND)
+                .rotation(0, -270, 0)
+                .translation(0, 8, 1)
+                .scale(1f, 1f, 1f)
+                .end()
+                .transform(ItemDisplayContext.THIRD_PERSON_LEFT_HAND)
+                .rotation(0, 90, 0)
+                .translation(0, 8, 4)
+                .scale(1f, 1f, 1f)
+                .end()
+                .transform(ItemDisplayContext.FIRST_PERSON_RIGHT_HAND)
+                .rotation(0, -90, 0)
+                .translation(1.13f, 4f, 1.13f)
+                .scale(0.68f, 0.68f, 0.68f)
+                .end()
+                .transform(ItemDisplayContext.FIRST_PERSON_LEFT_HAND)
+                .rotation(0, 90, 0)
+                .translation(1.13f, 4f, 1.13f)
+                .scale(0.68f, 0.68f, 0.68f)
+                .end()
+                .transform(ItemDisplayContext.GUI)
+                .rotation(0, 0, 0)
+                .translation(0, 0, 0)
+                .scale(1.25f, 1.25f, 1.25f)
+                .end()
+                .transform(ItemDisplayContext.GROUND)
+                .translation(0, 5, 0)
+                .scale(2.5f, 2.5f, 2.5f)
+                .end()
+                .transform(ItemDisplayContext.FIXED)
+                .scale(1, 1, 1)
+                .end()
+                .end();
+    }
+
+    private void foolUniqueness(Item item) {
+        String itemName = getItemName(item);
+        getBuilder(itemName)
+                .parent(getExistingFile(mcLoc("item/generated")))
+                .texture("layer0", modLoc("item/" + itemName))
+                .transforms()
+                .transform(ItemDisplayContext.THIRD_PERSON_RIGHT_HAND)
+                .rotation(90, 0, 0)
+                .translation(0, 2, 4)
+                .scale(1f, 1f, 1f)
+                .end()
+                .transform(ItemDisplayContext.THIRD_PERSON_LEFT_HAND)
+                .rotation(0, 90, 0)
+                .translation(0, 8, 4)
+                .scale(1f, 1f, 1f)
+                .end()
+                .transform(ItemDisplayContext.FIRST_PERSON_RIGHT_HAND)
+                .rotation(0, -90, 0)
+                .translation(1.13f, 4f, 1.13f)
+                .scale(0.68f, 0.68f, 0.68f)
+                .end()
+                .transform(ItemDisplayContext.FIRST_PERSON_LEFT_HAND)
+                .rotation(0, 90, 0)
+                .translation(1.13f, 4f, 1.13f)
+                .scale(0.68f, 0.68f, 0.68f)
+                .end()
+                .transform(ItemDisplayContext.GUI)
+                .rotation(0, 0, 0)
+                .translation(0, 0, 0)
+                .scale(1.25f, 1.25f, 1.25f)
                 .end()
                 .transform(ItemDisplayContext.GROUND)
                 .translation(0, 5, 0)

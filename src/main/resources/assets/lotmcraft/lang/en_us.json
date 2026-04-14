@@ -13,6 +13,7 @@
 
 
   "creativetab.lotmcraft.lotm_tab": "Lord of the Mysteries",
+  "creativetab.lotmcraft.uniquenesses_tab": "Uniquenesses",
   "creativetab.lotmcraft.abilities_tab": "Beyonder Abilities",
   "creativetab.lotmcraft.passive_abilities_tab": "Passive Beyonder Abilities",
   "creativetab.lotmcraft.beyonder_potions_tab": "Beyonder Potions",
@@ -1419,6 +1420,14 @@
 
   "_comment015": "Uniquenesses-------------------------------------------------------------------------",
   "item.lotmcraft.red_priest_uniqueness": "Salinger's Blood Banner",
+  "item.lotmcraft.door_uniqueness": "Crystal Eyeballs",
+  "item.lotmcraft.fool_uniqueness": "The Fool's Mask",
+  "item.lotmcraft.error_uniqueness": "Crystal Monocle",
+  "item.lotmcraft.tyrant_uniqueness": "Tyrant Uniqueness",
+  "item.lotmcraft.sun_uniqueness": "Sun Uniqueness",
+  "item.lotmcraft.darkness_uniqueness": "Darkness Uniqueness",
+  "item.lotmcraft.wheel_of_fortune_uniqueness": "Dice of Probability",
+  "item.lotmcraft.visionary_uniqueness": "Visionary Uniqueness",
   "lotm.uniqueness.fail": "You are not fit to advancing using this uniqueness",
   "lotm.uniqueness.start": " has started his Apotheosis",
   "lotm.uniqueness.overworld": "You can only ascend in the overworld",
