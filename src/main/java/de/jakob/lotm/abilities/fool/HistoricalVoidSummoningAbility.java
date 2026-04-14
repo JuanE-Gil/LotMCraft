@@ -50,6 +50,7 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.item.ItemTossEvent;
+import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
@@ -242,51 +243,6 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
         }
     }
 
-    @SubscribeEvent
-    public static void onItemTickInPlayerInventory(PlayerTickEvent.Post event) {
-        // method to check every xx mins for summoned items and remove them
-        Player player = event.getEntity();
-        Level level = player.level();
-
-        // run every 30s
-        if (player.tickCount % 600 != 0) return;
-        if (level.isClientSide || !(level instanceof ServerLevel serverLevel) || !(player instanceof ServerPlayer serverPlayer)) return;
-
-        // decrease the borrow count and return back to original state
-        HistoricalVoidComponent data = serverPlayer.getData(ModAttachments.HISTORICAL_VOID_COMPONENT.get());
-        for (HistoricalVoidComponent.SummonInfo info : data.activeSummonTimes.values()) {
-            if (info.type() == SummonType.HEALTH ||
-                    info.type() == SummonType.SPIRITUALITY ||
-                    info.type() == SummonType.CLEANSED_STATE) {
-
-                if (serverLevel.getGameTime() > info.summonTime()) {
-                    decrementHistoricalBorrowingCount(serverPlayer, info.summonTime());
-                }
-            }
-        }
-
-
-        for (int i = 0; i < serverPlayer.getInventory().getContainerSize(); i++) {
-            ItemStack stack = serverPlayer.getInventory().getItem(i);
-
-            if (!stack.isEmpty()) {
-                CustomData customData = stack.get(DataComponents.CUSTOM_DATA);
-                if(customData != null) {
-                    CompoundTag tag = customData.copyTag();
-                    if (tag.contains("VoidSummonTime") && tag.contains("VoidSummonOwner")) {
-                        if (tag.getLong("VoidSummonTime") < serverLevel.getGameTime()) {
-                            player.getInventory().removeItem(i, stack.getCount());
-                            decrementSummonedCount(serverPlayer, tag.getLong("VoidSummonTime"));
-                            if(player.isAlive()) {
-                                player.sendSystemMessage(Component.translatable("ability.lotmcraft.historical_void_summoning.item_returned").withStyle(ChatFormatting.GRAY));
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     private boolean hasPlacedBlocksForSummon(UUID playerUUID, long summonTime) {
         return placedBlocks.values().stream()
                 .anyMatch(data -> data.playerUUID.equals(playerUUID) && data.summonTime == summonTime);
@@ -306,138 +262,6 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
         toRemove.forEach(placedBlocks::remove);
     }
 
-    // Event handler for block placement
-    @SubscribeEvent
-    public static void onBlockPlace(BlockEvent.EntityPlaceEvent event) {
-        if(!(event.getEntity() instanceof ServerPlayer player)) return;
-
-        ItemStack heldItem = player.getMainHandItem();
-
-        if(heldItem.isEmpty()) {
-            heldItem = player.getOffhandItem();
-        }
-
-        if(!heldItem.isEmpty()) {
-            CustomData customData = heldItem.get(DataComponents.CUSTOM_DATA);
-            if(customData != null) {
-                CompoundTag tag = customData.copyTag();
-                if(tag.contains("VoidSummonTime") && tag.contains("VoidSummonOwner")) {
-                    long summonTime = tag.getLong("VoidSummonTime");
-                    UUID ownerId = tag.getUUID("VoidSummonOwner");
-
-                    // Track this placed block
-                    placedBlocks.put(event.getPos(), new PlacedBlockData(summonTime, ownerId));
-                }
-            }
-        }
-    }
-
-    // Event handler for block breaking
-    @SubscribeEvent
-    public static void onBlockBreak(BlockEvent.BreakEvent event) {
-        BlockPos pos = event.getPos();
-
-        if(placedBlocks.containsKey(pos)) {
-            // Remove drops from void-summoned blocks
-            event.setCanceled(true);
-            // Manually remove the block without drops
-            if(event.getLevel() instanceof ServerLevel serverLevel) {
-                serverLevel.removeBlock(pos, false);
-            }
-            placedBlocks.remove(pos);
-        }
-    }
-
-    // Event handler for item toss
-    @SubscribeEvent
-    public static void onItemToss(ItemTossEvent event) {
-        ItemStack tossedItem = event.getEntity().getItem();
-
-        CustomData customData = tossedItem.get(DataComponents.CUSTOM_DATA);
-        if(customData != null) {
-            CompoundTag tag = customData.copyTag();
-            if(tag.contains("VoidSummonTime") && tag.contains("VoidSummonOwner")) {
-                // This is a summoned item being tossed - make it disappear
-                // only make it disappear if the player is crouching, good qol to force items to disappear
-                if (event.getPlayer().isCrouching()) {
-                    long summonTime = tag.getLong("VoidSummonTime");
-                    UUID ownerId = tag.getUUID("VoidSummonOwner");
-
-                    event.getEntity().discard();
-                    event.setCanceled(true);
-
-                    // Notify player and decrement count
-                    if(event.getPlayer() instanceof ServerPlayer player && player.getUUID().equals(ownerId)) {
-                        decrementSummonedCount(player, summonTime);
-                        player.sendSystemMessage(Component.translatable("ability.lotmcraft.historical_void_summoning.item_returned").withStyle(ChatFormatting.GRAY));
-                    }
-                }
-            }
-        }
-    }
-
-    // Event handler for player logout - cleanup all summoned items/entities
-    @SubscribeEvent
-    public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
-        if(!(event.getEntity() instanceof ServerPlayer player)) return;
-
-        UUID playerUUID = player.getUUID();
-        ServerLevel level = (ServerLevel) player.level();
-
-        // Remove all summoned items from inventory
-        for(int i = 0; i < player.getInventory().getContainerSize(); i++) {
-            ItemStack stack = player.getInventory().getItem(i);
-            if(!stack.isEmpty()) {
-                CustomData customData = stack.get(DataComponents.CUSTOM_DATA);
-                if(customData != null) {
-                    CompoundTag tag = customData.copyTag();
-                    if(tag.contains("VoidSummonOwner") && tag.getUUID("VoidSummonOwner").equals(playerUUID)) {
-                        player.getInventory().removeItem(i, stack.getCount());
-                    }
-                }
-            }
-        }
-
-        // Remove all summoned entities
-        HistoricalVoidComponent data = player.getData(ModAttachments.HISTORICAL_VOID_COMPONENT.get());
-        for(HistoricalVoidComponent.SummonInfo info : data.activeSummonTimes.values()) {
-            if(info.type() == SummonType.ENTITY && info.entityUUID() != null) {
-                if (info.summonTime() < player.serverLevel().getGameTime()) {
-                    Entity entity = level.getEntity(info.entityUUID());
-                    if(entity != null && entity.getPersistentData().getBoolean("VoidSummoned")) {
-                        entity.remove(Entity.RemovalReason.DISCARDED);
-                    }
-                    decrementSummonedCount(player, info.summonTime());
-                }
-
-            }
-        }
-
-        // Remove all placed blocks by this player
-        List<BlockPos> blocksToRemove = new ArrayList<>();
-        for(Map.Entry<BlockPos, PlacedBlockData> entry : placedBlocks.entrySet()) {
-            if(entry.getValue().playerUUID.equals(playerUUID)) {
-                level.removeBlock(entry.getKey(), false);
-                blocksToRemove.add(entry.getKey());
-            }
-        }
-        blocksToRemove.forEach(placedBlocks::remove);
-    }
-
-//    // Periodic cleanup of invalid entities/items
-//    @SubscribeEvent
-//    public static void onServerTick(ServerTickEvent.Post event) {
-//        // Only run every 20 ticks (1 second)
-//        if(event.getServer().getTickCount() % 20 != 0) return;
-//
-//        // Clean up activeSummons for offline players
-//        Set<UUID> onlinePlayers = new HashSet<>();
-//        for(ServerPlayer player : event.getServer().getPlayerList().getPlayers()) {
-//            onlinePlayers.add(player.getUUID());
-//        }
-//
-//        activeSummons.keySet().removeIf(uuid -> !onlinePlayers.contains(uuid));
-//    }
 
     private void summonEntity(ServerLevel level, ServerPlayer player) {
         int currentSummoned = getSummonedCount(player);
@@ -735,25 +559,6 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
         }
     }
 
-    @SubscribeEvent
-    public static void onSummonedEntityTick(EntityTickEvent.Post event) {
-        // method to check every xx mins for summoned entities and remove them
-        Entity entity = event.getEntity();
-        Level level = entity.level();
-
-        // run every minute
-        if (entity.tickCount % 1200 != 0) return;
-        if (level.isClientSide || !(level instanceof ServerLevel serverLevel)) return;
-
-        if(entity.getPersistentData().getBoolean("VoidSummoned")) {
-            if (entity.getPersistentData().getLong("VoidSummonTime") < serverLevel.getGameTime()) {
-                entity.remove(Entity.RemovalReason.DISCARDED);
-            }
-            if (serverLevel.getPlayerByUUID(entity.getPersistentData().getUUID("VoidSummonOwner")) instanceof ServerPlayer serverPlayer) {
-                decrementSummonedCount(serverPlayer, entity.getPersistentData().getLong("VoidSummonTime"));
-            }
-        }
-    }
 
     private void markItems(ServerLevel level, ServerPlayer player) {
         // Open the player's ender chest for them to add items
@@ -1022,6 +827,217 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
             component.enableAllAbilities();
         }
     }
+
+    @SubscribeEvent
+    public static void onTooltip(ItemTooltipEvent event) {
+        ItemStack stack = event.getItemStack();
+        Player player = event.getEntity();
+        CustomData Data = stack.get(DataComponents.CUSTOM_DATA);
+        if (BeyonderData.getSequence(player) <= 2 || (BeyonderData.getSequence(player) <= 3 && BeyonderData.getPathway(player).equals("fool"))) {
+            if (Data != null && Data.contains("VoidSummonTime")) {
+                event.getToolTip().add(Component.literal("§7[Void Summoned]§r").withStyle(ChatFormatting.GRAY));
+            }
+        }
+
+    }
+
+    @SubscribeEvent
+    public static void onItemTickInPlayerInventory(PlayerTickEvent.Post event) {
+        // method to check every xx mins for summoned items and remove them
+        Player player = event.getEntity();
+        Level level = player.level();
+
+        // run every 30s
+        if (player.tickCount % 600 != 0) return;
+        if (level.isClientSide || !(level instanceof ServerLevel serverLevel) || !(player instanceof ServerPlayer serverPlayer)) return;
+
+        // decrease the borrow count and return back to original state
+        HistoricalVoidComponent data = serverPlayer.getData(ModAttachments.HISTORICAL_VOID_COMPONENT.get());
+        for (HistoricalVoidComponent.SummonInfo info : data.activeSummonTimes.values()) {
+            if (info.type() == SummonType.HEALTH ||
+                    info.type() == SummonType.SPIRITUALITY ||
+                    info.type() == SummonType.CLEANSED_STATE) {
+
+                if (serverLevel.getGameTime() > info.summonTime()) {
+                    decrementHistoricalBorrowingCount(serverPlayer, info.summonTime());
+                }
+            }
+        }
+
+
+        for (int i = 0; i < serverPlayer.getInventory().getContainerSize(); i++) {
+            ItemStack stack = serverPlayer.getInventory().getItem(i);
+
+            if (!stack.isEmpty()) {
+                CustomData customData = stack.get(DataComponents.CUSTOM_DATA);
+                if(customData != null) {
+                    CompoundTag tag = customData.copyTag();
+                    if (tag.contains("VoidSummonTime") && tag.contains("VoidSummonOwner")) {
+                        if (tag.getLong("VoidSummonTime") < serverLevel.getGameTime()) {
+                            player.getInventory().removeItem(i, stack.getCount());
+                            decrementSummonedCount(serverPlayer, tag.getLong("VoidSummonTime"));
+                            if(player.isAlive()) {
+                                player.sendSystemMessage(Component.translatable("ability.lotmcraft.historical_void_summoning.item_returned").withStyle(ChatFormatting.GRAY));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onSummonedEntityTick(EntityTickEvent.Post event) {
+        // method to check every xx mins for summoned entities and remove them
+        Entity entity = event.getEntity();
+        Level level = entity.level();
+
+        // run every minute
+        if (entity.tickCount % 1200 != 0) return;
+        if (level.isClientSide || !(level instanceof ServerLevel serverLevel)) return;
+
+        if(entity.getPersistentData().getBoolean("VoidSummoned")) {
+            if (entity.getPersistentData().getLong("VoidSummonTime") < serverLevel.getGameTime()) {
+                entity.remove(Entity.RemovalReason.DISCARDED);
+            }
+            if (serverLevel.getPlayerByUUID(entity.getPersistentData().getUUID("VoidSummonOwner")) instanceof ServerPlayer serverPlayer) {
+                decrementSummonedCount(serverPlayer, entity.getPersistentData().getLong("VoidSummonTime"));
+            }
+        }
+    }
+
+    // Event handler for block placement
+    @SubscribeEvent
+    public static void onBlockPlace(BlockEvent.EntityPlaceEvent event) {
+        if(!(event.getEntity() instanceof ServerPlayer player)) return;
+
+        ItemStack heldItem = player.getMainHandItem();
+
+        if(heldItem.isEmpty()) {
+            heldItem = player.getOffhandItem();
+        }
+
+        if(!heldItem.isEmpty()) {
+            CustomData customData = heldItem.get(DataComponents.CUSTOM_DATA);
+            if(customData != null) {
+                CompoundTag tag = customData.copyTag();
+                if(tag.contains("VoidSummonTime") && tag.contains("VoidSummonOwner")) {
+                    long summonTime = tag.getLong("VoidSummonTime");
+                    UUID ownerId = tag.getUUID("VoidSummonOwner");
+
+                    // Track this placed block
+                    placedBlocks.put(event.getPos(), new PlacedBlockData(summonTime, ownerId));
+                }
+            }
+        }
+    }
+
+    // Event handler for block breaking
+    @SubscribeEvent
+    public static void onBlockBreak(BlockEvent.BreakEvent event) {
+        BlockPos pos = event.getPos();
+
+        if(placedBlocks.containsKey(pos)) {
+            // Remove drops from void-summoned blocks
+            event.setCanceled(true);
+            // Manually remove the block without drops
+            if(event.getLevel() instanceof ServerLevel serverLevel) {
+                serverLevel.removeBlock(pos, false);
+            }
+            placedBlocks.remove(pos);
+        }
+    }
+
+    // Event handler for item toss
+    @SubscribeEvent
+    public static void onItemToss(ItemTossEvent event) {
+        ItemStack tossedItem = event.getEntity().getItem();
+
+        CustomData customData = tossedItem.get(DataComponents.CUSTOM_DATA);
+        if(customData != null) {
+            CompoundTag tag = customData.copyTag();
+            if(tag.contains("VoidSummonTime") && tag.contains("VoidSummonOwner")) {
+                // This is a summoned item being tossed - make it disappear
+                // only make it disappear if the player is crouching, good qol to force items to disappear
+                if (event.getPlayer().isCrouching()) {
+                    long summonTime = tag.getLong("VoidSummonTime");
+                    UUID ownerId = tag.getUUID("VoidSummonOwner");
+
+                    event.getEntity().discard();
+                    event.setCanceled(true);
+
+                    // Notify player and decrement count
+                    if(event.getPlayer() instanceof ServerPlayer player && player.getUUID().equals(ownerId)) {
+                        decrementSummonedCount(player, summonTime);
+                        player.sendSystemMessage(Component.translatable("ability.lotmcraft.historical_void_summoning.item_returned").withStyle(ChatFormatting.GRAY));
+                    }
+                }
+            }
+        }
+    }
+
+    // Event handler for player logout - cleanup all summoned items/entities
+    @SubscribeEvent
+    public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
+        if(!(event.getEntity() instanceof ServerPlayer player)) return;
+
+        UUID playerUUID = player.getUUID();
+        ServerLevel level = (ServerLevel) player.level();
+
+        // Remove all summoned items from inventory
+        for(int i = 0; i < player.getInventory().getContainerSize(); i++) {
+            ItemStack stack = player.getInventory().getItem(i);
+            if(!stack.isEmpty()) {
+                CustomData customData = stack.get(DataComponents.CUSTOM_DATA);
+                if(customData != null) {
+                    CompoundTag tag = customData.copyTag();
+                    if(tag.contains("VoidSummonOwner") && tag.getUUID("VoidSummonOwner").equals(playerUUID)) {
+                        player.getInventory().removeItem(i, stack.getCount());
+                    }
+                }
+            }
+        }
+
+        // Remove all summoned entities
+        HistoricalVoidComponent data = player.getData(ModAttachments.HISTORICAL_VOID_COMPONENT.get());
+        for(HistoricalVoidComponent.SummonInfo info : data.activeSummonTimes.values()) {
+            if(info.type() == SummonType.ENTITY && info.entityUUID() != null) {
+                if (info.summonTime() < player.serverLevel().getGameTime()) {
+                    Entity entity = level.getEntity(info.entityUUID());
+                    if(entity != null && entity.getPersistentData().getBoolean("VoidSummoned")) {
+                        entity.remove(Entity.RemovalReason.DISCARDED);
+                    }
+                    decrementSummonedCount(player, info.summonTime());
+                }
+
+            }
+        }
+
+        // Remove all placed blocks by this player
+        List<BlockPos> blocksToRemove = new ArrayList<>();
+        for(Map.Entry<BlockPos, PlacedBlockData> entry : placedBlocks.entrySet()) {
+            if(entry.getValue().playerUUID.equals(playerUUID)) {
+                level.removeBlock(entry.getKey(), false);
+                blocksToRemove.add(entry.getKey());
+            }
+        }
+        blocksToRemove.forEach(placedBlocks::remove);
+    }
+
+//    // Periodic cleanup of invalid entities/items
+//    @SubscribeEvent
+//    public static void onServerTick(ServerTickEvent.Post event) {
+//        // Only run every 20 ticks (1 second)
+//        if(event.getServer().getTickCount() % 20 != 0) return;
+//
+//        // Clean up activeSummons for offline players
+//        Set<UUID> onlinePlayers = new HashSet<>();
+//        for(ServerPlayer player : event.getServer().getPlayerList().getPlayers()) {
+//            onlinePlayers.add(player.getUUID());
+//        }
+//
+//        activeSummons.keySet().removeIf(uuid -> !onlinePlayers.contains(uuid));
+//    }
 
     // scale max summoned items
     private static int getMaxSummoned(ServerPlayer serverPlayer){
