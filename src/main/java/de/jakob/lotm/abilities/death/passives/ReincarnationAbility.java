@@ -7,6 +7,9 @@ import de.jakob.lotm.attachments.DisabledAbilitiesComponent;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.damage.ModDamageTypes;
 import de.jakob.lotm.util.BeyonderData;
+import de.jakob.lotm.util.scheduling.ServerScheduler;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -30,14 +33,22 @@ import net.minecraft.util.RandomSource;
 public class ReincarnationAbility extends PassiveAbilityItem {
 
     private static final String NBT_COOLDOWN_TIME = "reincarnation_cooldown_until";
-
-    /** 24 real-life hours in milliseconds */
-    private static final long COOLDOWN_MS = 24L * 60 * 60 * 1000;
-
-    /** 20 minutes in ticks */
-    private static final int SEAL_DURATION_TICKS = 20 * 60 * 20;
-
     private static final String SEAL_CAUSE = "reincarnation_debuff";
+
+    /** 5 minutes of invisibility in ticks */
+    private static final int CONCEALMENT_TICKS = 20 * 60 * 5;
+
+    /** Cooldown in ms by sequence (index = sequence number) */
+    private static long getCooldownMs(int sequence) {
+        if (sequence <= 3) return 12L * 60 * 60 * 1000; // 12 hours
+        return 24L * 60 * 60 * 1000;                    // 24 hours (seq 4+)
+    }
+
+    /** Seal duration in ticks by sequence */
+    private static int getSealDurationTicks(int sequence) {
+        if (sequence <= 3) return 20 * 60 * 15; // 15 minutes
+        return 20 * 60 * 30;                    // 30 minutes (seq 4+)
+    }
 
     public ReincarnationAbility(Properties properties) {
         super(properties);
@@ -45,7 +56,7 @@ public class ReincarnationAbility extends PassiveAbilityItem {
 
     @Override
     public Map<String, Integer> getRequirements() {
-        return new HashMap<>(Map.of("death", 4));
+        return new HashMap<>(Map.of("death", 3));
     }
 
     @Override
@@ -67,6 +78,10 @@ public class ReincarnationAbility extends PassiveAbilityItem {
         if (!((ReincarnationAbility) PassiveAbilityHandler.REINCARNATION.get()).shouldApplyTo(player)) return;
         if (!BeyonderData.isBeyonder(player)) return;
 
+        int sequence = BeyonderData.getSequence(player);
+        long cooldownMs = getCooldownMs(sequence);
+        int sealTicks = getSealDurationTicks(sequence);
+
         // Cooldown check (real-world time so it survives restarts)
         long now = System.currentTimeMillis();
         long cooldownUntil = player.getPersistentData().getLong(NBT_COOLDOWN_TIME);
@@ -84,52 +99,61 @@ public class ReincarnationAbility extends PassiveAbilityItem {
         player.setHealth(player.getMaxHealth());
 
         // Set cooldown
-        player.getPersistentData().putLong(NBT_COOLDOWN_TIME, now + COOLDOWN_MS);
+        player.getPersistentData().putLong(NBT_COOLDOWN_TIME, now + cooldownMs);
 
-        // Teleport to a random safe location within the world border
+        // Teleport to a random safe location within the world border (deferred 1 tick so death handling finishes first)
         if (player.level() instanceof ServerLevel serverLevel) {
-            BlockPos safePos = findSafeTeleportPos(serverLevel, player.getRandom());
+            BlockPos safePos = findSafeTeleportPos(serverLevel, player.getRandom(), player.blockPosition());
             if (safePos != null) {
-                player.teleportTo(safePos.getX() + 0.5, safePos.getY(), safePos.getZ() + 0.5);
-            }
+                ServerScheduler.scheduleDelayed(1, () -> {
+                    player.teleportTo(safePos.getX() + 0.5, safePos.getY(), safePos.getZ() + 0.5);
 
-            // Visual burst at destination
-            for (int i = 0; i < 40; i++) {
-                double ox = (player.getRandom().nextDouble() - 0.5) * 2;
-                double oy = player.getRandom().nextDouble() * player.getBbHeight();
-                double oz = (player.getRandom().nextDouble() - 0.5) * 2;
-                serverLevel.sendParticles(ParticleTypes.SOUL,
-                        player.getX() + ox, player.getY() + oy, player.getZ() + oz,
-                        1, 0, 0.05, 0, 0.05);
+                    // Visual burst at destination
+                    for (int i = 0; i < 40; i++) {
+                        double ox = (player.getRandom().nextDouble() - 0.5) * 2;
+                        double oy = player.getRandom().nextDouble() * player.getBbHeight();
+                        double oz = (player.getRandom().nextDouble() - 0.5) * 2;
+                        serverLevel.sendParticles(ParticleTypes.SOUL,
+                                player.getX() + ox, player.getY() + oy, player.getZ() + oz,
+                                1, 0, 0.05, 0, 0.05);
+                    }
+                }, serverLevel);
             }
         }
 
-        // Seal all current-sequence abilities for 20 minutes (Reincarnation Debuff)
+        // Seal all current-sequence abilities (Reincarnation Debuff)
         DisabledAbilitiesComponent disabledAbilities = player.getData(ModAttachments.DISABLED_ABILITIES_COMPONENT);
-        disabledAbilities.disableAbilityUsageForTime(SEAL_CAUSE, SEAL_DURATION_TICKS, player);
+        disabledAbilities.disableAbilityUsageForTime(SEAL_CAUSE, sealTicks, player);
 
         // Also seal each current-sequence ability individually for clarity
         if (BeyonderData.isBeyonder(player)) {
             String pathway = BeyonderData.getPathway(player);
-            int sequence = BeyonderData.getSequence(player);
             LOTMCraft.abilityHandler.getByPathwayAndSequence(pathway, sequence).forEach(ability -> {
                 if (!ability.canAlwaysBeUsed) {
-                    disabledAbilities.disableSpecificAbilityForTime(ability.getId(), SEAL_CAUSE, SEAL_DURATION_TICKS);
+                    disabledAbilities.disableSpecificAbilityForTime(ability.getId(), SEAL_CAUSE, sealTicks);
                 }
             });
         }
 
+        // Grant 5 minutes of concealment
+        player.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY,
+                CONCEALMENT_TICKS, 0, false, false, false));
+
+        int sealMinutes = sealTicks / (20 * 60);
         player.sendSystemMessage(Component.translatable("ability.lotmcraft.reincarnation.triggered")
                 .withStyle(ChatFormatting.DARK_AQUA));
-        player.sendSystemMessage(Component.translatable("ability.lotmcraft.reincarnation.debuff_applied")
+        player.sendSystemMessage(Component.translatable("ability.lotmcraft.reincarnation.debuff_applied", sealMinutes)
                 .withStyle(ChatFormatting.DARK_RED));
     }
 
+    private static final int MIN_DISTANCE = 500;
+
     /**
-     * Finds a random safe spawn position within the world border.
+     * Finds a random safe spawn position within the world border,
+     * at least MIN_DISTANCE blocks away from the origin.
      * Tries up to 32 candidates; falls back to null if none found.
      */
-    private static BlockPos findSafeTeleportPos(ServerLevel level, RandomSource random) {
+    private static BlockPos findSafeTeleportPos(ServerLevel level, RandomSource random, BlockPos origin) {
         WorldBorder border = level.getWorldBorder();
         double minX = border.getMinX();
         double maxX = border.getMaxX();
@@ -139,6 +163,11 @@ public class ReincarnationAbility extends PassiveAbilityItem {
         for (int attempt = 0; attempt < 32; attempt++) {
             int x = (int) (minX + random.nextDouble() * (maxX - minX));
             int z = (int) (minZ + random.nextDouble() * (maxZ - minZ));
+
+            // Reject candidates that are too close to the death location
+            double dx = x - origin.getX();
+            double dz = z - origin.getZ();
+            if (dx * dx + dz * dz < (double) MIN_DISTANCE * MIN_DISTANCE) continue;
 
             // Use the world surface heightmap to find the top solid block
             int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);

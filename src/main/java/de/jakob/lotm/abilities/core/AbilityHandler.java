@@ -259,6 +259,10 @@ public class AbilityHandler {
         abilities.add(new TimeManipulationAbility("time_manipulation_ability"));
 
         // DEATH PATHWAY
+        abilities.add(new DivineKingdomAbility("divine_kingdom_ability"));
+        abilities.add(new NationOfTheDeadAbility("nation_of_the_dead_ability"));
+        abilities.add(new PaleEyeAbility("pale_eye_ability"));
+        abilities.add(new HandOfDeathAbility("hand_of_death_ability"));
         abilities.add(new EyeOfDeathAbility("eye_of_death_ability"));
         abilities.add(new SpiritChannelingAbility("spirit_channeling_ability"));
         abilities.add(new SpiritCommunicationAbility("spirit_communication_ability"));

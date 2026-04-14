@@ -36,11 +36,23 @@ import java.util.*;
 public class InternalUnderworldAbility extends SelectableAbility {
 
     private static final String STORED_SOULS_TAG = "InternalUnderworldSouls";
-    private static final int MAX_STORED_SOULS = 27;
     private static final float CAPTURE_CHANCE = 0.5f;
 
+    /** Maximum souls that can be stored, by sequence level. */
+    private static int getMaxSouls(int sequence) {
+        return switch (sequence) {
+            case 5 -> 5;
+            case 4 -> 15;
+            case 3 -> 20;
+            case 2 -> 35;
+            case 1 -> 45;
+            case 0 -> 53;
+            default -> 5; // seq 6+ cannot use this ability, but safe fallback
+        };
+    }
+
     public InternalUnderworldAbility(String id) {
-        super(id, 20); // 1-second cooldown
+        super(id, 1);
         canBeCopied = false;
         canBeReplicated = false;
     }
@@ -58,7 +70,8 @@ public class InternalUnderworldAbility extends SelectableAbility {
     @Override
     protected String[] getAbilityNames() {
         return new String[]{
-                "ability.lotmcraft.internal_underworld.summon"
+                "ability.lotmcraft.internal_underworld.summon",
+                "ability.lotmcraft.internal_underworld.summon_all"
         };
     }
 
@@ -67,8 +80,10 @@ public class InternalUnderworldAbility extends SelectableAbility {
         if (!(level instanceof ServerLevel serverLevel)) return;
         if (!(entity instanceof ServerPlayer player)) return;
 
-        // Only mode: summon a stored soul
-        summonSoul(serverLevel, player);
+        switch (selectedAbility) {
+            case 0 -> summonSoul(serverLevel, player);
+            case 1 -> summonAllSouls(serverLevel, player);
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -89,7 +104,7 @@ public class InternalUnderworldAbility extends SelectableAbility {
         // Killer must be a Death pathway Beyonder with this ability
         if (!BeyonderData.isBeyonder(player)) return;
         if (!BeyonderData.getPathway(player).equals("death")) return;
-        if (BeyonderData.getSequence(player) > 4) return; // Seq 4 or higher rank
+        if (BeyonderData.getSequence(player) > 5) return; // Seq 5 or higher rank required
 
         // Dying entity must be a Beyonder weaker than the player (higher sequence = weaker)
         if (!BeyonderData.isBeyonder(dying)) return;
@@ -109,9 +124,10 @@ public class InternalUnderworldAbility extends SelectableAbility {
             return;
         }
 
-        // Check capacity
+        // Check capacity against sequence-based limit
         List<CompoundTag> stored = getStoredSouls(player);
-        if (stored.size() >= MAX_STORED_SOULS) {
+        int maxSouls = getMaxSouls(playerSeq);
+        if (stored.size() >= maxSouls) {
             player.sendSystemMessage(Component.translatable("ability.lotmcraft.internal_underworld.full")
                     .withStyle(ChatFormatting.RED));
             return;
@@ -224,6 +240,36 @@ public class InternalUnderworldAbility extends SelectableAbility {
                 },
                 Component.translatable("ability.lotmcraft.internal_underworld.select_soul")
         ));
+    }
+
+    // -------------------------------------------------------------------------
+    // Summon All — spawns every stored soul at once up to the sequence cap
+    // -------------------------------------------------------------------------
+
+    private void summonAllSouls(ServerLevel level, ServerPlayer player) {
+        List<CompoundTag> storedSouls = getStoredSouls(player);
+
+        if (storedSouls.isEmpty()) {
+            player.sendSystemMessage(Component.translatable("ability.lotmcraft.internal_underworld.no_souls")
+                    .withStyle(ChatFormatting.RED));
+            return;
+        }
+
+        int maxSouls = getMaxSouls(BeyonderData.getSequence(player));
+        List<CompoundTag> toSummon = new ArrayList<>(storedSouls.subList(0, Math.min(storedSouls.size(), maxSouls)));
+
+        int summoned = 0;
+        for (CompoundTag soulData : toSummon) {
+            try {
+                spawnSoulAsSubordinate(level, player, soulData);
+                summoned++;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        player.sendSystemMessage(Component.translatable("ability.lotmcraft.internal_underworld.summoned_all", summoned)
+                .withStyle(ChatFormatting.DARK_AQUA));
     }
 
     private ItemStack createSoulDisplayItem(CompoundTag soulData) {
@@ -345,7 +391,8 @@ public class InternalUnderworldAbility extends SelectableAbility {
 
         list.add(soulData);
 
-        while (list.size() > MAX_STORED_SOULS) {
+        int maxSouls = getMaxSouls(BeyonderData.getSequence(player));
+        while (list.size() > maxSouls) {
             list.remove(0);
         }
 
