@@ -401,6 +401,12 @@ public class PacketHandler {
         );
 
         registrar.playToClient(
+                OpenHistoricalVoidBorrowingScreenPacket.TYPE,
+                OpenHistoricalVoidBorrowingScreenPacket.STREAM_CODEC,
+                OpenHistoricalVoidBorrowingScreenPacket::handle
+        );
+
+        registrar.playToClient(
                 SyncPlayerTeleportationPlayerNamesPacket.TYPE,
                 SyncPlayerTeleportationPlayerNamesPacket.STREAM_CODEC,
                 SyncPlayerTeleportationPlayerNamesPacket::handle
@@ -685,6 +691,11 @@ public class PacketHandler {
                 StructureDivinationSelectedPacket.TYPE,
                 StructureDivinationSelectedPacket.STREAM_CODEC,
                 StructureDivinationSelectedPacket::handle);
+
+        registrar.playToServer(
+                HistoricalVoidBorrowingSelectedPacket.TYPE,
+                HistoricalVoidBorrowingSelectedPacket.STREAM_CODEC,
+                HistoricalVoidBorrowingSelectedPacket::handle);
 
         registrar.playToServer(
                 ShapeShiftingSelectedPacket.TYPE,

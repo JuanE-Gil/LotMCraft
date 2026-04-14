@@ -255,6 +255,13 @@ public class ModAttachments {
                             .build()
             );
 
+    public static final Supplier<AttachmentType<HistoricalVoidComponent>> HISTORICAL_VOID_COMPONENT =
+            ATTACHMENT_TYPES.register("historical_void_component", () ->
+                    AttachmentType.serializable(HistoricalVoidComponent::new)
+                            .copyOnDeath()
+                            .build()
+            );
+
     public static void register(IEventBus eventBus) {
         ATTACHMENT_TYPES.register(eventBus);
     }

@@ -1,8 +1,13 @@
 package de.jakob.lotm.abilities.fool;
+
+import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.SelectableAbility;
 import de.jakob.lotm.attachments.CopiedInventoryComponent;
+import de.jakob.lotm.attachments.DisabledAbilitiesComponent;
+import de.jakob.lotm.attachments.HistoricalVoidComponent;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.entity.custom.BeyonderNPCEntity;
+import de.jakob.lotm.network.packets.toClient.OpenHistoricalVoidBorrowingScreenPacket;
 import de.jakob.lotm.potions.BeyonderCharacteristicItem;
 import de.jakob.lotm.potions.BeyonderPotion;
 import de.jakob.lotm.util.BeyonderData;
@@ -24,9 +29,13 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.SimpleMenuProvider;
+import net.minecraft.world.effect.MobEffectCategory;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.ClickType;
@@ -45,7 +54,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
-import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -53,36 +62,15 @@ import java.util.concurrent.ConcurrentHashMap;
 @EventBusSubscriber
 public class HistoricalVoidSummoningAbility extends SelectableAbility {
     public static final String MARKED_ENTITIES_TAG = "MarkedEntities";
-    private static final String PLACED_BLOCKS_TAG = "VoidPlacedBlocks";
     private static final int MAX_MARKED_ENTITIES = 54;
-    private static final int MAX_SUMMONED = 5;
-    private static final int SUMMON_DURATION_TICKS = 20 * 20; // 20 seconds
-
-    // Track active summons per player (session-only, not persisted)
-    private static final Map<UUID, PlayerSummonData> activeSummons = new ConcurrentHashMap<>();
 
     // Track placed blocks and their summon times (thread-safe)
     private static final Map<BlockPos, PlacedBlockData> placedBlocks = new ConcurrentHashMap<>();
 
-    private static class PlayerSummonData {
-        int summonedCount = 0;
-        final Map<Long, SummonInfo> activeSummonTimes = new ConcurrentHashMap<>();
-    }
+    // Track active summons per player (session-only, not persisted)
 
-    private static class SummonInfo {
-        final long summonTime;
-        final SummonType type;
-        final UUID entityUUID; // null for items
-
-        SummonInfo(long summonTime, SummonType type, UUID entityUUID) {
-            this.summonTime = summonTime;
-            this.type = type;
-            this.entityUUID = entityUUID;
-        }
-    }
-
-    private enum SummonType {
-        ITEM, ENTITY
+    public enum SummonType {
+        ITEM, ENTITY, HEALTH, SPIRITUALITY, CLEANSED_STATE
     }
 
     private static class PlacedBlockData {
@@ -115,7 +103,7 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
 
     @Override
     protected String[] getAbilityNames() {
-        return new String[]{"ability.lotmcraft.historical_void_summoning.summon_item", "ability.lotmcraft.historical_void_summoning.summon_entity", "ability.lotmcraft.historical_void_summoning.mark_items", "ability.lotmcraft.historical_void_summoning.mark_entity"};
+        return new String[]{"ability.lotmcraft.historical_void_summoning.summon_item", "ability.lotmcraft.historical_void_summoning.summon_entity", "ability.lotmcraft.historical_void_summoning.mark_items", "ability.lotmcraft.historical_void_summoning.mark_entity", "ability.lotmcraft.historical_void_summoning.historical_void_borrowing"};
     }
 
     @Override
@@ -136,6 +124,9 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
                 break;
             case 3: // Mark Entity
                 markEntity(serverLevel, player);
+                break;
+            case 4: // Mark Entity
+                historicalVoidBorrowing(player);
                 break;
         }
     }
@@ -257,9 +248,23 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
         Player player = event.getEntity();
         Level level = player.level();
 
-        // run every minute
-        if (player.tickCount % 1200 != 0) return;
+        // run every 30s
+        if (player.tickCount % 600 != 0) return;
         if (level.isClientSide || !(level instanceof ServerLevel serverLevel) || !(player instanceof ServerPlayer serverPlayer)) return;
+
+        // decrease the borrow count and return back to original state
+        HistoricalVoidComponent data = serverPlayer.getData(ModAttachments.HISTORICAL_VOID_COMPONENT.get());
+        for (HistoricalVoidComponent.SummonInfo info : data.activeSummonTimes.values()) {
+            if (info.type() == SummonType.HEALTH ||
+                    info.type() == SummonType.SPIRITUALITY ||
+                    info.type() == SummonType.CLEANSED_STATE) {
+
+                if (serverLevel.getGameTime() > info.summonTime()) {
+                    decrementHistoricalBorrowingCount(serverPlayer, info.summonTime());
+                }
+            }
+        }
+
 
         for (int i = 0; i < serverPlayer.getInventory().getContainerSize(); i++) {
             ItemStack stack = serverPlayer.getInventory().getItem(i);
@@ -394,15 +399,17 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
         }
 
         // Remove all summoned entities
-        PlayerSummonData summonData = activeSummons.get(playerUUID);
-        if(summonData != null) {
-            for(SummonInfo info : summonData.activeSummonTimes.values()) {
-                if(info.type == SummonType.ENTITY && info.entityUUID != null) {
-                    Entity entity = level.getEntity(info.entityUUID);
+        HistoricalVoidComponent data = player.getData(ModAttachments.HISTORICAL_VOID_COMPONENT.get());
+        for(HistoricalVoidComponent.SummonInfo info : data.activeSummonTimes.values()) {
+            if(info.type() == SummonType.ENTITY && info.entityUUID() != null) {
+                if (info.summonTime() < player.serverLevel().getGameTime()) {
+                    Entity entity = level.getEntity(info.entityUUID());
                     if(entity != null && entity.getPersistentData().getBoolean("VoidSummoned")) {
                         entity.remove(Entity.RemovalReason.DISCARDED);
                     }
+                    decrementSummonedCount(player, info.summonTime());
                 }
+
             }
         }
 
@@ -415,25 +422,22 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
             }
         }
         blocksToRemove.forEach(placedBlocks::remove);
-
-        // Clear session data
-        activeSummons.remove(playerUUID);
     }
 
-    // Periodic cleanup of invalid entities/items
-    @SubscribeEvent
-    public static void onServerTick(ServerTickEvent.Post event) {
-        // Only run every 20 ticks (1 second)
-        if(event.getServer().getTickCount() % 20 != 0) return;
-
-        // Clean up activeSummons for offline players
-        Set<UUID> onlinePlayers = new HashSet<>();
-        for(ServerPlayer player : event.getServer().getPlayerList().getPlayers()) {
-            onlinePlayers.add(player.getUUID());
-        }
-
-        activeSummons.keySet().removeIf(uuid -> !onlinePlayers.contains(uuid));
-    }
+//    // Periodic cleanup of invalid entities/items
+//    @SubscribeEvent
+//    public static void onServerTick(ServerTickEvent.Post event) {
+//        // Only run every 20 ticks (1 second)
+//        if(event.getServer().getTickCount() % 20 != 0) return;
+//
+//        // Clean up activeSummons for offline players
+//        Set<UUID> onlinePlayers = new HashSet<>();
+//        for(ServerPlayer player : event.getServer().getPlayerList().getPlayers()) {
+//            onlinePlayers.add(player.getUUID());
+//        }
+//
+//        activeSummons.keySet().removeIf(uuid -> !onlinePlayers.contains(uuid));
+//    }
 
     private void summonEntity(ServerLevel level, ServerPlayer player) {
         int currentSummoned = getSummonedCount(player);
@@ -530,8 +534,6 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
                                     player.closeContainer();
                                 }
                             }
-
-
                         }
                     }
                 },
@@ -569,7 +571,7 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
             }
 
             EntityType<?> entityType = optionalType.get();
-            Entity entity = null;
+            Entity entity;
 
             // Special handling for BeyonderNPCEntity
             if(entityData.getBoolean("IsBeyonderNPC")) {
@@ -635,6 +637,9 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
                         tag.putUUID("VoidSummonOwner", player.getUUID());
 
                     });
+                }
+                if (stack.is((ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", "shulker_boxes"))))) {
+                    container.setItem(i, ItemStack.EMPTY);
                 }
             }
             entity.setData(ModAttachments.COPIED_INVENTORY, data);
@@ -741,9 +746,11 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
         if (level.isClientSide || !(level instanceof ServerLevel serverLevel)) return;
 
         if(entity.getPersistentData().getBoolean("VoidSummoned")) {
-            System.out.println("entity : "+entity);
             if (entity.getPersistentData().getLong("VoidSummonTime") < serverLevel.getGameTime()) {
                 entity.remove(Entity.RemovalReason.DISCARDED);
+            }
+            if (serverLevel.getPlayerByUUID(entity.getPersistentData().getUUID("VoidSummonOwner")) instanceof ServerPlayer serverPlayer) {
+                decrementSummonedCount(serverPlayer, entity.getPersistentData().getLong("VoidSummonTime"));
             }
         }
     }
@@ -849,26 +856,170 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
     }
 
     private int getSummonedCount(ServerPlayer player) {
-        PlayerSummonData data = activeSummons.get(player.getUUID());
-        return data != null ? data.summonedCount : 0;
+        HistoricalVoidComponent data = player.getData(ModAttachments.HISTORICAL_VOID_COMPONENT.get());
+        return data.summonedCount;
     }
 
     private void incrementSummonedCount(ServerPlayer player, long summonTime, SummonType type, UUID entityUUID) {
-        PlayerSummonData data = activeSummons.computeIfAbsent(player.getUUID(), k -> new PlayerSummonData());
+        HistoricalVoidComponent data = player.getData(ModAttachments.HISTORICAL_VOID_COMPONENT.get());
         data.summonedCount++;
-        data.activeSummonTimes.put(summonTime, new SummonInfo(summonTime, type, entityUUID));
+        HistoricalVoidComponent.SummonInfo info = new HistoricalVoidComponent.SummonInfo(
+                summonTime,
+                type,
+                entityUUID,
+                new CompoundTag()
+        );
+        data.activeSummonTimes.put(summonTime, info);
     }
 
     private static void decrementSummonedCount(ServerPlayer player, long summonTime) {
-        PlayerSummonData data = activeSummons.get(player.getUUID());
-        if(data != null) {
-            data.summonedCount = Math.max(0, data.summonedCount - 1);
-            data.activeSummonTimes.remove(summonTime);
+        HistoricalVoidComponent data = player.getData(ModAttachments.HISTORICAL_VOID_COMPONENT.get());
+        data.summonedCount = Math.max(0, data.summonedCount - 1);
+        data.activeSummonTimes.remove(summonTime);
+    }
 
-            // Clean up if no more summons
-            if(data.summonedCount == 0) {
-                activeSummons.remove(player.getUUID());
+    private void historicalVoidBorrowing(ServerPlayer player) {
+        if (getHistoricalBorrowingCount(player) <= getMaxHistoricalBorrowingCount(player)) {
+            PacketDistributor.sendToPlayer(
+                    player,
+                    new OpenHistoricalVoidBorrowingScreenPacket(List.of("Borrow Health", "Borrow Spirituality", "Borrow Cleansed State"))
+            );
+        }
+    }
+
+    private static int getHistoricalBorrowingCount(ServerPlayer player) {
+        HistoricalVoidComponent data = player.getData(ModAttachments.HISTORICAL_VOID_COMPONENT.get());
+        return data.historicalBorrowingCount;
+    }
+
+    private static void incrementHistoricalBorrowingCount(ServerPlayer player, long borrowTime, SummonType type, UUID entityUUID, CompoundTag originalBeforeBorrowing) {
+        HistoricalVoidComponent data = player.getData(ModAttachments.HISTORICAL_VOID_COMPONENT.get());
+        data.historicalBorrowingCount++;
+        HistoricalVoidComponent.SummonInfo info = new HistoricalVoidComponent.SummonInfo(
+                borrowTime,
+                type,
+                entityUUID,
+                originalBeforeBorrowing
+        );
+        data.activeSummonTimes.put(borrowTime, info);
+    }
+
+    private static void decrementHistoricalBorrowingCount(ServerPlayer player, long borrowTime) {
+        HistoricalVoidComponent data = player.getData(ModAttachments.HISTORICAL_VOID_COMPONENT.get());
+        data.historicalBorrowingCount = Math.max(0, data.historicalBorrowingCount - 1);
+
+        HistoricalVoidComponent.SummonInfo specificInfo = data.activeSummonTimes.get(borrowTime);
+        if(specificInfo != null) {
+
+            if(specificInfo.type() == SummonType.HEALTH) {
+                player.setHealth(specificInfo.originalBeforeBorrowing().getFloat("health"));
             }
+            else if (specificInfo.type() == SummonType.SPIRITUALITY) {
+                BeyonderData.setSpirituality(player, specificInfo.originalBeforeBorrowing().getFloat("spirituality"));
+            }
+            else if (specificInfo.type() == SummonType.CLEANSED_STATE) {
+                CompoundTag tag = specificInfo.originalBeforeBorrowing();
+                if (tag.getBoolean("WalkStolen")) {
+                    // placeholder
+                }
+                if (tag.contains("StolenEffects")) {
+                    ListTag effectsList = tag.getList("StolenEffects", Tag.TAG_COMPOUND);
+                    for (int i = 0; i < effectsList.size(); i++) {
+                        MobEffectInstance effect = MobEffectInstance.load(effectsList.getCompound(i));
+                        if (effect != null) {
+                            player.addEffect(effect);
+                        }
+                    }
+                }
+            }
+            data.activeSummonTimes.remove(borrowTime);
+        }
+    }
+
+    public static void historicalVoidBorrowHealth(ServerPlayer player, ServerLevel level) {
+        if (getHistoricalBorrowingCount(player) <= getMaxHistoricalBorrowingCount(player)) {
+            if (player.getHealth() < player.getMaxHealth()) {
+                // save current health
+                long borrowTime = level.getGameTime() + getMaxHistoricalBorrowingDurationTicks(player);
+                CompoundTag tag = new CompoundTag();
+                tag.putFloat("health", player.getHealth());
+
+                incrementHistoricalBorrowingCount(player, borrowTime, SummonType.HEALTH, player.getUUID(), tag);
+
+                // set health to max
+                player.setHealth(player.getMaxHealth());
+            }
+        }
+    }
+
+    public static void historicalVoidBorrowSpirituality(ServerPlayer player, ServerLevel level) {
+        if (getHistoricalBorrowingCount(player) <= getMaxHistoricalBorrowingCount(player)) {
+            if (BeyonderData.getSpirituality(player) < BeyonderData.getMaxSpirituality(BeyonderData.getSequence(player))) {
+                // save current spirituality
+                long borrowTime = level.getGameTime() + getMaxHistoricalBorrowingDurationTicks(player);
+                CompoundTag tag = new CompoundTag();
+                tag.putFloat("spirituality", BeyonderData.getSpirituality(player));
+
+                incrementHistoricalBorrowingCount(player, borrowTime, SummonType.SPIRITUALITY, player.getUUID(), tag);
+
+                // set spirituality to max
+                BeyonderData.setSpirituality(player, BeyonderData.getMaxSpirituality(BeyonderData.getSequence(player)));
+            }
+        }
+    }
+
+    public static void historicalVoidBorrowCleansedState(ServerPlayer player, ServerLevel level) {
+        if (getHistoricalBorrowingCount(player) <= getMaxHistoricalBorrowingCount(player)) {
+            // save current spirituality
+            long borrowTime = level.getGameTime() + getMaxHistoricalBorrowingDurationTicks(player);
+            CompoundTag tag = new CompoundTag();
+
+            // save if walk was stolen
+            AttributeInstance movementSpeedInner = player.getAttribute(Attributes.MOVEMENT_SPEED);
+            if(movementSpeedInner != null) {
+                tag.putBoolean("WalkStolen", true);
+            }
+
+            // save all negative effects with the tick remaining
+            ListTag effectsList = new ListTag();
+            for (MobEffectInstance instance : new ArrayList<>(player.getActiveEffects())) {
+                if (instance.getEffect().value().getCategory() == MobEffectCategory.HARMFUL) {
+                    effectsList.add(instance.save());
+
+                }
+            }
+            if(!effectsList.isEmpty()) {
+                tag.put("StolenEffects", effectsList);
+            }
+
+            // save currently disabled abilities
+            var component = player.getData(ModAttachments.DISABLED_ABILITIES_COMPONENT);
+            ListTag abilitiesList = new ListTag();
+
+            for (DisabledAbilitiesComponent.DisabledAbility entry : component.getAllDisabledAbilities()) {
+                CompoundTag abilityTag = new CompoundTag();
+                abilityTag.putString("AbilityName", entry.ability());
+                abilityTag.putInt("Amount", entry.amountDisabled());
+                abilitiesList.add(abilityTag);
+            }
+            tag.put("DisabledAbilities", abilitiesList);
+
+            incrementHistoricalBorrowingCount(player, borrowTime, SummonType.CLEANSED_STATE, player.getUUID(), tag);
+
+            // remove all negative effects
+            for (MobEffectInstance instance : new ArrayList<>(player.getActiveEffects())) {
+                if (instance.getEffect().value().getCategory() == MobEffectCategory.HARMFUL) {
+                    player.removeEffect(instance.getEffect());
+                }
+            }
+
+            // remove walk theft
+            if(movementSpeedInner != null) {
+                movementSpeedInner.removeModifier(ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "mundane_conceptual_theft_walk"));
+            }
+
+            // enable all abilities
+            component.enableAllAbilities();
         }
     }
 
@@ -889,6 +1040,26 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
             case 1 -> 10 * 60 * 20;
             case 2 -> 3 * 60 * 20;
             default -> 30 * 20;
+        };
+    }
+
+    // scale max summoned items
+    private static int getMaxHistoricalBorrowingCount(ServerPlayer serverPlayer){
+        return switch (BeyonderData.getSequence(serverPlayer)){
+            case 0 -> 50;
+            case 1 -> 20;
+            case 2 -> 10;
+            default -> 5;
+        };
+    }
+
+    // scale max summoned items
+    private static int getMaxHistoricalBorrowingDurationTicks(ServerPlayer serverPlayer){
+        return switch (BeyonderData.getSequence(serverPlayer)){
+            case 0 -> 60 * 60 * 20;
+            case 1 -> 10 * 60 * 20;
+            case 2 -> 4 * 60 * 20;
+            default -> 60 * 20;
         };
     }
 }
