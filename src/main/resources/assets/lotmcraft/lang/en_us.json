@@ -406,6 +406,7 @@
   "ability.lotmcraft.historical_void_summoning.mark_items_instruction": "Place items in your ender chest to mark them for summoning",
   "ability.lotmcraft.historical_void_summoning.no_nearby_entities": "No entities nearby to mark!",
   "ability.lotmcraft.historical_void_summoning.marked_entity": "Marked entity: %s",
+  "ability.lotmcraft.historical_void_summoning.historical_void_borrowing": "Historical Void Borrowing",
   "lotmcraft.historical_void_hiding_ability": "Hiding in the Historical Void",
   "lotmcraft.historical_void_hiding_ability.description": "Hide in Historical Void being invisible, but unable to move, upon leaving it, you will be in exact same spot where you activated it",
   "lotmcraft.miracle_creation_ability": "Miracle Creation",

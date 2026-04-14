@@ -1,6 +1,8 @@
 package de.jakob.lotm.abilities.fool;
 
 import de.jakob.lotm.LOTMCraft;
+import de.jakob.lotm.abilities.core.Ability;
+import de.jakob.lotm.abilities.core.AbilityHandler;
 import de.jakob.lotm.abilities.core.SelectableAbility;
 import de.jakob.lotm.attachments.CopiedInventoryComponent;
 import de.jakob.lotm.attachments.DisabledAbilitiesComponent;
@@ -12,6 +14,7 @@ import de.jakob.lotm.potions.BeyonderCharacteristicItem;
 import de.jakob.lotm.potions.BeyonderPotion;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.Config;
+import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.AllyUtil;
 import de.jakob.lotm.util.scheduling.ServerScheduler;
 import net.minecraft.ChatFormatting;
@@ -35,6 +38,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ChestMenu;
@@ -67,8 +71,6 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
 
     // Track placed blocks and their summon times (thread-safe)
     private static final Map<BlockPos, PlacedBlockData> placedBlocks = new ConcurrentHashMap<>();
-
-    // Track active summons per player (session-only, not persisted)
 
     public enum SummonType {
         ITEM, ENTITY, HEALTH, SPIRITUALITY, CLEANSED_STATE
@@ -131,6 +133,8 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
                 break;
         }
     }
+
+
 
     private void summonItem(ServerLevel level, ServerPlayer player) {
         int currentSummoned = getSummonedCount(player);
@@ -261,6 +265,7 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
 
         toRemove.forEach(placedBlocks::remove);
     }
+
 
 
     private void summonEntity(ServerLevel level, ServerPlayer player) {
@@ -559,6 +564,32 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
         }
     }
 
+    private List<CompoundTag> getMarkedEntities(ServerPlayer player) {
+        CompoundTag data = player.getPersistentData();
+        List<CompoundTag> entities = new ArrayList<>();
+
+        if(data.contains(MARKED_ENTITIES_TAG)) {
+            ListTag list = data.getList(MARKED_ENTITIES_TAG, Tag.TAG_COMPOUND);
+            for(int i = 0; i < list.size(); i++) {
+                entities.add(list.getCompound(i));
+            }
+        }
+
+        return entities;
+    }
+
+    private void removedMarkedEntity(ServerPlayer player, CompoundTag entityData) {
+        CompoundTag data = player.getPersistentData();
+        if (data.contains(MARKED_ENTITIES_TAG)) {
+            ListTag list = data.getList(MARKED_ENTITIES_TAG, Tag.TAG_COMPOUND);
+
+            list.remove(entityData);
+
+            data.put(MARKED_ENTITIES_TAG, list);
+        }
+    }
+
+
 
     private void markItems(ServerLevel level, ServerPlayer player) {
         // Open the player's ender chest for them to add items
@@ -615,31 +646,6 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
         player.sendSystemMessage(Component.translatable("ability.lotmcraft.historical_void_summoning.marked_entity", closest.getName().getString()).withStyle(ChatFormatting.GREEN));
     }
 
-    private List<CompoundTag> getMarkedEntities(ServerPlayer player) {
-        CompoundTag data = player.getPersistentData();
-        List<CompoundTag> entities = new ArrayList<>();
-
-        if(data.contains(MARKED_ENTITIES_TAG)) {
-            ListTag list = data.getList(MARKED_ENTITIES_TAG, Tag.TAG_COMPOUND);
-            for(int i = 0; i < list.size(); i++) {
-                entities.add(list.getCompound(i));
-            }
-        }
-
-        return entities;
-    }
-
-    private void removedMarkedEntity(ServerPlayer player, CompoundTag entityData) {
-        CompoundTag data = player.getPersistentData();
-        if (data.contains(MARKED_ENTITIES_TAG)) {
-            ListTag list = data.getList(MARKED_ENTITIES_TAG, Tag.TAG_COMPOUND);
-
-            list.remove(entityData);
-
-            data.put(MARKED_ENTITIES_TAG, list);
-        }
-    }
-
     private void addMarkedEntity(ServerPlayer player, CompoundTag entityData) {
         CompoundTag data = player.getPersistentData();
         ListTag list;
@@ -659,6 +665,8 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
 
         data.put(MARKED_ENTITIES_TAG, list);
     }
+
+
 
     private int getSummonedCount(ServerPlayer player) {
         HistoricalVoidComponent data = player.getData(ModAttachments.HISTORICAL_VOID_COMPONENT.get());
@@ -683,14 +691,6 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
         data.activeSummonTimes.remove(summonTime);
     }
 
-    private void historicalVoidBorrowing(ServerPlayer player) {
-        if (getHistoricalBorrowingCount(player) <= getMaxHistoricalBorrowingCount(player)) {
-            PacketDistributor.sendToPlayer(
-                    player,
-                    new OpenHistoricalVoidBorrowingScreenPacket(List.of("Borrow Health", "Borrow Spirituality", "Borrow Cleansed State"))
-            );
-        }
-    }
 
     private static int getHistoricalBorrowingCount(ServerPlayer player) {
         HistoricalVoidComponent data = player.getData(ModAttachments.HISTORICAL_VOID_COMPONENT.get());
@@ -725,7 +725,15 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
             else if (specificInfo.type() == SummonType.CLEANSED_STATE) {
                 CompoundTag tag = specificInfo.originalBeforeBorrowing();
                 if (tag.getBoolean("WalkStolen")) {
-                    // placeholder
+                    AttributeInstance movementSpeed = player.getAttribute(Attributes.MOVEMENT_SPEED);
+                    movementSpeed.addTransientModifier(new AttributeModifier(ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "mundane_conceptual_theft_walk"), -100, AttributeModifier.Operation.ADD_VALUE));
+                    ServerScheduler.scheduleDelayed(20 * 20, () -> {
+                        AttributeInstance movementSpeedInner = player.getAttribute(Attributes.MOVEMENT_SPEED);
+
+                        if(movementSpeedInner != null) {
+                            movementSpeedInner.removeModifier(ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "mundane_conceptual_theft_walk"));
+                        }
+                    });
                 }
                 if (tag.contains("StolenEffects")) {
                     ListTag effectsList = tag.getList("StolenEffects", Tag.TAG_COMPOUND);
@@ -736,8 +744,26 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
                         }
                     }
                 }
+                if (tag.contains("DisabledAbilities")) {
+                    ListTag disabledAbilitiesList = tag.getList("StolenEffects", Tag.TAG_COMPOUND);
+                    DisabledAbilitiesComponent disabledComponent = player.getData(ModAttachments.DISABLED_ABILITIES_COMPONENT);
+                    for (int i = 0; i < disabledAbilitiesList.size(); i++) {
+                        disabledComponent.disableSpecificAbilityForTime(disabledAbilitiesList.getCompound(i).getString("AbilityName"), "theft_", 30 * 20);
+                    }
+                }
             }
             data.activeSummonTimes.remove(borrowTime);
+        }
+    }
+
+
+
+    private void historicalVoidBorrowing(ServerPlayer player) {
+        if (getHistoricalBorrowingCount(player) <= getMaxHistoricalBorrowingCount(player)) {
+            PacketDistributor.sendToPlayer(
+                    player,
+                    new OpenHistoricalVoidBorrowingScreenPacket(List.of("Borrow Health", "Borrow Spirituality", "Borrow Cleansed State"))
+            );
         }
     }
 
@@ -827,6 +853,8 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
             component.enableAllAbilities();
         }
     }
+
+
 
     @SubscribeEvent
     public static void onTooltip(ItemTooltipEvent event) {
