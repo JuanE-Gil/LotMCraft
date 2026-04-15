@@ -16,6 +16,8 @@ import de.jakob.lotm.abilities.door.passives.SpiritWorldAwarenessAbility;
 import de.jakob.lotm.abilities.door.passives.VoidImmunityAbility;
 import de.jakob.lotm.abilities.error.passives.PassiveTheftAbility;
 import de.jakob.lotm.abilities.error.passives.PhysicalEnhancementsErrorAbility;
+import de.jakob.lotm.abilities.justiciar.passives.OrderJusticiarAbility;
+import de.jakob.lotm.abilities.justiciar.passives.PhysicalEnhancementsJusticiarAbility;
 import de.jakob.lotm.abilities.fool.passives.PaperDaggersAbility;
 import de.jakob.lotm.abilities.fool.passives.PhysicalEnhancementsFoolAbility;
 import de.jakob.lotm.abilities.fool.passives.PuppeteeringEnhancementsAbility;
@@ -56,6 +58,8 @@ public class PassiveAbilityHandler {
     public static final DeferredItem<Item> PHYSICAL_ENHANCEMENTS_MOTHER = ITEMS.registerItem("physical_enhancements_mother_ability", PhysicalEnhancementsMotherAbility::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
     public static final DeferredItem<Item> PHYSICAL_ENHANCEMENTS_VISIONARY = ITEMS.registerItem("physical_enhancements_visionary_ability", PhysicalEnhancementsVisionaryAbility::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
     public static final DeferredItem<Item> PHYSICAL_ENHANCEMENTS_WHEEL_OF_FORTUNE = ITEMS.registerItem("physical_enhancements_wheel_of_fortune_ability", PhysicalEnhancementsWheelOfFortuneAbility::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
+    public static final DeferredItem<Item> PHYSICAL_ENHANCEMENTS_JUSTICIAR = ITEMS.registerItem("physical_enhancements_justiciar_ability", PhysicalEnhancementsJusticiarAbility::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
+    public static final DeferredItem<Item> ORDER_JUSTICIAR = ITEMS.registerItem("order_justiciar_ability", OrderJusticiarAbility::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
 
     public static final DeferredItem<Item> FLAMING_HIT = ITEMS.registerItem("flaming_hit_ability", FlamingHitAbility::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
     public static final DeferredItem<Item> FIRE_RESISTANCE = ITEMS.registerItem("fire_resistance_ability", FireResistanceAbility::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));

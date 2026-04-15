@@ -764,6 +764,12 @@
   "ability.lotmcraft.time_manipulation.slow_time": "Slow down Time",
 
 
+  "lotmcraft.authority_ability": "Authority",
+  "lotmcraft.authority_ability.description": "Exert the authority of an Arbiter. Strip nearby entities of their buffs, slow them, or strip them of their armor.",
+  "ability.lotmcraft.authority.strip_defense": "Strip Defense",
+  "ability.lotmcraft.authority.slow": "Slow",
+  "ability.lotmcraft.authority.armor_remove": "Armor Remove",
+
   "lotm.ability.cogitation.tick": "Cogitating",
 
   "item.lotmcraft.ability_not_implemented": "Abilities for this Sequence are not yet implemented",
@@ -786,6 +792,9 @@
   "item.lotmcraft.physical_enhancements_mother_ability": "Physical Enhancements",
   "item.lotmcraft.physical_enhancements_visionary_ability": "Physical Enhancements",
   "item.lotmcraft.physical_enhancements_wheel_of_fortune_ability": "Physical Enhancements",
+  "item.lotmcraft.physical_enhancements_justiciar_ability": "Physical Enhancements",
+  "item.lotmcraft.order_justiciar_ability": "Order",
+  "item.lotmcraft.order_justiciar_ability.description": "Subconsciously maintain Order. Sense when murder is committed within 40 blocks.",
 
   "item.lotmcraft.flaming_hit_ability": "Flaming Hit",
   "item.lotmcraft.fire_resistance_ability": "Fire Resistance",

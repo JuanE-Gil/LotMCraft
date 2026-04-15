@@ -2,6 +2,7 @@ package de.jakob.lotm.abilities.core;
 
 import de.jakob.lotm.abilities.abyss.*;
 import de.jakob.lotm.abilities.common.*;
+import de.jakob.lotm.abilities.justiciar.*;
 import de.jakob.lotm.abilities.darkness.*;
 import de.jakob.lotm.abilities.demoness.*;
 import de.jakob.lotm.abilities.door.*;
@@ -239,6 +240,9 @@ public class AbilityHandler {
         abilities.add(new WordsOfMisfortuneAbility("words_of_misfortune_ability"));
         abilities.add(new ProphecyAbility("prophecy_ability"));
         abilities.add(new CycleOfFateAbility("cycle_of_fate_ability"));
+
+        // JUSTICIAR PATHWAY
+        abilities.add(new AuthorityAbility("authority_ability"));
 
         // ERROR PATHWAY
         abilities.add(new TheftAbility("theft_ability"));
