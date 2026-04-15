@@ -111,6 +111,7 @@
   "ability.lotmcraft.door_to_the_underworld.released": "Underworld forces dismissed",
   "ability.lotmcraft.word_of_spirit.no_target": "No target found",
   "ability.lotmcraft.word_of_spirit.applied": "Spirit Called!",
+  "ability.lotmcraft.word_of_spirit.too_strong": "Target is too powerful to be Spirit Called",
   "effect.lotmcraft.spirit_called": "Spirit Called",
   "lotmcraft.spirit_communication_ability": "Spirit Communication",
   "ability.lotmcraft.spirit_communication.spectral_bind": "Spectral Bind",

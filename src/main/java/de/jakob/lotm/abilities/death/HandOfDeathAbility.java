@@ -90,13 +90,20 @@ public class HandOfDeathAbility extends SelectableAbility {
 
         sendMessage(caster, "ability.lotmcraft.hand_of_death.left_applied", ChatFormatting.DARK_PURPLE);
 
+        // Capture sequence values now — target's sequence may change before deferred execution
+        int casterSeq = BeyonderData.getSequence(caster);
+        int targetSeq = BeyonderData.getSequence(target);
+        // seqDiff > 0: target is weaker; seqDiff < 0: target is stronger
+        int seqDiff = targetSeq - casterSeq;
+        float damageMultiplier = Math.max(0f, 0.25f + (seqDiff * 0.10f));
+
         // Schedule damage at the end of the 30 seconds
         LivingEntity targetRef = target;
         UUID taskId = ServerScheduler.scheduleDelayed(WITHER_DURATION, () -> {
             activeMarks.remove(targetRef.getUUID());
             if (!targetRef.isAlive()) return;
 
-            float damage = targetRef.getMaxHealth() * 0.25f;
+            float damage = targetRef.getMaxHealth() * damageMultiplier;
             targetRef.hurt(
                     ModDamageTypes.source(level, ModDamageTypes.BEYONDER_GENERIC, caster),
                     damage);

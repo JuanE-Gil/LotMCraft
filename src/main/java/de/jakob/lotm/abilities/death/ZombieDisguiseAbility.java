@@ -27,7 +27,7 @@ public class ZombieDisguiseAbility extends ToggleAbility {
     // RESISTANCE 6 -> amplifier 5
     private static final double HEALTH_BONUS = 28.0;
     private static final double STRENGTH_BONUS = 6.0;
-    private static final int RESISTANCE_AMPLIFIER = 5;
+    private static final int RESISTANCE_AMPLIFIER = 0;
 
     public ZombieDisguiseAbility(String id) {
         super(id);

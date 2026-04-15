@@ -2,6 +2,7 @@ package de.jakob.lotm.abilities.death;
 
 import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.effect.ModEffects;
+import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.ParticleUtil;
 import net.minecraft.core.particles.DustParticleOptions;
@@ -23,6 +24,7 @@ public class DeathEnvoyAbility extends Ability {
 
     private static final int RADIUS = 10;
     private static final int DURATION = 20 * 20; // 20 seconds
+    private static final int SPIRIT_CALLED_DURATION = 20 * 10; // 10 seconds
 
     private static final DustParticleOptions SOUL_DUST =
             new DustParticleOptions(new Vector3f(0.15f, 0.85f, 0.75f), 1.8f);
@@ -76,8 +78,13 @@ public class DeathEnvoyAbility extends Ability {
                     1, 0, 0.05, 0, 0.02);
         }
 
+        int casterSeq = BeyonderData.getSequence(entity);
+
         // --- Apply effects to all nearby entities ---
         for (LivingEntity target : AbilityUtil.getNearbyEntities(entity, serverLevel, center, RADIUS)) {
+            int targetSeq = BeyonderData.getSequence(target);
+            boolean tooStrong = (targetSeq - casterSeq) <= -2;
+
             // Weakness II
             target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS,
                     DURATION, 1, false, true, true));
@@ -86,9 +93,11 @@ public class DeathEnvoyAbility extends Ability {
                     DURATION, 2, false, true, true));
             // Freeze ticks (visual freezing)
             target.setTicksFrozen(target.getTicksRequiredToFreeze() + DURATION);
-            // Spirit Called
-            target.addEffect(new MobEffectInstance(ModEffects.SPIRIT_CALLED,
-                    DURATION, 0, false, true, true));
+            // Spirit Called — only if target is not 2+ sequences stronger
+            if (!tooStrong) {
+                target.addEffect(new MobEffectInstance(ModEffects.SPIRIT_CALLED,
+                        SPIRIT_CALLED_DURATION, 0, false, true, true));
+            }
         }
     }
 }

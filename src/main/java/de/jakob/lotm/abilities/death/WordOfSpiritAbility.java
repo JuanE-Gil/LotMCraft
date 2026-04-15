@@ -2,6 +2,7 @@ package de.jakob.lotm.abilities.death;
 
 import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.effect.ModEffects;
+import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -13,7 +14,7 @@ import java.util.Map;
 
 public class WordOfSpiritAbility extends Ability {
 
-    private static final int DURATION_TICKS = 20 * 30; // 30 seconds
+    private static final int DURATION_TICKS = 20 * 10; // 10 seconds
 
     public WordOfSpiritAbility(String id) {
         super(id, 20 * 45f); // 45-second cooldown
@@ -38,6 +39,14 @@ public class WordOfSpiritAbility extends Ability {
         LivingEntity target = AbilityUtil.getTargetEntity(entity, 25, 1.5f);
         if (target == null) {
             AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.word_of_spirit.no_target").withColor(0xFF4444));
+            return;
+        }
+
+        int casterSeq = BeyonderData.getSequence(entity);
+        int targetSeq = BeyonderData.getSequence(target);
+        // seqDiff < 0 means target is stronger; block if target is 2+ sequences stronger
+        if (targetSeq - casterSeq <= -2) {
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.word_of_spirit.too_strong").withColor(0xFF4444));
             return;
         }
 

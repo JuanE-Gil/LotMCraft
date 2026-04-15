@@ -107,7 +107,10 @@ Three selectable sub-abilities:
   - **Wither II**
   - **Weakness II**
   - **Blindness II**
-- After the 30-second duration expires, deals **25%** of the target's max HP as damage.
+- After the 30-second duration expires, deals damage as a percentage of the target's max HP, scaled by the sequence difference at the moment of casting:
+  - Base (same sequence): **25%**
+  - Each sequence weaker: **+10%** (e.g. 1 weaker → 35%, 2 weaker → 45%)
+  - Each sequence stronger: **−10%** (e.g. 1 stronger → 15%, 2 stronger → 5%), minimum 0%
 - Re-casting on the same target cancels the pending hit and restarts the timer.
 
 **Right Hand — Self**
@@ -198,7 +201,7 @@ Applies the following to all nearby entities on use:
 - **Weakness II** for 20 seconds
 - **Slowness III** for 20 seconds
 - **Freeze ticks** (+400 ticks)
-- **Spirit Called** for 20 seconds (full stun, armour bypass, ability block — see Word of Spirit)
+- **Spirit Called** for 10 seconds (full stun, armour bypass, ability block — see Word of Spirit)
 
 ---
 
@@ -210,7 +213,7 @@ Applies the following to all nearby entities on use:
 
 - **Targeting Range:** 25 blocks
 
-Applies the **Spirit Called** custom effect (Level 0) to the target for 30 seconds.
+Applies the **Spirit Called** custom effect (Level 0) to the target for 10 seconds.
 
 > **Spirit Called** is a harmful custom effect. While active, every tick:
 > - The target's movement is zeroed (full stun).
@@ -273,7 +276,7 @@ While active:
 - Transforms the caster's appearance to a Zombie.
 - Grants **+28 max HP** (equivalent to Sequence 6 physical enhancements).
 - Grants **+6 attack damage**.
-- Continuously refreshes **Resistance VI** every 2 ticks.
+- Continuously refreshes **Resistance I** every 2 ticks.
 
 On deactivation, all bonuses and appearance changes are reverted.
 
