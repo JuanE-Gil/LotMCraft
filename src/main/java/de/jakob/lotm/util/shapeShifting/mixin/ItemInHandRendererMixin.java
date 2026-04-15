@@ -36,7 +36,6 @@ public class ItemInHandRendererMixin {
         if (shapeKey == null || shapeKey.startsWith("player:")) {
             return;
         }
-        //  change hand texture for other humanoid entities (Not Implemented)
 
         // hide hand for any other "non humanoid" models
         ci.cancel();

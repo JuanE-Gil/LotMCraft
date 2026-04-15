@@ -1,20 +1,18 @@
 package de.jakob.lotm.abilities.fool;
 
 import de.jakob.lotm.LOTMCraft;
-import de.jakob.lotm.abilities.core.Ability;
-import de.jakob.lotm.abilities.core.AbilityHandler;
 import de.jakob.lotm.abilities.core.SelectableAbility;
 import de.jakob.lotm.attachments.CopiedInventoryComponent;
 import de.jakob.lotm.attachments.DisabledAbilitiesComponent;
 import de.jakob.lotm.attachments.HistoricalVoidComponent;
 import de.jakob.lotm.attachments.ModAttachments;
+import de.jakob.lotm.entity.ModEntities;
 import de.jakob.lotm.entity.custom.BeyonderNPCEntity;
 import de.jakob.lotm.network.packets.toClient.OpenHistoricalVoidBorrowingScreenPacket;
 import de.jakob.lotm.potions.BeyonderCharacteristicItem;
 import de.jakob.lotm.potions.BeyonderPotion;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.Config;
-import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.AllyUtil;
 import de.jakob.lotm.util.scheduling.ServerScheduler;
 import net.minecraft.ChatFormatting;
@@ -106,7 +104,14 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
 
     @Override
     protected String[] getAbilityNames() {
-        return new String[]{"ability.lotmcraft.historical_void_summoning.summon_item", "ability.lotmcraft.historical_void_summoning.summon_entity", "ability.lotmcraft.historical_void_summoning.mark_items", "ability.lotmcraft.historical_void_summoning.mark_entity", "ability.lotmcraft.historical_void_summoning.historical_void_borrowing"};
+        return new String[]{
+                "ability.lotmcraft.historical_void_summoning.summon_item",
+                "ability.lotmcraft.historical_void_summoning.summon_entity",
+                "ability.lotmcraft.historical_void_summoning.mark_items",
+                "ability.lotmcraft.historical_void_summoning.mark_entity",
+                "ability.lotmcraft.historical_void_summoning.mark_self",
+                "ability.lotmcraft.historical_void_summoning.historical_void_borrowing"
+        };
     }
 
     @Override
@@ -114,7 +119,6 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
         if(!(level instanceof ServerLevel serverLevel) || !(entity instanceof ServerPlayer player)) {
             return;
         }
-
         switch(abilityIndex) {
             case 0: // Summon Item
                 summonItem(serverLevel, player);
@@ -128,7 +132,10 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
             case 3: // Mark Entity
                 markEntity(serverLevel, player);
                 break;
-            case 4: // Mark Entity
+            case 4: // Mark the player
+                markSelf(serverLevel, player);
+                break;
+            case 5: // Borrow from History
                 historicalVoidBorrowing(player);
                 break;
         }
@@ -402,22 +409,40 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
             EntityType<?> entityType = optionalType.get();
             Entity entity;
 
-            // Special handling for BeyonderNPCEntity
-            if(entityData.getBoolean("IsBeyonderNPC")) {
-                String pathway = entityData.getString("BeyonderPathway");
-                int sequence = entityData.getInt("BeyonderSequence");
+            boolean isPlayer = entityTypeId.equals("minecraft:player");
+
+            // Special handling for BeyonderNPCEntity and players as well
+            if(entityData.getBoolean("IsBeyonderNPC") || isPlayer) {
+                String pathway = !isPlayer ? entityData.getString("BeyonderPathway") : entityData.getCompound("EntityNBT").getCompound("NeoForgeData").getString("beyonder_pathway");
+                int sequence = !isPlayer ? entityData.getInt("BeyonderSequence") : entityData.getCompound("EntityNBT").getCompound("NeoForgeData").getInt("beyonder_sequence");
                 String skin = entityData.getString("BeyonderSkin");
                 boolean hostile = entityData.getBoolean("BeyonderHostile");
 
+                // change the entity type to beyonder npc if the summoned was a player
+                EntityType<? extends BeyonderNPCEntity> npcType = isPlayer ?
+                        ModEntities.BEYONDER_NPC.get() :
+                        (EntityType<? extends BeyonderNPCEntity>) entityType;
+
                 // Create BeyonderNPCEntity with proper constructor
                 entity = new BeyonderNPCEntity(
-                        (EntityType<? extends BeyonderNPCEntity>) entityType,
+                        npcType,
                         level,
                         hostile,
                         skin,
                         pathway,
                         sequence
                 );
+
+                // store the original player's UUID if the summoned entity was a player
+                if(isPlayer && entityData.contains("EntityNBT")) {
+                    CompoundTag playerNbt = entityData.getCompound("EntityNBT");
+                    if(playerNbt.hasUUID("UUID")) {
+                        entity.getPersistentData().putUUID("OriginalPlayerUUID", playerNbt.getUUID("UUID"));
+                        if (entity instanceof BeyonderNPCEntity npc) {
+                            npc.setTargetPlayerUUID(playerNbt.getUUID("UUID"));
+                        }
+                    }
+                }
 
                 ((BeyonderNPCEntity) entity).setQuestId("");
                 entity.getPersistentData().putBoolean("Initialized", true);
@@ -431,12 +456,11 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
             }
 
             // Load entity data (only for non-BeyonderNPC entities, as BeyonderNPC is already initialized)
-            if(!entityData.getBoolean("IsBeyonderNPC") && entityData.contains("EntityNBT")) {
+            if(!(entityData.getBoolean("IsBeyonderNPC") || isPlayer) && entityData.contains("EntityNBT")) {
                 CompoundTag entityNBT = entityData.getCompound("EntityNBT").copy();
 
                 // Remove UUID to generate a new one and avoid conflicts
                 entityNBT.remove("UUID");
-
                 entity.load(entityNBT);
             } else if(entityData.getBoolean("IsBeyonderNPC") && entityData.contains("EntityNBT")) {
                 // For BeyonderNPC, load NBT but skip some fields that are already initialized
@@ -448,7 +472,7 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
                 entityNBT.remove("sequence");
                 entityNBT.remove("skin");
                 entityNBT.remove("hostile");
-                
+
                 // Load remaining data (health, position, etc.)
                 entity.load(entityNBT);
             }
@@ -664,6 +688,22 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
         }
 
         data.put(MARKED_ENTITIES_TAG, list);
+    }
+
+    private void markSelf(ServerLevel level, ServerPlayer player) {
+        // Save entity data
+        CompoundTag entityData = new CompoundTag();
+        entityData.putString("EntityType", EntityType.getKey(player.getType()).toString());
+        entityData.putString("CustomName", player.hasCustomName() ? player.getCustomName().getString() : player.getName().getString());
+
+        CompoundTag entityNBT = new CompoundTag();
+        player.saveWithoutId(entityNBT);
+        entityData.put("EntityNBT", entityNBT);
+        entityData.putBoolean("IsBeyonderNPC", false);
+
+        addMarkedEntity(player, entityData);
+
+        player.sendSystemMessage(Component.translatable("ability.lotmcraft.historical_void_summoning.marked_entity", player.getName().getString()).withStyle(ChatFormatting.GREEN));
     }
 
 
@@ -920,8 +960,8 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
         Entity entity = event.getEntity();
         Level level = entity.level();
 
-        // run every minute
-        if (entity.tickCount % 1200 != 0) return;
+        // run every 30s
+        if (entity.tickCount % 600 != 0) return;
         if (level.isClientSide || !(level instanceof ServerLevel serverLevel)) return;
 
         if(entity.getPersistentData().getBoolean("VoidSummoned")) {
