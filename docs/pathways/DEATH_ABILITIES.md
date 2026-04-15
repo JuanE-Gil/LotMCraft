@@ -168,6 +168,24 @@ While active, suppresses all negative artifact effects on the caster for the dur
 
 ---
 
+### Restruction
+**Sequence Requirement:** 6  
+**Spirituality Cost:** 500  
+**Cooldown:** 1 second  
+*(Cannot be copied or replicated)*
+
+Two selectable modes:
+
+**Summon**
+- Summons **10 Skeletons** and **10 Zombies** near the caster (within a 4-block radius), each wearing a full set of iron armour (no drop chance).
+- All summoned mobs are registered as subordinates of the caster.
+
+**Release**
+- Despawns all currently summoned mobs linked to the caster.
+- Bypasses cooldown and spirituality cost.
+
+---
+
 ### Door to the Underworld
 **Sequence Requirement:** 5  
 **Spirituality Cost:** 600  

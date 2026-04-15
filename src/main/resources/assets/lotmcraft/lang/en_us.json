@@ -84,7 +84,7 @@
   "lotmcraft.death_envoy_ability": "Death Envoy",
   "lotmcraft.internal_underworld_ability": "Internal Underworld",
   "lotmcraft.undying_seal_ability": "Undying Seal",
-  "lotmcraft.reincarnation_ability": "Reincarnation",
+  "item.lotmcraft.reincarnation_ability": "Reincarnation",
   "ability.lotmcraft.reincarnation.triggered": "Reincarnation activates — your soul refuses to leave",
   "ability.lotmcraft.reincarnation.debuff_applied": "Reincarnation Debuff: abilities sealed for %s minutes",
   "ability.lotmcraft.reincarnation.on_cooldown": "Reincarnation is on cooldown — %s minutes remaining",
@@ -909,6 +909,8 @@
 
   "item.lotmcraft.solar_sensitivity_ability": "Solar Sensitivity",
   "item.lotmcraft.solar_sensitivity_ability.description": "During daytime you suffer Weakness. Sun pathway attacks deal 50% more damage to you",
+
+  "item.lotmcraft.reincarnation_ability.description": "When you would die, death is cancelled.",
 
   "item.lotmcraft.virtual_avatar_ability": "Identity Avatar",
   "item.lotmcraft.virtual_avatar_ability.description": "Virtual Persona: Other can now split off a Identity Avatar into reality",
