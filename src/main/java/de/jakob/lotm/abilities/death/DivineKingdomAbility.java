@@ -138,10 +138,10 @@ public class DivineKingdomAbility extends Ability {
             entitiesInRange.forEach(target -> {
                 if (AllyUtil.areAllies(caster, target)) return;
 
-                inRangeIds.add(target.getUUID());
-
                 int targetSeq = BeyonderData.getSequence(target);
                 int seqDiff = targetSeq - casterSeq; // positive = target is weaker
+
+                inRangeIds.add(target.getUUID());
 
                 // --- Damage debuff (scales with sequence difference) ---
                 float debuffMultiplier = BASE_DEBUFF_MULTIPLIER - (seqDiff * DEBUFF_SCALE_PER_SEQ);

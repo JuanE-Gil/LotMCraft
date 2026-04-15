@@ -46,7 +46,7 @@
 - **Effect Interval:** Every tick; damage every 20 ticks (once per second)
 
 **Instant Kill:**
-- Entities with sequence > 5 (Sequence 6–9) are killed instantly on the first tick they are in range.
+- Entities that are **2+ sequences weaker** than the caster are killed instantly on the first tick they are in range.
 
 **Persistent Debuffs** (applied to all non-allied entities in range, refreshed each tick):
 - **Wither II** (2-tick duration, refreshed)
@@ -81,10 +81,11 @@
 - **Wither II** for 1 minute on the target.
 
 **Damage:**
-- Target is **weaker** (higher sequence number): instant kill.
+- Target is **2+ sequences weaker**: instant kill.
+- Target is **1 sequence weaker**: deals **70%** of target's max HP.
 - Target is **same sequence**: deals **50%** of target's max HP.
-- Target is **stronger** (lower sequence number): deals **50% − (40% × sequence difference)** of target's max HP.
-  - 1 sequence stronger → 10%
+- Target is **stronger** (lower sequence number): deals **50% − (20% × sequence difference)** of target's max HP.
+  - 1 sequence stronger → 30%
   - 2+ sequences stronger → 0% (no damage; "too strong" message)
 
 **Visual:**
@@ -215,7 +216,7 @@ Two selectable modes:
 - **Radius:** 10 blocks
 - **Effect Duration:** 20 seconds on all affected entities
 
-Applies the following to all nearby entities on use:
+Applies the following to all nearby non-allied entities on use. Entities **2+ sequences stronger** than the caster are unaffected:
 - **Weakness II** for 20 seconds
 - **Slowness III** for 20 seconds
 - **Freeze ticks** (+400 ticks)
@@ -231,7 +232,7 @@ Applies the following to all nearby entities on use:
 
 - **Targeting Range:** 25 blocks
 
-Applies the **Spirit Called** custom effect (Level 0) to the target for 10 seconds.
+Applies the **Spirit Called** custom effect (Level 0) to the target for 10 seconds. Has no effect on targets **2+ sequences stronger** than the caster.
 
 > **Spirit Called** is a harmful custom effect. While active, every tick:
 > - The target's movement is zeroed (full stun).

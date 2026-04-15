@@ -82,8 +82,8 @@ public class PaleEyeAbility extends Ability {
         target.addEffect(new MobEffectInstance(MobEffects.WITHER,
                 WITHER_DURATION, 1, false, true, true));
 
-        if (targetSeq > casterSeq) {
-            // Target is weaker (higher sequence number) — instant death
+        if (targetSeq >= casterSeq + 2) {
+            // Target is 2+ sequences weaker — instant death
             target.hurt(
                     ModDamageTypes.source(level, ModDamageTypes.BEYONDER_GENERIC, entity),
                     Float.MAX_VALUE);
@@ -93,11 +93,11 @@ public class PaleEyeAbility extends Ability {
                                 .withStyle(ChatFormatting.DARK_PURPLE));
             }
         } else {
-            // Same or higher sequence — deal scaled damage
+            // Target is same, 1 sequence weaker, or stronger — deal scaled damage
             // At same sequence: 50% of max HP
             // Each sequence the caster is weaker (target seq < caster seq) reduces damage by 40%
             int seqDiff = casterSeq - targetSeq; // positive = caster is weaker
-            float damageMultiplier = 0.5f - (seqDiff * 0.4f);
+            float damageMultiplier = 0.5f - (seqDiff * 0.2f);
             if (damageMultiplier <= 0) {
                 if (entity instanceof net.minecraft.world.entity.player.Player player) {
                     player.sendSystemMessage(

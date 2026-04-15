@@ -83,7 +83,8 @@ public class DeathEnvoyAbility extends Ability {
         // --- Apply effects to all nearby entities ---
         for (LivingEntity target : AbilityUtil.getNearbyEntities(entity, serverLevel, center, RADIUS)) {
             int targetSeq = BeyonderData.getSequence(target);
-            boolean tooStrong = (targetSeq - casterSeq) <= -2;
+            // Skip targets that are 2+ sequences stronger (lower sequence number)
+            if (targetSeq - casterSeq <= -2) continue;
 
             // Weakness II
             target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS,
@@ -93,11 +94,9 @@ public class DeathEnvoyAbility extends Ability {
                     DURATION, 2, false, true, true));
             // Freeze ticks (visual freezing)
             target.setTicksFrozen(target.getTicksRequiredToFreeze() + DURATION);
-            // Spirit Called — only if target is not 2+ sequences stronger
-            if (!tooStrong) {
-                target.addEffect(new MobEffectInstance(ModEffects.SPIRIT_CALLED,
-                        SPIRIT_CALLED_DURATION, 0, false, true, true));
-            }
+            // Spirit Called
+            target.addEffect(new MobEffectInstance(ModEffects.SPIRIT_CALLED,
+                    SPIRIT_CALLED_DURATION, 0, false, true, true));
         }
     }
 }

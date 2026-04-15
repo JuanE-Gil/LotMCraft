@@ -27,7 +27,6 @@ public class NationOfTheDeadAbility extends Ability {
 
     private static final int RADIUS = 15;
     private static final int DURATION_TICKS = 20 * 100; // 1 minute 40 seconds
-    private static final int INSTANT_KILL_THRESHOLD = 5; // weaker than seq 5 → instant kill
 
     // Damage per second at same sequence: 1% of max HP
     private static final float BASE_DPS_PERCENT = 0.01f;
@@ -80,9 +79,10 @@ public class NationOfTheDeadAbility extends Ability {
                 if (AllyUtil.areAllies(entity, target)) return;
 
                 int targetSeq = BeyonderData.getSequence(target);
+                int seqDiff = targetSeq - casterSeq; // positive = target is weaker
 
-                // Instant kill: weaker than seq 5 (seq > 5, i.e. 6, 7, 8, 9)
-                if (targetSeq > INSTANT_KILL_THRESHOLD) {
+                // Instant kill: target is 2+ sequences weaker
+                if (seqDiff >= 2) {
                     target.hurt(
                             ModDamageTypes.source(serverLevel, ModDamageTypes.BEYONDER_GENERIC, entity),
                             Float.MAX_VALUE);
@@ -100,7 +100,6 @@ public class NationOfTheDeadAbility extends Ability {
 
                 // seqDiff > 0: target is weaker → more damage
                 // seqDiff < 0: target is stronger → less damage
-                int seqDiff = targetSeq - casterSeq;
                 float damagePercent = BASE_DPS_PERCENT + (seqDiff * PER_SEQ_STEP);
 
                 if (damagePercent <= 0) return; // target too strong to be harmed
