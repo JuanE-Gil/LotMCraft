@@ -1,0 +1,88 @@
+package de.jakob.lotm.util;
+
+import de.jakob.lotm.LOTMCraft;
+import de.jakob.lotm.gamerule.ClientGameruleCache;
+import de.jakob.lotm.util.beyonderMap.PathwayHistory;
+
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
+public class ClientBeyonderCache {
+    private static final Map<UUID, BeyonderClientData> dataCache = new ConcurrentHashMap<>();
+
+    public static void updateData(UUID playerUUID, String pathway, int sequence, float spirituality, boolean griefingEnabled, boolean isPlayer, float digestionProgress) {
+        updateData(playerUUID, pathway, sequence, spirituality, griefingEnabled, isPlayer, digestionProgress, new PathwayHistory(), 0);
+    }
+
+    public static void updateData(UUID playerUUID, String pathway, int sequence, float spirituality, boolean griefingEnabled, boolean isPlayer, float digestionProgress, PathwayHistory pathwayHistory, int charStack) {
+        dataCache.put(playerUUID, new BeyonderClientData(pathway, sequence, spirituality, griefingEnabled, digestionProgress, pathwayHistory, charStack));
+
+        if(isPlayer) {
+            float progress = spirituality / BeyonderData.getMaxSpirituality(sequence);
+            SpiritualityProgressTracker.setProgress(playerUUID, progress);
+        }
+    }
+
+    public static String getPathway(UUID playerUUID) {
+        BeyonderClientData data = dataCache.get(playerUUID);
+        return data != null ? data.pathway() : "none";
+    }
+
+    public static int getSequence(UUID playerUUID) {
+        BeyonderClientData data = dataCache.get(playerUUID);
+        return data != null ? data.sequence() : LOTMCraft.NON_BEYONDER_SEQ;
+    }
+
+    public static int getCharStack(UUID playerUUID) {
+        BeyonderClientData data = dataCache.get(playerUUID);
+        return data != null ? data.charStack() : 0;
+    }
+
+    public static void setCharStack(UUID playerUUID, int charStack) {
+        BeyonderClientData data = dataCache.get(playerUUID);
+        if (data != null) {
+            dataCache.put(playerUUID, new BeyonderClientData(data.pathway(), data.sequence(), data.spirituality(), data.griefingEnabled(), data.digestionProgress(), data.pathwayHistory(), charStack));
+        }
+    }
+
+    public static float getDigestionProgress(UUID playerUUID) {
+        BeyonderClientData data = dataCache.get(playerUUID);
+        return data != null ? data.digestionProgress() : 0.0f;
+    }
+
+    public static float getSpirituality(UUID playerUUID) {
+        BeyonderClientData data = dataCache.get(playerUUID);
+        return data != null ? Math.max(0, data.spirituality()) : 0.0f;
+    }
+
+    public static boolean isGriefingEnabled(UUID playerUUID) {
+        if(!ClientGameruleCache.isGlobalGriefingEnabled) {
+            return false;
+        }
+        BeyonderClientData data = dataCache.get(playerUUID);
+        return data != null && data.griefingEnabled();
+    }
+
+    public static boolean isBeyonder(UUID playerUUID) {
+        BeyonderClientData data = dataCache.get(playerUUID);
+
+        return data != null && !data.pathway().equals("none") && data.sequence() != LOTMCraft.NON_BEYONDER_SEQ;
+    }
+
+    public static PathwayHistory getPathwayHistory(UUID playerUUID) {
+        BeyonderClientData data = dataCache.get(playerUUID);
+        return data != null ? data.pathwayHistory() : new PathwayHistory();
+    }
+
+    public static void clearCache() {
+        dataCache.clear();
+    }
+
+    public static void removePlayer(UUID playerUUID) {
+        dataCache.remove(playerUUID);
+    }
+
+    // Inner record to store client-side beyonder data
+    private record BeyonderClientData(String pathway, int sequence, float spirituality, boolean griefingEnabled, float digestionProgress, PathwayHistory pathwayHistory, int charStack) {}
+}
