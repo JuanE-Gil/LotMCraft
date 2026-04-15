@@ -10,7 +10,7 @@
 **Cooldown:** 5 minutes  
 *(Cannot be copied or replicated)*
 
-- **Radius:** 35 blocks
+- **Radius:** 120 blocks
 - **Duration:** 3 minutes (3,600 ticks)
 - **Effect Interval:** Every tick
 
@@ -26,8 +26,11 @@
 **Durability Drain:**
 - Every second (every 20 ticks), all equipped items in every slot (head, chest, legs, feet, mainhand, offhand) lose **3 durability** via `hurtAndBreak`.
 
+**Instant Kill:**
+- Entities that are **2+ sequences weaker** than the caster are killed instantly on the first tick they are in range.
+
 **Countdown & Death:**
-- Each non-allied entity that enters the domain receives a personal countdown timer.
+- Each non-allied entity (not instantly killed) that enters the domain receives a personal countdown timer.
 - Base timer: **45 seconds**, reduced by **5 seconds per sequence the target is weaker** (minimum 1 second).
 - Timer is shown on the target's action bar every second as `☠ Divine Kingdom: Xs ☠`.
 - The countdown **pauses when the target leaves the domain** and **resets on re-entry**.
@@ -51,20 +54,21 @@
 **Persistent Debuffs** (applied to all non-allied entities in range, refreshed each tick):
 - **Wither II** (2-tick duration, refreshed)
 - **Slowness I** (2-tick duration, refreshed)
+- **Regeneration suppressed** — targets cannot regenerate health while inside the domain.
 
 **Per-Second Damage** (sequence-scaled, does not affect allies):
-- Same sequence: **1.0%** of target's max HP per second.
+- Same sequence: **3.0%** of target's max HP per second.
 - Each sequence weaker (target seq > caster seq): **+0.5%** per step.
 - Each sequence stronger (target seq < caster seq): **−0.5%** per step.
 - No damage if the scaled percentage reaches 0% or below.
 
 | Sequence Difference | Damage/sec |
 |---|---|
-| Target 3 seq weaker | 2.5% max HP |
-| Target 2 seq weaker | 2.0% max HP |
-| Target 1 seq weaker | 1.5% max HP |
-| Same sequence        | 1.0% max HP |
-| Target 1 seq stronger | 0.5% max HP |
+| Target 3 seq weaker | 4.5% max HP |
+| Target 2 seq weaker | 4.0% max HP |
+| Target 1 seq weaker | 3.5% max HP |
+| Same sequence        | 3.0% max HP |
+| Target 1 seq stronger | 2.5% max HP |
 | Target 2+ seq stronger | No damage  |
 
 ---
@@ -79,6 +83,7 @@
 
 **Effects (applied regardless of outcome):**
 - **Wither II** for 1 minute on the target.
+- **Regeneration suppressed** for 10 seconds.
 
 **Damage:**
 - Target is **2+ sequences weaker**: instant kill.
@@ -108,7 +113,7 @@ Three selectable sub-abilities:
   - **Wither II**
   - **Weakness II**
   - **Blindness II**
-- After the 30-second duration expires, deals damage as a percentage of the target's max HP, scaled by the sequence difference at the moment of casting:
+- After the 30-second duration expires, deals damage as a percentage of the target's max HP, scaled by the sequence difference at the moment of casting, and suppresses **regeneration for 10 seconds**:
   - Base (same sequence): **25%**
   - Each sequence weaker: **+10%** (e.g. 1 weaker → 35%, 2 weaker → 45%)
   - Each sequence stronger: **−10%** (e.g. 1 stronger → 15%, 2 stronger → 5%), minimum 0%
@@ -169,24 +174,6 @@ While active, suppresses all negative artifact effects on the caster for the dur
 
 ---
 
-### Restruction
-**Sequence Requirement:** 6  
-**Spirituality Cost:** 500  
-**Cooldown:** 1 second  
-*(Cannot be copied or replicated)*
-
-Two selectable modes:
-
-**Summon**
-- Summons **10 Skeletons** and **10 Zombies** near the caster (within a 4-block radius), each wearing a full set of iron armour (no drop chance).
-- All summoned mobs are registered as subordinates of the caster.
-
-**Release**
-- Despawns all currently summoned mobs linked to the caster.
-- Bypasses cooldown and spirituality cost.
-
----
-
 ### Door to the Underworld
 **Sequence Requirement:** 5  
 **Spirituality Cost:** 600  
@@ -242,6 +229,26 @@ Applies the **Spirit Called** custom effect (Level 0) to the target for 10 secon
 > - All incoming damage **bypasses armour** — hits are re-dealt next tick using an armour-ignoring damage source.
 
 ---
+
+
+### Restruction
+**Sequence Requirement:** 6  
+**Spirituality Cost:** 500  
+**Cooldown:** 1 second  
+*(Cannot be copied or replicated)*
+
+Two selectable modes:
+
+**Summon**
+- Summons **10 Skeletons** and **10 Zombies** near the caster (within a 4-block radius), each wearing a full set of iron armour (no drop chance).
+- All summoned mobs are registered as subordinates of the caster.
+
+**Release**
+- Despawns all currently summoned mobs linked to the caster.
+- Bypasses cooldown and spirituality cost.
+
+---
+
 
 ### Spirit Channeling
 **Sequence Requirement:** 7  
@@ -333,7 +340,11 @@ Four selectable modes:
 - Opens a screen listing all other online players for targeting/tracking.
 
 **Spectral Bind**
-- Targeted bind ability *(details in SpiritCommunicationAbility)*.
+- **Targeting Range:** 20 blocks (line-of-sight)
+- Applies to the target:
+  - **Slowness Level 100** for 3 seconds — full movement stun
+  - **Freeze ticks** (+60) — powder snow freezing visual
+  - **Weakness II** for 30 seconds
 
 ---
 
@@ -375,7 +386,7 @@ Passive. During daytime (while the sun is up), the caster receives **Weakness I*
 ---
 
 ### Reincarnation
-**Sequence Requirement:** 3  
+**Sequence Requirement:** 4  
 *(Cannot be copied or replicated)*
 
 Passive. When the caster would die (excluding loss-of-control deaths):

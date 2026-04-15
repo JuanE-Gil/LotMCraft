@@ -32,7 +32,7 @@ public class DeathEnvoyAbility extends Ability {
             new DustParticleOptions(new Vector3f(0.05f, 0.0f, 0.2f), 1.4f);
 
     public DeathEnvoyAbility(String id) {
-        super(id, 20 * 90f); // 90-second cooldown
+        super(id, 20f); // 1-second cooldown
         canBeCopied = false;
         canBeReplicated = false;
     }

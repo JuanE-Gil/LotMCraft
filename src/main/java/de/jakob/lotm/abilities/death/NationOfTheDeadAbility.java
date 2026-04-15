@@ -1,8 +1,13 @@
 package de.jakob.lotm.abilities.death;
 
+import de.jakob.lotm.abilities.PhysicalEnhancementsAbility;
 import de.jakob.lotm.abilities.core.Ability;
+import de.jakob.lotm.abilities.core.interaction.InteractionHandler;
 import de.jakob.lotm.damage.ModDamageTypes;
+import de.jakob.lotm.network.PacketHandler;
+import de.jakob.lotm.network.packets.toClient.SyncCullAbilityPacket;
 import de.jakob.lotm.util.BeyonderData;
+import de.jakob.lotm.util.data.Location;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.AllyUtil;
 import de.jakob.lotm.util.helper.ParticleUtil;
@@ -10,6 +15,7 @@ import de.jakob.lotm.util.scheduling.ServerScheduler;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -20,8 +26,12 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class NationOfTheDeadAbility extends Ability {
 
@@ -29,7 +39,7 @@ public class NationOfTheDeadAbility extends Ability {
     private static final int DURATION_TICKS = 20 * 100; // 1 minute 40 seconds
 
     // Damage per second at same sequence: 1% of max HP
-    private static final float BASE_DPS_PERCENT = 0.01f;
+    private static final float BASE_DPS_PERCENT = 0.03f;
     // Per sequence difference adjustment
     private static final float PER_SEQ_STEP = 0.005f;
 
@@ -37,7 +47,7 @@ public class NationOfTheDeadAbility extends Ability {
             new DustParticleOptions(new Vector3f(0.05f, 0.0f, 0.1f), 1.8f);
 
     public NationOfTheDeadAbility(String id) {
-        super(id, 20 * 180f); // 3-minute cooldown
+        super(id, 20f, "death"); // 1-second cooldown
         canBeCopied = false;
         canBeReplicated = false;
     }
@@ -64,9 +74,28 @@ public class NationOfTheDeadAbility extends Ability {
                 SoundEvents.WITHER_SPAWN, SoundSource.PLAYERS, 3.0f, 0.4f);
 
         AtomicInteger ticks = new AtomicInteger(0);
+        Set<UUID> overlayActive = new HashSet<>();
+        AtomicReference<UUID> taskId = new AtomicReference<>();
 
-        ServerScheduler.scheduleForDuration(0, 1, DURATION_TICKS, () -> {
+        taskId.set(ServerScheduler.scheduleForDuration(0, 1, DURATION_TICKS, () -> {
             Vec3 center = entity.position();
+            Location loc = new Location(center, serverLevel);
+
+            // Sun's Divine Kingdom Manifestation (equal or higher sequence) cancels Nation of the Dead
+            if (InteractionHandler.isInteractionPossible(loc, "purification", casterSeq)
+                    && InteractionHandler.isInteractionPossible(loc, "light_strong", casterSeq)) {
+                overlayActive.forEach(uuid -> {
+                    ServerPlayer player = serverLevel.getServer().getPlayerList().getPlayer(uuid);
+                    if (player != null) PacketHandler.sendToPlayer(player, new SyncCullAbilityPacket(false));
+                });
+                overlayActive.clear();
+                ServerScheduler.cancel(taskId.get());
+                return;
+            }
+
+            // Unshadowed Domain — works even if Sun caster is 1 sequence weaker than Death caster
+            boolean unshadowedActive = InteractionHandler.isInteractionPossibleStrictlyHigher(loc, "purification", casterSeq, -1)
+                    && InteractionHandler.isInteractionPossibleStrictlyHigher(loc, "light_strong", casterSeq, -1);
 
             // Visual: sphere of death particles every 10 ticks, ring every tick
             if (ticks.get() % 10 == 0) {
@@ -75,19 +104,34 @@ public class NationOfTheDeadAbility extends Ability {
             ParticleUtil.spawnCircleParticles(serverLevel, DEATH_DUST, center,
                     new Vec3(0, 1, 0), RADIUS, 24);
 
+            Set<UUID> inRangeThisTick = new HashSet<>();
+
             AbilityUtil.getNearbyEntities(entity, serverLevel, center, RADIUS).forEach(target -> {
                 if (AllyUtil.areAllies(entity, target)) return;
 
                 int targetSeq = BeyonderData.getSequence(target);
                 int seqDiff = targetSeq - casterSeq; // positive = target is weaker
 
+                // Unshadowed Domain protects this target — skip all effects
+                if (unshadowedActive) return;
+
                 // Instant kill: target is 2+ sequences weaker
                 if (seqDiff >= 2) {
-                    target.hurt(
-                            ModDamageTypes.source(serverLevel, ModDamageTypes.BEYONDER_GENERIC, entity),
-                            Float.MAX_VALUE);
+                    ModDamageTypes.trueDamage(target, Float.MAX_VALUE, serverLevel, entity);
                     return;
                 }
+
+                // Black overlay for players inside the domain
+                if (target instanceof ServerPlayer targetPlayer) {
+                    inRangeThisTick.add(targetPlayer.getUUID());
+                    if (!overlayActive.contains(targetPlayer.getUUID())) {
+                        overlayActive.add(targetPlayer.getUUID());
+                        PacketHandler.sendToPlayer(targetPlayer, new SyncCullAbilityPacket(true));
+                    }
+                }
+
+                // Suppress regen while inside the domain (refreshed every tick)
+                PhysicalEnhancementsAbility.suppressRegen(target, 2000);
 
                 // Persistent debuffs while inside the domain (refreshed every tick)
                 target.addEffect(new MobEffectInstance(MobEffects.WITHER,
@@ -105,12 +149,24 @@ public class NationOfTheDeadAbility extends Ability {
                 if (damagePercent <= 0) return; // target too strong to be harmed
 
                 float damage = target.getMaxHealth() * damagePercent;
-                target.hurt(
-                        ModDamageTypes.source(serverLevel, ModDamageTypes.BEYONDER_GENERIC, entity),
-                        damage);
+                ModDamageTypes.trueDamage(target, damage, serverLevel, entity);
+            });
+
+            // Remove overlay for players who left the domain this tick
+            overlayActive.removeIf(uuid -> {
+                if (inRangeThisTick.contains(uuid)) return false;
+                ServerPlayer player = serverLevel.getServer().getPlayerList().getPlayer(uuid);
+                if (player != null) PacketHandler.sendToPlayer(player, new SyncCullAbilityPacket(false));
+                return true;
             });
 
             ticks.getAndIncrement();
-        }, serverLevel);
+        }, serverLevel));
+
+        // Clean up overlay for all remaining players when duration ends
+        overlayActive.forEach(uuid -> {
+            ServerPlayer player = serverLevel.getServer().getPlayerList().getPlayer(uuid);
+            if (player != null) PacketHandler.sendToPlayer(player, new SyncCullAbilityPacket(false));
+        });
     }
 }

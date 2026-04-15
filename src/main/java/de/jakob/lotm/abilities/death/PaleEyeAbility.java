@@ -1,5 +1,6 @@
 package de.jakob.lotm.abilities.death;
 
+import de.jakob.lotm.abilities.PhysicalEnhancementsAbility;
 import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.damage.ModDamageTypes;
 import de.jakob.lotm.util.BeyonderData;
@@ -36,7 +37,7 @@ public class PaleEyeAbility extends Ability {
     private static final int TARGET_RANGE = 30;
 
     public PaleEyeAbility(String id) {
-        super(id, 20 * 120f); // 2-minute cooldown
+        super(id, 20f); // 1-second cooldown
         canBeCopied = false;
         canBeReplicated = false;
     }
@@ -82,11 +83,11 @@ public class PaleEyeAbility extends Ability {
         target.addEffect(new MobEffectInstance(MobEffects.WITHER,
                 WITHER_DURATION, 1, false, true, true));
 
+        PhysicalEnhancementsAbility.suppressRegen(target, 10_000);
+
         if (targetSeq >= casterSeq + 2) {
             // Target is 2+ sequences weaker — instant death
-            target.hurt(
-                    ModDamageTypes.source(level, ModDamageTypes.BEYONDER_GENERIC, entity),
-                    Float.MAX_VALUE);
+            ModDamageTypes.trueDamage(target, Float.MAX_VALUE, serverLevel, entity);
             if (entity instanceof net.minecraft.world.entity.player.Player player) {
                 player.sendSystemMessage(
                         Component.translatable("ability.lotmcraft.pale_eye.death_gaze")
@@ -108,9 +109,7 @@ public class PaleEyeAbility extends Ability {
             }
 
             float damage = target.getMaxHealth() * damageMultiplier;
-            target.hurt(
-                    ModDamageTypes.source(level, ModDamageTypes.BEYONDER_GENERIC, entity),
-                    damage);
+            ModDamageTypes.trueDamage(target, damage, serverLevel, entity);
 
             if (entity instanceof net.minecraft.world.entity.player.Player player) {
                 player.sendSystemMessage(

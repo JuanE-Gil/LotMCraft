@@ -21,7 +21,7 @@ public class UndyingSealAbility extends Ability {
     private static final ConcurrentHashMap<UUID, Long> sealedPlayers = new ConcurrentHashMap<>();
 
     public UndyingSealAbility(String id) {
-        super(id, 20 * 120f); // 2-minute cooldown
+        super(id, 20f); // 1-second cooldown
         canBeCopied = false;
         canBeReplicated = false;
     }

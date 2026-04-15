@@ -49,6 +49,7 @@ Some abilities use `postsUsedAbilityEventManually = true` in their constructor w
 | `destruction` | Destruction-aspected abilities |
 | `space_warp` | Space-warping abilities |
 | `escape` | General escape mechanism |
+| `death` | Death-aspected domain abilities |
 
 ---
 
@@ -86,6 +87,13 @@ Some abilities use `postsUsedAbilityEventManually = true` in their constructor w
 | Horror Aura | `darkness` |
 | Requiem | `calming` |
 | Midnight Poem | `calming` |
+
+### Death Pathway
+
+| Ability | Flags |
+|---------|-------|
+| Divine Kingdom | `death` |
+| Nation of the Dead | `death` |
 
 ### Tyrant Pathway
 
@@ -230,6 +238,8 @@ Purification is the most widely-effective flag, primarily produced by Sun pathwa
 | Fear Aura | Abyss | Fear aura is cancelled |
 | Mind Fog | Abyss | Fog effect is completely cancelled |
 | Night Domain | Darkness | Domain is **weakened** — reduced blindness/darkness effects, fewer particles, reduced speed slowdown |
+| Divine Kingdom (Death) | Death | Domain entity is cancelled and cleaned up |
+| Nation of the Dead | Death | Domain is cancelled — all effects and overlay immediately removed |
 | Sword of Darkness | Darkness | Darkness attack is purified |
 | Horror Aura | Darkness | Horror aura is cancelled, affected entities are freed |
 | Charm | Demoness | Charm effect is broken |
@@ -283,6 +293,7 @@ Purification is the most widely-effective flag, primarily produced by Sun pathwa
 | Invisibility | Demoness | Invisibility completely removed (entity becomes visible, effect stripped) |
 | Shadow Concealment | Demoness | Concealment is broken |
 | Night Domain | Darkness | Domain is **completely cancelled** (requires caster to be strictly higher sequence by at least 1) |
+| Nation of the Dead | Death | All domain effects suspended for that tick (Sun caster may be up to 1 sequence weaker than Death caster) |
 | Surge of Darkness | Darkness | Darkness surge is cancelled |
 | Demonic Spells | Abyss | Spells are cancelled |
 
@@ -388,12 +399,17 @@ The following flags are produced by abilities but no ability currently reacts to
 - `unluck` — Produced by Curse of Misfortune
 - `space_warp` — Produced by Black Hole, Distortion Field Entity
 - `light_weak` — Produced by many Sun abilities
+- `death` — Produced by Divine Kingdom, Nation of the Dead (reacted to by `purification`+`light_strong` checks, not by the flag itself)
 
 These flags are available for future interaction implementations or may be used for conditional logic within the abilities that produce them.
 
 ---
 
 ## Cross-Pathway Interaction Summary
+
+### Sun ↔ Death
+- Sun's Divine Kingdom Manifestation (`purification` + `light_strong`, equal or higher sequence) cancels Death's Divine Kingdom entity and Nation of the Dead
+- Unshadowed Domain (`purification` + `light_strong`) suppresses Nation of the Dead effects even if the Sun caster is 1 sequence weaker than the Death caster
 
 ### Sun ↔ Darkness
 - Sun abilities (`purification`, `light_strong`, `light_source`) counter nearly all Darkness pathway abilities

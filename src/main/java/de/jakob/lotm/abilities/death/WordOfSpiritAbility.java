@@ -17,7 +17,7 @@ public class WordOfSpiritAbility extends Ability {
     private static final int DURATION_TICKS = 20 * 10; // 10 seconds
 
     public WordOfSpiritAbility(String id) {
-        super(id, 20 * 45f); // 45-second cooldown
+        super(id, 20f); // 1-second cooldown
         canBeCopied = false;
         canBeReplicated = false;
     }

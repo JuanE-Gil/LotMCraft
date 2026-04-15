@@ -40,13 +40,6 @@ public class SpiritChannelingAbility extends SelectableAbility {
     /** Spirits captured per player (server-side). */
     private static final HashMap<UUID, SpiritType> capturedSpirits = new HashMap<>();
 
-    /** Client-side mirror of the local player's captured spirit (-1 = none). */
-    private static int clientSpiritTypeOrdinal = -1;
-
-    public static void setClientSpiritType(int ordinal) {
-        clientSpiritTypeOrdinal = ordinal;
-    }
-
     /** Players who have the Glacial Aegis active (next hit negated). */
     private static final Set<UUID> glacialAegisActive = new HashSet<>();
 
@@ -99,14 +92,17 @@ public class SpiritChannelingAbility extends SelectableAbility {
 
     /** Returns the mode list for a specific player based on their captured spirit. */
     private String[] getAbilityNamesForPlayer(UUID uuid) {
-        // On the client the server map is empty — use the synced ordinal instead
-        if (capturedSpirits.isEmpty() && clientSpiritTypeOrdinal >= 0) {
-            SpiritType[] values = SpiritType.values();
-            if (clientSpiritTypeOrdinal < values.length) {
-                return switch (values[clientSpiritTypeOrdinal]) {
-                    case FROST_GHOST -> FROST_MODES;
-                    case EARTH_SPIRIT -> EARTH_MODES;
-                };
+        // On the client the server map is empty — use the synced ordinal from ClientSpiritCache instead
+        if (capturedSpirits.isEmpty() && net.neoforged.fml.loading.FMLEnvironment.dist == net.neoforged.api.distmarker.Dist.CLIENT) {
+            int ordinal = de.jakob.lotm.util.ClientSpiritCache.getSpiritTypeOrdinal();
+            if (ordinal >= 0) {
+                SpiritType[] values = SpiritType.values();
+                if (ordinal < values.length) {
+                    return switch (values[ordinal]) {
+                        case FROST_GHOST -> FROST_MODES;
+                        case EARTH_SPIRIT -> EARTH_MODES;
+                    };
+                }
             }
             return BASE_MODES;
         }

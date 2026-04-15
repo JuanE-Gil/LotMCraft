@@ -1,5 +1,6 @@
 package de.jakob.lotm.abilities.death;
 
+import de.jakob.lotm.abilities.PhysicalEnhancementsAbility;
 import de.jakob.lotm.abilities.core.SelectableAbility;
 import de.jakob.lotm.damage.ModDamageTypes;
 import de.jakob.lotm.util.BeyonderData;
@@ -28,7 +29,7 @@ public class HandOfDeathAbility extends SelectableAbility {
     private static final Map<UUID, UUID> activeMarks = new ConcurrentHashMap<>();
 
     public HandOfDeathAbility(String id) {
-        super(id, 20 * 60f); // 60-second cooldown
+        super(id, 20f); // 1-second cooldown
         canBeCopied = false;
         canBeReplicated = false;
     }
@@ -104,9 +105,8 @@ public class HandOfDeathAbility extends SelectableAbility {
             if (!targetRef.isAlive()) return;
 
             float damage = targetRef.getMaxHealth() * damageMultiplier;
-            targetRef.hurt(
-                    ModDamageTypes.source(level, ModDamageTypes.BEYONDER_GENERIC, caster),
-                    damage);
+            PhysicalEnhancementsAbility.suppressRegen(targetRef, 10_000);
+            ModDamageTypes.trueDamage(targetRef, damage, level, caster);
         }, level);
 
         activeMarks.put(target.getUUID(), taskId);

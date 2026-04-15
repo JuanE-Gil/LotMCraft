@@ -4,6 +4,7 @@ import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.entity.custom.*;
 import de.jakob.lotm.entity.custom.ability_entities.*;
 import de.jakob.lotm.entity.custom.ability_entities.darkness_pathway.ConcealedDomainEntity;
+import de.jakob.lotm.entity.custom.ability_entities.death_pathway.DeathDivineKingdomEntity;
 import de.jakob.lotm.entity.custom.ability_entities.door_pathway.*;
 import de.jakob.lotm.entity.custom.ability_entities.mother_pathway.BloomingAreaEntity;
 import de.jakob.lotm.entity.custom.ability_entities.mother_pathway.CoffinEntity;
@@ -72,9 +73,15 @@ public class ModEntities {
             ENTITY_TYPES.register("wind_blade", () -> EntityType.Builder.<WindBladeEntity>of(WindBladeEntity::new, MobCategory.MISC)
                     .sized(.75f, 2f).noSave().build("wind_blade"));
 
-    //Ability Entities - Darkness Pathway
-    
-     public static final Supplier<EntityType<ConcealedDomainEntity>> CONCEALED_DOMAIN =
+    // Ability Entities - Death Pathway
+
+    public static final Supplier<EntityType<DeathDivineKingdomEntity>> DEATH_DIVINE_KINGDOM =
+            ENTITY_TYPES.register("death_divine_kingdom", () -> EntityType.Builder.<DeathDivineKingdomEntity>of(DeathDivineKingdomEntity::new, MobCategory.MISC)
+                    .sized(0.5F, 0.5F).clientTrackingRange(64).updateInterval(1).noSummon().noSave().fireImmune().build("death_divine_kingdom"));
+
+    // Ability Entities - Darkness Pathway
+
+    public static final Supplier<EntityType<ConcealedDomainEntity>> CONCEALED_DOMAIN =
             ENTITY_TYPES.register("concealed_domain", () -> EntityType.Builder.<ConcealedDomainEntity>of(ConcealedDomainEntity::new, MobCategory.MISC)
                     .sized(0.5F, 0.5F).clientTrackingRange(64).updateInterval(1).noSummon().noSave().fireImmune().build("concealed_domain"));
     

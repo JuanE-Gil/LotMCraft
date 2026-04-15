@@ -530,7 +530,15 @@ public class ClientHandler {
         ClientSacrificeCache.setRemainingTicks(totalTicks);
     }
 
+    public static void syncCullAbility(boolean active, UUID playerUUID) {
+        if (active) {
+            CullOverlay.playersWithCullActivated.add(playerUUID);
+        } else {
+            CullOverlay.playersWithCullActivated.remove(playerUUID);
+        }
+    }
+
     public static void handleSpiritChannelingPacket(de.jakob.lotm.network.packets.toClient.SyncSpiritChannelingPacket packet) {
-        de.jakob.lotm.abilities.death.SpiritChannelingAbility.setClientSpiritType(packet.spiritType());
+        de.jakob.lotm.util.ClientSpiritCache.setSpiritTypeOrdinal(packet.spiritType());
     }
 }
