@@ -11,7 +11,6 @@ import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.ClientBeyonderCache;
 import de.jakob.lotm.util.ClientSacrificeCache;
 import de.jakob.lotm.util.ClientQuestData;
-import de.jakob.lotm.util.beyonderMap.PathwayHistory;
 import de.jakob.lotm.util.data.ClientData;
 import de.jakob.lotm.util.helper.ClientTeamData;
 import net.minecraft.ChatFormatting;
@@ -123,10 +122,10 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
             // The switch point seq (e.g. 5) is where they left the old pathway, so only abilities
             // from seq 5 and above (requirement >= switchSeq) carry over — not the seq 4 ability.
             if (this.minecraft != null && this.minecraft.player != null) {
-                PathwayHistory history = ClientBeyonderCache.getPathwayHistory(this.minecraft.player.getUUID());
+                String[] pathwayHistory = ClientBeyonderCache.getPathwayHistory(this.minecraft.player.getUUID());
                 for (int seq = menu.getSequence() + 1; seq <= 9; seq++) {
-                    String historicalPathway = history.get(seq);
-                    if (historicalPathway != null) {
+                    String historicalPathway = pathwayHistory[seq];
+                    if (historicalPathway != null && !historicalPathway.isEmpty()) {
                         availableAbilities.addAll(LOTMCraft.abilityHandler.getByPathwayAndSequenceOrderedBySequence(historicalPathway, seq));
                         break;
                     }

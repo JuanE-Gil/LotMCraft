@@ -105,12 +105,10 @@ public class SacrificeAbility extends Ability {
         // Activate after animation completes (20 ticks banner + 15 ticks ball = 35 ticks)
         int animationTicks = 35;
         ServerScheduler.scheduleDelayed(animationTicks, () -> {
-            if (player.connection == null) return;
-
             float savedDigestion = BeyonderData.getDigestionProgress(player);
-            BeyonderData.setBeyonder(player, pathway, tempSeq, true);
+            BeyonderData.setBeyonder(player, pathway, tempSeq, true, false, false);
             // Temp sequence starts at 0 digestion — prevents drinking potions to exploit the advance
-            player.getPersistentData().putFloat(BeyonderData.NBT_DIGESTION_PROGRESS, 0.0f);
+            BeyonderData.setDigestionProgress(player, 0);
             PacketHandler.syncBeyonderDataToPlayer(player);
             AbilityWheelHelper.removeUnusableAbilities(player);
 
@@ -127,8 +125,8 @@ public class SacrificeAbility extends Ability {
                         && BeyonderData.getPathway(player).equals(pathway)
                         && BeyonderData.getSequence(player) == tempSeq) {
                     float digestion = r.getSavedDigestion();
-                    BeyonderData.setBeyonder(player, pathway, currentSeq, true);
-                    player.getPersistentData().putFloat(BeyonderData.NBT_DIGESTION_PROGRESS, digestion);
+                    BeyonderData.setBeyonder(player, pathway, currentSeq, true, false, false);
+                    BeyonderData.setDigestionProgress(player, digestion);
                     PacketHandler.syncBeyonderDataToPlayer(player);
                     AbilityWheelHelper.removeUnusableAbilities(player);
                 }

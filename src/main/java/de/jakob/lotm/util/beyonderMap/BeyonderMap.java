@@ -278,17 +278,14 @@ public class BeyonderMap extends SavedData {
         return Optional.of(map.get(entity));
     }
 
-    public int count(String path, int seq){
+    public int count(String path, int seq) {
         int res = 0;
-
-        for(var obj : map.values()){
-            if(obj.pathway().equals(path) && obj.sequence() == seq){
+        for (var obj : map.values()) {
+            if (obj.pathway().equals(path) && obj.sequence() == seq) {
                 res++;
-
-                res += obj.charStack().get(seq);
+                res += obj.charStack(); // single int
             }
         }
-
         return res;
     }
 
@@ -466,17 +463,11 @@ public class BeyonderMap extends SavedData {
         setDirty();
     }
 
-    public void setStack(LivingEntity entity, int value){
-        if(!contains(entity)) put(entity);
+    public void addStack(LivingEntity entity, int value) {
+        if (!contains(entity)) put(entity);
 
-        setStack(entity, BeyonderData.getSequence(entity), value);
-    }
-
-    public void addStack(LivingEntity entity, int value){
-        if(!contains(entity)) put(entity);
-
-        var buff = beyonderMap.get(entity.getUUID()).get().charStack();
-        setStack(entity, buff.get(BeyonderData.getSequence(entity)) + value);
+        int current = beyonderMap.get(entity.getUUID()).get().charStack();
+        setStack(entity, current + value);
     }
 
     /**
@@ -487,22 +478,23 @@ public class BeyonderMap extends SavedData {
         if (!contains(entity)) put(entity);
 
         var current = beyonderMap.get(entity.getUUID()).get();
+        String[] history = Arrays.copyOf(current.pathwayHistory(), 10);
+        history[sequence] = previousPathway;
+
         map.put(entity.getUUID(), StoredData.builder
                 .copyFrom(current)
-                .pathwayHistory(current.pathwayHistory().set(sequence, previousPathway))
+                .pathwayHistory(history)
                 .build());
 
         setDirty();
     }
 
-    public void setStack(LivingEntity entity, int seq, int value){
-        if(!contains(entity)) put(entity);
-
-        var buff = beyonderMap.get(entity.getUUID()).get().charStack();
+    public void setStack(LivingEntity entity, int value) {
+        if (!contains(entity)) put(entity);
 
         map.put(entity.getUUID(), StoredData.builder
                 .copyFrom(map.get(entity.getUUID()))
-                .charStack(buff.set(seq, value))
+                .charStack(value)
                 .build());
 
         setDirty();

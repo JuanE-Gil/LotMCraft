@@ -80,8 +80,8 @@ public class PlayerEvents {
                         && BeyonderData.getPathway(player).equals(revert.getPathway())
                         && BeyonderData.getSequence(player) == revert.getRevertToSequence() - 1) {
                     float digestion = revert.getSavedDigestion();
-                    BeyonderData.setBeyonder(player, revert.getPathway(), revert.getRevertToSequence(), true);
-                    player.getPersistentData().putFloat(BeyonderData.NBT_DIGESTION_PROGRESS, digestion);
+                    BeyonderData.setBeyonder(player, revert.getPathway(), revert.getRevertToSequence(), true, true, true);
+                    BeyonderData.setDigestionProgress(player, digestion);
                     // No sync needed on logout — player reads NBT fresh on next login
                 }
                 revert.clear();

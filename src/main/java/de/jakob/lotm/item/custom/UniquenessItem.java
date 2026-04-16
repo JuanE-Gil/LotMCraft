@@ -43,8 +43,7 @@ public class UniquenessItem extends Item {
 
         int color = BeyonderData.pathwayInfos.get(pathway).color();
 
-        Optional<StoredData> storedData = beyonderMap.get(player);
-        int charStackCount = storedData.map(data -> data.charStack().get(BeyonderData.getSequence(player))).orElse(0);
+        int charStackCount = BeyonderData.getCharStack(player);
 
         if(
                 !pathway.equalsIgnoreCase(BeyonderData.getPathway(player)) ||

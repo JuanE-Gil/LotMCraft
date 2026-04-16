@@ -5,6 +5,7 @@ import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.units.qual.C;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.LinkedList;
 
 public class StoredDataBuilder {
@@ -16,8 +17,8 @@ public class StoredDataBuilder {
     private LinkedList<HonorificName> knownNames;
     private Boolean modified;
     private Vec3 lastPosition;
-    private CharacteristicStack charStack;
-    private PathwayHistory pathwayHistory;
+    private int charStack;
+    private String[] pathwayHistory;
 
     public StoredDataBuilder(){
         clean();
@@ -32,8 +33,8 @@ public class StoredDataBuilder {
         knownNames = new LinkedList<>();
         modified = false;
         lastPosition = new Vec3(0, 0, 0);
-        charStack = new CharacteristicStack();
-        pathwayHistory = new PathwayHistory();
+        charStack = 0;
+        pathwayHistory = new String[10];
     }
 
     public StoredDataBuilder copyFrom(@Nullable StoredData data){
@@ -49,7 +50,7 @@ public class StoredDataBuilder {
             modified = data.modified();
             lastPosition = data.lastPosition();
             charStack = data.charStack();
-            pathwayHistory = data.pathwayHistory();
+            pathwayHistory = Arrays.copyOf(data.pathwayHistory(), 10);
         }
 
         return this;
@@ -95,13 +96,13 @@ public class StoredDataBuilder {
         return this;
     }
 
-    public StoredDataBuilder charStack(CharacteristicStack stack){
+    public StoredDataBuilder charStack(int stack) {
         charStack = stack;
         return this;
     }
 
-    public StoredDataBuilder pathwayHistory(PathwayHistory history){
-        pathwayHistory = history;
+    public StoredDataBuilder pathwayHistory(String[] history) {
+        pathwayHistory = Arrays.copyOf(history, 10);
         return this;
     }
 
