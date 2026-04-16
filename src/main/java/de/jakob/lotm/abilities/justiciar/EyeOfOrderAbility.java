@@ -68,7 +68,7 @@ public class EyeOfOrderAbility extends Ability {
             default -> 15;
         };
     }
-
+//new upload
     @override
     public void onAbilityUse(Level level, LivingEntity entity) {
         if (level.isClientSide) return;
