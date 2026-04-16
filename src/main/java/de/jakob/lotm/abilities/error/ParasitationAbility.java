@@ -47,7 +47,7 @@ public class ParasitationAbility extends SelectableAbility {
     private static final HashMap<UUID, UUID> originalBodyMap = new HashMap<>();
 
     public ParasitationAbility(String id) {
-        super(id, 10f);
+        super(id, 5f);
         canBeUsedByNPC = false;
         canBeCopied = false;
         canBeReplicated = false;
@@ -132,7 +132,7 @@ public class ParasitationAbility extends SelectableAbility {
         boolean lowerSeq = targetSeq > userSeq;
 
         // 10% vs lower seq, 33% against same/higher
-        float chance = lowerSeq ? 0.10f : 0.33f;
+        float chance = lowerSeq ? 0.5f : 0.12f;
         if (random.nextFloat() >= chance) {
             AbilityUtil.sendActionBar(player, Component.literal(lowerSeq
                     ? "§cControl failed!"
