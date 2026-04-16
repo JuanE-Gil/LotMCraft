@@ -12,10 +12,7 @@ import de.jakob.lotm.entity.custom.ability_entities.OriginalBodyEntity;
 import de.jakob.lotm.gui.custom.CoordinateInput.CoordinateInputScreen;
 import de.jakob.lotm.gui.custom.Introspect.IntrospectScreen;
 import de.jakob.lotm.gui.custom.Quest.QuestAcceptanceScreen;
-import de.jakob.lotm.gui.custom.SelectionGui.HistoricalVoidBorrowingSelectionGui;
-import de.jakob.lotm.gui.custom.SelectionGui.PlayerSelectionGui;
-import de.jakob.lotm.gui.custom.SelectionGui.ShapeShiftingSelectionGui;
-import de.jakob.lotm.gui.custom.SelectionGui.StructureSelectionGui;
+import de.jakob.lotm.gui.custom.SelectionGui.*;
 import de.jakob.lotm.network.packets.toClient.*;
 import de.jakob.lotm.quest.Quest;
 import de.jakob.lotm.quest.QuestRegistry;
@@ -461,6 +458,10 @@ public class ClientHandler {
 
     public static void handleStructureDivinationScreenPacket(OpenStructureDivinationScreenPacket packet) {
         Minecraft.getInstance().setScreen(new StructureSelectionGui(packet.structureIds()));
+    }
+
+    public static void handleBiomeDivinationScreenPacket(OpenBiomeDivinationScreenPacket packet) {
+        Minecraft.getInstance().setScreen(new BiomeSelectionGui(packet.biomeIds()));
     }
 
     public static void handleShapeShiftingScreenPacket(OpenShapeShiftingScreenPacket packet) {

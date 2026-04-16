@@ -395,6 +395,12 @@ public class PacketHandler {
         );
 
         registrar.playToClient(
+                OpenBiomeDivinationScreenPacket.TYPE,
+                OpenBiomeDivinationScreenPacket.STREAM_CODEC,
+                OpenBiomeDivinationScreenPacket::handle
+        );
+
+        registrar.playToClient(
                 OpenShapeShiftingScreenPacket.TYPE,
                 OpenShapeShiftingScreenPacket.STREAM_CODEC,
                 OpenShapeShiftingScreenPacket::handle
@@ -691,6 +697,11 @@ public class PacketHandler {
                 StructureDivinationSelectedPacket.TYPE,
                 StructureDivinationSelectedPacket.STREAM_CODEC,
                 StructureDivinationSelectedPacket::handle);
+
+        registrar.playToServer(
+                BiomeDivinationSelectedPacket.TYPE,
+                BiomeDivinationSelectedPacket.STREAM_CODEC,
+                BiomeDivinationSelectedPacket::handle);
 
         registrar.playToServer(
                 HistoricalVoidBorrowingSelectedPacket.TYPE,
