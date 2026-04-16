@@ -59,7 +59,7 @@ public class NationOfTheDeadAbility extends Ability {
 
     @Override
     protected float getSpiritualityCost() {
-        return 3000;
+        return 8000;
     }
 
     @Override

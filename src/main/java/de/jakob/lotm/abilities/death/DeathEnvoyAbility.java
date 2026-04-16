@@ -44,7 +44,7 @@ public class DeathEnvoyAbility extends Ability {
 
     @Override
     protected float getSpiritualityCost() {
-        return 400;
+        return 800;
     }
 
     @Override

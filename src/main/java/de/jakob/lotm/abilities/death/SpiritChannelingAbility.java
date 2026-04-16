@@ -82,7 +82,7 @@ public class SpiritChannelingAbility extends SelectableAbility {
 
     @Override
     protected float getSpiritualityCost() {
-        return 150;
+        return 300;
     }
 
     @Override

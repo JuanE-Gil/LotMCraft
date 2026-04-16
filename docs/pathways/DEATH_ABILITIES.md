@@ -6,7 +6,7 @@
 
 ### Divine Kingdom
 **Sequence Requirement:** 1  
-**Spirituality Cost:** 75,000 (50% of Sequence 1 max)  
+**Spirituality Cost:** 30, 000
 **Cooldown:** 5 minutes  
 *(Cannot be copied or replicated)*
 
@@ -24,7 +24,7 @@
 - Modifier is removed when the target leaves the domain.
 
 **Durability Drain:**
-- Every second (every 20 ticks), all equipped items in every slot (head, chest, legs, feet, mainhand, offhand) lose **3 durability** via `hurtAndBreak`.
+- Every second (every 20 ticks), all equipped items in every slot (head, chest, legs, feet, mainhand, offhand) lose **15 durability** via `hurtAndBreak`.
 
 **Instant Kill:**
 - Entities that are **2+ sequences weaker** than the caster are killed instantly on the first tick they are in range.
@@ -40,7 +40,7 @@
 
 ### Nation of the Dead
 **Sequence Requirement:** 2  
-**Spirituality Cost:** 3,000  
+**Spirituality Cost:** 8,000  
 **Cooldown:** 3 minutes  
 *(Cannot be copied or replicated)*
 
@@ -130,7 +130,7 @@ Three selectable sub-abilities:
 
 ### Internal Underworld
 **Sequence Requirement:** 4  
-**Spirituality Cost:** 300  
+**Spirituality Cost:** 3000
 **Cooldown:** 1 tick (effectively instant)  
 *(Cannot be copied or replicated)*
 
@@ -196,7 +196,7 @@ Two selectable modes:
 
 ### Death Envoy
 **Sequence Requirement:** 5  
-**Spirituality Cost:** 400  
+**Spirituality Cost:** 800  
 **Cooldown:** 90 seconds  
 *(Cannot be copied or replicated)*
 
@@ -252,7 +252,7 @@ Two selectable modes:
 
 ### Spirit Channeling
 **Sequence Requirement:** 7  
-**Spirituality Cost:** 150  
+**Spirituality Cost:** 300  
 **Cooldown:** 3 ticks  
 *(Cannot be copied or replicated)*
 
@@ -295,7 +295,7 @@ Captures a spirit from the environment (75% success chance at Seq ≤ 6, 50% oth
 
 ### Zombie Disguise
 **Sequence Requirement:** 7  
-**Spirituality Cost:** 0.3/tick  
+**Spirituality Cost:** 7/tick  
 *(Toggle — cannot be copied, replicated, or stolen; players only)*
 
 While active:
@@ -324,7 +324,7 @@ While active:
 ### Spirit Communication
 **Sequence Requirement:** 8  
 **Spirituality Cost:** 10  
-**Cooldown:** 1 tick  
+**Cooldown:** 10 tick  
 *(Cannot be copied, replicated, or stolen; players only; not usable in artifacts)*
 
 Four selectable modes:

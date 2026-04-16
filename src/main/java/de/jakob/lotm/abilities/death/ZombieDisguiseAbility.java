@@ -44,7 +44,7 @@ public class ZombieDisguiseAbility extends ToggleAbility {
 
     @Override
     protected float getSpiritualityCost() {
-        return 0.3f;
+        return 7f;
     }
 
     @Override

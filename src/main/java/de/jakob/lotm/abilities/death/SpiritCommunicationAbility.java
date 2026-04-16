@@ -32,7 +32,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class SpiritCommunicationAbility extends SelectableAbility {
 
     public SpiritCommunicationAbility(String id) {
-        super(id, 1);
+        super(id, 10);
         canBeCopied = false;
         canBeUsedByNPC = false;
         cannotBeStolen = true;

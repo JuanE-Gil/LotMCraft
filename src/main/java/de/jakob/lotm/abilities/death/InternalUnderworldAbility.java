@@ -64,7 +64,7 @@ public class InternalUnderworldAbility extends SelectableAbility {
 
     @Override
     protected float getSpiritualityCost() {
-        return 300;
+        return 3000;
     }
 
     @Override
