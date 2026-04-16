@@ -91,6 +91,11 @@ public class BeyonderEventHandler {
         BeyonderData.setBeyonder(serverPlayer, oldPathway, oldSequence, true, true, true);
         BeyonderData.setDigestionProgress(serverPlayer, digestionsProgress);
         BeyonderData.setGriefingEnabled(serverPlayer, griefingEnabled);
+
+        serverPlayer.getPersistentData().remove("beyonder_pathway");
+        serverPlayer.getPersistentData().remove("beyonder_sequence");
+        serverPlayer.getPersistentData().remove("beyonder_digestion_progress");
+        serverPlayer.getPersistentData().remove("beyonder_griefing_enabled");
     }
 
     @SubscribeEvent
