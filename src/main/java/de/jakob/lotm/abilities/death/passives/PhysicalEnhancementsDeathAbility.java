@@ -1,4 +1,4 @@
-package de.jakob.lotm.abilities.darkness.passives;
+package de.jakob.lotm.abilities.death.passives;
 
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.PhysicalEnhancementsAbility;
