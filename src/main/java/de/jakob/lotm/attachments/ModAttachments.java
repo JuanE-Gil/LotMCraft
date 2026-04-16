@@ -67,6 +67,11 @@ public class ModAttachments {
                     AttachmentType.serializable(DisabledAbilitiesComponent::new).build()
             );
 
+    public static final Supplier<AttachmentType<ApotheosisComponent>> APOTHEOSIS_COMPONENT =
+            ATTACHMENT_TYPES.register("apotheosis_component", () ->
+                    AttachmentType.serializable(ApotheosisComponent::new).build()
+            );
+
     public static final Supplier<AttachmentType<MultiplierModifierComponent>> MULTIPLIER_MODIFIER_COMPONENT =
             ATTACHMENT_TYPES.register("multiplier_modifier_component", () ->
                     AttachmentType.serializable(MultiplierModifierComponent::new).build()
@@ -209,6 +214,11 @@ public class ModAttachments {
                             .serialize(SharedAbilitiesComponent.SERIALIZER)
                             .copyOnDeath()
                             .build()
+            );
+
+    public static final Supplier<AttachmentType<BeyonderComponent>> BEYONDER_COMPONENT =
+            ATTACHMENT_TYPES.register("beyonder_component", () ->
+                    AttachmentType.serializable(BeyonderComponent::new).copyOnDeath().build()
             );
 
     public static final Supplier<AttachmentType<SkillScalingComponent>> SKILL_SCALING_COMPONENT =

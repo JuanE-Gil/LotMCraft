@@ -27,7 +27,7 @@ public class BeyonderCommand {
             .requires(source -> source.hasPermission(2)) // Requires OP level 2
             .then(Commands.argument("pathway", StringArgumentType.string())
                 .suggests(PATHWAY_SUGGESTIONS)
-                .then(Commands.argument("sequence", IntegerArgumentType.integer(1, 9))
+                .then(Commands.argument("sequence", IntegerArgumentType.integer(0, 9))
                     .executes(context -> {
                         // Execute on the command source (self)
                         CommandSourceStack source = context.getSource();

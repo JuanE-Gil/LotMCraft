@@ -129,8 +129,7 @@ public class AdvancementUtil {
         if (!beyonderMap.check(pathway, sequence)) return;
 
         boolean fullyDigested = getDigestionProgress(player) == 1.0f;
-        Optional<StoredData> storedData = beyonderMap.get(player);
-        int charStackCount = storedData.map(data -> data.charStack().get(sequence)).orElse(0);
+        int charStackCount = BeyonderData.getCharStack(player);
         double failureChance = (fullyDigested && sequence == 1 && charStackCount < 2) ? 0.0 : 1.0;
 
         int duration = calculateAdvancementDuration(sequence);

@@ -3,7 +3,6 @@ package de.jakob.lotm.network.packets.toClient;
 
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.util.ClientBeyonderCache;
-import de.jakob.lotm.util.beyonderMap.PathwayHistory;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -11,25 +10,25 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public record SyncBeyonderDataPacket(String pathway, int sequence, float spirituality, boolean griefingEnabled, float digestionProgress, PathwayHistory pathwayHistory, int charStack) implements CustomPacketPayload {
+public record SyncBeyonderDataPacket(String pathway, int sequence, float spirituality, boolean griefingEnabled, float digestionProgress, String[] pathwayHistory, int charStack) implements CustomPacketPayload {
     public static final Type<SyncBeyonderDataPacket> TYPE =
             new Type<>(ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "sync_beyonder_data"));
 
-    private static final StreamCodec<FriendlyByteBuf, PathwayHistory> PATHWAY_HISTORY_CODEC =
+    private static final StreamCodec<FriendlyByteBuf, String[]> PATHWAY_HISTORY_CODEC =
             StreamCodec.of(
-                    (buf, history) -> {
+                    (buf, strings) -> {
                         for (int i = 0; i < 10; i++) {
-                            String p = history.get(i);
-                            buf.writeUtf(p != null ? p : "");
+                            String s = i < strings.length ? strings[i] : null;
+                            buf.writeUtf(s != null ? s : "");
                         }
                     },
                     buf -> {
-                        String[] pathways = new String[10];
+                        String[] strings = new String[10];
                         for (int i = 0; i < 10; i++) {
-                            String p = buf.readUtf();
-                            pathways[i] = p.isEmpty() ? null : p;
+                            String s = buf.readUtf();
+                            strings[i] = s.isEmpty() ? null : s;
                         }
-                        return new PathwayHistory(pathways);
+                        return strings;
                     }
             );
 

@@ -16,8 +16,10 @@ import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityWheelHelper;
 import de.jakob.lotm.util.helper.ParticleUtil;
 import de.jakob.lotm.util.scheduling.ServerScheduler;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -37,7 +39,7 @@ public class SacrificeAbility extends Ability {
     private static final int MAX_DURATION_SECONDS = 60;
 
     public SacrificeAbility(String id) {
-        super(id, 43200);
+        super(id, 20 * 60 * 5);
         canBeCopied = false;
         canBeReplicated = false;
         canBeUsedInArtifact = false;
@@ -103,12 +105,10 @@ public class SacrificeAbility extends Ability {
         // Activate after animation completes (20 ticks banner + 15 ticks ball = 35 ticks)
         int animationTicks = 35;
         ServerScheduler.scheduleDelayed(animationTicks, () -> {
-            if (player.connection == null) return;
-
             float savedDigestion = BeyonderData.getDigestionProgress(player);
-            BeyonderData.setBeyonder(player, pathway, tempSeq, true);
+            BeyonderData.setBeyonder(player, pathway, tempSeq, true, false, false);
             // Temp sequence starts at 0 digestion — prevents drinking potions to exploit the advance
-            player.getPersistentData().putFloat(BeyonderData.NBT_DIGESTION_PROGRESS, 0.0f);
+            BeyonderData.setDigestionProgress(player, 0);
             PacketHandler.syncBeyonderDataToPlayer(player);
             AbilityWheelHelper.removeUnusableAbilities(player);
 
@@ -119,15 +119,14 @@ public class SacrificeAbility extends Ability {
 
             // Revert while online after duration expires
             ServerScheduler.scheduleDelayed(durationTicks, () -> {
-                if (player.connection == null) return;
                 SacrificeRevertComponent r = player.getData(ModAttachments.SACRIFICE_REVERT_COMPONENT);
                 if (!r.isActive()) return;
                 if (BeyonderData.isBeyonder(player)
                         && BeyonderData.getPathway(player).equals(pathway)
                         && BeyonderData.getSequence(player) == tempSeq) {
                     float digestion = r.getSavedDigestion();
-                    BeyonderData.setBeyonder(player, pathway, currentSeq, true);
-                    player.getPersistentData().putFloat(BeyonderData.NBT_DIGESTION_PROGRESS, digestion);
+                    BeyonderData.setBeyonder(player, pathway, currentSeq, true, false, false);
+                    BeyonderData.setDigestionProgress(player, digestion);
                     PacketHandler.syncBeyonderDataToPlayer(player);
                     AbilityWheelHelper.removeUnusableAbilities(player);
                 }
@@ -172,5 +171,15 @@ public class SacrificeAbility extends Ability {
                         player.getX(), player.getY(), player.getZ(), level, player);
             }, level);
         }, level);
+    }
+
+    @Override
+    public void onHold(Level level, LivingEntity entity) {
+        if(!(entity instanceof ServerPlayer player)) return;
+
+        KillCountComponent killCount = player.getData(ModAttachments.KILL_COUNT_COMPONENT);
+        int kills = killCount.getKillCount();
+
+        player.displayClientMessage(Component.translatable("lotm.kills").append(": " + kills).withStyle(ChatFormatting.RED), true);
     }
 }

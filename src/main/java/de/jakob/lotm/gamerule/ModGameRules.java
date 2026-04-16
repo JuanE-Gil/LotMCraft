@@ -15,6 +15,7 @@ public class ModGameRules {
     public static GameRules.Key<GameRules.BooleanValue> DISABLE_FLIGHT_IN_COMBAT;
     public static GameRules.Key<GameRules.BooleanValue> ALLOW_ARTIFACTS;
     public static GameRules.Key<GameRules.BooleanValue> ALLOW_ARTIFACTS_WITH_NO_NEGATIVES;
+    public static GameRules.Key<GameRules.IntegerValue> CHARSTACK_REQUIRED_FOR_APOTHEOSIS;
 
     public static GameRules.Key<GameRules.IntegerValue> SEQ_0_AMOUNT;
     public static GameRules.Key<GameRules.IntegerValue> SEQ_1_AMOUNT;
@@ -45,6 +46,12 @@ public class ModGameRules {
                 GameRules.BooleanValue.create(true, (server, value) -> {
                     PacketHandler.sendToAllPlayers(new SyncGriefingGamerulePacket(value.get()));
                 })
+        );
+
+        CHARSTACK_REQUIRED_FOR_APOTHEOSIS = GameRules.register(
+                "charStackRequiredForApotheosis",
+                GameRules.Category.MISC,
+                GameRules.IntegerValue.create(2)
         );
 
         DIGESTION_RATE = GameRules.register(
