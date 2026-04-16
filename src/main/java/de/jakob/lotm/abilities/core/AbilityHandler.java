@@ -248,6 +248,8 @@ public class AbilityHandler {
         abilities.add(new ConfinementAbility("confinement_ability"));
         abilities.add(new JusticeLanguageAbility("justice_language_ability"));
         abilities.add(new VerdictExileAbility("verdict_exile_ability"));
+        abilities.add(new EyeOfOrderAbility("eye_of_order_ability"));
+
 
         // ERROR PATHWAY
         abilities.add(new TheftAbility("theft_ability"));
