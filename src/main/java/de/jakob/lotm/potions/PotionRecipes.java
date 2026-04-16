@@ -727,7 +727,7 @@ public class PotionRecipes {
         ));
         RECIPES.add(new PotionRecipe(
                 (BeyonderPotion) PotionItemHandler.FERRYMAN_POTION.get(),
-                new ItemStack(Items.BOAT, 1),
+                new ItemStack(Items.OAK_BOAT, 1),
                 new ItemStack(Items.SOUL_SOIL, 1),
                 new ItemStack(Objects.requireNonNull(BeyonderCharacteristicItemHandler.selectCharacteristicOfPathwayAndSequence("death", 3)))
         ));
