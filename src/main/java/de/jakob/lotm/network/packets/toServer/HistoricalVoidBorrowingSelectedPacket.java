@@ -40,6 +40,9 @@ public record HistoricalVoidBorrowingSelectedPacket (String SelectedOption) impl
             else if (packet.SelectedOption.equals("Borrow Cleansed State")) {
                 HistoricalVoidSummoningAbility.historicalVoidBorrowCleansedState(player, player.serverLevel());
             }
+            else if (packet.SelectedOption.equals("Borrow Sequence")) {
+                HistoricalVoidSummoningAbility.historicalVoidBorrowSequence(player, player.serverLevel());
+            }
         });
     }
 }
