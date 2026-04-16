@@ -243,6 +243,11 @@ public class AbilityHandler {
 
         // JUSTICIAR PATHWAY
         abilities.add(new AuthorityAbility("authority_ability"));
+        abilities.add(new ProhibitionAbility("prohibition_ability"));
+        abilities.add(new ImprisonAbility("imprison_ability"));
+        abilities.add(new ConfinementAbility("confinement_ability"));
+        abilities.add(new JusticeLanguageAbility("justice_language_ability"));
+        abilities.add(new VerdictExileAbility("verdict_exile_ability"));
 
         // ERROR PATHWAY
         abilities.add(new TheftAbility("theft_ability"));

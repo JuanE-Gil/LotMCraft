@@ -770,6 +770,29 @@
   "ability.lotmcraft.authority.slow": "Slow",
   "ability.lotmcraft.authority.armor_remove": "Armor Remove",
 
+  "lotmcraft.prohibition_ability": "Prohibition",
+  "lotmcraft.prohibition_ability.description": "Declare a type of activity Prohibited within a 40-block zone. Up to 3 zones per type may be active simultaneously.",
+  "ability.lotmcraft.prohibition.beyonder_abilities": "Prohibit Beyonder Abilities",
+  "ability.lotmcraft.prohibition.combat": "Prohibit Combat",
+  "ability.lotmcraft.prohibition.flying": "Prohibit Flying",
+  "ability.lotmcraft.prohibition.item_use": "Prohibit Item Use",
+  "ability.lotmcraft.prohibition.players": "Prohibit Players",
+
+  "lotmcraft.imprison_ability": "Imprison",
+  "lotmcraft.imprison_ability.description": "Imprison a target, freezing them in place. Drains 300 Spirituality from you every 4 seconds. Re-cast to release.",
+
+  "lotmcraft.confinement_ability": "Confinement",
+  "lotmcraft.confinement_ability.description": "Erect invisible barrier walls forming a hollow cage around a target location. Teleportation out of the cage is blocked.",
+
+  "lotmcraft.justice_language_ability": "Justice Language",
+  "lotmcraft.justice_language_ability.description": "Speak verdicts in the Language of Justice. Enforce secrecy, declare death, or prepare a flogging.",
+  "ability.lotmcraft.justice_language.maintain_secrecy": "Maintain Secrecy",
+  "ability.lotmcraft.justice_language.death": "Death",
+  "ability.lotmcraft.justice_language.flog": "Flog",
+
+  "lotmcraft.verdict_exile_ability": "Verdict: Exile",
+  "lotmcraft.verdict_exile_ability.description": "Exile a target upward with a burst of force, granting them slow falling while they are cast away.",
+
   "lotm.ability.cogitation.tick": "Cogitating",
 
   "item.lotmcraft.ability_not_implemented": "Abilities for this Sequence are not yet implemented",

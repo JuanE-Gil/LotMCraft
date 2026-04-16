@@ -1,0 +1,114 @@
+package de.jakob.lotm.events;
+
+import de.jakob.lotm.LOTMCraft;
+import de.jakob.lotm.abilities.core.AbilityUseEvent;
+import de.jakob.lotm.abilities.justiciar.ProhibitionAbility;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.phys.Vec3;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+
+@EventBusSubscriber(modid = LOTMCraft.MOD_ID)
+public class ProhibitionHandler {
+
+    @SubscribeEvent
+    public static void onAbilityUse(AbilityUseEvent event) {
+        LivingEntity entity = event.getEntity();
+        if (!(entity.level() instanceof ServerLevel serverLevel)) return;
+
+        if (isInZone(entity.position(), serverLevel, ProhibitionAbility.ProhibitionType.BEYONDER_ABILITIES)) {
+            event.setCanceled(true);
+            if (entity instanceof ServerPlayer sp) {
+                sp.sendSystemMessage(Component.literal("[Beyonder Abilities] is Prohibited here")
+                        .withStyle(ChatFormatting.RED));
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onLivingDamagePre(LivingDamageEvent.Pre event) {
+        if (!(event.getSource().getEntity() instanceof LivingEntity attacker)) return;
+        if (!(attacker.level() instanceof ServerLevel serverLevel)) return;
+
+        if (isInZone(attacker.position(), serverLevel, ProhibitionAbility.ProhibitionType.COMBAT)) {
+            event.setNewDamage(0);
+            if (attacker instanceof ServerPlayer sp) {
+                sp.sendSystemMessage(Component.literal("[Combat] is Prohibited here")
+                        .withStyle(ChatFormatting.RED));
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        if (!(player.level() instanceof ServerLevel serverLevel)) return;
+
+        // Clean expired zones
+        long now = serverLevel.getGameTime();
+        ProhibitionAbility.ACTIVE_ZONES.removeIf(z -> z.expiryTick < now);
+
+        Vec3 pos = player.position();
+
+        // Flying prohibition
+        if (isInZone(pos, serverLevel, ProhibitionAbility.ProhibitionType.FLYING)) {
+            if (player.getAbilities().flying) {
+                player.getAbilities().flying = false;
+                player.getAbilities().mayfly = false;
+                player.onUpdateAbilities();
+                player.sendSystemMessage(Component.literal("[Flying] is Prohibited here")
+                        .withStyle(ChatFormatting.RED));
+            }
+        }
+
+        // Players prohibition — push non-owner players out
+        for (ProhibitionAbility.ProhibitionZone zone : ProhibitionAbility.ACTIVE_ZONES) {
+            if (!zone.type.equals(ProhibitionAbility.ProhibitionType.PLAYERS)) continue;
+            if (!zone.level.equals(serverLevel)) continue;
+            if (!zone.isActive()) continue;
+            if (zone.ownerId.equals(player.getUUID())) continue;
+
+            double dist = pos.distanceTo(zone.center);
+            if (dist <= 40.0) {
+                Vec3 direction = pos.subtract(zone.center).normalize();
+                if (direction.lengthSqr() < 0.001) {
+                    direction = new Vec3(1, 0, 0);
+                }
+                player.setDeltaMovement(direction.scale(1.5));
+                player.hurtMarked = true;
+                player.sendSystemMessage(Component.literal("[Players] is Prohibited here")
+                        .withStyle(ChatFormatting.RED));
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onItemUse(PlayerInteractEvent.RightClickItem event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        if (!(player.level() instanceof ServerLevel serverLevel)) return;
+
+        if (isInZone(player.position(), serverLevel, ProhibitionAbility.ProhibitionType.ITEM_USE)) {
+            event.setCanceled(true);
+            player.sendSystemMessage(Component.literal("[Item Use] is Prohibited here")
+                    .withStyle(ChatFormatting.RED));
+        }
+    }
+
+    private static boolean isInZone(Vec3 pos, ServerLevel level, ProhibitionAbility.ProhibitionType type) {
+        long now = level.getGameTime();
+        for (ProhibitionAbility.ProhibitionZone zone : ProhibitionAbility.ACTIVE_ZONES) {
+            if (zone.type != type) continue;
+            if (!zone.level.equals(level)) continue;
+            if (zone.expiryTick < now) continue;
+            if (pos.distanceTo(zone.center) <= 40.0) return true;
+        }
+        return false;
+    }
+}

@@ -1,0 +1,155 @@
+package de.jakob.lotm.abilities.justiciar;
+
+import de.jakob.lotm.abilities.core.AbilityUsedEvent;
+import de.jakob.lotm.abilities.core.SelectableAbility;
+import de.jakob.lotm.rendering.effectRendering.EffectManager;
+import de.jakob.lotm.util.BeyonderData;
+import de.jakob.lotm.util.helper.AbilityUtil;
+import de.jakob.lotm.util.scheduling.ServerScheduler;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.common.NeoForge;
+
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+public class ProhibitionAbility extends SelectableAbility {
+
+    public static final List<ProhibitionZone> ACTIVE_ZONES = new CopyOnWriteArrayList<>();
+
+    private static final int ZONE_DURATION = 3600;
+    private static final int MAX_ZONES_PER_TYPE = 3;
+    private static final double ZONE_RADIUS = 40.0;
+
+    public ProhibitionAbility(String id) {
+        super(id, 15f, "prohibition");
+        interactionRadius = 40;
+        hasOptimalDistance = false;
+        postsUsedAbilityEventManually = true;
+    }
+
+    @Override
+    public Map<String, Integer> getRequirements() {
+        return new HashMap<>(Map.of("justiciar", 6));
+    }
+
+    @Override
+    protected float getSpiritualityCost() {
+        return 800;
+    }
+
+    @Override
+    protected String[] getAbilityNames() {
+        return new String[]{
+                "ability.lotmcraft.prohibition.beyonder_abilities",
+                "ability.lotmcraft.prohibition.combat",
+                "ability.lotmcraft.prohibition.flying",
+                "ability.lotmcraft.prohibition.item_use",
+                "ability.lotmcraft.prohibition.players"
+        };
+    }
+
+    @Override
+    protected void castSelectedAbility(Level level, LivingEntity entity, int abilityIndex) {
+        if (level.isClientSide) return;
+        ServerLevel serverLevel = (ServerLevel) level;
+
+        // Check for resistance from same-or-higher-rank beyonders in range
+        boolean failed = AbilityUtil.getNearbyEntities(entity, serverLevel, entity.position(), (int) ZONE_RADIUS)
+                .stream()
+                .filter(e -> e != entity && BeyonderData.isBeyonder(e))
+                .anyMatch(target -> {
+                    int targetSeq = BeyonderData.getSequence(target);
+                    int casterSeq = BeyonderData.getSequence(entity);
+                    return targetSeq <= casterSeq && random.nextDouble() < 0.4;
+                });
+
+        if (failed) {
+            if (entity instanceof net.minecraft.server.level.ServerPlayer sp) {
+                sp.sendSystemMessage(Component.literal("Your Verdict has Failed").withStyle(ChatFormatting.RED));
+            }
+            return;
+        }
+
+        ProhibitionType type = ProhibitionType.values()[abilityIndex];
+        long expiryTick = serverLevel.getGameTime() + ZONE_DURATION;
+
+        // Remove oldest zone of this type if at cap
+        List<ProhibitionZone> ownZones = new ArrayList<>(ACTIVE_ZONES.stream()
+                .filter(z -> z.ownerId.equals(entity.getUUID()) && z.type == type)
+                .sorted(Comparator.comparingLong(z -> z.expiryTick))
+                .toList());
+        while (ownZones.size() >= MAX_ZONES_PER_TYPE) {
+            ACTIVE_ZONES.remove(ownZones.remove(0));
+        }
+
+        // Remove expired zones
+        long now = serverLevel.getGameTime();
+        ACTIVE_ZONES.removeIf(z -> z.expiryTick < now);
+
+        ProhibitionZone newZone = new ProhibitionZone(entity.getUUID(), type, entity.position(), serverLevel, expiryTick);
+        ACTIVE_ZONES.add(newZone);
+
+        // Play the VFX immediately, then re-send every 140 ticks (effect lasts 160t) for the full zone duration
+        final double px = entity.getX(), py = entity.getY(), pz = entity.getZ();
+        EffectManager.playEffect(EffectManager.Effect.PROHIBITION, px, py, pz, serverLevel);
+        ServerScheduler.scheduleForDuration(140, 140, ZONE_DURATION, () -> {
+            if (!newZone.isActive()) return;
+            EffectManager.playEffect(EffectManager.Effect.PROHIBITION, px, py, pz, serverLevel);
+        }, null, serverLevel);
+
+        String typeName = type.displayName;
+        Component message = Component.literal("[" + typeName + "] is Prohibited here")
+                .withStyle(ChatFormatting.GOLD);
+
+        serverLevel.getServer().getPlayerList().getPlayers().forEach(p -> {
+            if (p.level().equals(serverLevel) && p.distanceTo(entity) <= ZONE_RADIUS) {
+                p.sendSystemMessage(message);
+            }
+        });
+
+        NeoForge.EVENT_BUS.post(new AbilityUsedEvent(serverLevel, entity.position(), entity, this, interactionFlags, ZONE_RADIUS, 20 * 2));
+    }
+
+    public enum ProhibitionType {
+        BEYONDER_ABILITIES("Beyonder Abilities"),
+        COMBAT("Combat"),
+        FLYING("Flying"),
+        ITEM_USE("Item Use"),
+        PLAYERS("Players");
+
+        public final String displayName;
+
+        ProhibitionType(String name) {
+            this.displayName = name;
+        }
+    }
+
+    public static class ProhibitionZone {
+        public final UUID ownerId;
+        public final ProhibitionType type;
+        public final Vec3 center;
+        public final ServerLevel level;
+        public final long expiryTick;
+
+        public ProhibitionZone(UUID ownerId, ProhibitionType type, Vec3 center, ServerLevel level, long expiryTick) {
+            this.ownerId = ownerId;
+            this.type = type;
+            this.center = center;
+            this.level = level;
+            this.expiryTick = expiryTick;
+        }
+
+        public boolean isActive() {
+            return level.getGameTime() < expiryTick;
+        }
+
+        public boolean isInZone(Vec3 pos, ServerLevel lvl) {
+            return lvl.equals(level) && pos.distanceTo(center) <= ZONE_RADIUS;
+        }
+    }
+}

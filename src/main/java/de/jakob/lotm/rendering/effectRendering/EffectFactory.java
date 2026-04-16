@@ -74,6 +74,8 @@ public class EffectFactory {
             case 28 -> new AcidSwampEffect(x, y, z);
             case 29 -> new ArtifactExplosionEffect(x, y, z);
             case 30 -> new BloodInfernoEffect(x, y, z);
+            case 31 -> new ProhibitionEffect(x, y, z);
+            case 32 -> new ImprisonEffect(x, y, z);
             default -> throw new IllegalArgumentException("Unknown effect index: " + effectIndex);
         };
 

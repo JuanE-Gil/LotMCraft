@@ -26,7 +26,7 @@ public class AuthorityAbility extends SelectableAbility {
 
     public AuthorityAbility(String id) {
         super(id, 10f, "authority");
-        interactionRadius = 10;
+        interactionRadius = 15;
         hasOptimalDistance = false;
     }
 
@@ -64,7 +64,7 @@ public class AuthorityAbility extends SelectableAbility {
         if (level.isClientSide) return;
         ServerLevel serverLevel = (ServerLevel) level;
 
-        AbilityUtil.getNearbyEntities(entity, serverLevel, entity.position(), 10).forEach(target -> {
+        AbilityUtil.getNearbyEntities(entity, serverLevel, entity.position(), 15).forEach(target -> {
             List<Holder<MobEffect>> toRemove = target.getActiveEffects().stream()
                     .filter(e -> e.getEffect().value().getCategory() == MobEffectCategory.BENEFICIAL)
                     .map(MobEffectInstance::getEffect)
@@ -72,7 +72,7 @@ public class AuthorityAbility extends SelectableAbility {
             toRemove.forEach(target::removeEffect);
         });
 
-        NeoForge.EVENT_BUS.post(new AbilityUsedEvent(serverLevel, entity.position(), entity, this, interactionFlags, 10, 20 * 2));
+        NeoForge.EVENT_BUS.post(new AbilityUsedEvent(serverLevel, entity.position(), entity, this, interactionFlags, 15, 20 * 2));
     }
 
     // ── Spell 2: Slow ─────────────────────────────────────────────────────────
@@ -81,11 +81,11 @@ public class AuthorityAbility extends SelectableAbility {
         if (level.isClientSide) return;
         ServerLevel serverLevel = (ServerLevel) level;
 
-        AbilityUtil.getNearbyEntities(entity, serverLevel, entity.position(), 10).forEach(target -> {
+        AbilityUtil.getNearbyEntities(entity, serverLevel, entity.position(), 15).forEach(target -> {
             target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20 * 20, 1)); // Slowness II, 20 seconds
         });
 
-        NeoForge.EVENT_BUS.post(new AbilityUsedEvent(serverLevel, entity.position(), entity, this, interactionFlags, 10, 20 * 2));
+        NeoForge.EVENT_BUS.post(new AbilityUsedEvent(serverLevel, entity.position(), entity, this, interactionFlags, 15, 20 * 2));
     }
 
     // ── Spell 3: Armor Remove ─────────────────────────────────────────────────
@@ -94,7 +94,7 @@ public class AuthorityAbility extends SelectableAbility {
         if (level.isClientSide) return;
         ServerLevel serverLevel = (ServerLevel) level;
 
-        AbilityUtil.getNearbyEntities(entity, serverLevel, entity.position(), 10).forEach(target -> {
+        AbilityUtil.getNearbyEntities(entity, serverLevel, entity.position(), 15).forEach(target -> {
             if (random.nextDouble() < 0.4) {
                 List<EquipmentSlot> equippedSlots = new ArrayList<>();
                 for (EquipmentSlot slot : ARMOR_SLOTS) {
@@ -113,6 +113,6 @@ public class AuthorityAbility extends SelectableAbility {
             }
         });
 
-        NeoForge.EVENT_BUS.post(new AbilityUsedEvent(serverLevel, entity.position(), entity, this, interactionFlags, 10, 20 * 2));
+        NeoForge.EVENT_BUS.post(new AbilityUsedEvent(serverLevel, entity.position(), entity, this, interactionFlags, 15, 20 * 2));
     }
 }
