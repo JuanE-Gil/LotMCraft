@@ -41,6 +41,6 @@
     }
   },
   "textures": {
-    "layer0": "lotmcraft:item/physical_enhancements_death_ability"
+    "layer0": "lotmcraft:item/solar_sensitivity_ability"
   }
 }
