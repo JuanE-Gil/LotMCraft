@@ -461,6 +461,45 @@ public class PotionItemHandler {
     public static DeferredItem<Item> SNAKE_OF_MERCURY_POTION = ITEMS.registerItem("snake_of_mercury_potion", properties ->
                     new BeyonderPotion(properties, 1, "wheel_of_fortune"),
             new Item.Properties().stacksTo(1).rarity(Rarity.EPIC));
+    
+    public static DeferredItem<Item> CORPSE_COLLECTOR_POTION = ITEMS.registerItem("corpse_collector_potion", properties ->
+                    new BeyonderPotion(properties, 9, "death"),
+            new Item.Properties().stacksTo(1).rarity(Rarity.EPIC));
+
+    public static DeferredItem<Item> GRAVEDIGGER_POTION = ITEMS.registerItem("gravedigger_potion", properties ->
+                    new BeyonderPotion(properties, 8, "death"),
+            new Item.Properties().stacksTo(1).rarity(Rarity.EPIC));
+
+    public static DeferredItem<Item> SPIRIT_MEDIUM_POTION = ITEMS.registerItem("spirit_medium_potion", properties ->
+                    new BeyonderPotion(properties, 7, "death"),
+            new Item.Properties().stacksTo(1).rarity(Rarity.EPIC));
+
+    public static DeferredItem<Item> SPIRIT_GUIDE_POTION = ITEMS.registerItem("spirit_guide_potion", properties ->
+                    new BeyonderPotion(properties, 6, "death"),
+            new Item.Properties().stacksTo(1).rarity(Rarity.EPIC));
+
+    public static DeferredItem<Item> GATEKEEPER_POTION = ITEMS.registerItem("gatekeeper_potion", properties ->
+                    new BeyonderPotion(properties, 5, "death"),
+            new Item.Properties().stacksTo(1).rarity(Rarity.EPIC));
+
+    public static DeferredItem<Item> UNDYING_POTION = ITEMS.registerItem("undying_potion", properties ->
+                    new BeyonderPotion(properties, 4, "death"),
+            new Item.Properties().stacksTo(1).rarity(Rarity.EPIC));
+
+    public static DeferredItem<Item> FERRYMAN_POTION = ITEMS.registerItem("ferryman_potion", properties ->
+                    new BeyonderPotion(properties, 3, "death"),
+            new Item.Properties().stacksTo(1).rarity(Rarity.EPIC));
+
+    public static DeferredItem<Item> DEATH_CONSUL_POTION = ITEMS.registerItem("death_consul_potion", properties ->
+                    new BeyonderPotion(properties, 2, "death"),
+            new Item.Properties().stacksTo(1).rarity(Rarity.EPIC));
+
+    public static DeferredItem<Item> PALE_EMPEROR_POTION = ITEMS.registerItem("pale_emperor_potion", properties ->
+                    new BeyonderPotion(properties, 1, "death"),
+            new Item.Properties().stacksTo(1).rarity(Rarity.EPIC));
+
+
+        
 
     public static DeferredItem<Item> EMPTY_BOTTLE = ITEMS.registerItem("empty_bottle", Item::new);
 
