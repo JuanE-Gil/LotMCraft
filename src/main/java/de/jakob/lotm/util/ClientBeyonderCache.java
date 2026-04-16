@@ -2,7 +2,6 @@ package de.jakob.lotm.util;
 
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.gamerule.ClientGameruleCache;
-import de.jakob.lotm.util.beyonderMap.PathwayHistory;
 
 import java.util.Map;
 import java.util.UUID;
@@ -12,10 +11,10 @@ public class ClientBeyonderCache {
     private static final Map<UUID, BeyonderClientData> dataCache = new ConcurrentHashMap<>();
 
     public static void updateData(UUID playerUUID, String pathway, int sequence, float spirituality, boolean griefingEnabled, boolean isPlayer, float digestionProgress) {
-        updateData(playerUUID, pathway, sequence, spirituality, griefingEnabled, isPlayer, digestionProgress, new PathwayHistory(), 0);
+        updateData(playerUUID, pathway, sequence, spirituality, griefingEnabled, isPlayer, digestionProgress, new String[10], 0);
     }
 
-    public static void updateData(UUID playerUUID, String pathway, int sequence, float spirituality, boolean griefingEnabled, boolean isPlayer, float digestionProgress, PathwayHistory pathwayHistory, int charStack) {
+    public static void updateData(UUID playerUUID, String pathway, int sequence, float spirituality, boolean griefingEnabled, boolean isPlayer, float digestionProgress, String[] pathwayHistory, int charStack) {
         dataCache.put(playerUUID, new BeyonderClientData(pathway, sequence, spirituality, griefingEnabled, digestionProgress, pathwayHistory, charStack));
 
         if(isPlayer) {
@@ -70,9 +69,9 @@ public class ClientBeyonderCache {
         return data != null && !data.pathway().equals("none") && data.sequence() != LOTMCraft.NON_BEYONDER_SEQ;
     }
 
-    public static PathwayHistory getPathwayHistory(UUID playerUUID) {
+    public static String[] getPathwayHistory(UUID playerUUID) {
         BeyonderClientData data = dataCache.get(playerUUID);
-        return data != null ? data.pathwayHistory() : new PathwayHistory();
+        return data != null ? data.pathwayHistory() : new String[10];
     }
 
     public static void clearCache() {
@@ -84,5 +83,5 @@ public class ClientBeyonderCache {
     }
 
     // Inner record to store client-side beyonder data
-    private record BeyonderClientData(String pathway, int sequence, float spirituality, boolean griefingEnabled, float digestionProgress, PathwayHistory pathwayHistory, int charStack) {}
+    private record BeyonderClientData(String pathway, int sequence, float spirituality, boolean griefingEnabled, float digestionProgress, String[] pathwayHistory, int charStack) {}
 }

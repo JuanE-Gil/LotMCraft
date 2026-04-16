@@ -5,8 +5,6 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.util.BeyonderData;
-import de.jakob.lotm.util.beyonderMap.CharacteristicStack;
-import de.jakob.lotm.util.beyonderMap.StoredData;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -19,91 +17,11 @@ public class CharacteristicsStackCommand {
     private static LiteralArgumentBuilder<CommandSourceStack> set() {
         return Commands.literal("set")
                 .then(Commands.argument("target", EntityArgument.entity())
-                        .then(Commands.argument("seq", IntegerArgumentType.integer())
                         .then(Commands.argument("stack", IntegerArgumentType.integer())
-                                        .executes(context -> {
-                                                    CommandSourceStack source = context.getSource();
-                                                    var targetEntity = EntityArgument.getEntity(context, "target");
-                                                    var seq = IntegerArgumentType.getInteger(context, "seq");
-                                                    var stack = IntegerArgumentType.getInteger(context, "stack");
-
-                                                    if (!(targetEntity instanceof LivingEntity livingEntity)
-                                                            || !(BeyonderData.isBeyonder(livingEntity))) {
-                                                        source.sendFailure(Component.literal("Target must be a living beyonder entity!"));
-                                                        return 0;
-                                                    }
-
-                                                    if(seq >= LOTMCraft.NON_BEYONDER_SEQ || seq < 1){
-                                                        source.sendFailure(Component.literal("Invalid sequence!"));
-                                                        return 0;
-                                                    }
-
-                                                    if(stack < 0){
-                                                        source.sendFailure(Component.literal("Invalid stack value!"));
-                                                        return 0;
-                                                    }
-
-                                                    BeyonderData.setCharStack(livingEntity, seq, stack, true);
-
-                                                    return 1;
-                                                }
-                                                )
-                        )
-                        )
-                        );
-    }
-
-    private static LiteralArgumentBuilder<CommandSourceStack> delete() {
-        return Commands.literal("delete")
-                .then(Commands.argument("target", EntityArgument.entity())
-                        .then(Commands.argument("seq", IntegerArgumentType.integer()))
-                        .executes(context -> {
-                            CommandSourceStack source = context.getSource();
-                            var targetEntity = EntityArgument.getEntity(context, "target");
-                            var seq = IntegerArgumentType.getInteger(context, "seq");
-
-                            if (!(targetEntity instanceof LivingEntity livingEntity)
-                                    || !(BeyonderData.isBeyonder(livingEntity))) {
-                                source.sendFailure(Component.literal("Target must be a living beyonder entity!"));
-                                return 0;
-                            }
-
-                            if(seq >= LOTMCraft.NON_BEYONDER_SEQ || seq < 1){
-                                source.sendFailure(Component.literal("Invalid sequence!"));
-                                return 0;
-                            }
-
-                            BeyonderData.setCharStack(livingEntity, seq, 0, true);
-
-                            return 1;
-                        })
-                    .then(Commands.literal("all")
-                            .executes(context -> {
-                                CommandSourceStack source = context.getSource();
-                                var targetEntity = EntityArgument.getEntity(context, "target");
-
-                                if (!(targetEntity instanceof LivingEntity livingEntity)
-                                        || !(BeyonderData.isBeyonder(livingEntity))) {
-                                    source.sendFailure(Component.literal("Target must be a living beyonder entity!"));
-                                    return 0;
-                                }
-
-                                var data = BeyonderData.beyonderMap.get(livingEntity.getUUID()).get();
-
-                                BeyonderData.beyonderMap.put(livingEntity, StoredData.builder
-                                        .copyFrom(data)
-                                        .charStack(new CharacteristicStack())
-                                        .build());
-
-                                BeyonderData.recalculateCharStackModifiers(livingEntity);
-
-                                return 1;
-                        })
-                    )
-                        .then(Commands.literal("modifiers")
                                 .executes(context -> {
                                     CommandSourceStack source = context.getSource();
                                     var targetEntity = EntityArgument.getEntity(context, "target");
+                                    var stack = IntegerArgumentType.getInteger(context, "stack");
 
                                     if (!(targetEntity instanceof LivingEntity livingEntity)
                                             || !(BeyonderData.isBeyonder(livingEntity))) {
@@ -111,13 +29,49 @@ public class CharacteristicsStackCommand {
                                         return 0;
                                     }
 
-                                    for(int i = 9; i >= BeyonderData.getSequence(livingEntity); i--) {
-                                        BeyonderData.removeModifier(livingEntity, CharacteristicStack.boostId(i));
+                                    int seq = BeyonderData.getSequence(livingEntity);
+
+                                    if(seq >= LOTMCraft.NON_BEYONDER_SEQ || seq < 1){
+                                        source.sendFailure(Component.literal("Invalid sequence!"));
+                                        return 0;
                                     }
 
+                                    if(stack < 0){
+                                        source.sendFailure(Component.literal("Invalid stack value!"));
+                                        return 0;
+                                    }
+
+                                    BeyonderData.setCharStack(livingEntity, stack, true);
+
                                     return 1;
-                                })))
-                ;
+                                })
+                        )
+                );
+    }
+
+    private static LiteralArgumentBuilder<CommandSourceStack> delete() {
+        return Commands.literal("delete")
+                .then(Commands.argument("target", EntityArgument.entity())
+                        .executes(context -> {
+                            CommandSourceStack source = context.getSource();
+                            var targetEntity = EntityArgument.getEntity(context, "target");
+                            if(!(targetEntity instanceof LivingEntity livingEntity)
+                                    || !(BeyonderData.isBeyonder(livingEntity))) {
+                                source.sendFailure(Component.literal("Target must be a living beyonder entity!"));
+                                return 0;
+                            }
+                            var seq = BeyonderData.getSequence(livingEntity);
+
+                            if(seq >= LOTMCraft.NON_BEYONDER_SEQ || seq < 1){
+                                source.sendFailure(Component.literal("Invalid sequence!"));
+                                return 0;
+                            }
+
+                            BeyonderData.setCharStack(livingEntity, 0, true);
+
+                            return 1;
+                        })
+                );
     }
 
     private static LiteralArgumentBuilder<CommandSourceStack> recalculate() {
