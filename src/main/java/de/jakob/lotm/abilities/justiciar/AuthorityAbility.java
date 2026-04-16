@@ -48,7 +48,7 @@ public class AuthorityAbility extends SelectableAbility {
                 "ability.lotmcraft.authority.armor_remove"
         };
     }
-
+    // Comment out to test GitHub.
     @Override
     protected void castSelectedAbility(Level level, LivingEntity entity, int abilityIndex) {
         switch (abilityIndex) {
