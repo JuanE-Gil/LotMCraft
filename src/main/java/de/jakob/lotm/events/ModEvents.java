@@ -4,6 +4,7 @@ import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.attachments.TeamComponent;
 import de.jakob.lotm.command.*;
+import de.jakob.lotm.command.UniquenessCommand;
 import de.jakob.lotm.entity.ModEntities;
 import de.jakob.lotm.entity.client.ability_entities.door_pathway.travelers_door.TravelersDoorModel;
 import de.jakob.lotm.entity.client.ability_entities.meteor.MeteorModel;
@@ -242,6 +243,7 @@ public class ModEvents {
         TeamInviteResponseCommand.register(event.getDispatcher());
         SetBeyonderLogCommand.register(event.getDispatcher());
         KillCountCommand.register(event.getDispatcher());
+        UniquenessCommand.register(event.getDispatcher());
     }
 
     @SubscribeEvent

@@ -1438,6 +1438,8 @@
   "lotm.uniqueness.fail": "You are not fit to advancing using this uniqueness",
   "lotm.uniqueness.start": " has started his Apotheosis",
   "lotm.uniqueness.overworld": "You can only ascend in the overworld",
+  "lotm.uniqueness.spawned": "A uniqueness of your pathway has manifested in the world...",
+  "lotm.uniqueness.picked_up": " has claimed the uniqueness!"
 
   "lotm.griefing": "Griefing Enabled",
   "lotm.griefing_required": "Griefing must be enabled",
