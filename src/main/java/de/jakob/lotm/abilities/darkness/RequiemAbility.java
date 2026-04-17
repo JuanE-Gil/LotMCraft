@@ -1,6 +1,7 @@
 package de.jakob.lotm.abilities.darkness;
 
 import de.jakob.lotm.abilities.core.Ability;
+import de.jakob.lotm.abilities.core.AbilityUsedEvent;
 import de.jakob.lotm.abilities.core.interaction.InteractionHandler;
 import de.jakob.lotm.attachments.DisabledAbilitiesComponent;
 import de.jakob.lotm.attachments.ModAttachments;
@@ -25,6 +26,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.common.NeoForge;
 import org.joml.Vector3f;
 
 import java.util.*;
@@ -36,7 +38,8 @@ public class RequiemAbility extends Ability {
     private static final HashSet<UUID> pacifiedEntities = new HashSet<>();
 
     public RequiemAbility(String id) {
-        super(id, 3);
+        super(id, 3, "calming");
+        postsUsedAbilityEventManually = true;
     }
 
     @Override
@@ -83,6 +86,9 @@ public class RequiemAbility extends Ability {
         Location currentLoc = new Location(entity.position(), serverLevel);
         int seq = AbilityUtil.getSeqWithArt(entity, this);
         boolean purified = InteractionHandler.isInteractionPossible(currentLoc, "purification", seq);
+
+        NeoForge.EVENT_BUS.post(new AbilityUsedEvent((ServerLevel) level, entity.position(), entity, targetEntity, this, interactionFlags, interactionRadius, interactionCacheTicks));
+
         pacifiedEntities.add(targetEntity.getUUID());
 
         float multiplier_target = multiplier(targetEntity);
@@ -117,7 +123,23 @@ public class RequiemAbility extends Ability {
             ParticleUtil.createParticleSpirals(bigDust, loc, .8, .8, targetEntity.getEyeHeight(), .35, 5, finalDuration, 15, 5);
         });
 
-        ServerScheduler.scheduleForDuration(0, 5,duration, () -> {
+        final UUID[] taskIdHolder = new UUID[1];
+        taskIdHolder[0] = ServerScheduler.scheduleForDuration(0, 5, duration, () -> {
+            if(InteractionHandler.isInteractionPossible(loc, "explosion", entitySeq)) {
+                if(taskIdHolder[0] != null) ServerScheduler.cancel(taskIdHolder[0]);
+
+                targetEntity.removeEffect(MobEffects.MOVEMENT_SLOWDOWN);
+                targetEntity.removeEffect(MobEffects.WEAKNESS);
+                targetEntity.removeEffect(MobEffects.DIG_SLOWDOWN);
+                if (targetEntity instanceof Mob mob) mob.setNoAi(false);
+                if(BeyonderData.isBeyonder(targetEntity)) {
+                    DisabledAbilitiesComponent component = targetEntity.getData(ModAttachments.DISABLED_ABILITIES_COMPONENT);
+                    component.enableAbilityUsage("requiem");
+                }
+                pacifiedEntities.remove(targetEntity.getUUID());
+                return;
+            }
+
             targetEntity.addEffect(new MobEffectInstance(ModEffects.ASLEEP, 40, 10, false, false, false));
             targetEntity.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 40, 10, false, false, false));
             targetEntity.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 40, 10, false, false, false));

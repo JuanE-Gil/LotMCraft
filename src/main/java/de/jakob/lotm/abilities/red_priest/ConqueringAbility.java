@@ -20,7 +20,7 @@ import java.util.Map;
 
 public class ConqueringAbility extends Ability {
     public ConqueringAbility(String id) {
-        super(id, 1.5f);
+        super(id, 1.5f, "morale_boost");
         canBeCopied = false;
         canBeReplicated = false;
     }
@@ -50,7 +50,9 @@ public class ConqueringAbility extends Ability {
 
         int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
 
-        AbilityUtil.getNearbyEntities(entity, (ServerLevel) level, entity.position(), 3.75, false).forEach(e -> {
+        double radius = entitySeq == 0 ? 10 : 3.75;
+
+        AbilityUtil.getNearbyEntities(entity, (ServerLevel) level, entity.position(), radius, false).forEach(e -> {
             if(AbilityUtil.getSequenceDifference(entitySeq, BeyonderData.getSequence(e)) > entitySeq) {
                 e.addEffect(new MobEffectInstance(ModEffects.CONQUERED, 20 * 60 * 5, 7));
             }

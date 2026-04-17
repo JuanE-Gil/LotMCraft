@@ -13,11 +13,15 @@ import de.jakob.lotm.util.helper.DamageLookup;
 import de.jakob.lotm.util.helper.ParticleUtil;
 import de.jakob.lotm.util.helper.VectorUtil;
 import de.jakob.lotm.util.scheduling.ServerScheduler;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
@@ -28,6 +32,7 @@ import org.joml.Vector3f;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class HairEntanglementAbility extends Ability {
     private final DustParticleOptions dust = new DustParticleOptions(new Vector3f(.2f, .2f, .2f), .5f);
@@ -103,7 +108,41 @@ public class HairEntanglementAbility extends Ability {
             LOTMCraft.LOGGER.info("multiplier{}", (multiplier(entity)));
         }
 
-        ServerScheduler.scheduleForDuration(0, 5, duration, () -> {
+        Location loc = new Location(targetEntity.position(), targetEntity.level());
+
+        AtomicReference<UUID> taskIdRef = new AtomicReference<>();
+        UUID taskId = ServerScheduler.scheduleForDuration(0, 5, duration, () -> {
+            // Burn Binding
+            if(InteractionHandler.isInteractionPossible(loc, "burning")) {
+                ServerScheduler.cancel(taskIdRef.get());
+
+                targetEntity.removeEffect(MobEffects.MOVEMENT_SLOWDOWN);
+                targetEntity.removeEffect(MobEffects.WEAKNESS);
+                targetEntity.removeEffect(MobEffects.DIG_SLOWDOWN);
+                if (targetEntity instanceof Mob mob) mob.setNoAi(false);
+
+                Vec3 pos = targetEntity.getPosition(0.5f);
+                ParticleUtil.spawnParticles((ServerLevel) level, ParticleTypes.FLAME,       pos, 180, 1.0, 0);
+                ParticleUtil.spawnParticles((ServerLevel) level, ParticleTypes.LARGE_SMOKE, pos, 90, 1.0, 0.15);
+                level.playSound(null, BlockPos.containing(pos),
+                        SoundEvents.FIRE_AMBIENT, SoundSource.PLAYERS, 1.5f, 1.2f);
+
+                pacifiedEntities.remove(targetEntity.getUUID());
+                return;
+            }
+
+            if(InteractionHandler.isInteractionPossibleForEntity(loc, "escape", AbilityUtil.getSeqWithArt(entity, this), targetEntity)) {
+                ServerScheduler.cancel(taskIdRef.get());
+
+                targetEntity.removeEffect(MobEffects.MOVEMENT_SLOWDOWN);
+                targetEntity.removeEffect(MobEffects.WEAKNESS);
+                targetEntity.removeEffect(MobEffects.DIG_SLOWDOWN);
+                if (targetEntity instanceof Mob mob) mob.setNoAi(false);
+
+                pacifiedEntities.remove(targetEntity.getUUID());
+                return;
+            }
+
             targetEntity.addEffect(new MobEffectInstance(ModEffects.ASLEEP, 40, 10, false, false, false));
             targetEntity.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 40, 10, false, false, false));
             targetEntity.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 40, 10, false, false, false));
@@ -115,6 +154,7 @@ public class HairEntanglementAbility extends Ability {
 
             targetEntity.teleportTo(pos.x, pos.y, pos.z);
         }, null, (ServerLevel) level, () -> AbilityUtil.getTimeInArea(entity, new Location(entity.position(), level)));
+        taskIdRef.set(taskId);
 
 
         ServerScheduler.scheduleDelayed(duration, () -> pacifiedEntities.remove(targetEntity.getUUID()));

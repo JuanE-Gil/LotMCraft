@@ -1,10 +1,13 @@
 package de.jakob.lotm.abilities.door;
 
 import de.jakob.lotm.abilities.core.Ability;
+import de.jakob.lotm.abilities.core.AbilityUsedEvent;
+import de.jakob.lotm.abilities.core.interaction.InteractionHandler;
 import de.jakob.lotm.attachments.DisabledAbilitiesComponent;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.particle.ModParticles;
 import de.jakob.lotm.util.BeyonderData;
+import de.jakob.lotm.util.data.Location;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.ParticleUtil;
 import de.jakob.lotm.util.scheduling.ServerScheduler;
@@ -20,16 +23,21 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.common.NeoForge;
 import org.joml.Vector3f;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class SealingAbility extends Ability {
     public SealingAbility(String id) {
-        super(id, 16);
+        super(id, 8, "sealing");
         canBeCopied = false;
+        interactionRadius = 5;
+        interactionCacheTicks = 20 * 14;
+        postsUsedAbilityEventManually = true;
     }
 
     @Override
@@ -56,6 +64,8 @@ public class SealingAbility extends Ability {
 
         int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
 
+        NeoForge.EVENT_BUS.post(new AbilityUsedEvent((ServerLevel) level, targetLoc, entity, this, interactionFlags, interactionRadius, interactionCacheTicks));
+
         List<LivingEntity> sealedEntities = AbilityUtil.getNearbyEntities(entity, (ServerLevel) level, targetLoc, radius, false).stream().filter(e -> !AbilityUtil.isTargetSignificantlyStronger(entity, e)).toList();
         sealedEntities.forEach(e -> {
             if(AbilityUtil.getSequenceDifference(entitySeq, BeyonderData.getSequence(e)) <= 0) {
@@ -74,7 +84,26 @@ public class SealingAbility extends Ability {
         level.playSound(null, targetLoc.x, targetLoc.y, targetLoc.z, SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.BLOCKS, 1f, 1f);
         level.playSound(null, targetLoc.x, targetLoc.y, targetLoc.z, SoundEvents.ENDER_CHEST_OPEN, SoundSource.BLOCKS, 1f, 1f);
 
-        ServerScheduler.scheduleForDuration(0, 4, 20 * 14, () -> {
+        final UUID[] taskIdHolder = new UUID[1];
+        taskIdHolder[0] = ServerScheduler.scheduleForDuration(0, 4, 20 * 14, () -> {
+            Location sealLoc = new Location(targetLoc, level);
+
+            if(InteractionHandler.isInteractionPossible(sealLoc, "explosion", entitySeq)) {
+                sealedEntities.forEach(e -> {
+                    BeyonderData.removeModifier(e, "sealed");
+                    e.removeEffect(MobEffects.MOVEMENT_SLOWDOWN);
+                    if(BeyonderData.isBeyonder(e)) {
+                        DisabledAbilitiesComponent comp = e.getData(ModAttachments.DISABLED_ABILITIES_COMPONENT);
+                        comp.enableAbilityUsage("sealed");
+                    }
+                    if(!(e instanceof Player) && !BeyonderData.isBeyonder(e) && e instanceof Mob mob) {
+                        mob.setNoAi(false);
+                    }
+                });
+                if(taskIdHolder[0] != null) ServerScheduler.cancel(taskIdHolder[0]);
+                return;
+            }
+
             ParticleUtil.spawnSphereParticles((ServerLevel) level, ParticleTypes.END_ROD, targetLoc, radius, 80);
             ParticleUtil.spawnSphereParticles((ServerLevel) level, dustOptions, targetLoc, radius, 60);
             ParticleUtil.spawnSphereParticles((ServerLevel) level, dustOptions2, targetLoc, radius, 40);

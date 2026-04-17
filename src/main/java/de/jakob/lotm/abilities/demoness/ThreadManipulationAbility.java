@@ -219,7 +219,7 @@ public class ThreadManipulationAbility extends SelectableAbility {
                 return;
             }
 
-            if(InteractionHandler.isInteractionPossibleForEntity(loc, "blink_escape", AbilityUtil.getSeqWithArt(entity, this), targetEntity)) {
+            if(InteractionHandler.isInteractionPossibleForEntity(loc, "escape", AbilityUtil.getSeqWithArt(entity, this), targetEntity)) {
                 ServerScheduler.cancel(taskIdRef.get());
 
                 targetEntity.removeEffect(MobEffects.MOVEMENT_SLOWDOWN);

@@ -21,8 +21,10 @@ import java.util.Map;
 
 public class SpaceTimeStormAbility extends Ability {
     public SpaceTimeStormAbility(String id) {
-        super(id, 12);
+        super(id, 12, "explosion");
         canBeCopied = false;
+        interactionRadius = 35;
+        interactionCacheTicks = 20 * 12;
     }
 
     @Override

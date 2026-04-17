@@ -100,7 +100,7 @@ public class PhysicalEnhancementsRedPriestAbility extends PhysicalEnhancementsAb
                     new PhysicalEnhancement(EnhancementType.STRENGTH, 5),
                     new PhysicalEnhancement(EnhancementType.RESISTANCE, 18),
                     new PhysicalEnhancement(EnhancementType.SPEED, 5),
-                    new PhysicalEnhancement(EnhancementType.HEALTH, 20),
+                    new PhysicalEnhancement(EnhancementType.HEALTH, 35),
                     new PhysicalEnhancement(EnhancementType.REGENERATION, 5),
                     new PhysicalEnhancement(EnhancementType.FIRE_RESISTANCE, 5)
             );

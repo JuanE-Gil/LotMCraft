@@ -31,8 +31,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class WaterMasteryAbility extends SelectableAbility {
     public WaterMasteryAbility(String id) {
-        super(id, 5f);
+        super(id, 5f, "water", "water_strong");
         canBeCopied = false;
+        interactionRadius = 30;
+        interactionCacheTicks = 20 * 30;
     }
 
     private final DustParticleOptions dust = new DustParticleOptions(

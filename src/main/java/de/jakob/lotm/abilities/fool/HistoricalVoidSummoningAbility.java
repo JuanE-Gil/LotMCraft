@@ -1,20 +1,24 @@
 package de.jakob.lotm.abilities.fool;
-
 import de.jakob.lotm.abilities.core.SelectableAbility;
 import de.jakob.lotm.entity.custom.BeyonderNPCEntity;
-import de.jakob.lotm.item.ModItems;
+import de.jakob.lotm.potions.BeyonderCharacteristicItem;
+import de.jakob.lotm.potions.BeyonderPotion;
 import de.jakob.lotm.util.BeyonderData;
+import de.jakob.lotm.util.Config;
 import de.jakob.lotm.util.helper.AllyUtil;
 import de.jakob.lotm.util.scheduling.ServerScheduler;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.SimpleMenuProvider;
@@ -88,10 +92,8 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
     public HistoricalVoidSummoningAbility(String id) {
         super(id, 1);
 
-        canBeCopied = false;
         canBeUsedByNPC = false;
         cannotBeStolen = true;
-        canBeReplicated = false;
         canBeUsedInArtifact = false;
     }
 
@@ -160,7 +162,11 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
                         if(slotId >= 0 && slotId < 27) {
                             ItemStack clickedItem = displayContainer.getItem(slotId);
                             if(!clickedItem.isEmpty()) {
-                                if (clickedItem.is(Items.SHULKER_BOX)) return;
+                                if (clickedItem.is((ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", "shulker_boxes"))))) return;
+                                if (clickedItem.getItem() instanceof BeyonderCharacteristicItem) return;
+                                if (clickedItem.getItem() instanceof BeyonderPotion) return;
+                                if (Config.items.contains(BuiltInRegistries.ITEM.getKey(clickedItem.getItem()))) return;
+
                                 // Re-check count before summoning
                                 if(getSummonedCount(player) < getMaxSummoned(player)) {
                                     createTemporaryItem(level, player, clickedItem.copy());
@@ -570,6 +576,10 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
                 entityNBT.remove("skin");
                 entityNBT.remove("hostile");
 
+                if (entityNBT.contains("neoforge:attachments")) {
+                    entityNBT.getCompound("neoforge:attachments").remove("lotmcraft:copied_inventory");
+                }
+                
                 // Load remaining data (health, position, etc.)
                 entity.load(entityNBT);
             }
@@ -702,6 +712,11 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
 
         CompoundTag entityNBT = new CompoundTag();
         closest.save(entityNBT);
+        entityNBT.remove("HandItems");
+        entityNBT.remove("ArmorItems");
+        if (entityNBT.contains("neoforge:attachments")) {
+            entityNBT.getCompound("neoforge:attachments").remove("lotmcraft:copied_inventory");
+        }
         entityData.put("EntityNBT", entityNBT);
 
         // Special handling for BeyonderNPCEntity
@@ -791,19 +806,21 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
 
     // scale max summoned items
     private static int getMaxSummoned(ServerPlayer serverPlayer){
-        int maxSummonedItems = 5 * (4 - BeyonderData.getSequence(serverPlayer));
-        if (maxSummonedItems == 0){
-            return 5;
-        }
-        return maxSummonedItems;
+        return switch (BeyonderData.getSequence(serverPlayer)){
+            case 0 -> 100;
+            case 1 -> 40;
+            case 2 -> 15;
+            default -> 5;
+        };
     }
 
     // scale max summoned items
     private static int getSummonDurationTicks(ServerPlayer serverPlayer){
-        int maxSummonedItems = 20 * 20 * (4 - BeyonderData.getSequence(serverPlayer));
-        if (maxSummonedItems == 0){
-            return 5;
-        }
-        return maxSummonedItems;
+        return switch (BeyonderData.getSequence(serverPlayer)){
+            case 0 -> 60 * 60 * 20;
+            case 1 -> 5 * 60 * 20;
+            case 2 -> 60 * 20;
+            default -> 20 * 20;
+        };
     }
 }

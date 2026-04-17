@@ -67,6 +67,11 @@ public class ModAttachments {
                     AttachmentType.serializable(DisabledAbilitiesComponent::new).build()
             );
 
+    public static final Supplier<AttachmentType<ApotheosisComponent>> APOTHEOSIS_COMPONENT =
+            ATTACHMENT_TYPES.register("apotheosis_component", () ->
+                    AttachmentType.serializable(ApotheosisComponent::new).build()
+            );
+
     public static final Supplier<AttachmentType<MultiplierModifierComponent>> MULTIPLIER_MODIFIER_COMPONENT =
             ATTACHMENT_TYPES.register("multiplier_modifier_component", () ->
                     AttachmentType.serializable(MultiplierModifierComponent::new).build()
@@ -211,10 +216,38 @@ public class ModAttachments {
                             .build()
             );
 
+    public static final Supplier<AttachmentType<BeyonderComponent>> BEYONDER_COMPONENT =
+            ATTACHMENT_TYPES.register("beyonder_component", () ->
+                    AttachmentType.serializable(BeyonderComponent::new).copyOnDeath().build()
+            );
+
     public static final Supplier<AttachmentType<SkillScalingComponent>> SKILL_SCALING_COMPONENT =
             ATTACHMENT_TYPES.register("skill_scaling_component", () ->
                     AttachmentType.builder(SkillScalingComponent::new)
                             .serialize(SkillScalingComponent.SERIALIZER)
+                            .build()
+            );
+
+    public static final Supplier<AttachmentType<KillCountComponent>> KILL_COUNT_COMPONENT =
+            ATTACHMENT_TYPES.register("kill_count_component", () ->
+                    AttachmentType.builder(KillCountComponent::new)
+                            .serialize(KillCountComponent.SERIALIZER)
+                            .copyOnDeath()
+                            .build()
+            );
+
+    public static final Supplier<AttachmentType<SacrificeRevertComponent>> SACRIFICE_REVERT_COMPONENT =
+            ATTACHMENT_TYPES.register("sacrifice_revert_component", () ->
+                    AttachmentType.builder(SacrificeRevertComponent::new)
+                            .serialize(SacrificeRevertComponent.SERIALIZER)
+                            .build()
+            );
+
+    public static final Supplier<AttachmentType<UniquenessComponent>> UNIQUENESS_COMPONENT =
+            ATTACHMENT_TYPES.register("uniqueness_component", () ->
+                    AttachmentType.builder(UniquenessComponent::new)
+                            .serialize(UniquenessComponent.SERIALIZER)
+                            .copyOnDeath()
                             .build()
             );
 

@@ -1,6 +1,7 @@
 package de.jakob.lotm.abilities.tyrant;
 
 import de.jakob.lotm.abilities.core.SelectableAbility;
+import de.jakob.lotm.abilities.core.interaction.InteractionHandler;
 import de.jakob.lotm.particle.ModParticles;
 import de.jakob.lotm.sound.ModSounds;
 import de.jakob.lotm.util.BeyonderData;
@@ -20,12 +21,12 @@ import net.minecraft.world.level.Level;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class SirenSongAbility extends SelectableAbility {
     public SirenSongAbility(String id) {
         super(id, 45);
         canBeCopied = false;
-        canBeReplicated = false;
     }
 
     @Override
@@ -61,15 +62,26 @@ public class SirenSongAbility extends SelectableAbility {
 
         level.playSound(null, BlockPos.containing(entity.position()), ModSounds.DAZING_SONG.get(), SoundSource.BLOCKS, 1, 1);
 
-        ServerScheduler.scheduleForDuration(0,  2, 20 * 30, () -> {
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+
+        final UUID[] posTrackerHolder = new UUID[1];
+        posTrackerHolder[0] = ServerScheduler.scheduleForDuration(0,  2, 20 * 30, () -> {
             if(entity.level().isClientSide)
                 return;
             supplier.setPosition(entity.position());
             supplier.setLevel(entity.level());
         }, level);
-        ServerScheduler.scheduleForDuration(0,  18, 20 * 30, () -> {
+        final UUID[] effectHolder = new UUID[1];
+        effectHolder[0] = ServerScheduler.scheduleForDuration(0,  18, 20 * 30, () -> {
             if(entity.level().isClientSide)
                 return;
+
+            if(InteractionHandler.isInteractionPossible(new Location(entity.position(), entity.level()), "explosion", entitySeq)) {
+                if(posTrackerHolder[0] != null) ServerScheduler.cancel(posTrackerHolder[0]);
+                if(effectHolder[0] != null) ServerScheduler.cancel(effectHolder[0]);
+                return;
+            }
+
             AbilityUtil.addPotionEffectToNearbyEntities((ServerLevel) entity.level(), entity, 25, entity.position(), new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, 3, false, false, false), new MobEffectInstance(MobEffects.WEAKNESS, 20, 3, false, false, false), new MobEffectInstance(MobEffects.BLINDNESS, 20, 3, false, false, false));
         }, level);
     }
@@ -106,16 +118,27 @@ public class SirenSongAbility extends SelectableAbility {
 
         level.playSound(null, BlockPos.containing(entity.position()), ModSounds.DEATH_MELODY.get(), SoundSource.BLOCKS, 1, 1);
 
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+
         double multiplier = multiplier(entity)/3;
-        ServerScheduler.scheduleForDuration(0,  2, 20 * 30, () -> {
+        final UUID[] posTrackerHolder = new UUID[1];
+        posTrackerHolder[0] = ServerScheduler.scheduleForDuration(0,  2, 20 * 30, () -> {
             if(entity.level().isClientSide)
                 return;
             supplier.setPosition(entity.position());
             supplier.setLevel(entity.level());
         }, level);
-        ServerScheduler.scheduleForDuration(0,  18, 20 * 30, () -> {
+        final UUID[] effectHolder = new UUID[1];
+        effectHolder[0] = ServerScheduler.scheduleForDuration(0,  18, 20 * 30, () -> {
             if(entity.level().isClientSide)
                 return;
+
+            if(InteractionHandler.isInteractionPossible(new Location(entity.position(), entity.level()), "explosion", entitySeq)) {
+                if(posTrackerHolder[0] != null) ServerScheduler.cancel(posTrackerHolder[0]);
+                if(effectHolder[0] != null) ServerScheduler.cancel(effectHolder[0]);
+                return;
+            }
+
             AbilityUtil.damageNearbyEntities((ServerLevel) entity.level(), entity, 25, DamageLookup.lookupDps(5,  .65, 18, 20) * multiplier, entity.position(), true, false, true, 0);
         }, level);
     }

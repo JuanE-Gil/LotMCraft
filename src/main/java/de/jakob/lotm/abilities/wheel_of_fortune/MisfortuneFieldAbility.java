@@ -19,7 +19,6 @@ import java.util.Map;
 public class MisfortuneFieldAbility extends Ability {
     public MisfortuneFieldAbility(String id) {
         super(id, 30);
-        canBeCopied = false;
     }
 
     @Override
@@ -46,7 +45,7 @@ public class MisfortuneFieldAbility extends Ability {
         ServerScheduler.scheduleForDuration(0, 2, 20 * 20, () -> {
             AbilityUtil.getNearbyEntities(entity, serverLevel, startPos, 20*multiplier).forEach(e -> {
                 LuckComponent luckComponent = e.getData(ModAttachments.LUCK_COMPONENT.get());
-                luckComponent.addLuckWithMax(amplifier, -amplifier);
+                luckComponent.addLuckWithMin(-amplifier, -amplifier);
             });
         });
     }

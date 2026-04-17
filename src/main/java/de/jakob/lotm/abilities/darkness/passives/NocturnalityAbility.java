@@ -1,6 +1,7 @@
 package de.jakob.lotm.abilities.darkness.passives;
 
 import de.jakob.lotm.abilities.PassiveAbilityItem;
+import de.jakob.lotm.entity.custom.ability_entities.darkness_pathway.ConcealedDomainEntity;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
@@ -24,7 +25,15 @@ public class NocturnalityAbility extends PassiveAbilityItem {
         return new HashMap<>(Map.of("darkness", 9));
     }
 
+    private boolean isNocturnal(Level level, LivingEntity entity) {
+        return level.isNight()
+                || ConcealedDomainEntity.ENTITIES_INSIDE_DOMAIN.contains(entity.getUUID());
+    }
+
     @Override
     public void tick(Level level, LivingEntity entity) {
+        if (isNocturnal(level, entity)) {
+            // Nocturnal bonuses apply here — fill in as needed
+        }
     }
 }

@@ -10,18 +10,48 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public record SyncBeyonderDataPacket(String pathway, int sequence, float spirituality, boolean griefingEnabled, float digestionProgress) implements CustomPacketPayload {
+public record SyncBeyonderDataPacket(String pathway, int sequence, float spirituality, boolean griefingEnabled, float digestionProgress, String[] pathwayHistory, int charStack) implements CustomPacketPayload {
     public static final Type<SyncBeyonderDataPacket> TYPE =
             new Type<>(ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "sync_beyonder_data"));
 
+    private static final StreamCodec<FriendlyByteBuf, String[]> PATHWAY_HISTORY_CODEC =
+            StreamCodec.of(
+                    (buf, strings) -> {
+                        for (int i = 0; i < 10; i++) {
+                            String s = i < strings.length ? strings[i] : null;
+                            buf.writeUtf(s != null ? s : "");
+                        }
+                    },
+                    buf -> {
+                        String[] strings = new String[10];
+                        for (int i = 0; i < 10; i++) {
+                            String s = buf.readUtf();
+                            strings[i] = s.isEmpty() ? null : s;
+                        }
+                        return strings;
+                    }
+            );
+
     public static final StreamCodec<FriendlyByteBuf, SyncBeyonderDataPacket> STREAM_CODEC =
-            StreamCodec.composite(
-                    ByteBufCodecs.STRING_UTF8, SyncBeyonderDataPacket::pathway,
-                    ByteBufCodecs.VAR_INT, SyncBeyonderDataPacket::sequence,
-                    ByteBufCodecs.FLOAT, SyncBeyonderDataPacket::spirituality,
-                    ByteBufCodecs.BOOL, SyncBeyonderDataPacket::griefingEnabled,
-                    ByteBufCodecs.FLOAT, SyncBeyonderDataPacket::digestionProgress,
-                    SyncBeyonderDataPacket::new
+            StreamCodec.of(
+                    (buf, packet) -> {
+                        ByteBufCodecs.STRING_UTF8.encode(buf, packet.pathway());
+                        ByteBufCodecs.VAR_INT.encode(buf, packet.sequence());
+                        ByteBufCodecs.FLOAT.encode(buf, packet.spirituality());
+                        ByteBufCodecs.BOOL.encode(buf, packet.griefingEnabled());
+                        ByteBufCodecs.FLOAT.encode(buf, packet.digestionProgress());
+                        PATHWAY_HISTORY_CODEC.encode(buf, packet.pathwayHistory());
+                        ByteBufCodecs.VAR_INT.encode(buf, packet.charStack());
+                    },
+                    buf -> new SyncBeyonderDataPacket(
+                            ByteBufCodecs.STRING_UTF8.decode(buf),
+                            ByteBufCodecs.VAR_INT.decode(buf),
+                            ByteBufCodecs.FLOAT.decode(buf),
+                            ByteBufCodecs.BOOL.decode(buf),
+                            ByteBufCodecs.FLOAT.decode(buf),
+                            PATHWAY_HISTORY_CODEC.decode(buf),
+                            ByteBufCodecs.VAR_INT.decode(buf)
+                    )
             );
 
     @Override
@@ -31,7 +61,6 @@ public record SyncBeyonderDataPacket(String pathway, int sequence, float spiritu
 
     public static void handle(SyncBeyonderDataPacket packet, IPayloadContext context) {
         context.enqueueWork(() -> {
-            // Update client-side cache
             ClientBeyonderCache.updateData(
                     context.player().getUUID(),
                     packet.pathway(),
@@ -39,7 +68,9 @@ public record SyncBeyonderDataPacket(String pathway, int sequence, float spiritu
                     packet.spirituality(),
                     packet.griefingEnabled(),
                     true,
-                    packet.digestionProgress()
+                    packet.digestionProgress(),
+                    packet.pathwayHistory(),
+                    packet.charStack()
             );
         });
     }

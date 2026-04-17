@@ -50,6 +50,28 @@ public class ModDimensions {
     public static final Supplier<MapCodec<SpiritWorldBiomeSource>> SPIRIT_WORLD_BIOME_SOURCE =
             BIOME_SOURCES.register("spirit_world_biome_source", () -> SpiritWorldBiomeSource.CODEC);
 
+    // =======================
+    // DREAM MAZE dimension
+    // ========================
+
+
+    public static final ResourceKey<LevelStem> DREAM_MAZE_LEVEL_KEY =
+            ResourceKey.create(Registries.LEVEL_STEM,
+                    ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "dream_maze"));
+
+    public static final ResourceKey<Level> DREAM_MAZE_DIMENSION_KEY =
+            ResourceKey.create(Registries.DIMENSION,
+                    ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "dream_maze"));
+
+    public static final ResourceKey<DimensionType> DREAM_MAZE_TYPE_KEY =
+            ResourceKey.create(Registries.DIMENSION_TYPE,
+                    ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "dream_maze"));
+
+    public static final ResourceKey<Biome> DREAM_MAZE_BIOME_KEY =
+            ResourceKey.create(Registries.BIOME,
+                    ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "dream_maze_biome"));
+
+    
     // =========================================================================
     // SPACE dimension
     // =========================================================================

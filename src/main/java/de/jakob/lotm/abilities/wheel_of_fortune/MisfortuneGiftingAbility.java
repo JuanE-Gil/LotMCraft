@@ -63,6 +63,6 @@ public class MisfortuneGiftingAbility extends Ability {
         double resistance = AbilityUtil.getSequenceResistanceFactor(entitySeq, targetSeq);
         int amplifier =(int) Math.min(Math.round(multiplier(entity) * 3.125f * (1.0 - resistance)) * 120, 6500);;
         LuckComponent luckComponent = target.getData(ModAttachments.LUCK_COMPONENT.get());
-        luckComponent.addLuckWithMax(amplifier, -amplifier);
+        luckComponent.addLuckWithMin(-amplifier, (int) (-amplifier * 1.25f));
     }
 }

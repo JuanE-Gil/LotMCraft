@@ -3,6 +3,7 @@ package de.jakob.lotm.abilities.visionary;
 import de.jakob.lotm.abilities.core.SelectableAbility;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.effect.ModEffects;
+import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.RingEffectManager;
 import net.minecraft.server.level.ServerLevel;
@@ -61,7 +62,7 @@ public class PlacateAbility extends SelectableAbility {
         for(LivingEntity e : AbilityUtil.getNearbyEntities(entity, (ServerLevel) level, entity.position(), 18 , false, true)) {
             RingEffectManager.createRingForAll(e.getEyePosition().subtract(0, .4, 0), 2, 60, 255 / 255f, 211 / 255f, 92 / 255f, 1, .5f, .75f, (ServerLevel) level);
 
-            placateEntity(e);
+            placateEntity(entity, e);
         }
     }
 
@@ -75,13 +76,13 @@ public class PlacateAbility extends SelectableAbility {
 
         level.playSound(null, entity.position().x, entity.position().y, entity.position().z, SoundEvents.BEACON_ACTIVATE, SoundSource.BLOCKS, 1, 1);
 
-        placateEntity(entity);
+        placateEntity(entity, entity);
 
 
     }
 
-    private void placateEntity(LivingEntity entity) {
-        entity.getData(ModAttachments.SANITY_COMPONENT).increaseSanityAndSync(.15f, entity);
+    private void placateEntity(LivingEntity caster, LivingEntity entity) {
+        entity.getData(ModAttachments.SANITY_COMPONENT).increaseSanityWithSequenceDifference(.15f, entity, AbilityUtil.getSeqWithArt(caster, this), BeyonderData.getSequence(entity));
         entity.removeEffect(ModEffects.LOOSING_CONTROL);
     }
 

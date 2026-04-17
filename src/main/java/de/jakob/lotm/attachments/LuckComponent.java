@@ -37,8 +37,14 @@ public class LuckComponent implements INBTSerializable<CompoundTag> {
     public void addLuckWithMax(int amount, int max) {
         if (amount >= 0 && this.luck + amount > max) {
             this.luck = max;
-        } else if (amount < 0 && this.luck + amount < max) {
-            this.luck = -max;
+        } else {
+            this.luck += amount;
+        }
+    }
+
+    public void addLuckWithMin(int amount, int min) {
+        if (this.luck + amount < min) {
+            this.luck = min;
         } else {
             this.luck += amount;
         }

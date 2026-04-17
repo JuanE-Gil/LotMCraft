@@ -72,6 +72,7 @@ public class AbilityHandler {
         abilities.add(new WarSongAbility("war_song_ability"));
         abilities.add(new FogOfWarAbility("fog_of_war_ability"));
         abilities.add(new EssenceOfWarAbility("essence_of_war_ability"));
+        abilities.add(new SacrificeAbility("sacrifice_ability"));
         abilities.add(new FlightAbility("flight_ability"));
         abilities.add(new WeatherManipulationAbility("weather_manipulation_ability"));
         abilities.add(new ConqueringAbility("conquering_ability"));
@@ -143,6 +144,7 @@ public class AbilityHandler {
         abilities.add(new SurgeOfDarknessAbility("surge_of_darkness_ability"));
         abilities.add(new ConcealmentAbility("concealment_ability"));
         abilities.add(new IdentityConcealmentAbility("identity_concealment_ability"));
+        abilities.add(new ConcealedDomainAbility("concealed_domain_ability"));
         abilities.add(new SwordOfDarknessAbility("sword_of_darkness_ability"));
 
         // DEMONESS PATHWAY
@@ -218,10 +220,15 @@ public class AbilityHandler {
         abilities.add(new SleepInducementAbility("sleep_inducement_ability"));
         abilities.add(new DreamTraversalAbility("dream_traversal_ability"));
         abilities.add(new NightmareSpectatorAbility("nightmare_spectator_ability"));
+        abilities.add(new VirtualPersonaAbility("virtual_persona_ability"));
         abilities.add(new ManipulationAbility("manipulation_ability"));
         abilities.add(new MentalPlagueAbility("mental_plague_ability"));
         abilities.add(new MindInvasionAbility("mind_invasion_ability"));
-        abilities.add(new IdentityAvatarAbility("identity_avatar_ability"));
+        abilities.add(new DreamWeaveAbility("dream_weave_ability"));
+        abilities.add(new DreamMazeAbility("dream_maze_ability"));
+        abilities.add(new DisasterFantasiaAbility("disaster_fantasia_ability"));
+        abilities.add(new StoryWritingAbility("story_writing_ability"));
+
 
         // WHEEL OF FORTUNE PATHWAY
         abilities.add(new PsycheStormAbility("psyche_storm_ability"));

@@ -99,7 +99,7 @@ This mechanic also applies to **team members sharing Sun abilities** — if a no
 **Spirituality Cost:** 5 per tick (toggle)
 *(Cannot be copied)*
 
-- Toggles sustained flight for the caster (flying speed 0.15).
+- Toggles sustained flight for the caster (flying speed 0.45).
 - Deactivates if flight is externally disabled.
 - Displays a Wings of Light transformation visual on the caster.
 

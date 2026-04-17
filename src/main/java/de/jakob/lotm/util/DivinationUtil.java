@@ -8,6 +8,7 @@ import de.jakob.lotm.abilities.darkness.NightDomainAbility;
 import de.jakob.lotm.abilities.demoness.InvisibilityAbility;
 import de.jakob.lotm.abilities.demoness.ShadowConcealmentAbility;
 import de.jakob.lotm.abilities.door.SpaceConcealmentAbility;
+import de.jakob.lotm.abilities.error.ParasitationAbility;
 import de.jakob.lotm.abilities.fool.HistoricalVoidHidingAbility;
 import de.jakob.lotm.abilities.red_priest.FogOfWarAbility;
 import de.jakob.lotm.abilities.tyrant.LightningStormAbility;
@@ -15,6 +16,7 @@ import de.jakob.lotm.attachments.MirrorWorldTraversalComponent;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.dimension.ModDimensions;
 import de.jakob.lotm.effect.ModEffects;
+import de.jakob.lotm.entity.custom.ability_entities.darkness_pathway.ConcealedDomainEntity;
 import de.jakob.lotm.item.ModItems;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.scheduling.ServerScheduler;
@@ -227,6 +229,13 @@ public class DivinationUtil {
         if(SpaceConcealmentAbility.isInsideConcealedSpace(serverPlayer.position())) {
             addedValue += 12;
         }
+        if (ConcealedDomainEntity.ENTITIES_INSIDE_DOMAIN.contains(serverPlayer.getUUID())) {
+            addedValue += 99;
+        }
+        if (ParasitationAbility.isConcealed(serverPlayer.getUUID())) {
+            addedValue += 99;
+        }
+        
         return addedValue;
     }
 

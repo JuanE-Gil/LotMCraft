@@ -16,8 +16,7 @@ import java.util.Map;
 
 public class TsunamiAbility extends Ability {
     public TsunamiAbility(String id) {
-        super(id, 6);
-        canBeCopied = false;
+        super(id, 6, "water", "water_strong");
     }
 
     @Override

@@ -1,5 +1,6 @@
 package de.jakob.lotm.abilities.mother;
 
+import de.jakob.lotm.abilities.core.AbilityUsedEvent;
 import de.jakob.lotm.abilities.core.SelectableAbility;
 import de.jakob.lotm.entity.custom.ability_entities.BigMoonEntity;
 import de.jakob.lotm.entity.custom.ability_entities.tyrant_pathway.GiantLightningEntity;
@@ -17,6 +18,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.*;
 
@@ -24,6 +26,7 @@ public class WrathOfNatureAbility extends SelectableAbility {
     public WrathOfNatureAbility(String id) {
         super(id, 3);
         canBeCopied = false;
+        postsUsedAbilityEventManually = true;
     }
 
     @Override
@@ -61,7 +64,10 @@ public class WrathOfNatureAbility extends SelectableAbility {
         }
 
         Vec3 targetPos = AbilityUtil.getTargetLocation(entity, 30, 1.5f, true);
-        BigMoonEntity moonEntity = new BigMoonEntity(serverLevel, (float) DamageLookup.lookupDps(2, .7f, 2, 20) *(int) multiplier, BeyonderData.isGriefingEnabled(entity), entity.getUUID(), 20 * 30);
+
+        NeoForge.EVENT_BUS.post(new AbilityUsedEvent(serverLevel, targetPos, entity, this, new String[]{"explosion"}, 25, 20 * 30));
+
+        BigMoonEntity moonEntity = new BigMoonEntity(serverLevel, (float) DamageLookup.lookupDps(2, .7f, 2, 20) * (float) multiplier, BeyonderData.isGriefingEnabled(entity), entity.getUUID(), 20 * 30);
         moonEntity.setPos(targetPos.x, targetPos.y + 25, targetPos.z);
         serverLevel.addFreshEntity(moonEntity);
     }
@@ -69,6 +75,8 @@ public class WrathOfNatureAbility extends SelectableAbility {
     private void fire(Level level, LivingEntity entity) {
         if (!level.isClientSide) {
             Vec3 center = entity.position();
+
+            NeoForge.EVENT_BUS.post(new AbilityUsedEvent((ServerLevel) level, center, entity, this, new String[]{"burning"}, 55, 20 * 15));
 
             double multiplier = (int) Math.max(multiplier(entity)/3,1);
             // Affect entities
@@ -130,6 +138,9 @@ public class WrathOfNatureAbility extends SelectableAbility {
     private void lightning(Level level, LivingEntity entity) {
         Vec3 targetLocFinak = AbilityUtil.getTargetLocation(entity, 70, 2, true);
         double multiplier = (int) Math.max(multiplier(entity)/2,1);
+
+        if(!level.isClientSide)
+            NeoForge.EVENT_BUS.post(new AbilityUsedEvent((ServerLevel) level, targetLocFinak, entity, this, new String[]{"explosion"}, 50, 20 * 4));
 
         ServerScheduler.scheduleForDuration(0, 20, 20 * 4, () -> {
             Vec3 targetLoc = new Vec3(targetLocFinak.x, targetLocFinak.y, targetLocFinak.z);

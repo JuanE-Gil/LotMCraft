@@ -158,7 +158,7 @@ public class MiracleHandler {
 
             AbilityUtil.getNearbyEntities(caster, (ServerLevel) level, center, 70).forEach(e -> {
                 SanityComponent sanityComponent = e.getData(ModAttachments.SANITY_COMPONENT);
-                sanityComponent.increaseSanityAndSync(-.0025f, e);
+                sanityComponent.decreaseSanityWithSequenceDifference(.0025f, e, BeyonderData.getSequence(caster), BeyonderData.getSequence(e));
             });
         });
 

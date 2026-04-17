@@ -28,11 +28,12 @@ public class MindFogAbility extends ToggleAbility {
     private final DustParticleOptions fogDustStrong = new DustParticleOptions(new Vector3f(0.88f, 0.9f, 1.0f), 1.5f);
 
     public MindFogAbility(String id) {
-        super(id);
+        super(id, "fog");
         canBeUsedByNPC = false;
         this.canBeCopied = false;
         this.canBeReplicated = false;
         autoClear = false;
+        interactionRadius = 20;
     }
 
     @Override
@@ -81,7 +82,7 @@ public class MindFogAbility extends ToggleAbility {
                 .forEach(target -> {
                     if (target.hasData(ModAttachments.SANITY_COMPONENT)) {
                         target.getData(ModAttachments.SANITY_COMPONENT)
-                                .increaseSanityAndSync(-0.05f, target);
+                                .decreaseSanityWithSequenceDifference(0.05f, target, AbilityUtil.getSeqWithArt(entity, this), BeyonderData.getSequence(target));
                     }
 
                     if (random.nextInt(5) == 0) {

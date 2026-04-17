@@ -96,7 +96,9 @@ public class EffectManager {
         SPIRITUAL_BAPTISM(25),
         CONCEALMENT(26),
         ABYSS_PILLAR(27),
-        ACID_SWAMP(28);
+        ACID_SWAMP(28),
+        ARTIFACT_EXPLOSION(29),
+        BLOOD_INFERNO(30);
 
         private final int index;
 

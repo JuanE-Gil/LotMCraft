@@ -21,6 +21,7 @@ import de.jakob.lotm.quest.QuestRegistry;
 import de.jakob.lotm.rendering.*;
 import de.jakob.lotm.rendering.effectRendering.impl.VFXRenderer;
 import de.jakob.lotm.util.ClientBeyonderCache;
+import de.jakob.lotm.util.ClientSacrificeCache;
 import de.jakob.lotm.util.helper.RingExpansionRenderer;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
@@ -189,6 +190,7 @@ public class ClientHandler {
 
         entity.getData(ModAttachments.TRANSFORMATION_COMPONENT.get()).setTransformed(packet.isTransformed());
         entity.getData(ModAttachments.TRANSFORMATION_COMPONENT.get()).setTransformationIndex(packet.transformationIndex());
+        entity.getData(ModAttachments.TRANSFORMATION_COMPONENT.get()).setAdditionalData(packet.additionalData());
     }
 
     public static void changeToThirdPerson(LivingEntity entity) {
@@ -500,6 +502,29 @@ public class ClientHandler {
         Entity entity = level.getEntity(packet.entityId());
         if (entity != null) {
             entity.getTags().add(packet.tag());
+        }
+    }
+
+    public static void syncKillCount(int killCount) {
+        ClientSacrificeCache.setKillCount(killCount);
+        if (Minecraft.getInstance().screen instanceof IntrospectScreen screen) {
+            screen.updateKillCount(killCount);
+        }
+    }
+
+    public static void syncSacrificeDuration(int totalTicks) {
+        ClientSacrificeCache.setTotalTicks(totalTicks);
+        ClientSacrificeCache.setRemainingTicks(totalTicks);
+    }
+
+    public static void handleApotheosisPacket(SyncApotheosisPacket packet) {
+        ClientLevel level = Minecraft.getInstance().level;
+        if (level == null) return;
+
+        Entity entity = level.getEntity(packet.entityId());
+        if (entity instanceof LivingEntity living) {
+            living.getData(ModAttachments.APOTHEOSIS_COMPONENT).setApotheosisTicksLeft(packet.ticks());
+            living.getData(ModAttachments.APOTHEOSIS_COMPONENT).setPathway(packet.pathway());
         }
     }
 }

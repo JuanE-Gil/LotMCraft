@@ -20,7 +20,7 @@ import java.util.Map;
 
 public class MentalPlagueAbility extends Ability {
     public MentalPlagueAbility(String id) {
-        super(id, 20);
+        super(id, 20, "plague");
         canBeCopied = false;
         canBeReplicated = false;
     }

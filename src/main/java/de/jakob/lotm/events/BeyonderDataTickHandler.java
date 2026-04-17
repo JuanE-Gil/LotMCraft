@@ -6,6 +6,7 @@ import de.jakob.lotm.abilities.PassiveAbilityItem;
 import de.jakob.lotm.abilities.PhysicalEnhancementsAbility;
 import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.abilities.core.ToggleAbility;
+import de.jakob.lotm.abilities.door.passives.VoidImmunityAbility;
 import de.jakob.lotm.abilities.wheel_of_fortune.passives.PassiveLuckAbility;
 import de.jakob.lotm.attachments.*;
 import de.jakob.lotm.item.ModItems;
@@ -86,17 +87,6 @@ public class BeyonderDataTickHandler {
             disabledFlightComponent.setCooldownTicks(disabledFlightComponent.getCooldownTicks() - 1);
         }
 
-        // Remove Unluck gradually
-        if(entity.tickCount % 10 == 0) {
-            LuckComponent luckComponent = livingEntity.getData(ModAttachments.LUCK_COMPONENT);
-
-            if (luckComponent.getLuck() < 0) {
-                luckComponent.addLuckWithMax((int) (BeyonderData.getMultiplier(livingEntity)), 0);
-            } else if (luckComponent.getLuck() > PassiveLuckAbility.getNormalLuckForEntity(livingEntity)) {
-                luckComponent.addLuckWithMax(-3, PassiveLuckAbility.getNormalLuckForEntity(livingEntity));
-            }
-        }
-
         if(BeyonderData.isBeyonder(livingEntity)) {
             if(entity.tickCount % 200 == 0) {
                 invalidateCache(livingEntity);
@@ -104,9 +94,21 @@ public class BeyonderDataTickHandler {
                 invalidateCache(livingEntity); // also re-filter applicable abilities
             }
 
-            // Tick Passive Abilities, Toggle Abilities and onHold for currently selected Ability
-            if(entity.tickCount % 5 == 0)
+            // Tick Passive Abilities, Toggle Abilities and onHold for currently selected Ability and tick luck
+            if(entity.tickCount % 5 == 0) {
                 tickAbilities(livingEntity);
+
+                // Remove Unluck gradually
+                LuckComponent luckComponent = livingEntity.getData(ModAttachments.LUCK_COMPONENT);
+                if(luckComponent.getLuck() < 0) {
+                    luckComponent.addLuckWithMax(1, 0);
+                }
+
+                // Remove Luck gradually
+                if(luckComponent.getLuck() > PassiveLuckAbility.getNormalLuckForEntity(livingEntity)) {
+                    luckComponent.addLuckWithMin(-1, PassiveLuckAbility.getNormalLuckForEntity(livingEntity));
+                }
+            }
         }
     }
 
@@ -118,7 +120,7 @@ public class BeyonderDataTickHandler {
             return;
         }
 
-        if(player.getY() < -200) {
+        if(player.getY() < -200 && !VoidImmunityAbility.IMMUNE_ENTITIES.contains(player)) {
             player.kill();
         }
 

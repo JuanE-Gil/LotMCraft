@@ -26,7 +26,6 @@ public class AvatarOfDesireAbility extends ToggleAbility {
     public AvatarOfDesireAbility(String id) {
         super(id, "corruption");
 
-        this.canBeReplicated = false;
         this.canBeCopied = false;
         this.canBeUsedInArtifact = false;
     }

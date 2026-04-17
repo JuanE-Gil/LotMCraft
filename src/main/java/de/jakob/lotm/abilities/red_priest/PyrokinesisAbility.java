@@ -24,7 +24,7 @@ import java.util.Map;
 public class PyrokinesisAbility extends SelectableAbility {
 
     public PyrokinesisAbility(String id) {
-        super(id, .75f);
+        super(id, .75f, "burning");
     }
 
     @Override

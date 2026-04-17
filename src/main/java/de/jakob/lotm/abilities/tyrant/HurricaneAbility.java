@@ -14,8 +14,7 @@ import java.util.Map;
 
 public class HurricaneAbility extends Ability {
     public HurricaneAbility(String id) {
-        super(id, 20f);
-        canBeCopied = false;
+        super(id, 20f, "explosion");
     }
 
     @Override

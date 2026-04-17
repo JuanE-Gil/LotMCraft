@@ -24,7 +24,6 @@ import java.util.Map;
 public class RoarAbility extends Ability {
     public RoarAbility(String id) {
         super(id, 2);
-        canBeCopied = false;
     }
 
     @Override

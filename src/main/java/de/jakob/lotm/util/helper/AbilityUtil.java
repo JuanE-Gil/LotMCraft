@@ -1254,6 +1254,7 @@ public class AbilityUtil {
     }
 
     public static int getSeqWithArt(LivingEntity entity, Ability ability){
+        if(entity == null) return LOTMCraft.NON_BEYONDER_SEQ;
         return ability.artifactScalingMap.containsKey(entity.getUUID()) ?
                 ability.artifactScalingMap.get(entity.getUUID()) : BeyonderData.getSequence(entity);
     }

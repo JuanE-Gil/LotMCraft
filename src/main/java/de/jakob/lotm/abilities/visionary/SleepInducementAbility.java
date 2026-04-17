@@ -25,7 +25,6 @@ import java.util.Map;
 public class SleepInducementAbility extends Ability {
     public SleepInducementAbility(String id) {
         super(id, 2);
-        canBeCopied = false;
     }
 
     @Override
@@ -83,7 +82,7 @@ public class SleepInducementAbility extends Ability {
             return;
 
         float distance = (float) end.distanceTo(startLoc.getPosition());
-        float bezierSteps = .5f / distance;
+        float bezierSteps = .2f / distance;
 
         int maxPoints = Math.max(2, Math.min(10, (int) Math.ceil(distance * 1.5)));
 

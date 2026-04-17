@@ -35,7 +35,7 @@ public class WaterManipulationAbility extends SelectableAbility {
     private final HashSet<UUID> castingCorrosiveRain = new HashSet<>();
 
     public WaterManipulationAbility(String id) {
-        super(id, .75f);
+        super(id, .75f, "water");
     }
 
     private final DustParticleOptions dustOptions = new DustParticleOptions(

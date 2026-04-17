@@ -42,12 +42,16 @@ import de.jakob.lotm.entity.client.spirits.translucent_wizard.SpiritTranslucentW
 import de.jakob.lotm.entity.custom.*;
 import de.jakob.lotm.entity.custom.ability_entities.OriginalBodyEntity;
 import de.jakob.lotm.entity.custom.spirits.*;
-import de.jakob.lotm.gamerule.ModGameRules;
 import de.jakob.lotm.network.PacketHandler;
 import de.jakob.lotm.network.packets.toClient.SyncSharedAbilitiesDataPacket;
+import de.jakob.lotm.rendering.models.door.DoorHighMythicalCreatureModel;
+import de.jakob.lotm.rendering.models.fool.FoolMythicalCreatureModel;
+import de.jakob.lotm.rendering.models.red_priest.RedPriestMythicalCreatureModel;
+import de.jakob.lotm.rendering.models.sun.SunMythicalCreatureModel;
+import de.jakob.lotm.rendering.models.wheel_of_fortune.WheelOfFortuneMythicalCreatureModel;
 import de.jakob.lotm.util.helper.TeamUtils;
-import de.jakob.lotm.rendering.models.DoorMythicalCreatureModel;
-import de.jakob.lotm.rendering.models.TyrantMythicalCreatureModel;
+import de.jakob.lotm.rendering.models.door.DoorMythicalCreatureModel;
+import de.jakob.lotm.rendering.models.tyrant.TyrantMythicalCreatureModel;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.SpiritualityProgressTracker;
 import net.minecraft.nbt.CompoundTag;
@@ -67,14 +71,23 @@ import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
+import de.jakob.lotm.abilities.tyrant.LightningStormAbility;
+import net.neoforged.neoforge.event.ServerChatEvent;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static de.jakob.lotm.abilities.fool.HistoricalVoidSummoningAbility.MARKED_ENTITIES_TAG;
 import static de.jakob.lotm.util.BeyonderData.*;
 
 @EventBusSubscriber(modid = LOTMCraft.MOD_ID)
 public class ModEvents {
+
+    public static final Map<UUID, Integer> leoderoUsesLeft = new ConcurrentHashMap<>();
+    private static final LightningStormAbility LIGHTNING_STORM = new LightningStormAbility("lightning_storm_leodero");
 
     @SubscribeEvent
     public static void registerLayers(EntityRenderersEvent.RegisterLayerDefinitions event) {
@@ -118,6 +131,11 @@ public class ModEvents {
         // Mythical Creature Forms
         event.registerLayerDefinition(TyrantMythicalCreatureModel.LAYER_LOCATION, TyrantMythicalCreatureModel::createBodyLayer);
         event.registerLayerDefinition(DoorMythicalCreatureModel.LAYER_LOCATION, DoorMythicalCreatureModel::createBodyLayer);
+        event.registerLayerDefinition(FoolMythicalCreatureModel.LAYER_LOCATION, FoolMythicalCreatureModel::createBodyLayer);
+        event.registerLayerDefinition(WheelOfFortuneMythicalCreatureModel.LAYER_LOCATION, WheelOfFortuneMythicalCreatureModel::createBodyLayer);
+        event.registerLayerDefinition(RedPriestMythicalCreatureModel.LAYER_LOCATION, RedPriestMythicalCreatureModel::createBodyLayer);
+        event.registerLayerDefinition(SunMythicalCreatureModel.LAYER_LOCATION, SunMythicalCreatureModel::createBodyLayer);
+        event.registerLayerDefinition(DoorHighMythicalCreatureModel.LAYER_LOCATION, DoorHighMythicalCreatureModel::createBodyLayer);
     }
 
     @SubscribeEvent
@@ -135,7 +153,7 @@ public class ModEvents {
         event.put(ModEntities.SPIRIT_GHOST.get(), SpiritGhostEntity.createAttributes().build());
         event.put(ModEntities.SPIRIT_BIZARRO_BANE.get(), SpiritBizarroBaneEntity.createAttributes().build());
         event.put(ModEntities.SPIRIT_BANE.get(), SpiritBaneEntity.createAttributes().build());
-        event.put(ModEntities.SPIRIT_MALMOUTH.get(), SpiritBaneEntity.createAttributes().build());
+        event.put(ModEntities.SPIRIT_MALMOUTH.get(), SpiritMalmouthEntity.createAttributes().build());
     }
 
     @SubscribeEvent
@@ -208,8 +226,10 @@ public class ModEvents {
     @SubscribeEvent
     public static void onRegisterCommands(RegisterCommandsEvent event) {
         BeyonderCommand.register(event.getDispatcher());
+        LuckCheckCommand.register(event.getDispatcher());
         SkinChangeCommand.register(event.getDispatcher());
         AllyRequestCommands.register(event.getDispatcher());
+        AllyCommand.register(event.getDispatcher());
         SanityCommand.register(event.getDispatcher());
         DigestionCommand.register(event.getDispatcher());
         QuestCommand.register(event.getDispatcher());
@@ -220,6 +240,9 @@ public class ModEvents {
         CharacteristicsStackCommand.register(event.getDispatcher());
         TeamCommand.register(event.getDispatcher());
         TeamInviteResponseCommand.register(event.getDispatcher());
+        SetBeyonderLogCommand.register(event.getDispatcher());
+        KillCountCommand.register(event.getDispatcher());
+        UniquenessCommand.register(event.getDispatcher());
     }
 
     @SubscribeEvent
@@ -258,6 +281,9 @@ public class ModEvents {
         MinecraftServer server = player.getServer();
         if (server == null) return;
 
+        // Sync uniqueness data on login
+        PacketHandler.syncUniquenessToPlayer(player);
+
         TeamComponent team = player.getData(ModAttachments.TEAM_COMPONENT.get());
 
         if (team.isInTeam()) {
@@ -285,32 +311,24 @@ public class ModEvents {
     }
 
     @SubscribeEvent
-    public static void onPlayerClone(PlayerEvent.Clone event) {
-        Player original = event.getOriginal();
-        Player newPlayer = event.getEntity();
+    public static void onServerChat(ServerChatEvent event) {
+        if (!event.getMessage().getString().equalsIgnoreCase("LEODERO!")) return;
 
-        // Only copy data if the original player was a beyonder
-        if (isBeyonder(original)) {
-            String pathway = getPathway(original);
-            int sequence = getSequence(original);
-            boolean griefingEnabled = original.getPersistentData().getBoolean(NBT_GRIEFING_ENABLED);
-            Tag markedEntities = original.getPersistentData().get(MARKED_ENTITIES_TAG);
+        ServerPlayer player = event.getPlayer();
+        UUID uuid = player.getUUID();
 
-            // Copy the data to the new player
-            CompoundTag newTag = newPlayer.getPersistentData();
-            newTag.putString(NBT_PATHWAY, pathway);
-            newTag.putInt(NBT_SEQUENCE, sequence);
-            newTag.putFloat(NBT_SPIRITUALITY, BeyonderData.getMaxSpirituality(pathway, sequence));
-            newTag.putBoolean(NBT_GRIEFING_ENABLED, griefingEnabled);
-            if (markedEntities != null) {
-                newTag.put(MARKED_ENTITIES_TAG, markedEntities.copy());
-            }
+        int usesLeft = leoderoUsesLeft.getOrDefault(uuid, 1);
+        if (usesLeft <= 0) return;
 
-            // Update spirituality progress tracker
-            if (getMaxSpirituality(pathway, sequence) > 0) {
-                float progress = 1;
-                SpiritualityProgressTracker.setProgress(newPlayer.getUUID(), progress);
-            }
+        leoderoUsesLeft.put(uuid, usesLeft - 1);
+
+        if (player.level() instanceof ServerLevel serverLevel) {
+            net.minecraft.world.entity.decoration.ArmorStand dummy = new net.minecraft.world.entity.decoration.ArmorStand(serverLevel, player.getX(), player.getY(), player.getZ());
+            dummy.setYRot(player.getYRot());
+            dummy.setXRot(player.getXRot());
+            serverLevel.addFreshEntity(dummy);
+            LIGHTNING_STORM.onAbilityUse(serverLevel, dummy);
+            dummy.discard();
         }
     }
 }

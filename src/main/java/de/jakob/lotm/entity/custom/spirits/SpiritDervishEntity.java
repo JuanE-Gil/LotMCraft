@@ -1,8 +1,12 @@
 package de.jakob.lotm.entity.custom.spirits;
 
+import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.entity.custom.projectiles.SpiritBallEntity;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
@@ -23,6 +27,7 @@ import net.minecraft.world.entity.projectile.SmallFireball;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -54,13 +59,21 @@ public class SpiritDervishEntity extends Animal {
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this).setAlertOthers());
     }
 
+    @Override
+    public @NotNull ResourceKey<LootTable> getDefaultLootTable() {
+        return ResourceKey.create(
+                Registries.LOOT_TABLE,
+                ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "entities/spirit_dervish")
+        );
+    }
+
     public static AttributeSupplier.Builder createAttributes() {
         return Animal.createMobAttributes()
                 .add(Attributes.MAX_HEALTH, 60.0)
                 .add(Attributes.FLYING_SPEED, 2.5)
                 .add(Attributes.SCALE, 1)
                 .add(Attributes.ARMOR, 5.0)
-                .add(Attributes.ATTACK_DAMAGE, 18.0)
+                .add(Attributes.ATTACK_DAMAGE, 25.0)
                 .add(Attributes.FOLLOW_RANGE, 30.0);
     }
 
@@ -176,7 +189,7 @@ public class SpiritDervishEntity extends Animal {
                     }
 
                     if (this.attackTime <= 0) {
-                        this.attackTime = 20;
+                        this.attackTime = 10;
                         this.dervish.doHurtTarget(livingentity);
                     }
 
@@ -185,11 +198,11 @@ public class SpiritDervishEntity extends Animal {
                     if (this.attackTime <= 0) {
                         ++this.attackStep;
                         if (this.attackStep == 1) {
-                            this.attackTime = 60;
+                            this.attackTime = 40;
                         } else if (this.attackStep <= 4) {
                             this.attackTime = 6;
                         } else {
-                            this.attackTime = 100;
+                            this.attackTime = 60;
                             this.attackStep = 0;
                         }
 

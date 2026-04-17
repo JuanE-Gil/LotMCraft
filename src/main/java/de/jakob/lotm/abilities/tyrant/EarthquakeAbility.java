@@ -27,8 +27,9 @@ import java.util.Map;
 public class EarthquakeAbility extends Ability {
 
     public EarthquakeAbility(String id) {
-        super(id, 32);
-        canBeCopied = false;
+        super(id, 32, "explosion");
+        interactionRadius = 70;
+        interactionCacheTicks = 20 * 25;
     }
 
     @Override

@@ -29,7 +29,6 @@ public class ConceptualTheftAbility extends SelectableAbility {
 
         canBeUsedByNPC = false;
         canBeCopied = false;
-        canBeReplicated = false;
     }
 
     @Override
@@ -44,7 +43,8 @@ public class ConceptualTheftAbility extends SelectableAbility {
 
     @Override
     protected String[] getAbilityNames() {
-        return new String[]{"ability.lotmcraft.conceptual_theft.day_night",
+        return new String[]{
+                "ability.lotmcraft.conceptual_theft.day_night",
                 "ability.lotmcraft.conceptual_theft.area",
                 "ability.lotmcraft.conceptual_theft.digestion",
                 "ability.lotmcraft.conceptual_theft.sanity",

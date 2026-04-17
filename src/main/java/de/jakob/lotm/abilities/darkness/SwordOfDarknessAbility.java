@@ -38,7 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class SwordOfDarknessAbility extends Ability {
     public SwordOfDarknessAbility(String id) {
-        super(id, 8);
+        super(id, 8, "darkness");
         this.canBeCopied = false;
         autoClear = false;
     }
@@ -81,12 +81,6 @@ public class SwordOfDarknessAbility extends Ability {
                     float actualsequence =  seq<=1? 1: 3;
                     ParticleUtil.spawnParticles(serverLevel, ModParticles.BLACK.get(), point, 3, 0.2, 0);
                     AbilityUtil.damageNearbyEntities(serverLevel, entity, 3, Math.max(multiplier/2,1) * DamageLookup.lookupDamage((int) actualsequence, 1.2) * damageMult, point, true, false, false, 10, ModDamageTypes.source(level, ModDamageTypes.DARKNESS_GENERIC, entity));
-                    LOTMCraft.LOGGER.info("damage {},multiplier {},multiplier_seq{},actualsequence{} ",
-                            DamageLookup.lookupDamage((int) actualsequence, 1.2) * damageMult,
-                            Math.max(multiplier/2,1) * DamageLookup.lookupDamage((int) actualsequence, 1.2),
-                            multiplier,
-                            actualsequence
-                    );
                     //Additional effects
                     AbilityUtil.getNearbyEntities(entity, serverLevel, entity.position(), 20*Math.max(multiplier/2, 1)).forEach(e -> {
                         SanityComponent sanityComponent = e.getData(ModAttachments.SANITY_COMPONENT);
@@ -132,6 +126,6 @@ public class SwordOfDarknessAbility extends Ability {
 
     @Override
     protected float getSpiritualityCost() {
-        return 2000;
+        return 760;
     }
 }

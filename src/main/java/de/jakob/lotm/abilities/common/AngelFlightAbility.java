@@ -1,6 +1,5 @@
 package de.jakob.lotm.abilities.common;
 
-import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.ToggleAbility;
 import de.jakob.lotm.attachments.DisabledFlightComponent;
 import de.jakob.lotm.attachments.ModAttachments;
@@ -53,7 +52,7 @@ public class AngelFlightAbility extends ToggleAbility {
         TransformationComponent transformationComponent = entity.getData(ModAttachments.TRANSFORMATION_COMPONENT);
         int index = transformationComponent.getTransformationIndex();
         int mythical_index = TransformationComponent.TransformationType.MYTHICAL_CREATURE.getIndex();
-        int parasitism_index = TransformationComponent.TransformationType.PARASTATION.getIndex();
+        int parasitism_index = TransformationComponent.TransformationType.PARASITATION.getIndex();
 
         if (transformationComponent.isTransformed() && !(index ==  mythical_index || index == parasitism_index) ) {
             cancel((ServerLevel) level, entity);

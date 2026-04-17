@@ -48,6 +48,7 @@ public abstract class Ability {
     public boolean cannotBeStolen = false;
     public boolean canBeUsedInArtifact = true;
     public boolean canBeReplicated = true;
+    public boolean canBeShared = true;
 
     public boolean canAlwaysBeUsed = false;
 
@@ -166,10 +167,27 @@ public abstract class Ability {
             return getRequirements().values().stream().anyMatch(reqSeq -> reqSeq >= sequence);
         }
 
-        if(!getRequirements().containsKey(pathway)) return false;
-        if(getRequirements().get(pathway) < sequence) return false;
+        // Check current pathway
+        if(getRequirements().containsKey(pathway) && getRequirements().get(pathway) >= sequence) {
+            return true;
+        }
 
-        return true;
+        // Check historical pathways from domain switches — abilities from the previous pathway are
+        // accessible only down to the switch point (e.g. switched at seq 4, so only fool seq 5–9 carry over)
+        if(!entity.level().isClientSide()) {
+            String[] pathwayHistory = BeyonderData.getPathwayHistory(entity);
+            if(pathwayHistory.length < 10) return false;
+            for (int seq = sequence + 1; seq <= 9; seq++) {
+                String historicalPathway = pathwayHistory[seq];
+                if (historicalPathway != null
+                        && getRequirements().containsKey(historicalPathway)
+                        && getRequirements().get(historicalPathway) >= seq) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     public boolean canUse(LivingEntity entity) {
@@ -215,12 +233,16 @@ public abstract class Ability {
 
         int requiredSequence = getRequirements().get(BeyonderData.getPathway(entity));
 
-        // If user's sequence is numerically higher (weaker) → cannot digest at all
         if (sequence > requiredSequence) {
             return 0f;
         }
 
-        return (1f / (100f * Math.max(.5f, ((10 - sequence) * .5f)))) * (entity.level().getGameRules().getInt(ModGameRules.DIGESTION_RATE) / 100f);
+        float cooldownMultiplier = Math.clamp(((float) cooldown) / (20 * 7), .1f, 2.25f);
+
+        float rawDigestion = (1f / (100f * Math.max(.5f, ((10 - requiredSequence) * .5f)))) * cooldownMultiplier;
+        float digestion = rawDigestion * (entity.level().getGameRules().getInt(ModGameRules.DIGESTION_RATE) / 100f);
+
+        return digestion;
     }
 
     public ResourceLocation getTextureLocation() {

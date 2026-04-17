@@ -1,6 +1,7 @@
 package de.jakob.lotm.abilities.darkness.passives;
 
 import de.jakob.lotm.abilities.PhysicalEnhancementsAbility;
+import de.jakob.lotm.entity.custom.ability_entities.darkness_pathway.ConcealedDomainEntity;
 import de.jakob.lotm.util.BeyonderData;
 import net.minecraft.world.entity.LivingEntity;
 
@@ -26,6 +27,11 @@ public class PhysicalEnhancementsDarknessAbility extends PhysicalEnhancementsAbi
         return List.of();
     }
 
+    private boolean isNocturnal(LivingEntity entity) {
+        return entity.level().isNight()
+                || ConcealedDomainEntity.ENTITIES_INSIDE_DOMAIN.contains(entity.getUUID());
+    }
+
     @Override
     protected List<PhysicalEnhancement> getEnhancementsForSequence(int sequenceLevel, LivingEntity entity) {
 
@@ -33,7 +39,7 @@ public class PhysicalEnhancementsDarknessAbility extends PhysicalEnhancementsAbi
         int resistanceModifier = 0;
         int speedModifier = 0;
 
-        if(entity.level().isNight()) {
+        if (isNocturnal(entity)) {
             strengthModifier = 1;
             resistanceModifier = 1;
             speedModifier = 2;
@@ -123,7 +129,7 @@ public class PhysicalEnhancementsDarknessAbility extends PhysicalEnhancementsAbi
     }
 
     @Override
-    protected int getCurrentSequenceLevel(net.minecraft.world.entity.LivingEntity entity) {
+    protected int getCurrentSequenceLevel(LivingEntity entity) {
         return BeyonderData.getSequence(entity);
     }
 }

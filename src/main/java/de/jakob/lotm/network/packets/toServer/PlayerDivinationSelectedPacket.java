@@ -115,7 +115,8 @@ public record PlayerDivinationSelectedPacket(UUID selectedPlayerUuid) implements
                         targetPlayer.blockPosition().getZ(),
                         distance
                 )));
-            }
+            }     // Trigger MetaAwareness passive if target has it
+            de.jakob.lotm.abilities.visionary.passives.MetaAwarenessAbility.onDivined(player, targetPlayer);
         });
     }
 

@@ -25,8 +25,10 @@ import java.util.*;
 
 public class SurgeOfDarknessAbility extends Ability {
     public SurgeOfDarknessAbility(String id) {
-        super(id, 11);
+        super(id, 11, "darkness");
         autoClear = false;
+        interactionRadius = 45;
+        interactionCacheTicks = 20 * 15;
     }
 
     @Override
@@ -57,7 +59,7 @@ public class SurgeOfDarknessAbility extends Ability {
 
                 AbilityUtil.getNearbyEntities(entity, (ServerLevel) level, center, 45).forEach(e -> {
                     SanityComponent sanityComponent = e.getData(ModAttachments.SANITY_COMPONENT);
-                    sanityComponent.increaseSanityAndSync(-0.0525f*(int) Math.max(multiplier/2,1), e);
+                    sanityComponent.decreaseSanityWithSequenceDifference(0.0525f*(int) Math.max(multiplier/2,1), e, AbilityUtil.getSeqWithArt(entity, this), BeyonderData.getSequence(e));
                 });
 
                 AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 45*(int) Math.max(multiplier/2,1), DamageLookup.lookupDps(3, .5, 4, 20) * multiplier(entity) * damageMult, center, true, false, ModDamageTypes.source(level, ModDamageTypes.DARKNESS_GENERIC, entity));

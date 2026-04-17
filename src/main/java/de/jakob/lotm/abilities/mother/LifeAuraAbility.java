@@ -1,6 +1,7 @@
 package de.jakob.lotm.abilities.mother;
 
 import de.jakob.lotm.abilities.core.ToggleAbility;
+import de.jakob.lotm.abilities.core.interaction.InteractionHandler;
 import de.jakob.lotm.rendering.effectRendering.MovableEffectManager;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.data.Location;
@@ -66,6 +67,11 @@ public class LifeAuraAbility extends ToggleAbility {
 
         Location loc = new Location(entity.position(), serverLevel);
         MovableEffectManager.updateEffectPosition(entityEffectMap.get(entity.getUUID()), loc, serverLevel);
+
+        int seq = AbilityUtil.getSeqWithArt(entity, this);
+        if(InteractionHandler.isInteractionPossible(loc, "corruption", seq)) {
+            return;
+        }
 
         AbilityUtil.getBlocksInEllipsoid(serverLevel, entity.position(), 30*(int)Math.max(multiplier(entity)/4,1), 7*(int)Math.max(multiplier(entity)/4,1), true, false, false).forEach(blockPos -> {
             BlockState blockState = level.getBlockState(blockPos);
