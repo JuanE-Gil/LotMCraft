@@ -82,37 +82,6 @@ public class ModItems {
             () -> new BlockItem(ModBlocks.MYSTICAL_RING.get(), new Item.Properties())
     );
 
-
-    // Uniquenesses
-    public static final DeferredItem<Item> RED_PRIEST_UNIQUENESS = ITEMS.register("red_priest_uniqueness",
-            () -> new UniquenessItem(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC), "red_priest")
-    );
-    public static final DeferredItem<Item> TYRANT_UNIQUENESS = ITEMS.register("tyrant_uniqueness",
-            () -> new UniquenessItem(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC), "tyrant")
-    );
-    public static final DeferredItem<Item> SUN_UNIQUENESS = ITEMS.register("sun_uniqueness",
-            () -> new UniquenessItem(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC), "sun")
-    );
-    public static final DeferredItem<Item> FOOL_UNIQUENESS = ITEMS.register("fool_uniqueness",
-            () -> new UniquenessItem(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC), "fool")
-    );
-    public static final DeferredItem<Item> ERROR_UNIQUENESS = ITEMS.register("error_uniqueness",
-            () -> new UniquenessItem(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC), "error")
-    );
-    public static final DeferredItem<Item> VISIONARY_UNIQUENESS = ITEMS.register("visionary_uniqueness",
-            () -> new UniquenessItem(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC), "visionary")
-    );
-    public static final DeferredItem<Item> DOOR_UNIQUENESS = ITEMS.register("door_uniqueness",
-            () -> new UniquenessItem(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC), "door")
-    );
-    public static final DeferredItem<Item> DARKNESS_UNIQUENESS = ITEMS.register("darkness_uniqueness",
-            () -> new UniquenessItem(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC), "darkness")
-    );
-    public static final DeferredItem<Item> WHEEL_OF_FORTUNE_UNIQUENESS = ITEMS.register("wheel_of_fortune_uniqueness",
-            () -> new UniquenessItem(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC), "wheel_of_fortune")
-    );
-
-
     public static PotionIngredient selectRandomIngredient(List<PotionIngredient> ingredients, Random random) {
         if (ingredients == null || ingredients.isEmpty()) {
             return null;

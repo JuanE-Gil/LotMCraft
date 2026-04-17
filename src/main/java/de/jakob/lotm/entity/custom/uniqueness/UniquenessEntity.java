@@ -86,8 +86,7 @@ public class UniquenessEntity extends Entity {
 
         // Check nearby entities for hitbox interactions
         AABB hitbox = this.getBoundingBox().inflate(0.5);
-        List<LivingEntity> nearby = level().getEntitiesOfClass(LivingEntity.class, hitbox,
-                e -> e != this && !(e instanceof UniquenessEntity));
+        List<LivingEntity> nearby = level().getEntitiesOfClass(LivingEntity.class, hitbox);
 
         for (LivingEntity entity : nearby) {
             handleEntityContact(entity, pathway);

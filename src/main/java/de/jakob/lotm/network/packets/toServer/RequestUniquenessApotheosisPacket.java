@@ -66,7 +66,7 @@ public record RequestUniquenessApotheosisPacket() implements CustomPacketPayload
             return;
         }
 
-        int charStack = player.getData(ModAttachments.BEYONDER_COMPONENT).getCharacteristicStack();
+        int charStack = BeyonderData.getCurrentCharStack(player);
         int requiredStack = player.serverLevel().getGameRules().getInt(ModGameRules.CHARSTACK_REQUIRED_FOR_APOTHEOSIS);
         int killCount = comp.getKillCount();
 
