@@ -70,8 +70,6 @@ public class FrenzyAbility extends Ability {
         target.hurt(entity.damageSources().source(ModDamageTypes.LOOSING_CONTROL), (float) (DamageLookup.lookupDamage(7, .85) * multiplier(entity)));
 
         target.getData(ModAttachments.SANITY_COMPONENT).decreaseSanityWithSequenceDifference((float) (0.065f * multiplier(entity)), target, entitySeq, BeyonderData.getSequence(target));
-
-        ParticleUtil.spawnParticles((ServerLevel) level, dust, target.getEyePosition(), 80, 0.5f);
     }
 
     private int getAmplifier(LivingEntity entity, LivingEntity target) {

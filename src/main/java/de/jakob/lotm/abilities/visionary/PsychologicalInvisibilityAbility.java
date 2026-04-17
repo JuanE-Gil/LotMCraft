@@ -193,6 +193,7 @@ public class PsychologicalInvisibilityAbility extends ToggleAbility {
                 }
             }
 
+            player.setGlowingTag(false);
             player.setInvisible(true);
             event.setCanceled(true);
         }
