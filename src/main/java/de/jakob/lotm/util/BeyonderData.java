@@ -447,12 +447,6 @@ public class BeyonderData {
 
     private static float getMaxSpirituality(int sequence, float mult) {
         return spiritualityLookup[sequence] * mult;
-        player.getData(ModAttachments.BEYONDER_COMPONENT).setDigestionProgress(progress);
-
-        // Sync to client if this is server-side
-        if (!player.level().isClientSide() && player instanceof ServerPlayer serverPlayer) {
-            PacketHandler.syncBeyonderDataToPlayer(serverPlayer);
-        }
     }
 
     public static void clearBeyonderData(LivingEntity entity) {
@@ -548,6 +542,14 @@ public class BeyonderData {
         }
 
         return entity.getData(ModAttachments.BEYONDER_COMPONENT).getCharacteristicStack()[sequence];
+    }
+
+    public static int[] getCharStacks(LivingEntity entity) {
+        if(entity.level().isClientSide) {
+            return new int[10];
+        }
+
+        return entity.getData(ModAttachments.BEYONDER_COMPONENT).getCharacteristicStack();
     }
 
     public static int getCurrentCharStack(LivingEntity entity) {

@@ -46,14 +46,14 @@ public class AvatarCreationAbility extends Ability {
             return;
         }
 
-        var stacks = BeyonderData.beyonderMap.get(entity).get().charStack();
+        int[] stacks = BeyonderData.getCharStacks(entity);
         int sequence = LOTMCraft.NON_BEYONDER_SEQ;
         int entitySeq = BeyonderData.getSequence(entity);
 
         for (int i = 1; i < LOTMCraft.NON_BEYONDER_SEQ; i++){
             if(entitySeq >= i) continue;
 
-            if(stacks.get(i) > 1){
+            if(stacks[i] > 1){
                 sequence = i;
                 break;
             }
@@ -64,6 +64,6 @@ public class AvatarCreationAbility extends Ability {
         level.addFreshEntity(avatar);
 
         if(sequence != LOTMCraft.NON_BEYONDER_SEQ)
-            BeyonderData.setCharStack(entity, sequence, stacks.get(sequence) - 1, true);
+            BeyonderData.setCharStack(entity, stacks[sequence] - 1, sequence, true);
     }
 }
