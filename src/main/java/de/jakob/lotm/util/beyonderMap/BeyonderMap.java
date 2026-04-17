@@ -32,7 +32,6 @@ public class BeyonderMap extends SavedData {
             null
     );
 
-
     public BeyonderMap() {
         super();
 

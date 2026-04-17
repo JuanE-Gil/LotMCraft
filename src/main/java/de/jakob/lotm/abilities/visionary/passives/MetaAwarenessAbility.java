@@ -4,6 +4,7 @@ import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.PassiveAbilityItem;
 import de.jakob.lotm.events.HonorificNamesEventHandler;
 import de.jakob.lotm.util.BeyonderData;
+import de.jakob.lotm.util.beyonderMap.HonorificName;
 import de.jakob.lotm.util.beyonderMap.PendingPrayer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -55,8 +56,9 @@ public class MetaAwarenessAbility extends PassiveAbilityItem {
 
             String username = candidate.getName().getString();
 
-            // Full username must appear in the message (case-insensitive)
-            if (!message.toLowerCase().contains(username.toLowerCase())) continue;
+            // Full username or one line of hn must appear in the message (case-insensitive)
+            if (!message.toLowerCase().contains(username.toLowerCase())
+                    || !BeyonderData.beyonderMap.containsHonorificNameWithLine(message)) continue;
 
             triggerAutoPrayer(sender, candidate);
         }
