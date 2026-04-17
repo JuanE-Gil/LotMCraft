@@ -81,6 +81,8 @@ public class BeyonderEventHandler {
             }
 
             serverPlayer.addEffect(new MobEffectInstance(ModEffects.CONCEALMENT, 20 * 30, 99, false, false, false));
+            BeyonderData.recalculateCharStackModifiers(serverPlayer);
+            serverPlayer.getData(ModAttachments.LUCK_COMPONENT.get()).setLuck(0);
             PacketHandler.sendToPlayer(serverPlayer ,new SyncPsychologicalInvisibilityPacket(PsychologicalInvisibilityAbility.invisiblePlayers));
         }
     }
@@ -116,6 +118,7 @@ public class BeyonderEventHandler {
         if (event.getEntity() instanceof ServerPlayer serverPlayer) {
             // Re-sync data when changing dimensions
             PacketHandler.syncBeyonderDataToPlayer(serverPlayer);
+            BeyonderData.recalculateCharStackModifiers(serverPlayer);
         }
     }
 
@@ -164,6 +167,9 @@ public class BeyonderEventHandler {
         if (event.getEntity() instanceof ServerPlayer serverPlayer) {
             // Re-sync data on respawn
             PacketHandler.syncBeyonderDataToPlayer(serverPlayer);
+            BeyonderData.recalculateCharStackModifiers(serverPlayer);
+            serverPlayer.getData(ModAttachments.LUCK_COMPONENT.get()).setLuck(0);
+
             // Clear sacrifice bar if it was active when the player died
             if (serverPlayer.getPersistentData().getBoolean("sacrifice_bar_clear")) {
                 serverPlayer.getPersistentData().remove("sacrifice_bar_clear");
@@ -265,10 +271,12 @@ public class BeyonderEventHandler {
                 LOTMCraft.LOGGER.info("{} was killed with {}", player.getGameProfile().getName(),event.getSource());
             }
 
-
             if (!BeyonderData.isBeyonder(player)) return;
             if(beyonderMap.get(player).isEmpty()) return;
-            if (!player.level().getGameRules().getBoolean(ModGameRules.REGRESS_SEQUENCE_ON_DEATH)) return;
+            if (!player.level().getGameRules().getBoolean(ModGameRules.REGRESS_SEQUENCE_ON_DEATH)){
+                BeyonderData.recalculateCharStackModifiers(player);
+                return;
+            }
 
             StoredData data = beyonderMap.get(player).get();
             StoredData regressed = data.regressSeq(false);
@@ -289,6 +297,8 @@ public class BeyonderEventHandler {
             BeyonderData.setDigestionProgress(player, 1.0f);
 
             BeyonderData.recalculateCharStackModifiers(player);
+
+            player.getData(ModAttachments.LUCK_COMPONENT.get()).setLuck(0);
 
             if (Objects.equals(regressed.sequence(), LOTMCraft.NON_BEYONDER_SEQ)) {
                 ClientBeyonderCache.removePlayer(player.getUUID());
@@ -538,7 +548,8 @@ public class BeyonderEventHandler {
                 BeyonderData.digest(player, (0.01f + (diff * 0.1f)), true);
             }
 
-           victim.addEffect(new MobEffectInstance(ModEffects.CONCEALMENT, 20 * 30, 99, false, false, false));
+            victim.getData(ModAttachments.LUCK_COMPONENT).setLuck(0);
+            victim.addEffect(new MobEffectInstance(ModEffects.CONCEALMENT, 20 * 30, 99, false, false, false));
         }
     }
 

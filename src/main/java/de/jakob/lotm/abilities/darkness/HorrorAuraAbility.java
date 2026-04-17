@@ -53,12 +53,11 @@ public class HorrorAuraAbility extends Ability {
         if(!(level instanceof ServerLevel serverLevel)) {
             return;
         }
-
+        float multiplier = multiplier(entity);
         Location loc = new Location(entity.position(), serverLevel);
-        UUID effectID = MovableEffectManager.playEffect(MovableEffectManager.MovableEffect.HORROR_AURA, loc, 20 * 25, false, serverLevel, entity);
+        UUID effectID = MovableEffectManager.playEffect(MovableEffectManager.MovableEffect.HORROR_AURA, loc, 20 * 25 *(int) Math.max(multiplier/4,1), false, serverLevel, entity);
 
         AtomicInteger ticks = new AtomicInteger(0);
-
         ServerScheduler.scheduleForDuration(0, 1, 20 * 30, () -> {
             loc.setPosition(entity.position());
             loc.setLevel(serverLevel);
@@ -73,7 +72,8 @@ public class HorrorAuraAbility extends Ability {
                 return;
             }
 
-            AbilityUtil.getNearbyEntities(entity, serverLevel, entity.position(), 20).forEach(e -> {
+
+            AbilityUtil.getNearbyEntities(entity, serverLevel, entity.position(), 20*Math.max(multiplier/2, 1)).forEach(e -> {
                 // Entity is freed from Horror Aura by morale-boosting abilities
                 Location eLoc = new Location(e.position(), serverLevel);
                 int eSeq = BeyonderData.getSequence(e);
@@ -86,9 +86,9 @@ public class HorrorAuraAbility extends Ability {
                 if(hasMorale)
                     return;
 
-                e.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 30, 5, false, false, false));
-                e.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 20, 4, false, false, false));
-                e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, 4, false, false, false));
+                e.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 60, 5, false, false, false));
+                e.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 60, 4, false, false, false));
+                e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 4, false, false, false));
 
                 BeyonderData.addModifier(e, "horror_aura", .4);
                 if(AbilityUtil.isTargetSignificantlyWeaker(seq, BeyonderData.getSequence(e)) && ticks.get() % 10 == 0) {
@@ -97,7 +97,7 @@ public class HorrorAuraAbility extends Ability {
                 }
 
                 SanityComponent sanityComponent = e.getData(ModAttachments.SANITY_COMPONENT);
-                sanityComponent.decreaseSanityWithSequenceDifference(.0033f, e, AbilityUtil.getSeqWithArt(entity, this), BeyonderData.getSequence(e));
+                sanityComponent.decreaseSanityWithSequenceDifference(-0.008125f*(int) Math.max(multiplier/2,1), e, AbilityUtil.getSeqWithArt(entity, this), BeyonderData.getSequence(e));
             });
             ticks.getAndIncrement();
         }, () -> this.clearArtifactScaling(entity), serverLevel, () -> AbilityUtil.getTimeInArea(entity, new Location(entity.position(), serverLevel)));

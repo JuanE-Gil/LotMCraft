@@ -157,6 +157,8 @@ public abstract class PhysicalEnhancementsAbility extends PassiveAbilityItem {
         for(int i = 9; i >= seq; i--){
             int buff = stack[i];
 
+            buff = (i == 1 && buff >= 0) ? buff : (buff > 0) ? 1 : 0;
+
             switch (i){
                 case 8 -> result += buff;
                 case 7 -> result += buff * 2;

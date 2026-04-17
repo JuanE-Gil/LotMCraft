@@ -87,6 +87,17 @@ public class BeyonderDataTickHandler {
             disabledFlightComponent.setCooldownTicks(disabledFlightComponent.getCooldownTicks() - 1);
         }
 
+        // Remove Unluck gradually
+        if(entity.tickCount % 10 == 0) {
+            LuckComponent luckComponent = livingEntity.getData(ModAttachments.LUCK_COMPONENT);
+
+            if (luckComponent.getLuck() < 0) {
+                luckComponent.addLuckWithMax((int) (BeyonderData.getMultiplier(livingEntity)), 0);
+            } else if (luckComponent.getLuck() > PassiveLuckAbility.getNormalLuckForEntity(livingEntity)) {
+                luckComponent.addLuckWithMax(-3, PassiveLuckAbility.getNormalLuckForEntity(livingEntity));
+            }
+        }
+
         if(BeyonderData.isBeyonder(livingEntity)) {
             if(entity.getData(ModAttachments.SANITY_COMPONENT.get()).getSanity() == 0.0f){
                 entity.kill();
@@ -130,7 +141,7 @@ public class BeyonderDataTickHandler {
 
         if (BeyonderData.isBeyonder(player)) {
             // Regenerate Spirituality
-            float amount = BeyonderData.getMaxSpirituality(BeyonderData.getSequence(player)) * 0.0006f;
+            float amount = BeyonderData.getMaxSpirituality(BeyonderData.getPathway(player), BeyonderData.getSequence(player)) * 0.0006f;
             BeyonderData.incrementSpirituality(player, amount);
 
             // Slowly digest potion

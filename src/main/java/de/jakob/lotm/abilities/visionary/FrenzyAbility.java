@@ -23,7 +23,7 @@ import java.util.Map;
 
 public class FrenzyAbility extends Ability {
     public FrenzyAbility(String id) {
-        super(id, 1.5f, "corruption");
+        super(id, 5f, "corruption");
     }
 
     @Override

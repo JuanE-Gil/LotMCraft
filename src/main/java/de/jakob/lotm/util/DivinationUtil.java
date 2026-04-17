@@ -20,6 +20,7 @@ import de.jakob.lotm.entity.custom.ability_entities.darkness_pathway.ConcealedDo
 import de.jakob.lotm.item.ModItems;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.scheduling.ServerScheduler;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -293,6 +294,7 @@ public class DivinationUtil {
                         durationMultiplier = 4;
                         powerMultiplier = (10 - sequence);
                     }
+                    //Seq 4 ability - Minor Concealment - Darkness
                 }
 
                 // seq4 ability - Night Domain - Darkness

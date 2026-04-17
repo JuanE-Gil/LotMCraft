@@ -31,6 +31,12 @@ import net.minecraft.world.entity.player.Player;
 import java.util.*;
 
 public class BeyonderData {
+    public static final String NBT_PATHWAY = "beyonder_pathway";
+    public static final String NBT_SEQUENCE = "beyonder_sequence";
+    public static final String NBT_SPIRITUALITY = "beyonder_spirituality";
+    public static final String NBT_GRIEFING_ENABLED = "beyonder_griefing_enabled";
+    public static final String NBT_DIGESTION_PROGRESS = "beyonder_digestion_progress";
+
     private static final int[] spiritualityLookup = {150000, 20000, 10000, 5000, 3900, 1900, 1200, 780, 200, 180};
     private static final double[] multiplier = {9, 4.25, 3.25, 2.15, 1.85, 1.4, 1.25, 1.1, 1.0, 1.0};
     private static final double[] sanityDecreaseMultiplier = {.003, .0125, .025, .05, .1, .65, .75, .88, 1.0, 1.0};
@@ -156,6 +162,7 @@ public class BeyonderData {
             callPassiveEffectsOnRemoved(entity, serverLevel);
         }
 
+
         if(entity instanceof ServerPlayer player) {
             if(!skipCheck && !beyonderMap.check(pathway, sequence)) return;
 
@@ -180,7 +187,7 @@ public class BeyonderData {
         component.setSequence(sequence);
         if(clearCharStack) component.clearCharacteristicStack();
         else component.setCharacteristicStack(0, sequence);
-        component.setSpirituality(getMaxSpirituality(sequence));
+        component.setSpirituality(getMaxSpirituality(pathway, sequence));
         component.setDigestionProgress(0);
         component.setGriefingEnabled(griefing);
 
@@ -298,9 +305,9 @@ public class BeyonderData {
             return ClientBeyonderCache.getSpirituality(entity.getUUID());
         }
         if(!(entity instanceof Player player))
-            return getMaxSpirituality(getSequence(entity));
+            return getMaxSpirituality(getPathway(entity), getSequence(entity));
         float spirituality = entity.getData(ModAttachments.BEYONDER_COMPONENT).getSpirituality();
-        float maxSpirituality = getMaxSpirituality(getSequence(entity));
+        float maxSpirituality = getMaxSpirituality(getPathway(entity), getSequence(entity));
 
         if(maxSpirituality <= 0) {
             return 0.0f;
@@ -318,7 +325,7 @@ public class BeyonderData {
         float current = getSpirituality(entity);
         entity.getData(ModAttachments.BEYONDER_COMPONENT).setSpirituality(Math.max(0, current - amount));
 
-        float maxSpirituality = getMaxSpirituality(getSequence(entity));
+        float maxSpirituality = getMaxSpirituality(getPathway(entity), getSequence(entity));
 
         if(maxSpirituality <= 0) {
             return;
@@ -394,10 +401,10 @@ public class BeyonderData {
             return;
 
         float current = getSpirituality(player);
-        float newAmount = Math.min(getMaxSpirituality(getSequence(player)), current + amount);
+        float newAmount = Math.min(getMaxSpirituality(getPathway(player), getSequence(player)), current + amount);
         player.getData(ModAttachments.BEYONDER_COMPONENT).setSpirituality(newAmount);
 
-        float maxSpirituality = getMaxSpirituality(getSequence(player));
+        float maxSpirituality = getMaxSpirituality(getPathway(player), getSequence(player));
 
         if(maxSpirituality <= 0) {
             return;
@@ -412,8 +419,25 @@ public class BeyonderData {
         }
     }
 
-    public static float getMaxSpirituality(int sequence) {
-        return sequence > -1 && sequence != LOTMCraft.NON_BEYONDER_SEQ && sequence < spiritualityLookup.length ? spiritualityLookup[sequence] : 0.0f;
+    public static float getMaxSpirituality(String path, int seq){
+        if(seq >= LOTMCraft.NON_BEYONDER_SEQ || !(seq < spiritualityLookup.length) || seq <= -1)
+            return 0f;
+
+        return switch (path){
+            case "darkness", "fool", "wheel_of_fortune" -> getMaxSpirituality(seq, 3.5f);
+            case "door", "death" -> getMaxSpirituality(seq, 3);
+            case "twilight_giant", "hermit", "error" -> getMaxSpirituality(seq, 2);
+            case "demoness", "white_tower", "visionary", "sun", "tyrant", "hanged_man", "moon",
+                 "mother", "abyss", "black_emperor", "justiciar", "chained"
+                    -> getMaxSpirituality(seq, 1);
+            case "red_priest" -> getMaxSpirituality(seq, 0.8f);
+            case "paragon" -> getMaxSpirituality(seq, 0.6f);
+            default -> 0f;
+        };
+    }
+
+    private static float getMaxSpirituality(int sequence, float mult) {
+        return spiritualityLookup[sequence] * mult;
     }
 
     public static void setDigestionProgress(LivingEntity entity, float progress) {
@@ -572,7 +596,7 @@ public class BeyonderData {
     }
 
     private static float getRelativeSpirituality(Player player) {
-        float maxSpirituality = getMaxSpirituality(getSequence(player));
+        float maxSpirituality = getMaxSpirituality(getPathway(player), getSequence(player));
         if (maxSpirituality <= 0) {
             return 0.0f;
         }
@@ -647,15 +671,15 @@ public class BeyonderData {
 
     public static float getDamageBoostByCharStack(int seq, int stacks){
         return switch (seq){
-            case 9 -> 1.025f;
-            case 8 -> 1.05f;
-            case 7 -> 1.075f;
-            case 6 -> 1.105f;
-            case 5 -> 1.15f;
-            case 4 -> 1.3f;
-            case 3 -> 1.4f;
-            case 2 -> 1.5f;
-            case 1 -> 1.0f + stacks;
+            case 9 -> 1.0025f;
+            case 8 -> 1.005f;
+            case 7 -> 1.0075f;
+            case 6 -> 1.0105f;
+            case 5 -> 1.015f;
+            case 4 -> 1.03f;
+            case 3 -> 1.15f;
+            case 2 -> 1.25f;
+            case 1 -> 1.0f + (float) stacks/7 ;
             default -> 0.0f;
         };
     }

@@ -114,9 +114,8 @@ public class PoisonCreationAbility extends SelectableAbility {
         int seq = AbilityUtil.getSeqWithArt(entity, this);
 
         final UUID[] taskIdHolder = new UUID[1];
-        taskIdHolder[0] = ServerScheduler.scheduleForDuration(0, 2, 20 * 5, () -> {
+        taskIdHolder[0] = ServerScheduler.scheduleForDuration(0, 2, 20 * 5*(int) Math.max(multiplier(entity)/2,1), () -> {
             Location poisonLoc = new Location(startPos, serverLevel);
-
             if(InteractionHandler.isInteractionPossible(poisonLoc, "burning", seq)) {
                 AbilityUtil.damageNearbyEntities(serverLevel,
                         null,

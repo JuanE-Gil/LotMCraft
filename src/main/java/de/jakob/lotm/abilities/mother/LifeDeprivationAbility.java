@@ -21,7 +21,7 @@ import java.util.*;
 
 public class LifeDeprivationAbility extends SelectableAbility {
     public LifeDeprivationAbility(String id) {
-        super(id, 3);
+        super(id, 15);
         canBeCopied = false;
     }
 
@@ -54,7 +54,7 @@ public class LifeDeprivationAbility extends SelectableAbility {
         ArrayList<BlockPos> blocks = new ArrayList<>(AbilityUtil.getBlocksInEllipsoid(serverLevel, entity.position(), 55, 10, true, true, true));
         Collections.shuffle(blocks);
 
-        int totalDuration = 20 * 3;
+        int totalDuration = 20 * 3*(int)Math.max(multiplier(entity)/4,1);
         int iterationsPerTick = (int) (blocks.size() / ((float) totalDuration));
         boolean griefing = BeyonderData.isGriefingEnabled(entity);
         ServerScheduler.scheduleForDuration(0, 1, totalDuration, () -> {
