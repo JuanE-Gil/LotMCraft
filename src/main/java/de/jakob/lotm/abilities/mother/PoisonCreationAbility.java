@@ -114,9 +114,9 @@ public class PoisonCreationAbility extends SelectableAbility {
         int seq = AbilityUtil.getSeqWithArt(entity, this);
 
         final UUID[] taskIdHolder = new UUID[1];
-        taskIdHolder[0] = ServerScheduler.scheduleForDuration(0, 2, 20 * 5*(int) Math.max(multiplier(entity)/2,1), () -> {
+        taskIdHolder[0] = ServerScheduler.scheduleForDuration(0, 2, 20 * 5*(int) Math.max(multiplier(entity) / 2, 1), () -> {
             Location poisonLoc = new Location(startPos, serverLevel);
-            if(InteractionHandler.isInteractionPossible(poisonLoc, "burning", seq)) {
+            if (InteractionHandler.isInteractionPossible(poisonLoc, "burning", seq)) {
                 AbilityUtil.damageNearbyEntities(serverLevel,
                         null,
                         radius.get() + 2,
@@ -132,12 +132,12 @@ public class PoisonCreationAbility extends SelectableAbility {
                 ParticleUtil.spawnParticles(serverLevel, ParticleTypes.LARGE_SMOKE, startPos, 100, radius.get(), .02);
                 ParticleUtil.spawnParticles(serverLevel, ParticleTypes.FLAME, startPos, 150, radius.get(), .02);
                 serverLevel.playSound(null, startPos.x, startPos.y, startPos.z, SoundEvents.GENERIC_EXPLODE, SoundSource.BLOCKS, 1, 1);
-                if(taskIdHolder[0] != null) ServerScheduler.cancel(taskIdHolder[0]);
+                if (taskIdHolder[0] != null) ServerScheduler.cancel(taskIdHolder[0]);
                 return;
             }
 
-            if(InteractionHandler.isInteractionPossible(poisonLoc, "purification", seq)) {
-                if(taskIdHolder[0] != null) ServerScheduler.cancel(taskIdHolder[0]);
+            if (InteractionHandler.isInteractionPossible(poisonLoc, "purification", seq)) {
+                if (taskIdHolder[0] != null) ServerScheduler.cancel(taskIdHolder[0]);
                 return;
             }
 

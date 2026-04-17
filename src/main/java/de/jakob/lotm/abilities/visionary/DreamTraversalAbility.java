@@ -233,22 +233,6 @@ public class DreamTraversalAbility extends SelectableAbility {
     }
 
     @SubscribeEvent
-    public static void onDamage(LivingIncomingDamageEvent event) {
-        if(!(event.getEntity().level() instanceof ServerLevel level)) return;
-        var entity = event.getEntity();
-
-        if (event.getSource().getEntity() instanceof LivingEntity player) {
-            var source = event.getSource();
-
-            if (hideMap.containsKey(entity.getUUID())) {
-                DreamTraversalAbility.cancelHide(level, entity);
-            }
-
-        }
-
-    }
-
-    @SubscribeEvent
     public static void onEntityTick(EntityTickEvent.Post event) {
         if (!(event.getEntity() instanceof LivingEntity entity)) return;
         if (entity.level().isClientSide) return;
@@ -263,25 +247,7 @@ public class DreamTraversalAbility extends SelectableAbility {
         if (hostEntity == null || hostEntity.isRemoved() || !(hostEntity instanceof LivingEntity host)
                 || !host.isAlive() || (!seqUnlocked && !host.hasEffect(ModEffects.ASLEEP))) {
 
-            if (hostEntity instanceof LivingEntity host2) {
-                ParasitationComponent parasitationComponent = host2.getData(ModAttachments.PARASITE_COMPONENT);
-                parasitationComponent.setParasited(false);
-                parasitationComponent.setParasiteUUID(null);
-            }
-
-            hideMap.remove(entity.getUUID());
-            hideSeqMap.remove(entity.getUUID());
-            // clearArtifactScaling since it should expire properly
-            entity.setInvisible(false);
-            entity.removeEffect(MobEffects.INVISIBILITY);
-
-            if (entity instanceof Player player) {
-                player.setBoundingBox(player.getDimensions(player.getPose()).makeBoundingBox(
-                        player.getX(), player.getY(), player.getZ()
-                ));
-                player.onUpdateAbilities();
-                player.hurtMarked = true;
-            }
+            cancelHide(serverLevel, entity);
             return;
         }
 

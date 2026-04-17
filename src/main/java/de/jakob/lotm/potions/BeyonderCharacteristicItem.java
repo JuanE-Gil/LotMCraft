@@ -57,8 +57,8 @@ public class BeyonderCharacteristicItem extends Item {
             if(seq >= BeyonderData.getSequence(player)){
                 var stacks = BeyonderData.beyonderMap.get(player).get().charStack();
 
-                if(stacks.get(seq) >= 1 && !(seq <= 1)){
-                    BeyonderData.setCharStack(player, seq, (stacks.get(seq) + 1), true);
+                if(stacks[seq] >= 1 && !(seq <= 1)){
+                    BeyonderData.setCharStack(player, seq, (stacks[seq] + 1), true);
 
                     player.setItemInHand(hand, ItemStack.EMPTY);
                     return InteractionResultHolder.success(ItemStack.EMPTY);

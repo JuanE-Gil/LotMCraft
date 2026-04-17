@@ -613,6 +613,8 @@
   "lotmcraft.psychological_invisibility_ability.description": "Make yourself invisibility to a person's mind",
   "lotmcraft.battle_hypnosis_ability": "Battle Hypnosis",
   "lotmcraft.battle_hypnosis_ability.description": "Control your enemies to do abnormal actions for a short period of time",
+  "ability.lotmcraft.battle_hypnosis.single": "Single Target",
+  "ability.lotmcraft.battle_hypnosis.aoe": "AOE",
   "ability.lotmcraft.battle_hypnosis.stop": "Target is unable to move",
   "ability.lotmcraft.battle_hypnosis.weaken": "Target is distracted and weakened",
   "ability.lotmcraft.battle_hypnosis.stop_beyonder_powers": "Target cannot use Beyonder Powers",
