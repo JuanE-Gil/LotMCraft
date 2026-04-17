@@ -362,11 +362,19 @@ public class BeyonderData {
 
         MultiplierModifierComponent modifierComponent = entity.getData(ModAttachments.MULTIPLIER_MODIFIER_COMPONENT);
 
-        if(modifierComponent.modifiers.isEmpty())
-            return damageMultiplier;
+        if(!modifierComponent.modifiers.isEmpty()) {
+            for(float d : modifierComponent.modifiers.values().stream().map(MultiplierModifierComponent.MultiplierModifier::multiplier).toList()) {
+                damageMultiplier *= d;
+            }
+        }
 
-        for(float d : modifierComponent.modifiers.values().stream().map(MultiplierModifierComponent.MultiplierModifier::multiplier).toList()) {
-            damageMultiplier *= d;
+        // Uniqueness boost: +10% multiplier when holding the uniqueness
+        if (!entity.level().isClientSide()) {
+            de.jakob.lotm.attachments.UniquenessComponent uniquenessComp =
+                    entity.getData(ModAttachments.UNIQUENESS_COMPONENT);
+            if (uniquenessComp.hasUniqueness()) {
+                damageMultiplier *= 1.1;
+            }
         }
 
         return damageMultiplier;

@@ -242,6 +242,7 @@ public class ModEvents {
         TeamInviteResponseCommand.register(event.getDispatcher());
         SetBeyonderLogCommand.register(event.getDispatcher());
         KillCountCommand.register(event.getDispatcher());
+        UniquenessCommand.register(event.getDispatcher());
     }
 
     @SubscribeEvent
@@ -279,6 +280,9 @@ public class ModEvents {
 
         MinecraftServer server = player.getServer();
         if (server == null) return;
+
+        // Sync uniqueness data on login
+        PacketHandler.syncUniquenessToPlayer(player);
 
         TeamComponent team = player.getData(ModAttachments.TEAM_COMPONENT.get());
 

@@ -440,6 +440,12 @@ public class PacketHandler {
                 SyncSkillScalingPacket.STREAM_CODEC,
                 SyncSkillScalingPacket::handle
         );
+
+        registrar.playToClient(
+                SyncUniquenessPacket.TYPE,
+                SyncUniquenessPacket.STREAM_CODEC,
+                SyncUniquenessPacket::handle
+        );
     }
 
     private static void registerServerPackets(PayloadRegistrar registrar) {
@@ -690,6 +696,12 @@ public class PacketHandler {
                 SyncArtifactAbilityWheel.STREAM_CODEC,
                 SyncArtifactAbilityWheel::handle
         );
+
+        registrar.playToServer(
+                RequestUniquenessApotheosisPacket.TYPE,
+                RequestUniquenessApotheosisPacket.STREAM_CODEC,
+                RequestUniquenessApotheosisPacket::handle
+        );
     }
 
     public static void sendToServer(CustomPacketPayload packet) {
@@ -747,6 +759,16 @@ public class PacketHandler {
 
     public static void sendToAllPlayersInSameLevel(CustomPacketPayload payload, ServerLevel level) {
         level.players().forEach(player -> sendToPlayer(player, payload));
+    }
+
+    public static void syncUniquenessToPlayer(ServerPlayer player) {
+        de.jakob.lotm.attachments.UniquenessComponent comp = player.getData(de.jakob.lotm.attachments.ModAttachments.UNIQUENESS_COMPONENT);
+        SyncUniquenessPacket packet = new SyncUniquenessPacket(
+                comp.hasUniqueness(),
+                comp.getUniquenessPathway(),
+                comp.getKillCount()
+        );
+        sendToPlayer(player, packet);
     }
 
     // Helper method to sync to all players (useful for when other players need to see beyonder status)

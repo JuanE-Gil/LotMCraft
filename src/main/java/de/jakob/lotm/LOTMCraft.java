@@ -273,6 +273,7 @@ public class LOTMCraft
 
             // Spirits
             EntityRenderers.register(ModEntities.SPIRIT_DERVISH_ENTITY.get(), SpiritDervishRenderer::new);
+            EntityRenderers.register(ModEntities.UNIQUENESS_ENTITY.get(), de.jakob.lotm.entity.client.uniqueness.UniquenessEntityRenderer::new);
             EntityRenderers.register(ModEntities.SPIRIT_BUBBLES_ENTITY.get(), SpiritBubblesRenderer::new);
             EntityRenderers.register(ModEntities.SPIRIT_BLUE_WIZARD.get(), SpiritBlueWizardRenderer::new);
             EntityRenderers.register(ModEntities.SPIRIT_TRANSLUCENT_WIZARD.get(), SpiritTranslucentWizardRenderer::new);
