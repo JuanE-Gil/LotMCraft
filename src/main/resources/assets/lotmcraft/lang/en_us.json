@@ -1357,6 +1357,8 @@
   "lotm.ally.requester_limit_reached": "%s has reached their maximum number of allies",
   "lotm.ally.not_allies": "You are not allied with %s",
   "lotm.ally.remove_self": "You cannot remove yourself as an ally",
+  "lotm.ally.list_empty": "You have no allies",
+  "lotm.ally.list_header": "Allies (%s):",
 
   "_comment014": "Quests-------------------------------------------------------------------------",
   "lotm.quest.already_accepted": "You have already accepted/completed this quest",

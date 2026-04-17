@@ -3,6 +3,8 @@ package de.jakob.lotm.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.authlib.GameProfile;
+import de.jakob.lotm.attachments.AllyComponent;
+import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.util.helper.AllyUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -11,6 +13,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Collection;
+import java.util.UUID;
 
 public class AllyCommand {
 
@@ -27,7 +30,39 @@ public class AllyCommand {
                                 })
                         )
                 )
+                .then(Commands.literal("list")
+                        .executes(context -> {
+                            ServerPlayer sender = context.getSource().getPlayerOrException();
+                            return executeList(context.getSource(), sender);
+                        })
+                )
         );
+    }
+
+    private static int executeList(CommandSourceStack source, ServerPlayer sender) {
+        AllyComponent comp = sender.getData(ModAttachments.ALLY_COMPONENT.get());
+
+        if (!comp.hasAllies()) {
+            source.sendSuccess(() -> Component.translatable("lotm.ally.list_empty").withColor(0x9E9E9E), false);
+            return 1;
+        }
+
+        source.sendSuccess(() -> Component.translatable("lotm.ally.list_header", comp.allyCount()).withColor(0x2196F3), false);
+        for (String uuidStr : comp.allies()) {
+            try {
+                UUID allyUUID = UUID.fromString(uuidStr);
+                ServerPlayer online = source.getServer().getPlayerList().getPlayer(allyUUID);
+                Component name = online != null
+                        ? online.getName().copy().withColor(0x4CAF50)
+                        : Component.literal(source.getServer().getProfileCache()
+                                .get(allyUUID)
+                                .map(GameProfile::getName)
+                                .orElse(uuidStr)).withColor(0x9E9E9E);
+                source.sendSuccess(() -> Component.literal("  - ").append(name), false);
+            } catch (IllegalArgumentException ignored) {}
+        }
+
+        return 1;
     }
 
     private static int executeRemove(CommandSourceStack source, ServerPlayer sender, GameProfile targetProfile) {
