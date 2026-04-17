@@ -4,7 +4,10 @@ import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.SelectableAbility;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.attachments.ParasitationComponent;
+import de.jakob.lotm.damage.ModDamageTypes;
 import de.jakob.lotm.effect.ModEffects;
+import de.jakob.lotm.network.PacketHandler;
+import de.jakob.lotm.network.packets.toServer.AbilitySelectionPacket;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import net.minecraft.network.chat.Component;
@@ -19,6 +22,8 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 
 import java.util.HashMap;
@@ -51,17 +56,65 @@ public class DreamTraversalAbility extends SelectableAbility {
     protected String[] getAbilityNames() {
         return new String[]{
                 "ability.lotmcraft.dream_traversal.jump",
-                "ability.lotmcraft.dream_traversal.hide",
-                "ability.lotmcraft.dream_traversal.guidance"
+                "ability.lotmcraft.dream_traversal.hide"
         };
     }
+
+    @Override
+    public void nextAbility(LivingEntity entity){
+        if(getAbilityNames().length == 0)
+            return;
+
+        if(!selectedAbilities.containsKey(entity.getUUID())) {
+            selectedAbilities.put(entity.getUUID(), 0);
+        }
+
+        int selectedAbility = selectedAbilities.get(entity.getUUID());
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+
+        selectedAbility++;
+        if(selectedAbility >= getAbilityNames().length) {
+            selectedAbility = 0;
+        }
+
+        if((entitySeq > 3 && selectedAbility >= 0)){
+            selectedAbility = 0;
+        }
+
+        selectedAbilities.put(entity.getUUID(), selectedAbility);
+        PacketHandler.sendToServer(new AbilitySelectionPacket(getId(), selectedAbility));
+    }
+
+    @Override
+    public void previousAbility(LivingEntity entity){
+        if(getAbilityNames().length == 0)
+            return;
+
+        if(!selectedAbilities.containsKey(entity.getUUID())) {
+            selectedAbilities.put(entity.getUUID(), 0);
+        }
+
+        int selectedAbility = selectedAbilities.get(entity.getUUID());
+        selectedAbility--;
+        if(selectedAbility <= -1) {
+            selectedAbility = getAbilityNames().length - 1;
+        }
+
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+        if((entitySeq > 3 && selectedAbility >= 0)){
+            selectedAbility = 0;
+        }
+
+        selectedAbilities.put(entity.getUUID(), selectedAbility);
+        PacketHandler.sendToServer(new AbilitySelectionPacket(getId(), selectedAbility));
+    }
+
 
     @Override
     protected void castSelectedAbility(Level level, LivingEntity entity, int abilityIndex) {
         switch (abilityIndex) {
             case 0 -> jump(level, entity);
             case 1 -> hide(level, entity);
-            case 2 -> guidance(level, entity);
         }
     }
 
@@ -72,7 +125,7 @@ public class DreamTraversalAbility extends SelectableAbility {
     private void jump(Level level, LivingEntity entity) {
         if (!(level instanceof ServerLevel serverLevel)) return;
 
-        LivingEntity target = AbilityUtil.getTargetEntity(entity, 200, 2);
+        LivingEntity target = AbilityUtil.getTargetEntity(entity, 200 * (int) multiplier(entity), 2);
 
         if (target == null) {
             AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.dream_traversal.no_target").withColor(0xFFff124d));
@@ -108,10 +161,11 @@ public class DreamTraversalAbility extends SelectableAbility {
 
         if (hideMap.containsKey(entity.getUUID())) {
             cancelHide(serverLevel, entity);
+            clearArtifactScaling(entity);
             return;
         }
 
-        LivingEntity target = AbilityUtil.getTargetEntity(entity, 20, 2);
+        LivingEntity target = AbilityUtil.getTargetEntity(entity, 20 * (int) multiplier(entity), 2);
 
         if (target == null) {
             AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.dream_traversal.no_target").withColor(0xFFff124d));
@@ -131,7 +185,8 @@ public class DreamTraversalAbility extends SelectableAbility {
         parasitationComponent.setParasited(true);
         parasitationComponent.setParasiteUUID(entity.getUUID());
 
-        entity.setInvisible(true);
+        PsychologicalInvisibilityAbility.add(entity, AbilityUtil.getSeqWithArt(entity, this));
+
         if (entity instanceof Player player) {
             player.setBoundingBox(new AABB(
                     player.getX(), player.getY(), player.getZ(),
@@ -142,7 +197,7 @@ public class DreamTraversalAbility extends SelectableAbility {
         }
     }
 
-    private void cancelHide(ServerLevel serverLevel, LivingEntity entity) {
+    public static void cancelHide(ServerLevel serverLevel, LivingEntity entity) {
         if (!hideMap.containsKey(entity.getUUID())) return;
 
         Entity hostEntity = serverLevel.getEntity(hideMap.get(entity.getUUID()));
@@ -154,12 +209,8 @@ public class DreamTraversalAbility extends SelectableAbility {
 
         hideMap.remove(entity.getUUID());
         hideSeqMap.remove(entity.getUUID());
-        clearArtifactScaling(entity);
-    //i think this should be good for artifact stuff?
 
-        entity.setInvisible(false);
-        entity.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 0, 0));
-        entity.removeEffect(MobEffects.INVISIBILITY);
+       PsychologicalInvisibilityAbility.remove(entity);
 
         if (entity instanceof Player player) {
             player.setBoundingBox(player.getDimensions(player.getPose()).makeBoundingBox(
@@ -170,46 +221,31 @@ public class DreamTraversalAbility extends SelectableAbility {
         }
     }
 
-    private void guidance(Level level, LivingEntity entity) {
-        if (level.isClientSide) return;
-        if (!(level instanceof ServerLevel serverLevel)) return;
+    @SubscribeEvent
+    public static void onRightClick(PlayerInteractEvent.RightClickItem event) {
+        if(!(event.getLevel() instanceof ServerLevel level)) return;
 
-        LivingEntity target = AbilityUtil.getTargetEntity(entity, 200, 2);
+        LivingEntity entity = event.getEntity();
 
-        if (target == null) {
-            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.dream_traversal.no_target").withColor(0xFFff124d));
-            return;
+        if (hideMap.containsKey(entity.getUUID())) {
+            DreamTraversalAbility.cancelHide(level, entity);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onDamage(LivingIncomingDamageEvent event) {
+        if(!(event.getEntity().level() instanceof ServerLevel level)) return;
+        var entity = event.getEntity();
+
+        if (event.getSource().getEntity() instanceof LivingEntity player) {
+            var source = event.getSource();
+
+            if (hideMap.containsKey(entity.getUUID())) {
+                DreamTraversalAbility.cancelHide(level, entity);
+            }
+
         }
 
-        if (!target.hasEffect(ModEffects.ASLEEP)) {
-            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.dream_traversal.must_be_asleep").withColor(0xFFff124d));
-            return;
-        }
-
-        if (!BeyonderData.isBeyonder(target)) {
-            AbilityUtil.sendActionBar(entity,
-                    Component.translatable("ability.lotmcraft.dream_traversal.guidance.not_beyonder")
-                            .withColor(0xFFffad33));
-            return;
-        }
-
-        //casterSeq should function for usage in artifacts. or do i also need to change targetSeq??
-        int casterSeq = AbilityUtil.getSeqWithArt(entity, this);
-        int targetSeq = BeyonderData.getSequence(target);
-        String targetPathway = BeyonderData.getPathway(target);
-        String pathwayName = BeyonderData.getSequenceName(targetPathway, targetSeq);
-        String displayPathway = targetPathway.substring(0, 1).toUpperCase()
-                + targetPathway.substring(1).replace("_", " ");
-
-        if (targetSeq <= casterSeq) {
-            AbilityUtil.sendActionBar(entity,
-                    Component.translatable("ability.lotmcraft.dream_traversal.guidance.pathway_only",
-                            displayPathway).withColor(0xFFe3ffff));
-        } else {
-            AbilityUtil.sendActionBar(entity,
-                    Component.translatable("ability.lotmcraft.dream_traversal.guidance.pathway_and_sequence",
-                            displayPathway, targetSeq, pathwayName).withColor(0xFFe3ffff));
-        }
     }
 
     @SubscribeEvent

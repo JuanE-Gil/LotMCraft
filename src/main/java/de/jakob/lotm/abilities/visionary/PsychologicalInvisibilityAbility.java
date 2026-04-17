@@ -70,7 +70,7 @@ public class PsychologicalInvisibilityAbility extends ToggleAbility {
     @Override
     public void start(Level level, LivingEntity entity) {
         if (!invisiblePlayers.containsKey(entity.getUUID())) {
-            add(entity, this);
+            add(entity, AbilityUtil.getSeqWithArt(entity, this));
         }
     }
 
@@ -79,8 +79,8 @@ public class PsychologicalInvisibilityAbility extends ToggleAbility {
         remove(entity);
     }
 
-    public static void add(LivingEntity entity, PsychologicalInvisibilityAbility skill) {
-        invisiblePlayers.put(entity.getUUID(), AbilityUtil.getSeqWithArt(entity, skill));
+    public static void add(LivingEntity entity, int seq) {
+        invisiblePlayers.put(entity.getUUID(), seq);
         hits.put(entity.getUUID(), 0);
 
         PacketHandler.sendToAllPlayers(new SyncPsychologicalInvisibilityPacket(invisiblePlayers));
