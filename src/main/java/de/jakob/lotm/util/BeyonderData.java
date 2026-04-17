@@ -148,10 +148,10 @@ public class BeyonderData {
     }
 
     public static void setBeyonder(LivingEntity entity, String pathway, int sequence) {
-        setBeyonder(entity, pathway, sequence, false, false, true);
+        setBeyonder(entity, pathway, sequence, false, false, true, false);
     }
 
-    public static void setBeyonder(LivingEntity entity, String pathway, int sequence, boolean skipCheck, boolean clearPathwayHistory, boolean addToPathwayHistory) {
+    public static void setBeyonder(LivingEntity entity, String pathway, int sequence, boolean skipCheck, boolean clearPathwayHistory, boolean addToPathwayHistory, boolean clearCharStack) {
         if(entity.level() instanceof ServerLevel serverLevel) {
             callPassiveEffectsOnRemoved(entity, serverLevel);
         }
@@ -163,7 +163,8 @@ public class BeyonderData {
                     || BeyonderData.getSequence(player) < sequence)
                 beyonderMap.removeHonorificName(player);
 
-            beyonderMap.setStack(player, 0);
+            if(clearCharStack) beyonderMap.clearStack(player);
+            else beyonderMap.setStack(player, sequence, sequence);
         }
 
         if(Objects.equals(sequence, LOTMCraft.NON_BEYONDER_SEQ)
@@ -177,7 +178,8 @@ public class BeyonderData {
         BeyonderComponent component = entity.getData(ModAttachments.BEYONDER_COMPONENT);
         component.setPathway(pathway);
         component.setSequence(sequence);
-        component.setCharacteristicStack(0);
+        if(clearCharStack) component.clearCharacteristicStack();
+        else component.setCharacteristicStack(0, sequence);
         component.setSpirituality(getMaxSpirituality(sequence));
         component.setDigestionProgress(0);
         component.setGriefingEnabled(griefing);
@@ -505,12 +507,20 @@ public class BeyonderData {
         return player.getData(ModAttachments.BEYONDER_COMPONENT).getDigestionProgress();
     }
 
-    public static int getCharStack(LivingEntity entity) {
+    public static int getCharStack(LivingEntity entity, int sequence) {
         if(entity.level().isClientSide) {
             return ClientBeyonderCache.getCharStack(entity.getUUID());
         }
 
-        return entity.getData(ModAttachments.BEYONDER_COMPONENT).getCharacteristicStack();
+        return entity.getData(ModAttachments.BEYONDER_COMPONENT).getCharacteristicStack()[sequence];
+    }
+
+    public static int getCurrentCharStack(LivingEntity entity) {
+        if(entity.level().isClientSide) {
+            return ClientBeyonderCache.getCharStack(entity.getUUID());
+        }
+
+        return entity.getData(ModAttachments.BEYONDER_COMPONENT).getCharacteristicStack()[getSequence(entity)];
     }
 
     public static String[] getPathwayHistory(LivingEntity entity) {
@@ -570,24 +580,24 @@ public class BeyonderData {
         }
     }
 
-    public static void addCharStack(LivingEntity player) {
+    public static void addCharStack(LivingEntity player, int sequence) {
         if (!isBeyonder(player)) return;
 
-        beyonderMap.addStack(player, 1);
+        beyonderMap.addStack(player, 1, sequence);
         BeyonderComponent component = player.getData(ModAttachments.BEYONDER_COMPONENT);
-        component.setCharacteristicStack(component.getCharacteristicStack() + 1);
+        component.setCharacteristicStack(component.getCharacteristicStack()[sequence] + 1, sequence);
         component.setDigestionProgress(0);
 
         recalculateCharStackModifiers(player);
         if (player instanceof ServerPlayer sp) PacketHandler.syncBeyonderDataToPlayer(sp);
     }
 
-    public static void setCharStack(LivingEntity player, int value, boolean ignoreDigestion) {
+    public static void setCharStack(LivingEntity player, int value, int sequence, boolean ignoreDigestion) {
         if (!isBeyonder(player)) return;
 
-        beyonderMap.setStack(player, value);
+        beyonderMap.setStack(player, value, sequence);
         BeyonderComponent component = player.getData(ModAttachments.BEYONDER_COMPONENT);
-        component.setCharacteristicStack(value);
+        component.setCharacteristicStack(value, sequence);
 
         if (!ignoreDigestion)
             component.setDigestionProgress(0);
@@ -596,7 +606,7 @@ public class BeyonderData {
         if (player instanceof ServerPlayer sp) PacketHandler.syncBeyonderDataToPlayer(sp);
     }
 
-    private static final String CHAR_STACK_BOOST_ID = "characteristics_stack_boost";
+    public static final String CHAR_STACK_BOOST_ID = "characteristics_stack_boost";
 
     public static void recalculateCharStackModifiers(LivingEntity player) {
         if (!isBeyonder(player)) return;
@@ -605,10 +615,14 @@ public class BeyonderData {
         removeModifier(player, CHAR_STACK_BOOST_ID);
 
         int seq    = getSequence(player);
-        int stacks = player.getData(ModAttachments.BEYONDER_COMPONENT).getCharacteristicStack();
+        int[] stacks = player.getData(ModAttachments.BEYONDER_COMPONENT).getCharacteristicStack();
 
-        if (stacks != 0) {
-            addModifier(player, CHAR_STACK_BOOST_ID, getDamageBoostByCharStack(seq, stacks));
+        for(int i = 0; i <= 9; i++) {
+            removeModifier(player, CHAR_STACK_BOOST_ID + "_" + i);
+
+            if(stacks[i] > 0) {
+                addModifier(player, CHAR_STACK_BOOST_ID + "_" + i, getDamageBoostByCharStack(i, stacks[i]));
+            }
         }
     }
 

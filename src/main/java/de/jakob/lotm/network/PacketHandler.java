@@ -706,7 +706,7 @@ public class PacketHandler {
         float spirituality = BeyonderData.getSpirituality(player);
         boolean griefingEnabled = BeyonderData.isGriefingEnabled(player);
         float digestionProgress = BeyonderData.getDigestionProgress(player);
-        int charStackCount = BeyonderData.getCharStack(player);
+        int charStackCount = BeyonderData.getCurrentCharStack(player);
 
         String[] history = BeyonderData.getPathwayHistory(player);
 
@@ -756,7 +756,7 @@ public class PacketHandler {
         float spirituality = BeyonderData.getSpirituality(targetPlayer);
         boolean griefingEnabled = BeyonderData.isGriefingEnabled(targetPlayer);
         float digestionProgress = BeyonderData.getDigestionProgress(targetPlayer);
-        int charStackCount = BeyonderData.getCharStack(targetPlayer);
+        int charStackCount = BeyonderData.getCurrentCharStack(targetPlayer);
 
         SyncBeyonderDataPacket packet = new SyncBeyonderDataPacket(pathway, sequence, spirituality, griefingEnabled, digestionProgress, new String[10], charStackCount);
 
