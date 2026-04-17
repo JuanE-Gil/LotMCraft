@@ -106,6 +106,11 @@ public class StoredDataBuilder {
         return this;
     }
 
+    public StoredDataBuilder charStackArray(int[] stack) {
+        this.charStack = Arrays.copyOf(stack, 10);
+        return this;
+    }
+
     public StoredDataBuilder pathwayHistory(String[] history) {
         pathwayHistory = Arrays.copyOf(history, 10);
         return this;

@@ -614,6 +614,17 @@ public class BeyonderData {
         if (player instanceof ServerPlayer sp) PacketHandler.syncBeyonderDataToPlayer(sp);
     }
 
+    public static void clearCharStack(LivingEntity player) {
+        if (!isBeyonder(player)) return;
+
+        beyonderMap.clearStack(player);
+        BeyonderComponent component = player.getData(ModAttachments.BEYONDER_COMPONENT);
+        component.clearCharacteristicStack();
+
+        recalculateCharStackModifiers(player);
+        if (player instanceof ServerPlayer sp) PacketHandler.syncBeyonderDataToPlayer(sp);
+    }
+
     public static final String CHAR_STACK_BOOST_ID = "characteristics_stack_boost";
 
     public static void recalculateCharStackModifiers(LivingEntity player) {

@@ -88,8 +88,7 @@ public class CharacteristicsStackCommand {
                                         return 0;
                                     }
 
-                                    BeyonderComponent component = livingEntity.getData(ModAttachments.BEYONDER_COMPONENT);
-                                    component.clearCharacteristicStack();
+                                    BeyonderData.clearCharStack(livingEntity);
 
                                     BeyonderData.recalculateCharStackModifiers(livingEntity);
 
