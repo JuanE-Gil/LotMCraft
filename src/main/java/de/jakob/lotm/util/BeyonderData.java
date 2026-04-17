@@ -215,7 +215,7 @@ public class BeyonderData {
                 // Only applies when this player is actually the leader (has members) — members
                 // advancing their own sequence should never trigger a disband.
                 TeamComponent teamComp = serverPlayer.getData(ModAttachments.TEAM_COMPONENT.get());
-                if (teamComp.memberCount() > 0 && !TeamUtils.isEligibleLeader(serverPlayer)) {
+                if (!TeamUtils.isEligibleLeader(serverPlayer)) {
                     TeamUtils.disbandTeam(serverPlayer, serverPlayer.getServer());
                 }
             }
@@ -318,7 +318,7 @@ public class BeyonderData {
         float current = getSpirituality(entity);
         entity.getData(ModAttachments.BEYONDER_COMPONENT).setSpirituality(Math.max(0, current - amount));
 
-        float maxSpirituality = getMaxSpirituality(getSequence(entity));
+        float maxSpirituality = getMaxSpirituality(getPathway(entity), getSequence(entity));
 
         if(maxSpirituality <= 0) {
             return;
@@ -397,7 +397,7 @@ public class BeyonderData {
         float newAmount = Math.min(getMaxSpirituality(getSequence(player)), current + amount);
         player.getData(ModAttachments.BEYONDER_COMPONENT).setSpirituality(newAmount);
 
-        float maxSpirituality = getMaxSpirituality(getSequence(player));
+        float maxSpirituality = getMaxSpirituality(getPathway(player), getSequence(player));
 
         if(maxSpirituality <= 0) {
             return;
@@ -420,6 +420,33 @@ public class BeyonderData {
         if(!(entity instanceof Player player))
             return;
 
+        player.getData(ModAttachments.BEYONDER_COMPONENT).setDigestionProgress(progress);
+
+        // Sync to client if this is server-side
+        if (!player.level().isClientSide() && player instanceof ServerPlayer serverPlayer) {
+            PacketHandler.syncBeyonderDataToPlayer(serverPlayer);
+        }
+    }
+
+    public static float getMaxSpirituality(String path, int seq){
+        if(seq >= LOTMCraft.NON_BEYONDER_SEQ || !(seq < spiritualityLookup.length) || seq <= -1)
+            return 0f;
+
+        return switch (path){
+            case "darkness", "fool", "wheel_of_fortune" -> getMaxSpirituality(seq, 3.5f);
+            case "door", "death" -> getMaxSpirituality(seq, 3);
+            case "twilight_giant", "hermit", "error" -> getMaxSpirituality(seq, 2);
+            case "demoness", "white_tower", "visionary", "sun", "tyrant", "hanged_man", "moon",
+                 "mother", "abyss", "black_emperor", "justiciar", "chained"
+                    -> getMaxSpirituality(seq, 1);
+            case "red_priest" -> getMaxSpirituality(seq, 0.8f);
+            case "paragon" -> getMaxSpirituality(seq, 0.6f);
+            default -> 0f;
+        };
+    }
+
+    private static float getMaxSpirituality(int sequence, float mult) {
+        return spiritualityLookup[sequence] * mult;
         player.getData(ModAttachments.BEYONDER_COMPONENT).setDigestionProgress(progress);
 
         // Sync to client if this is server-side
@@ -572,7 +599,7 @@ public class BeyonderData {
     }
 
     private static float getRelativeSpirituality(Player player) {
-        float maxSpirituality = getMaxSpirituality(getSequence(player));
+        float maxSpirituality = getMaxSpirituality(getPathway(player), getSequence(player));
         if (maxSpirituality <= 0) {
             return 0.0f;
         }
@@ -647,15 +674,15 @@ public class BeyonderData {
 
     public static float getDamageBoostByCharStack(int seq, int stacks){
         return switch (seq){
-            case 9 -> 1.025f;
-            case 8 -> 1.05f;
-            case 7 -> 1.075f;
-            case 6 -> 1.105f;
-            case 5 -> 1.15f;
-            case 4 -> 1.3f;
-            case 3 -> 1.4f;
-            case 2 -> 1.5f;
-            case 1 -> 1.0f + stacks;
+            case 9 -> 1.0025f;
+            case 8 -> 1.005f;
+            case 7 -> 1.0075f;
+            case 6 -> 1.0105f;
+            case 5 -> 1.015f;
+            case 4 -> 1.03f;
+            case 3 -> 1.15f;
+            case 2 -> 1.25f;
+            case 1 -> 1.0f + (float) stacks/7 ;
             default -> 0.0f;
         };
     }

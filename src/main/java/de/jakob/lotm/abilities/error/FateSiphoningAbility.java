@@ -2,6 +2,7 @@ package de.jakob.lotm.abilities.error;
 
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.Ability;
+import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.damage.ModDamageTypes;
 import de.jakob.lotm.rendering.effectRendering.DirectionalEffectManager;
 import de.jakob.lotm.util.BeyonderData;
@@ -141,13 +142,12 @@ public class FateSiphoningAbility extends Ability {
         if(!(target instanceof LivingEntity targetLiving))
             return;
 
-        ArrayList<MobEffectInstance> effects = new ArrayList<>(player.getActiveEffects());
-        for(var effect : effects){
-            if (effect.getEffect().value().isBeneficial()) continue;
+        var luck = entity.getData(ModAttachments.LUCK_COMPONENT.get());
+        var luckTarget = target.getData(ModAttachments.LUCK_COMPONENT.get());
 
-            player.removeEffect(effect.getEffect());
-
-            targetLiving.addEffect(new MobEffectInstance(effect));
+        if(luck.getLuck() < 0) {
+            luckTarget.setLuck(luckTarget.getLuck() + luck.getLuck());
+            luck.setLuck(0);
         }
     }
 

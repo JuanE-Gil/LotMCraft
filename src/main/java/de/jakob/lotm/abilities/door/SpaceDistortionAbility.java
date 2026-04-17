@@ -39,7 +39,7 @@ public class SpaceDistortionAbility extends Ability {
 
         EffectManager.playEffect(EffectManager.Effect.SPACE_DISTORTION, targetLoc.x(), targetLoc.y(), targetLoc.z(), serverLevel);
 
-        ServerScheduler.scheduleForDuration(0, 2, 20 * 60, () -> AbilityUtil.getAllNearbyEntities(entity, serverLevel, targetLoc, 70).forEach(e -> {
+        ServerScheduler.scheduleForDuration(0, 2, 20 * 15, () -> AbilityUtil.getAllNearbyEntities(entity, serverLevel, targetLoc, 70).forEach(e -> {
             e.setDeltaMovement(targetLoc.subtract(e.position()).scale(.04));
             BlockPos nextPos = BlockPos.containing(e.position().add(targetLoc.subtract(e.position()).scale(.4)));
             if(!serverLevel.getBlockState(nextPos).getCollisionShape(serverLevel, nextPos).isEmpty()) {

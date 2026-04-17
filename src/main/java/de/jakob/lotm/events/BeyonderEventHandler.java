@@ -78,7 +78,9 @@ public class BeyonderEventHandler {
                 }
             }
 
-            serverPlayer.addEffect(new MobEffectInstance(ModEffects.CONCEALMENT, 20 * 30, 99, false, false, false));
+            serverPlayer.addEffect(new MobEffectInstance(ModEffects.CONCEALMENT, 20 * 5, 99));
+            BeyonderData.recalculateCharStackModifiers(serverPlayer);
+            serverPlayer.getData(ModAttachments.LUCK_COMPONENT.get()).setLuck(0);
         }
     }
 
@@ -113,6 +115,7 @@ public class BeyonderEventHandler {
         if (event.getEntity() instanceof ServerPlayer serverPlayer) {
             // Re-sync data when changing dimensions
             PacketHandler.syncBeyonderDataToPlayer(serverPlayer);
+            BeyonderData.recalculateCharStackModifiers(serverPlayer);
         }
     }
 
@@ -161,6 +164,8 @@ public class BeyonderEventHandler {
         if (event.getEntity() instanceof ServerPlayer serverPlayer) {
             // Re-sync data on respawn
             PacketHandler.syncBeyonderDataToPlayer(serverPlayer);
+            BeyonderData.recalculateCharStackModifiers(serverPlayer);
+            serverPlayer.getData(ModAttachments.LUCK_COMPONENT.get()).setLuck(0);
             // Clear sacrifice bar if it was active when the player died
             if (serverPlayer.getPersistentData().getBoolean("sacrifice_bar_clear")) {
                 serverPlayer.getPersistentData().remove("sacrifice_bar_clear");
@@ -262,10 +267,12 @@ public class BeyonderEventHandler {
                 LOTMCraft.LOGGER.info("{} was killed with {}", player.getGameProfile().getName(),event.getSource());
             }
 
-
             if (!BeyonderData.isBeyonder(player)) return;
             if(beyonderMap.get(player).isEmpty()) return;
-            if (!player.level().getGameRules().getBoolean(ModGameRules.REGRESS_SEQUENCE_ON_DEATH)) return;
+            if (!player.level().getGameRules().getBoolean(ModGameRules.REGRESS_SEQUENCE_ON_DEATH)){
+                BeyonderData.recalculateCharStackModifiers(player);
+                return;
+            }
 
             StoredData data = beyonderMap.get(player).get();
             StoredData regressed = data.regressSeq(false);
@@ -287,7 +294,9 @@ public class BeyonderEventHandler {
 
             BeyonderData.recalculateCharStackModifiers(player);
 
-            if (Objects.equals(regressed.sequence(), LOTMCraft.NON_BEYONDER_SEQ)) {
+            player.getData(ModAttachments.LUCK_COMPONENT.get()).setLuck(0);
+
+            if (Objects.equals(data.sequence(), LOTMCraft.NON_BEYONDER_SEQ)) {
                 ClientBeyonderCache.removePlayer(player.getUUID());
             } else
                 ClientBeyonderCache.updateData(player.getUUID(), regressed.pathway(), regressed.sequence(),
@@ -416,7 +425,16 @@ public class BeyonderEventHandler {
         boolean isDirect = !event.getSource().is(ModDamageTypes.PURIFICATION_INDIRECT);
 
         // seqDiff > 0 means attacker is stronger (lower seq number), < 0 means weaker
-        float digestionDrain = getDigestionDrain(victimSeq, attackerSeq, isDirect);
+        int seqDiff = victimSeq - attackerSeq;
+
+        float digestionDrain;
+        if (isDirect) {
+            // Base 0.3%, +0.1% per level attacker is stronger, -0.1% per level attacker is weaker, floor 0.1%
+            digestionDrain = Math.max(0.001f, 0.003f + seqDiff * 0.001f);
+        } else {
+            // Base 0.05%, +0.01% per level attacker is stronger, -0.001% per level attacker is weaker, floor 0.01%
+            digestionDrain = Math.max(0.0001f, 0.0005f + seqDiff * 0.0001f);
+        }
 
         float currentDigestion = BeyonderData.getDigestionProgress(victimPlayer);
         float newDigestion = Math.max(0f, currentDigestion - digestionDrain);
@@ -535,7 +553,9 @@ public class BeyonderEventHandler {
                 BeyonderData.digest(player, (0.01f + (diff * 0.1f)), true);
             }
 
-           victim.addEffect(new MobEffectInstance(ModEffects.CONCEALMENT, 20 * 30, 99, false, false, false));
+           victim.addEffect(new MobEffectInstance(ModEffects.CONCEALMENT, 20 * 5, 99, false, false));
+
+            victim.getData(ModAttachments.LUCK_COMPONENT).setLuck(0);
         }
     }
 
