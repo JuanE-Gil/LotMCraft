@@ -69,7 +69,7 @@ public class PlantControllingAbility extends SelectableAbility {
             return;
         }
 
-        int duration = 20 * 20;
+        int duration = 20 * 10*(int)Math.max(multiplier(entity)/2,1);
 
         for(int i = 0; i < 12; i++) {
             Vec3 targetLoc = targetEntity.position().add(0, .4, 0);
@@ -117,7 +117,12 @@ public class PlantControllingAbility extends SelectableAbility {
             targetEntity.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 20, 10, false, false, false));
             targetEntity.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 20, 10, false, false, false));
             targetEntity.setDeltaMovement(new Vec3(0, 0, 0));
+            targetEntity.setOnGround(true);
+            var pos = targetEntity.position();
+            targetEntity.setDeltaMovement(new Vec3(0, 0, 0));
             targetEntity.hurtMarked = true;
+
+            targetEntity.teleportTo(pos.x, pos.y, pos.z);
 
             loc.setLevel(targetEntity.level());
             loc.setPosition(targetEntity.position());

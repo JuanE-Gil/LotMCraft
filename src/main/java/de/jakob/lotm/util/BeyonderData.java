@@ -632,15 +632,15 @@ public class BeyonderData {
 
     public static float getDamageBoostByCharStack(int seq, int stacks){
         return switch (seq){
-            case 9 -> 1.025f;
-            case 8 -> 1.05f;
-            case 7 -> 1.075f;
-            case 6 -> 1.105f;
-            case 5 -> 1.15f;
-            case 4 -> 1.3f;
-            case 3 -> 1.4f;
-            case 2 -> 1.5f;
-            case 1 -> 1.0f + stacks;
+            case 9 -> 1.0025f;
+            case 8 -> 1.005f;
+            case 7 -> 1.0075f;
+            case 6 -> 1.0105f;
+            case 5 -> 1.015f;
+            case 4 -> 1.03f;
+            case 3 -> 1.15f;
+            case 2 -> 1.25f;
+            case 1 -> 1.0f + (float) stacks/7 ;
             default -> 0.0f;
         };
     }

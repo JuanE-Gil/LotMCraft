@@ -29,7 +29,13 @@ public class LuckPerceptionAbility extends ToggleAbility {
 
         LivingEntity target = AbilityUtil.getTargetEntity(entity, 20, 1.5f, true);
         if(target == null){
-            AbilityUtil.sendActionBar(entity, Component.literal(""));
+            LuckComponent luck = entity.getData(ModAttachments.LUCK_COMPONENT.get());
+            String name = entity.hasCustomName()
+                    ? entity.getCustomName().getString()
+                    : entity.getType().getDescription().getString();
+
+            AbilityUtil.sendActionBar(entity, Component.literal(
+                    "§d" + name + " §7| Luck: " + luck.getLuck()));
             return;
         }
 

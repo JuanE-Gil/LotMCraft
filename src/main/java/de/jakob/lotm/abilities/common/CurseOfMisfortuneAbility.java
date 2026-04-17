@@ -80,7 +80,7 @@ public class CurseOfMisfortuneAbility extends Ability {
 
         double resistance = AbilityUtil.getSequenceResistanceFactor(entitySeq, targetSeq);
         float multiplier = multiplier(entity);
-        int amplifier = (int) Math.min(Math.round(multiplier * 6.25f * (1.0 - resistance)) * 120, 3000);
+        int amplifier = (int) Math.min(Math.round(multiplier * 6.25f * (1.0 - resistance)) * 120, 6500);
 
         LOTMCraft.LOGGER.info("mult: {}, amp: {}, res: {}", multiplier, amplifier, resistance);
         if (amplifier <= 0) {
@@ -88,7 +88,7 @@ public class CurseOfMisfortuneAbility extends Ability {
         }
 
         LuckComponent luckComponent = target.getData(ModAttachments.LUCK_COMPONENT);
-        luckComponent.addLuckWithMax(amplifier, -3000*(int)Math.max((multiplier/10),1));
+        luckComponent.addLuckWithMax(amplifier, -amplifier);
         NeoForge.EVENT_BUS.post(new AbilityUsedEvent(serverLevel, target.position(), entity, target, this, interactionFlags, interactionRadius, interactionCacheTicks));
     }
 }

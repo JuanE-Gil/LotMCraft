@@ -15,6 +15,7 @@ import net.minecraft.world.level.Level;
 import java.util.HashMap;
 import java.util.Map;
 
+
 public class AbilityTheftAbility extends SelectableAbility {
     public AbilityTheftAbility(String id) {
         super(id, 3f);

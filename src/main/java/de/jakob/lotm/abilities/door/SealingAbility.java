@@ -61,18 +61,11 @@ public class SealingAbility extends Ability {
             if(AbilityUtil.getSequenceDifference(entitySeq, BeyonderData.getSequence(e)) <= 0) {
                 return;
             }
-
-            if(BeyonderData.getPathway(e).equals("door") && BeyonderData.getSequence(e) < entitySeq){
-                return;
-            }
-
-            if(AbilityUtil.isTargetSignificantlyStronger(entitySeq, BeyonderData.getSequence(e)))
-                return;
-
             BeyonderData.addModifier(e, "sealed", .5);
-            DisabledAbilitiesComponent component = e.getData(ModAttachments.DISABLED_ABILITIES_COMPONENT);
-            component.disableAbilityUsageForTime("sealed", 20 * 14, e);
-
+            if(BeyonderData.isBeyonder(e) && BeyonderData.getSequence(e) > entitySeq) {
+                DisabledAbilitiesComponent component = e.getData(ModAttachments.DISABLED_ABILITIES_COMPONENT);
+                component.disableAbilityUsageForTime("sealed", 20 * 14, e);
+            }
             if(!(e instanceof Player) && !BeyonderData.isBeyonder(e) && e instanceof Mob mob) {
                 mob.setNoAi(true);
             }

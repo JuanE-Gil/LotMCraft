@@ -70,23 +70,23 @@ public class NightDomainAbility extends Ability {
             // Night Domain is weakened by purification interactions
             boolean purified = InteractionHandler.isInteractionPossible(currentLoc, "purification", seq);
 
-            ParticleUtil.spawnParticles(serverLevel, dust, startPos, purified ? 30 : 80, 35*(int) Math.max(multiplier/20,1), .25*(int) Math.max(multiplier/20,1), 35*(int) Math.max(multiplier/20,1), 0);
+            ParticleUtil.spawnParticles(serverLevel, dust, startPos, purified ? 30 : 80, 35*(int) Math.max(multiplier/2,1), .25*(int) Math.max(multiplier/2,1), 35*(int) Math.max(multiplier/2,1), 0);
             if(!purified) {
-                AbilityUtil.addPotionEffectToNearbyEntities(serverLevel, entity, 35*(int) Math.max(multiplier/20,1), startPos, new MobEffectInstance(MobEffects.BLINDNESS, 20, 20, false, false, false));
-                AbilityUtil.addPotionEffectToNearbyEntities(serverLevel, entity, 35*(int) Math.max(multiplier/20,1), startPos, new MobEffectInstance(MobEffects.DARKNESS, 20, 20, false, false, false));
+                AbilityUtil.addPotionEffectToNearbyEntities(serverLevel, entity, 35*(int) Math.max(multiplier/2,1), startPos, new MobEffectInstance(MobEffects.BLINDNESS, 20, 20, false, false, false));
+                AbilityUtil.addPotionEffectToNearbyEntities(serverLevel, entity, 35*(int) Math.max(multiplier/2,1), startPos, new MobEffectInstance(MobEffects.DARKNESS, 20, 20, false, false, false));
             }
 
 
-            AbilityUtil.getNearbyEntities(entity, serverLevel, entity.getEyePosition(), 10).forEach(e -> {
+            AbilityUtil.getNearbyEntities(entity, serverLevel, entity.getEyePosition(), 10*(int) Math.max(multiplier/2,1)).forEach(e -> {
                 LuckComponent luckComponent = e.getData(ModAttachments.LUCK_COMPONENT);
-                luckComponent.addLuckWithMax(120*(int) Math.max(multiplier/10,1), purified ? -240*(int) Math.max(multiplier/20,1) : -960*(int) Math.max(multiplier/20,1));
+                luckComponent.addLuckWithMax(120*(int) Math.max(multiplier/2,1), purified ? -240*(int) Math.max(multiplier/2,1) : -960*(int) Math.max(multiplier/2,1));
 
             });
             AbilityUtil.addPotionEffectToNearbyEntities(serverLevel, entity, 35, startPos, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, purified ? 1 : 5, false, false, false));
 
-            AbilityUtil.damageNearbyEntities(serverLevel, entity, 35*(int) Math.max(multiplier/20,1), DamageLookup.lookupDps(4, .85, 2, 20) * multiplier(entity)/2.5, startPos, true, false, ModDamageTypes.source(level, ModDamageTypes.DARKNESS_GENERIC, entity));
+            AbilityUtil.damageNearbyEntities(serverLevel, entity, 35*(int) Math.max(multiplier/2,1), DamageLookup.lookupDps(4, .85, 2, 20) * 20, startPos, true, false, ModDamageTypes.source(level, ModDamageTypes.DARKNESS_GENERIC, entity));
 
-            AbilityUtil.getNearbyEntities(entity, serverLevel, startPos, 35*(int) Math.max(multiplier/20,1)).forEach(e -> BeyonderData.addModifierWithTimeLimit(e, "night_domain_debuff", .65, 2000));
+            AbilityUtil.getNearbyEntities(entity, serverLevel, startPos, 35*(int) Math.max(multiplier/2,1)).forEach(e -> BeyonderData.addModifierWithTimeLimit(e, "night_domain_debuff", .65, 2000));
             BeyonderData.addModifierWithTimeLimit(entity, "night_domain_buff", 1.35f, 2000);
 
             entity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 20 * 2, 2, false, false, false));

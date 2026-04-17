@@ -138,9 +138,11 @@ public class AbilityHandler {
         abilities.add(new SpiritCommandingAbility("spirit_commanding_ability"));
         abilities.add(new NightDomainAbility("night_domain_ability"));
         abilities.add(new HairEntanglementAbility("hair_entanglement_ability"));
+        abilities.add(new LesserConcealmentAbility("lesser_concealment_ability"));
         abilities.add(new HorrorAuraAbility("horror_aura_ability"));
         abilities.add(new SurgeOfDarknessAbility("surge_of_darkness_ability"));
         abilities.add(new ConcealmentAbility("concealment_ability"));
+        abilities.add(new IdentityConcealmentAbility("identity_concealment_ability"));
         abilities.add(new SwordOfDarknessAbility("sword_of_darkness_ability"));
 
         // DEMONESS PATHWAY

@@ -39,9 +39,9 @@ public class AirBulletAbility extends Ability {
     public void onAbilityUse(Level level, LivingEntity entity) {
         if(level.isClientSide)
             return;
-
+        float multiplier = multiplier(entity);
         Vec3 startPos = VectorUtil.getRelativePosition(entity.getEyePosition().add(entity.getLookAngle().normalize()), entity.getLookAngle().normalize(), 0, random.nextDouble(-.65, .65), random.nextDouble(-.1, .6));
-        Vec3 direction = AbilityUtil.getTargetLocation(entity, 10, 1.4f).subtract(startPos).normalize();
+        Vec3 direction = AbilityUtil.getTargetLocation(entity, 10*(int) multiplier, 1.4f).subtract(startPos).normalize();
 
         AtomicReference<Vec3> currentPos = new AtomicReference<>(startPos);
 
@@ -50,7 +50,6 @@ public class AirBulletAbility extends Ability {
         level.playSound(null, startPos.x, startPos.y, startPos.z, SoundEvents.SNOWBALL_THROW, entity.getSoundSource(), 1.0f, 1.0f);
 
         int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
-        double multiplier = multiplier(entity);
 
         double rawDamage = Math.min(DamageLookup.lookupDamage(entitySeq, .9), DamageLookup.lookupDamage(3, .9));
 
@@ -60,7 +59,7 @@ public class AirBulletAbility extends Ability {
 
             Vec3 pos = currentPos.get();
 
-            if(AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 2.5f, rawDamage * multiplier, pos, true, false, true, 0)) {
+            if(AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 2.5f, rawDamage * (int) Math.max(multiplier/2,1), pos, true, false, true, 0)) {
                 hasHit.set(true);
                 return;
             }

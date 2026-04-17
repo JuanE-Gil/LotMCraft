@@ -1,9 +1,16 @@
 package de.jakob.lotm.abilities.darkness;
 
 import com.google.common.util.concurrent.AtomicDouble;
+import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.Ability;
+import de.jakob.lotm.abilities.core.ToggleAbility;
 import de.jakob.lotm.abilities.core.interaction.InteractionHandler;
+import de.jakob.lotm.abilities.sun.HolyOathAbility;
+import de.jakob.lotm.attachments.DisabledAbilitiesComponent;
+import de.jakob.lotm.attachments.ModAttachments;
+import de.jakob.lotm.attachments.SanityComponent;
 import de.jakob.lotm.damage.ModDamageTypes;
+import de.jakob.lotm.effect.ModEffects;
 import de.jakob.lotm.network.packets.handlers.ClientHandler;
 import de.jakob.lotm.particle.ModParticles;
 import de.jakob.lotm.util.BeyonderData;
@@ -17,6 +24,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
@@ -68,10 +76,43 @@ public class SwordOfDarknessAbility extends Ability {
                     Location pointLoc = new Location(point, level);
                     int seq = AbilityUtil.getSeqWithArt(entity, this);
                     boolean purified = InteractionHandler.isInteractionPossible(pointLoc, "purification", seq);
-                    float damageMult = purified ? 0.3f : 1f;
-
+                    float damageMult = purified ? 0.5f : 1f;
+                    float multiplier = multiplier(entity);
+                    float actualsequence =  seq<=1? 1: 3;
                     ParticleUtil.spawnParticles(serverLevel, ModParticles.BLACK.get(), point, 3, 0.2, 0);
-                    AbilityUtil.damageNearbyEntities(serverLevel, entity, 3, (multiplier(entity)/2.5) * DamageLookup.lookupDamage(1, .85) * damageMult, point, true, false, false, 10, ModDamageTypes.source(level, ModDamageTypes.DARKNESS_GENERIC, entity));
+                    AbilityUtil.damageNearbyEntities(serverLevel, entity, 3, Math.max(multiplier/2,1) * DamageLookup.lookupDamage((int) actualsequence, 1.2) * damageMult, point, true, false, false, 10, ModDamageTypes.source(level, ModDamageTypes.DARKNESS_GENERIC, entity));
+                    LOTMCraft.LOGGER.info("damage {},multiplier {},multiplier_seq{},actualsequence{} ",
+                            DamageLookup.lookupDamage((int) actualsequence, 1.2) * damageMult,
+                            Math.max(multiplier/2,1) * DamageLookup.lookupDamage((int) actualsequence, 1.2),
+                            multiplier,
+                            actualsequence
+                    );
+                    //Additional effects
+                    AbilityUtil.getNearbyEntities(entity, serverLevel, entity.position(), 20*Math.max(multiplier/2, 1)).forEach(e -> {
+                        SanityComponent sanityComponent = e.getData(ModAttachments.SANITY_COMPONENT);
+                        sanityComponent.increaseSanityAndSync(-0.000163f*(int) Math.max(multiplier/4,1), e);
+                        if (seq <= 1)
+                        {
+                            //Eternal rest part
+                            int actualDuration = 20*5*(int) Math.max(multiplier/4, 1);
+                            e.addEffect(new MobEffectInstance(ModEffects.ASLEEP, actualDuration, 1, false, false, true));
+                            e.addEffect(new MobEffectInstance(MobEffects.DARKNESS, actualDuration, 5, false, false, false));
+                            e.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, actualDuration, 4, false, false, false));
+                            e.setDeltaMovement(Vec3.ZERO);
+                            e.setOnGround(true);
+                            var pos = e.position();
+                            e.setDeltaMovement(new Vec3(0, 0, 0));
+                            e.hurtMarked = true;
+
+                            e.teleportTo(pos.x, pos.y, pos.z);
+                            // Despair part
+                            Location eLoc = new Location(e.position(), serverLevel);
+                            boolean hasMorale = InteractionHandler.isInteractionPossibleForEntity(eLoc, "morale_boost", seq, e);
+                            int duration = hasMorale? 20*2:20*4;
+                            double reduction = -8*(int)Math.max(multiplier/4,1);
+                            BeyonderData.addModifierWithTimeLimit(e, "sword_of_darkness_multiplier_reduction", reduction, duration);
+                        };
+                    });
                     if(BeyonderData.isGriefingEnabled(entity)) {
                         if(serverLevel.getBlockState(BlockPos.containing(point)).getDestroySpeed(level, BlockPos.containing(point)) < 0)
                             continue;

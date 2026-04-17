@@ -378,7 +378,6 @@ public class TheftHandler {
             int index = random.nextInt(stealableAbilities.size());
             Ability stolenAbility = stealableAbilities.get(index);
             stealableAbilities.remove(index);
-
             // Disable the ability on the target for the duration
             disabledComponent.disableSpecificAbilityForTime(stolenAbility.getId(), "theft_" + entity.getUUID(), disableTime * 20);
 
@@ -401,7 +400,6 @@ public class TheftHandler {
             AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.ability_theft.success").withColor(0x6d32a8));
         }
     }
-
     public static int getAbilityCountForSequence(int sequence) {
         return switch (sequence) {
             default -> 1;
@@ -545,6 +543,6 @@ public class TheftHandler {
     }
 
     public static double getDistancePerSeq(int seq){
-        return (1 << (9 - seq));
+       return (1 << (9 - seq));
     }
 }

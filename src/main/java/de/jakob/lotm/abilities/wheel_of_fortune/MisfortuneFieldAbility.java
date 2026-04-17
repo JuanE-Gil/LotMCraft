@@ -42,11 +42,11 @@ public class MisfortuneFieldAbility extends Ability {
 
         Vec3 startPos = entity.position();
         float multiplier = multiplier(entity);
-        int amplifier = Math.min(Math.round(multiplier * 6.25f ) * 120, 3000);
+        int amplifier = Math.min(Math.round(multiplier * 6.25f ) * 80, 6500);
         ServerScheduler.scheduleForDuration(0, 2, 20 * 20, () -> {
             AbilityUtil.getNearbyEntities(entity, serverLevel, startPos, 20*multiplier).forEach(e -> {
                 LuckComponent luckComponent = e.getData(ModAttachments.LUCK_COMPONENT.get());
-                luckComponent.addLuckWithMax(amplifier, -amplifier*(int)Math.max((multiplier/10)-1,1));
+                luckComponent.addLuckWithMax(amplifier, -amplifier);
             });
         });
     }

@@ -106,7 +106,7 @@ public class PoisonCreationAbility extends SelectableAbility {
 
         double multiplier = multiplier(entity);
 
-        ServerScheduler.scheduleForDuration(0, 2, 20 * 5, () -> {
+        ServerScheduler.scheduleForDuration(0, 2, 20 * 5*(int) Math.max(multiplier(entity)/2,1), () -> {
             radius.addAndGet(0.5);
             ParticleUtil.spawnParticles(serverLevel, dustBig, startPos, (int) (radius.get() * 12), radius.get(), 0.1, radius.get(), 0);
             AbilityUtil.damageNearbyEntities(serverLevel, entity, radius.get(), DamageLookup.lookupDps(6, .95, 2, 20) * multiplier, startPos, true, false);

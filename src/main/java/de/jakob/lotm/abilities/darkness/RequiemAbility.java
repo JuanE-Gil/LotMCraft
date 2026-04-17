@@ -1,8 +1,10 @@
 package de.jakob.lotm.abilities.darkness;
 
 import de.jakob.lotm.abilities.core.Ability;
+import de.jakob.lotm.abilities.core.interaction.InteractionHandler;
 import de.jakob.lotm.attachments.DisabledAbilitiesComponent;
 import de.jakob.lotm.attachments.ModAttachments;
+import de.jakob.lotm.effect.ModEffects;
 import de.jakob.lotm.sound.ModSounds;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.data.Location;
@@ -49,6 +51,9 @@ public class RequiemAbility extends Ability {
 
     @Override
     public void onAbilityUse(Level level, LivingEntity entity) {
+        if(!(level instanceof ServerLevel serverLevel)) {
+            return;
+        }
         if(level.isClientSide)
             return;
 
@@ -62,9 +67,9 @@ public class RequiemAbility extends Ability {
 
             animateParticleLine(new Location(startPos, level), targetLoc, 2, 0, duration);
         }
-
+        float multiplier = multiplier(entity);
         level.playSound(null, BlockPos.containing(entity.position()), ModSounds.MIDNIGHT_POEM.get(), SoundSource.BLOCKS, 1, 1);
-        LivingEntity targetEntity = AbilityUtil.getTargetEntity(entity, 16, 2);
+        LivingEntity targetEntity = AbilityUtil.getTargetEntity(entity, 16*(int) Math.max(multiplier/2,1), 2);
         if(targetEntity == null)
             return;
 
@@ -75,29 +80,33 @@ public class RequiemAbility extends Ability {
             }
             return;
         }
-
+        Location currentLoc = new Location(entity.position(), serverLevel);
+        int seq = AbilityUtil.getSeqWithArt(entity, this);
+        boolean purified = InteractionHandler.isInteractionPossible(currentLoc, "purification", seq);
         pacifiedEntities.add(targetEntity.getUUID());
-        float multiplier = multiplier(entity);
-        int duration = 20 * 15*(int) Math.min(multiplier/20,1);
+
+        float multiplier_target = multiplier(targetEntity);
+        int duration = 20 * 15*(int) Math.max(multiplier/4,1)/  (int) Math.max(multiplier_target/4,1);
 
         int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
         int targetEntitySeq = BeyonderData.getSequence(targetEntity);
 
         if(AbilityUtil.isTargetSignificantlyStronger(entitySeq, targetEntitySeq)) {
-            duration = 35*(int) Math.min(multiplier/20,1);
+            duration = 35*(int) Math.max(multiplier/4,1);
         }
         if(AbilityUtil.isTargetSignificantlyWeaker(entitySeq, targetEntitySeq)) {
-            duration = 20 * 65*(int) Math.min(multiplier/20,1);
+            duration = 20 * 65*(int) Math.max(multiplier/4,1)/ (int) Math.max(multiplier_target/4,1);
         }
-
-        if(!BeyonderData.isBeyonder(targetEntity) || targetEntitySeq - 1 > entitySeq) {
+        //|| (((BeyonderData.getPathway(targetEntity).equals("darkness")) && (targetEntitySeq < entitySeq)))
+        if(!BeyonderData.isBeyonder(targetEntity) || (targetEntitySeq >= entitySeq-1)) {
             if(targetEntity instanceof Mob) {
                 ((Mob) targetEntity).setNoAi(true);
                 ServerScheduler.scheduleDelayed(duration, () -> ((Mob) targetEntity).setNoAi(false));
             }
+
             if(BeyonderData.isBeyonder(targetEntity)) {
-                DisabledAbilitiesComponent component = targetEntity.getData(ModAttachments.DISABLED_ABILITIES_COMPONENT);
-                component.disableAbilityUsageForTime("requiem", duration, targetEntity);
+                    DisabledAbilitiesComponent component = targetEntity.getData(ModAttachments.DISABLED_ABILITIES_COMPONENT);
+                    component.disableAbilityUsageForTime("requiem", purified ? duration / 2 : duration, targetEntity);
             }
         }
 
@@ -108,12 +117,18 @@ public class RequiemAbility extends Ability {
             ParticleUtil.createParticleSpirals(bigDust, loc, .8, .8, targetEntity.getEyeHeight(), .35, 5, finalDuration, 15, 5);
         });
 
-        ServerScheduler.scheduleForDuration(0, 5, duration, () -> {
-            targetEntity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, 10, false, false, false));
-            targetEntity.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 20, 10, false, false, false));
-            targetEntity.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 20, 10, false, false, false));
+        ServerScheduler.scheduleForDuration(0, 5,duration, () -> {
+            targetEntity.addEffect(new MobEffectInstance(ModEffects.ASLEEP, 40, 10, false, false, false));
+            targetEntity.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 40, 10, false, false, false));
+            targetEntity.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 40, 10, false, false, false));
+            targetEntity.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 60, 4, false, false, false));
+            targetEntity.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 60, 5, false, false, false));
+            targetEntity.setOnGround(true);
+            var pos = targetEntity.position();
             targetEntity.setDeltaMovement(new Vec3(0, 0, 0));
             targetEntity.hurtMarked = true;
+
+            targetEntity.teleportTo(pos.x, pos.y, pos.z);
 
             loc.setLevel(targetEntity.level());
             loc.setPosition(targetEntity.position());

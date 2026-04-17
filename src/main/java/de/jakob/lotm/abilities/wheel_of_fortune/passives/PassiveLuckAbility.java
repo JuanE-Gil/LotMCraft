@@ -50,8 +50,8 @@ public class PassiveLuckAbility extends PassiveAbilityItem {
         if (sequence < 0 || sequence > 9) {
             return;
         }
-
         LuckComponent component = entity.getData(ModAttachments.LUCK_COMPONENT.get());
+        //if (component.getLuck() >= getLuckLevelForSequence(sequence)) {return;};
         if(component.getLuck() < getLuckLevelForSequence(sequence)) {
             component.setLuck(component.getLuck() + (int) Math.round(5 * BeyonderData.getMultiplier(entity)));
         }
