@@ -229,6 +229,7 @@ public class ModEvents {
         LuckCheckCommand.register(event.getDispatcher());
         SkinChangeCommand.register(event.getDispatcher());
         AllyRequestCommands.register(event.getDispatcher());
+        AllyCommand.register(event.getDispatcher());
         SanityCommand.register(event.getDispatcher());
         DigestionCommand.register(event.getDispatcher());
         QuestCommand.register(event.getDispatcher());
@@ -301,36 +302,6 @@ public class ModEvents {
             }
             if (!current.memberUUIDs().equals(team.memberUUIDs())) {
                 player.setData(ModAttachments.TEAM_COMPONENT.get(), current);
-            }
-        }
-    }
-
-    @SubscribeEvent
-    public static void onPlayerClone(PlayerEvent.Clone event) {
-        Player original = event.getOriginal();
-        Player newPlayer = event.getEntity();
-
-        // Only copy data if the original player was a beyonder
-        if (isBeyonder(original)) {
-            String pathway = getPathway(original);
-            int sequence = getSequence(original);
-            boolean griefingEnabled = original.getPersistentData().getBoolean(NBT_GRIEFING_ENABLED);
-            Tag markedEntities = original.getPersistentData().get(MARKED_ENTITIES_TAG);
-
-            // Copy the data to the new player
-            CompoundTag newTag = newPlayer.getPersistentData();
-            newTag.putString(NBT_PATHWAY, pathway);
-            newTag.putInt(NBT_SEQUENCE, sequence);
-            newTag.putFloat(NBT_SPIRITUALITY, BeyonderData.getMaxSpirituality(sequence));
-            newTag.putBoolean(NBT_GRIEFING_ENABLED, griefingEnabled);
-            if (markedEntities != null) {
-                newTag.put(MARKED_ENTITIES_TAG, markedEntities.copy());
-            }
-
-            // Update spirituality progress tracker
-            if (getMaxSpirituality(sequence) > 0) {
-                float progress = 1;
-                SpiritualityProgressTracker.setProgress(newPlayer.getUUID(), progress);
             }
         }
     }

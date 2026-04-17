@@ -17,6 +17,8 @@ public class ModGameRules {
     public static GameRules.Key<GameRules.BooleanValue> ALLOW_ARTIFACTS_WITH_NO_NEGATIVES;
     public static GameRules.Key<GameRules.IntegerValue> CHARSTACK_REQUIRED_FOR_APOTHEOSIS;
 
+    public static GameRules.Key<GameRules.IntegerValue> MAX_ALLY_COUNT;
+
     public static GameRules.Key<GameRules.IntegerValue> SEQ_0_AMOUNT;
     public static GameRules.Key<GameRules.IntegerValue> SEQ_1_AMOUNT;
     public static GameRules.Key<GameRules.IntegerValue> SEQ_2_AMOUNT;
@@ -88,6 +90,17 @@ public class ModGameRules {
                 "allowArtifactsWithNoNegatives",
                 GameRules.Category.MISC,
                 GameRules.BooleanValue.create(false)
+        );
+
+        MAX_ALLY_COUNT = GameRules.register(
+                "maxAllyCount",
+                GameRules.Category.MISC,
+                GameRules.IntegerValue.create(100,
+                        (server, value) -> {
+                            if (value.get() < 0) {
+                                value.set(0, server);
+                            }
+                        })
         );
 
         SEQ_0_AMOUNT = GameRules.register(

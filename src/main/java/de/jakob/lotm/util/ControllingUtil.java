@@ -153,10 +153,7 @@ public class ControllingUtil {
 
                 // Carry over digestion progress (stored in persistent data, not NPC fields)
                 if (targetEntity instanceof LivingEntity targetLiving) {
-                    targetLiving.getPersistentData().putFloat(
-                            BeyonderData.NBT_DIGESTION_PROGRESS,
-                            player.getPersistentData().getFloat(BeyonderData.NBT_DIGESTION_PROGRESS)
-                    );
+                    BeyonderData.setDigestionProgress(targetLiving, BeyonderData.getDigestionProgress(player));
                     restoredTarget = targetLiving;
                 }
 

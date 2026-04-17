@@ -27,6 +27,9 @@ public class ApotheosisComponent implements INBTSerializable<CompoundTag> {
     public void setApotheosisTicksLeftAndSync(int apotheosisTicksLeft, ServerLevel level, Player player) {
         this.apotheosisTicksLeft = apotheosisTicksLeft;
 
+        if(player == null) return;
+        if(pathway == null) return;
+
         if(level != null) PacketHandler.sendToAllPlayersInSameLevel(new SyncApotheosisPacket(player.getId(), apotheosisTicksLeft, pathway), level);
     }
 

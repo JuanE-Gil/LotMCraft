@@ -18,8 +18,6 @@ import de.jakob.lotm.potions.BeyonderCharacteristicItemHandler;
 import de.jakob.lotm.potions.BeyonderPotion;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.ClientBeyonderCache;
-import de.jakob.lotm.util.beyonderMap.BeyonderMap;
-import de.jakob.lotm.util.beyonderMap.CharacteristicStack;
 import de.jakob.lotm.util.beyonderMap.StoredData;
 import de.jakob.lotm.attachments.SharedAbilitiesComponent;
 import de.jakob.lotm.attachments.TeamComponent;
@@ -54,6 +52,9 @@ public class BeyonderEventHandler {
     @SubscribeEvent
     public static void onPlayerJoinWorld(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer serverPlayer) {
+            // Convert legacy nbt tags to component data to preserve data through code changes, then remove legacy tags
+            convertLegacyNBT(serverPlayer);
+
             // Sync beyonder data when player joins
             PacketHandler.syncBeyonderDataToPlayer(serverPlayer);
 
@@ -78,6 +79,23 @@ public class BeyonderEventHandler {
 
             serverPlayer.addEffect(new MobEffectInstance(ModEffects.CONCEALMENT, 20 * 30, 99, false, false, false));
         }
+    }
+
+    private static void convertLegacyNBT(ServerPlayer serverPlayer) {
+        if(!serverPlayer.getPersistentData().contains("beyonder_pathway") || !serverPlayer.getPersistentData().contains("beyonder_sequence")) return;
+        String oldPathway = serverPlayer.getPersistentData().getString("beyonder_pathway");
+        int oldSequence = serverPlayer.getPersistentData().getInt("beyonder_sequence");
+        float digestionsProgress = serverPlayer.getPersistentData().contains("beyonder_digestion_progress") ? serverPlayer.getPersistentData().getFloat("beyonder_digestion_progress") : 0f;
+        boolean griefingEnabled = serverPlayer.getPersistentData().contains("beyonder_griefing_enabled") || !serverPlayer.getPersistentData().getBoolean("beyonder_griefing_enabled");
+
+        BeyonderData.setBeyonder(serverPlayer, oldPathway, oldSequence, true, true, true);
+        BeyonderData.setDigestionProgress(serverPlayer, digestionsProgress);
+        BeyonderData.setGriefingEnabled(serverPlayer, griefingEnabled);
+
+        serverPlayer.getPersistentData().remove("beyonder_pathway");
+        serverPlayer.getPersistentData().remove("beyonder_sequence");
+        serverPlayer.getPersistentData().remove("beyonder_digestion_progress");
+        serverPlayer.getPersistentData().remove("beyonder_griefing_enabled");
     }
 
     @SubscribeEvent
@@ -212,10 +230,12 @@ public class BeyonderEventHandler {
         if(beyonderMap.get(player).isEmpty()) return;
 
         var data = beyonderMap.get(player).get();
-        BeyonderData.setBeyonder(player, data.pathway(), data.sequence(), true);
 
         BeyonderCharacteristicItem charItem = BeyonderCharacteristicItemHandler
                 .selectCharacteristicOfPathwayAndSequence(BeyonderData.getPathway(player), dropSequence);
+
+        BeyonderData.setBeyonder(player, data.pathway(), data.sequence(), true, false, true);
+
         if (charItem == null) return;
 
         ItemEntity itemEntity = new ItemEntity(
@@ -262,7 +282,7 @@ public class BeyonderEventHandler {
             } else {
                 beyonderMap.put(player, regressed);
             }
-            player.getPersistentData().putFloat(BeyonderData.NBT_DIGESTION_PROGRESS, 1.0f);
+            BeyonderData.setDigestionProgress(player, 1.0f);
 
             BeyonderData.recalculateCharStackModifiers(player);
 
@@ -395,20 +415,11 @@ public class BeyonderEventHandler {
         boolean isDirect = !event.getSource().is(ModDamageTypes.PURIFICATION_INDIRECT);
 
         // seqDiff > 0 means attacker is stronger (lower seq number), < 0 means weaker
-        int seqDiff = victimSeq - attackerSeq;
-
-        float digestionDrain;
-        if (isDirect) {
-            // Base 3%, +1% per level attacker is stronger, -1% per level attacker is weaker, floor 1%
-            digestionDrain = Math.max(0.01f, 0.03f + seqDiff * 0.01f);
-        } else {
-            // Base 0.5%, +0.1% per level attacker is stronger, -0.1% per level attacker is weaker, floor 0.1%
-            digestionDrain = Math.max(0.001f, 0.005f + seqDiff * 0.001f);
-        }
+        float digestionDrain = getDigestionDrain(victimSeq, attackerSeq, isDirect);
 
         float currentDigestion = BeyonderData.getDigestionProgress(victimPlayer);
         float newDigestion = Math.max(0f, currentDigestion - digestionDrain);
-        victimPlayer.getPersistentData().putFloat(BeyonderData.NBT_DIGESTION_PROGRESS, newDigestion);
+        BeyonderData.setDigestionProgress(victimPlayer, newDigestion);
         if (victim instanceof ServerPlayer sp) {
             PacketHandler.syncBeyonderDataToPlayer(sp);
         }
@@ -418,14 +429,11 @@ public class BeyonderEventHandler {
             // Capture pathway before regression changes it — the dropped characteristic belongs to the old pathway/seq
             String pathwayBeforeRegress = BeyonderData.getPathway(victim);
             // Check if victim has a characteristic stack at their current sequence
-            boolean hasStack = BeyonderData.beyonderMap != null
-                    && BeyonderData.beyonderMap.get(victim.getUUID()).isPresent()
-                    && BeyonderData.beyonderMap.get(victim.getUUID()).get().charStack().get(victimSeq) > 0;
+            boolean hasStack = BeyonderData.getCharStack(victim) > 0;
 
             if (hasStack) {
                 // Consume one stack instead of desequencing
-                BeyonderData.setCharStack(victim, victimSeq,
-                        BeyonderData.beyonderMap.get(victim.getUUID()).get().charStack().get(victimSeq) - 1, true);
+                BeyonderData.setCharStack(victim, BeyonderData.getCharStack(victim), true);
             } else {
                 // No stack — desequence the victim, using regressSeq so domain-switched players restore to their previous pathway
                 if (victim instanceof ServerPlayer sp && BeyonderData.beyonderMap.get(sp).isPresent()) {
@@ -447,9 +455,23 @@ public class BeyonderEventHandler {
             }
 
             // Either way, reset digestion to full so the victim isn't immediately vulnerable again
-            victimPlayer.getPersistentData().putFloat(BeyonderData.NBT_DIGESTION_PROGRESS, 1.0f);
+            victimPlayer.getData(ModAttachments.BEYONDER_COMPONENT).setSpirituality(1);
             if (victim instanceof ServerPlayer sp) PacketHandler.syncBeyonderDataToPlayer(sp);
         }
+    }
+
+    private static float getDigestionDrain(int victimSeq, int attackerSeq, boolean isDirect) {
+        int seqDiff = victimSeq - attackerSeq;
+
+        float digestionDrain;
+        if (isDirect) {
+            // Base 3%, +1% per level attacker is stronger, -1% per level attacker is weaker, floor 1%
+            digestionDrain = Math.max(0.01f, 0.03f + seqDiff * 0.01f);
+        } else {
+            // Base 0.5%, +0.1% per level attacker is stronger, -0.1% per level attacker is weaker, floor 0.1%
+            digestionDrain = Math.max(0.001f, 0.005f + seqDiff * 0.001f);
+        }
+        return digestionDrain;
     }
 
     /**

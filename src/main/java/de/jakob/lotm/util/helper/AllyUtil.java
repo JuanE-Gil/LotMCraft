@@ -6,6 +6,8 @@ import de.jakob.lotm.network.PacketHandler;
 import de.jakob.lotm.network.packets.toClient.SyncAllyDataPacket;
 import de.jakob.lotm.util.BeyonderData;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
@@ -126,12 +128,34 @@ public class AllyUtil {
     }
 
     /**
-     * Get ally count for an entity
+     * Get total ally count for an entity (includes mobs)
      */
     public static int getAllyCount(LivingEntity entity) {
         if (entity == null) return 0;
         AllyComponent comp = entity.getData(ModAttachments.ALLY_COMPONENT.get());
         return comp.allyCount();
+    }
+
+    /**
+     * Get the number of player allies only (excludes mobs).
+     * Used for the maxAllyCount gamerule limit.
+     */
+    public static int getPlayerAllyCount(LivingEntity entity) {
+        if (entity == null) return 0;
+        if (!(entity.level() instanceof ServerLevel serverLevel)) return 0;
+
+        MinecraftServer server = serverLevel.getServer();
+        AllyComponent comp = entity.getData(ModAttachments.ALLY_COMPONENT.get());
+        int count = 0;
+        for (String uuidStr : comp.allies()) {
+            try {
+                UUID uuid = UUID.fromString(uuidStr);
+                if (server.getProfileCache().get(uuid).isPresent()) {
+                    count++;
+                }
+            } catch (IllegalArgumentException ignored) {}
+        }
+        return count;
     }
 
     /**

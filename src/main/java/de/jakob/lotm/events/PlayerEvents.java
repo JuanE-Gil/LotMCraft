@@ -20,6 +20,8 @@ import de.jakob.lotm.potions.PotionRecipeItemHandler;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.beyonderMap.BeyonderMap;
 import de.jakob.lotm.util.beyonderMap.StoredData;
+import de.jakob.lotm.attachments.AllyComponent;
+import de.jakob.lotm.util.helper.AllyUtil;
 import de.jakob.lotm.util.helper.ExplodingFallingBlockHelper;
 import de.jakob.lotm.util.helper.ParticleUtil;
 import net.minecraft.ChatFormatting;
@@ -80,8 +82,8 @@ public class PlayerEvents {
                         && BeyonderData.getPathway(player).equals(revert.getPathway())
                         && BeyonderData.getSequence(player) == revert.getRevertToSequence() - 1) {
                     float digestion = revert.getSavedDigestion();
-                    BeyonderData.setBeyonder(player, revert.getPathway(), revert.getRevertToSequence(), true);
-                    player.getPersistentData().putFloat(BeyonderData.NBT_DIGESTION_PROGRESS, digestion);
+                    BeyonderData.setBeyonder(player, revert.getPathway(), revert.getRevertToSequence(), true, true, true);
+                    BeyonderData.setDigestionProgress(player, digestion);
                     // No sync needed on logout — player reads NBT fresh on next login
                 }
                 revert.clear();
@@ -92,6 +94,23 @@ public class PlayerEvents {
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
+            // Prune stale ally entries: remove any ally UUID whose owner no longer lists
+            // this player back (e.g. the player was removed while they were offline).
+            AllyComponent comp = player.getData(ModAttachments.ALLY_COMPONENT.get());
+            for (String uuidStr : new java.util.HashSet<>(comp.allies())) {
+                try {
+                    java.util.UUID allyUUID = java.util.UUID.fromString(uuidStr);
+                    ServerPlayer ally = player.getServer().getPlayerList().getPlayer(allyUUID);
+                    if (ally != null && !AllyUtil.isAlly(ally, player.getUUID())) {
+                        // Ally is online but doesn't have us listed — remove the stale entry
+                        player.setData(ModAttachments.ALLY_COMPONENT.get(),
+                                player.getData(ModAttachments.ALLY_COMPONENT.get()).removeAlly(allyUUID));
+                    }
+                    // If ally is offline we can't check their data, so leave it for the
+                    // next time they log in and this same check runs on their side.
+                } catch (IllegalArgumentException ignored) {}
+            }
+
             PacketHandler.sendToPlayer(player, new SyncGriefingGamerulePacket(player.level().getGameRules().getBoolean(ModGameRules.ALLOW_GRIEFING)));
 
             NewPlayerComponent component = player.getData(ModAttachments.BOOK_COMPONENT);
