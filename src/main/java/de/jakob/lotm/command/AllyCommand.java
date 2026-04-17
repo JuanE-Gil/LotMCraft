@@ -13,6 +13,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 public class AllyCommand {
@@ -47,19 +48,28 @@ public class AllyCommand {
             return 1;
         }
 
-        source.sendSuccess(() -> Component.translatable("lotm.ally.list_header", comp.allyCount()).withColor(0x2196F3), false);
+        List<Component> playerEntries = new java.util.ArrayList<>();
         for (String uuidStr : comp.allies()) {
             try {
                 UUID allyUUID = UUID.fromString(uuidStr);
                 ServerPlayer online = source.getServer().getPlayerList().getPlayer(allyUUID);
-                Component name = online != null
-                        ? online.getName().copy().withColor(0x4CAF50)
-                        : Component.literal(source.getServer().getProfileCache()
-                                .get(allyUUID)
-                                .map(GameProfile::getName)
-                                .orElse(uuidStr)).withColor(0x9E9E9E);
-                source.sendSuccess(() -> Component.literal("  - ").append(name), false);
+                if (online != null) {
+                    playerEntries.add(online.getName().copy().withColor(0x4CAF50));
+                } else {
+                    source.getServer().getProfileCache().get(allyUUID).ifPresent(profile ->
+                            playerEntries.add(Component.literal(profile.getName()).withColor(0x9E9E9E)));
+                }
             } catch (IllegalArgumentException ignored) {}
+        }
+
+        if (playerEntries.isEmpty()) {
+            source.sendSuccess(() -> Component.translatable("lotm.ally.list_empty").withColor(0x9E9E9E), false);
+            return 1;
+        }
+
+        source.sendSuccess(() -> Component.translatable("lotm.ally.list_header", playerEntries.size()).withColor(0x2196F3), false);
+        for (Component entry : playerEntries) {
+            source.sendSuccess(() -> Component.literal("  - ").append(entry), false);
         }
 
         return 1;
