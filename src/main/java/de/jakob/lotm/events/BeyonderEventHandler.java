@@ -230,10 +230,12 @@ public class BeyonderEventHandler {
         if(beyonderMap.get(player).isEmpty()) return;
 
         var data = beyonderMap.get(player).get();
-        BeyonderData.setBeyonder(player, data.pathway(), data.sequence(), true, false, true);
 
         BeyonderCharacteristicItem charItem = BeyonderCharacteristicItemHandler
                 .selectCharacteristicOfPathwayAndSequence(BeyonderData.getPathway(player), dropSequence);
+
+        BeyonderData.setBeyonder(player, data.pathway(), data.sequence(), true, false, true);
+
         if (charItem == null) return;
 
         ItemEntity itemEntity = new ItemEntity(
