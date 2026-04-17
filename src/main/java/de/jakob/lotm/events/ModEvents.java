@@ -4,7 +4,6 @@ import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.attachments.TeamComponent;
 import de.jakob.lotm.command.*;
-import de.jakob.lotm.command.UniquenessCommand;
 import de.jakob.lotm.entity.ModEntities;
 import de.jakob.lotm.entity.client.ability_entities.door_pathway.travelers_door.TravelersDoorModel;
 import de.jakob.lotm.entity.client.ability_entities.meteor.MeteorModel;
@@ -281,6 +280,9 @@ public class ModEvents {
 
         MinecraftServer server = player.getServer();
         if (server == null) return;
+
+        // Sync uniqueness data on login
+        PacketHandler.syncUniquenessToPlayer(player);
 
         TeamComponent team = player.getData(ModAttachments.TEAM_COMPONENT.get());
 

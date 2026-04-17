@@ -44,8 +44,6 @@ public class UniquenessEntity extends Entity {
 
     public UniquenessEntity(EntityType<?> entityType, Level level) {
         super(entityType, level);
-        this.noPhysics = false;
-        this.setNoGravity(false);
     }
 
     public UniquenessEntity(Level level, Vec3 position, String pathway) {
@@ -118,7 +116,9 @@ public class UniquenessEntity extends Entity {
         component.setHasUniqueness(true);
         component.setUniquenessPathway(pathway);
 
-        int color = BeyonderData.pathwayInfos.get(pathway).color();
+        int color = BeyonderData.pathwayInfos.containsKey(pathway)
+                ? BeyonderData.pathwayInfos.get(pathway).color()
+                : 0xFFFFFF;
 
         serverLevel.players().forEach(p ->
                 p.displayClientMessage(
@@ -130,6 +130,11 @@ public class UniquenessEntity extends Entity {
         );
 
         player.playSound(SoundEvents.ITEM_PICKUP);
+
+        // Sync uniqueness component to client
+        if (player instanceof ServerPlayer serverPlayer) {
+            de.jakob.lotm.network.PacketHandler.syncUniquenessToPlayer(serverPlayer);
+        }
 
         // Remove from active map and discard entity
         ACTIVE_ENTITIES.remove(pathway);

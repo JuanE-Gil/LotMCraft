@@ -6,8 +6,6 @@ import de.jakob.lotm.attachments.UniquenessComponent;
 import de.jakob.lotm.entity.custom.uniqueness.UniquenessEntity;
 import de.jakob.lotm.network.PacketHandler;
 import de.jakob.lotm.util.BeyonderData;
-import de.jakob.lotm.util.beyonderMap.StoredData;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -19,7 +17,6 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
-import java.util.Optional;
 import java.util.Random;
 
 /**
@@ -32,7 +29,7 @@ import java.util.Random;
 public class UniquenessEventHandler {
 
     private static final Random RANDOM = new Random();
-    // Check every 10 minutes (12000 ticks) with a 1-in-100 chance = roughly 1 spawn per ~17 hours
+    // Check every 5 minutes (6000 ticks) with a 1-in-100 chance
     private static final int SPAWN_CHECK_INTERVAL = 6000; // ticks
     private static final double SPAWN_CHANCE = 0.01; // 1%
 

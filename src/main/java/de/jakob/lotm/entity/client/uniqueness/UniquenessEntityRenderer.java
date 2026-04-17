@@ -4,16 +4,14 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.entity.custom.uniqueness.UniquenessEntity;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
@@ -37,8 +35,8 @@ public class UniquenessEntityRenderer extends EntityRenderer<UniquenessEntity> {
         if (pathway.isEmpty()) return;
 
         // Get the item for this pathway uniqueness
-        Item uniquenessItem = getUniquenessItem(pathway);
-        if (uniquenessItem == null) return;
+        ItemStack stack = getUniquenessItemStack(pathway);
+        if (stack.isEmpty()) return;
 
         poseStack.pushPose();
 
@@ -46,33 +44,37 @@ public class UniquenessEntityRenderer extends EntityRenderer<UniquenessEntity> {
         float tick = entity.getTicksExisted() + partialTick;
         float bobOffset = (float) Math.sin(tick * 0.1f) * 0.1f;
 
-        // Translate to sit just above the ground
+        // Translate to sit just above the ground with a gentle bob
         poseStack.translate(0, 0.25 + bobOffset, 0);
 
-        // Slowly rotate
+        // Slowly rotate around Y axis
         poseStack.mulPose(Axis.YP.rotationDegrees(tick * 3f));
 
-        // Render the item
-        this.entityRenderDispatcher.getItemInHandRenderer().renderItem(
-                null,
-                new ItemStack(uniquenessItem),
-                ItemDisplayContext.GROUND,
-                false,
+        // Render the item using the game's item renderer
+        Minecraft mc = Minecraft.getInstance();
+        mc.getItemRenderer().renderStatic(
+                stack,
+                net.minecraft.world.item.ItemDisplayContext.GROUND,
+                packedLight,
+                net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY,
                 poseStack,
                 bufferSource,
-                packedLight
+                mc.level,
+                entity.getId()
         );
 
         poseStack.popPose();
     }
 
-    private Item getUniquenessItem(String pathway) {
+    private ItemStack getUniquenessItemStack(String pathway) {
         try {
-            return net.minecraft.core.registries.BuiltInRegistries.ITEM.get(
+            net.minecraft.world.item.Item item = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(
                     ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, pathway + "_uniqueness")
             );
+            if (item == Items.AIR) return ItemStack.EMPTY;
+            return new ItemStack(item);
         } catch (Exception e) {
-            return null;
+            return ItemStack.EMPTY;
         }
     }
 

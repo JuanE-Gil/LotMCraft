@@ -294,22 +294,24 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
             int apotheosisButtonX = baseLeftPos - 65;
             int apotheosisButtonY = this.topPos + 110;
 
-            boolean canApotheosize = ClientUniquenessCache.getKillCount() >= 500
-                    && ClientBeyonderCache.getCharStack(
-                    this.minecraft != null && this.minecraft.player != null
-                            ? this.minecraft.player.getUUID() : java.util.UUID.randomUUID()) >= 2;
+            boolean canApotheosize = false;
+            if (this.minecraft != null && this.minecraft.player != null) {
+                int charStack = ClientBeyonderCache.getCharStack(this.minecraft.player.getUUID());
+                canApotheosize = ClientUniquenessCache.getKillCount() >= 500 && charStack >= 2;
+            }
+            final boolean finalCanApotheosize = canApotheosize;
 
             apotheosisButton = Button.builder(
                             Component.literal("Apotheosis").withStyle(
-                                    canApotheosize ? ChatFormatting.GOLD : ChatFormatting.GRAY),
+                                    finalCanApotheosize ? ChatFormatting.GOLD : ChatFormatting.GRAY),
                             button -> {
-                                if (canApotheosize) {
+                                if (finalCanApotheosize) {
                                     PacketHandler.sendToServer(new RequestUniquenessApotheosisPacket());
                                 }
                             })
                     .bounds(apotheosisButtonX, apotheosisButtonY, 60, 20)
                     .build();
-            apotheosisButton.active = canApotheosize;
+            apotheosisButton.active = finalCanApotheosize;
             this.addRenderableWidget(apotheosisButton);
         }
 
@@ -1546,22 +1548,22 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
         String pathway = ClientUniquenessCache.getPathway();
         if (pathway.isEmpty()) return;
 
-        // Render uniqueness item icon in top-right corner of the GUI panel (next to pathway symbol)
+        // Render uniqueness item icon in top-left area below sequence info
         ResourceLocation textureLocation = ResourceLocation.fromNamespaceAndPath(
                 LOTMCraft.MOD_ID, "textures/item/" + pathway + "_uniqueness.png"
         );
 
         int iconSize = 16;
-        int iconX = x + 170; // Near the right edge
-        int iconY = y + 3;
+        int iconX = x + 7;
+        int iconY = y + 50;
 
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         guiGraphics.blit(textureLocation, iconX, iconY, 0, 0, iconSize, iconSize, iconSize, iconSize);
 
-        // Also show kill count for apotheosis progress
-        int killCount = ClientUniquenessCache.getKillCount();
-        Component killText = Component.literal(killCount + "/500").withStyle(ChatFormatting.GOLD);
-        guiGraphics.drawString(this.font, killText, x + 7, y + 40, 0xFFAA00, true);
+        // Show kill count for apotheosis progress next to the icon
+        int kills = ClientUniquenessCache.getKillCount();
+        Component killText = Component.literal(kills + "/500 kills").withStyle(ChatFormatting.GOLD);
+        guiGraphics.drawString(this.font, killText, iconX + iconSize + 3, iconY + 4, 0xFFAA00, true);
     }
 
     private void renderPassiveAbilitiesText(GuiGraphics guiGraphics, int x, int y) {

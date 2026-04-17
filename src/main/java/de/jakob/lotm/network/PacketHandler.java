@@ -3,7 +3,6 @@ package de.jakob.lotm.network;
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.network.packets.toClient.*;
 import de.jakob.lotm.network.packets.toServer.*;
-import de.jakob.lotm.network.packets.toServer.RequestUniquenessApotheosisPacket;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.beyonderMap.StoredData;
 import net.minecraft.client.Minecraft;

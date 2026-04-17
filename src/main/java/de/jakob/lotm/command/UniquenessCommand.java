@@ -21,7 +21,6 @@ public class UniquenessCommand {
 
     private static final SuggestionProvider<CommandSourceStack> PATHWAY_SUGGESTIONS =
             (context, builder) -> SharedSuggestionProvider.suggest(BeyonderData.implementedPathways, builder);
-
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("uniqueness")
                 .requires(source -> source.hasPermission(2))
@@ -47,8 +46,8 @@ public class UniquenessCommand {
     }
 
     private static int checkHolder(CommandSourceStack source, String pathway) {
-        if (!BeyonderData.pathways.contains(pathway)) {
-            source.sendFailure(Component.literal("Unknown pathway: " + pathway));
+        if (!BeyonderData.implementedPathways.contains(pathway)) {
+            source.sendFailure(Component.literal("Unknown or unimplemented pathway: " + pathway));
             return 0;
         }
 
@@ -84,8 +83,8 @@ public class UniquenessCommand {
     }
 
     private static int removeUniqueness(CommandSourceStack source, String pathway) {
-        if (!BeyonderData.pathways.contains(pathway)) {
-            source.sendFailure(Component.literal("Unknown pathway: " + pathway));
+        if (!BeyonderData.implementedPathways.contains(pathway)) {
+            source.sendFailure(Component.literal("Unknown or unimplemented pathway: " + pathway));
             return 0;
         }
 
