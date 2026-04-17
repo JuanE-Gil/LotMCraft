@@ -131,9 +131,9 @@ public class ParasitationAbility extends SelectableAbility {
         int targetSeq = BeyonderData.isBeyonder(target) ? BeyonderData.getSequence(target) : 10;
         boolean lowerSeq = targetSeq > userSeq;
 
-        // 10% vs lower seq, 33% against same/higher
-        float chance = lowerSeq ? 0.5f : 0.12f;
-        if (random.nextFloat() >= chance) {
+        // 50% vs lower seq, 15% against same, 0% chance against higher sequence
+        float chance = lowerSeq ? 0.5f : 0.15f;
+        if (random.nextFloat() >= chance || userSeq > targetSeq) {
             AbilityUtil.sendActionBar(player, Component.literal(lowerSeq
                     ? "§cControl failed!"
                     : "§cControl failed — resistance too strong!"));
@@ -201,9 +201,9 @@ public class ParasitationAbility extends SelectableAbility {
             if (bodyEntity != null) exitPos = bodyEntity.position();
         }
 
-// back to behind the host if body position unavailable
+        // back to behind the host if body position unavailable
+        Entity hostEntity = serverLevel.getEntity(hostUUID);
         if (exitPos == null) {
-            Entity hostEntity = serverLevel.getEntity(hostUUID);
             if (hostEntity != null) {
                 Vec3 hostLook = new Vec3(hostEntity.getLookAngle().x(), 0, hostEntity.getLookAngle().z()).normalize();
                 exitPos = hostEntity.position().subtract(hostLook.scale(hostEntity.getBbWidth() + 1.0));
@@ -223,6 +223,7 @@ public class ParasitationAbility extends SelectableAbility {
             if (tag == null) return false;
             return tag.copyTag().getString("MarionetteUUID").equals(hostUUID.toString());
         });
+
         ItemStack offhand = player.getOffhandItem();
         if (offhand.is(ModItems.MARIONETTE_CONTROLLER.get())) {
             var tag = offhand.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
@@ -235,7 +236,6 @@ public class ParasitationAbility extends SelectableAbility {
             player.teleportTo(exitPos.x, exitPos.y, exitPos.z);
         }
 
-        Entity hostEntity = serverLevel.getEntity(hostUUID);
         if (hostEntity instanceof LivingEntity host) {
             host.setInvisible(false);
             host.removeEffect(MobEffects.INVISIBILITY);
@@ -254,7 +254,8 @@ public class ParasitationAbility extends SelectableAbility {
     }
 
     private static boolean performExitSteal(ServerLevel serverLevel, ServerPlayer player, LivingEntity host) {
-        float roll = new Random().nextFloat();
+        Random random = new Random();
+        float roll = random.nextFloat();
 
         Ability instance = LOTMCraft.abilityHandler.getById("parasitation_ability");
 
@@ -263,7 +264,7 @@ public class ParasitationAbility extends SelectableAbility {
         } else if (roll < 0.75f) {
             TheftHandler.stealItemsFromEntity(host, player, instance);
         } else if (roll < 0.90f) {
-            TheftHandler.performAbilityTheft(serverLevel, player, host, new Random(), true, instance);
+            TheftHandler.performAbilityTheft(serverLevel, player, host, random, true, instance);
         } else {
             // Health drain — check if it kills
             float drain = host.getMaxHealth() * 0.2f;
@@ -293,7 +294,7 @@ public class ParasitationAbility extends SelectableAbility {
         TheftHandler.stealItemsFromEntity(host, player, instance);
     }
 
-    //concealmedode
+    // conceal mode
     private void concealed(Level level, LivingEntity entity) {
         if (level.isClientSide) return;
         if (!(level instanceof ServerLevel serverLevel)) return;
@@ -401,6 +402,7 @@ public class ParasitationAbility extends SelectableAbility {
         if (entity.level().isClientSide) return;
         if (!(entity.level() instanceof ServerLevel serverLevel)) return;
 
+
         tickControlling(serverLevel, entity);
         tickConcealed(serverLevel, entity);
     }
@@ -426,7 +428,6 @@ public class ParasitationAbility extends SelectableAbility {
         UUID hostUUID = controllingMap.get(player.getUUID());
         if (bodyUUID != null && hostUUID != null) {
             Entity bodyEntity = serverLevel.getEntity(bodyUUID);
-            Entity hostEntity = serverLevel.getEntity(hostUUID);
 
             if (bodyEntity instanceof OriginalBodyEntity body) {
                 // During possession, player IS the host — track player position
@@ -459,8 +460,10 @@ public class ParasitationAbility extends SelectableAbility {
 
         Entity hostEntity = serverLevel.getEntity(concealedMap.get(entity.getUUID()));
 
-        if (hostEntity == null || hostEntity.isRemoved()
-                || !(hostEntity instanceof LivingEntity host) || !host.isAlive()) {
+        if (hostEntity == null
+                || hostEntity.isRemoved()
+                || !(hostEntity instanceof LivingEntity host)
+                || !host.isAlive()) {
             if (hostEntity instanceof LivingEntity host2) {
                 ParasitationComponent pc = host2.getData(ModAttachments.PARASITE_COMPONENT);
                 pc.setParasited(false);
@@ -508,7 +511,7 @@ public class ParasitationAbility extends SelectableAbility {
 
     @SubscribeEvent
     public static void onLivingChangeTarget(LivingChangeTargetEvent event) {
-        if (!(event.getEntity() instanceof Mob mob)) return;
+        if (!(event.getEntity() instanceof Mob)) return;
         LivingEntity newTarget = event.getNewAboutToBeSetTarget();
         if (newTarget == null) return;
         if (concealedMap.containsKey(newTarget.getUUID()) || controllingMap.containsKey(newTarget.getUUID())) {
