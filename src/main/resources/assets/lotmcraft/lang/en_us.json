@@ -1353,6 +1353,10 @@
   "lotm.ally.request_denied_self": "Ally request denied",
   "lotm.ally.no_request": "No pending ally request",
   "lotm.ally.requester_offline": "Requester is no longer online",
+  "lotm.ally.limit_reached": "You have reached the maximum number of allies (%s)",
+  "lotm.ally.requester_limit_reached": "%s has reached their maximum number of allies",
+  "lotm.ally.not_allies": "You are not allied with %s",
+  "lotm.ally.remove_self": "You cannot remove yourself as an ally",
 
   "_comment014": "Quests-------------------------------------------------------------------------",
   "lotm.quest.already_accepted": "You have already accepted/completed this quest",

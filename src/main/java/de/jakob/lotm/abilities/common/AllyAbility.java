@@ -1,6 +1,7 @@
 package de.jakob.lotm.abilities.common;
 
 import de.jakob.lotm.abilities.core.Ability;
+import de.jakob.lotm.gamerule.ModGameRules;
 import de.jakob.lotm.network.PacketHandler;
 import de.jakob.lotm.network.packets.toClient.PendingAllyRequestPacket;
 import de.jakob.lotm.util.BeyonderData;
@@ -71,6 +72,13 @@ public class AllyAbility extends Ability {
             return;
         }
 
+        // Check ally limit
+        int maxAllies = serverLevel.getGameRules().getInt(ModGameRules.MAX_ALLY_COUNT);
+        if (maxAllies >= 0 && AllyUtil.getAllyCount(entity) >= maxAllies) {
+            AbilityUtil.sendActionBar(entity, Component.translatable("lotm.ally.limit_reached", maxAllies).withColor(0xF44336));
+            return;
+        }
+
         // Check if target can be allied without permission
         if (AllyUtil.canBeAllied(target)) {
             AllyUtil.makeAllies(entity, target);
@@ -134,6 +142,24 @@ public class AllyAbility extends Ability {
             AbilityUtil.sendActionBar(accepter, Component.translatable("lotm.ally.requester_offline").withColor(0xF44336));
             removePendingRequest(requesterUUID, accepter.getUUID());
             return;
+        }
+
+        // Check ally limits for both players
+        if (accepter.level() instanceof ServerLevel serverLevel) {
+            int maxAllies = serverLevel.getGameRules().getInt(ModGameRules.MAX_ALLY_COUNT);
+            if (maxAllies >= 0) {
+                if (AllyUtil.getAllyCount(accepter) >= maxAllies) {
+                    AbilityUtil.sendActionBar(accepter, Component.translatable("lotm.ally.limit_reached", maxAllies).withColor(0xF44336));
+                    removePendingRequest(requesterUUID, accepter.getUUID());
+                    return;
+                }
+                if (AllyUtil.getAllyCount(requester) >= maxAllies) {
+                    AbilityUtil.sendActionBar(accepter, Component.translatable("lotm.ally.requester_limit_reached", requester.getName()).withColor(0xF44336));
+                    AbilityUtil.sendActionBar(requester, Component.translatable("lotm.ally.limit_reached", maxAllies).withColor(0xF44336));
+                    removePendingRequest(requesterUUID, accepter.getUUID());
+                    return;
+                }
+            }
         }
 
         AllyUtil.makeAllies(requester, accepter);
