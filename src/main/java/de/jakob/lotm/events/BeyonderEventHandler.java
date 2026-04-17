@@ -1,6 +1,7 @@
 package de.jakob.lotm.events;
 
 import de.jakob.lotm.LOTMCraft;
+import de.jakob.lotm.abilities.visionary.PsychologicalInvisibilityAbility;
 import de.jakob.lotm.artifacts.SealedArtifactData;
 import de.jakob.lotm.damage.ModDamageTypes;
 import de.jakob.lotm.attachments.DisabledFlightComponent;
@@ -13,6 +14,7 @@ import de.jakob.lotm.gamerule.ModGameRules;
 import de.jakob.lotm.item.PotionIngredient;
 import de.jakob.lotm.network.PacketHandler;
 import de.jakob.lotm.network.packets.toClient.SyncKillCountPacket;
+import de.jakob.lotm.network.packets.toClient.SyncPsychologicalInvisibilityPacket;
 import de.jakob.lotm.potions.BeyonderCharacteristicItem;
 import de.jakob.lotm.potions.BeyonderCharacteristicItemHandler;
 import de.jakob.lotm.potions.BeyonderPotion;
@@ -78,6 +80,7 @@ public class BeyonderEventHandler {
             }
 
             serverPlayer.addEffect(new MobEffectInstance(ModEffects.CONCEALMENT, 20 * 30, 99, false, false, false));
+            PacketHandler.sendToPlayer(serverPlayer ,new SyncPsychologicalInvisibilityPacket(PsychologicalInvisibilityAbility.invisiblePlayers));
         }
     }
 

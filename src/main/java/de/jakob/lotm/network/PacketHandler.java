@@ -406,6 +406,12 @@ public class PacketHandler {
         );
 
         registrar.playToClient(
+                SyncPsychologicalInvisibilityPacket.TYPE,
+                SyncPsychologicalInvisibilityPacket.STREAM_CODEC,
+                SyncPsychologicalInvisibilityPacket::handle
+        );
+
+        registrar.playToClient(
                 AddClientSideTagPacket.TYPE,
                 AddClientSideTagPacket.STREAM_CODEC,
                 AddClientSideTagPacket::handle
