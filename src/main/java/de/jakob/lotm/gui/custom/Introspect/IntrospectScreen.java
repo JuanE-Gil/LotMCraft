@@ -11,6 +11,7 @@ import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.ClientBeyonderCache;
 import de.jakob.lotm.util.ClientSacrificeCache;
 import de.jakob.lotm.util.ClientQuestData;
+import de.jakob.lotm.util.ClientUniquenessCache;
 import de.jakob.lotm.util.data.ClientData;
 import de.jakob.lotm.util.helper.ClientTeamData;
 import net.minecraft.ChatFormatting;
@@ -39,6 +40,8 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
     private Button clearWheelButton;
     private Button messageButton;
     private Button clearBarButton;
+
+    private Button apotheosisButton = null;
 
     // Quest section
     private boolean showQuests = false;
@@ -284,6 +287,32 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
 
         if(menu.getSequence() < 4) {
             this.addRenderableWidget(messageButton);
+        }
+
+        // Add Apotheosis button if player has uniqueness and is Sequence 1
+        if (ClientUniquenessCache.hasUniqueness() && menu.getSequence() == 1) {
+            int apotheosisButtonX = baseLeftPos - 65;
+            int apotheosisButtonY = this.topPos + 110;
+
+            boolean canApotheosize = false;
+            if (this.minecraft != null && this.minecraft.player != null) {
+                int charStack = ClientBeyonderCache.getCharStack(this.minecraft.player.getUUID());
+                canApotheosize = ClientUniquenessCache.getKillCount() >= RequestUniquenessApotheosisPacket.KILLS_REQUIRED_FOR_APOTHEOSIS && charStack >= 2;
+            }
+            final boolean finalCanApotheosize = canApotheosize;
+
+            apotheosisButton = Button.builder(
+                            Component.literal("Apotheosis").withStyle(
+                                    finalCanApotheosize ? ChatFormatting.GOLD : ChatFormatting.GRAY),
+                            button -> {
+                                if (finalCanApotheosize) {
+                                    PacketHandler.sendToServer(new RequestUniquenessApotheosisPacket());
+                                }
+                            })
+                    .bounds(apotheosisButtonX, apotheosisButtonY, 60, 20)
+                    .build();
+            apotheosisButton.active = finalCanApotheosize;
+            this.addRenderableWidget(apotheosisButton);
         }
 
         // Add "All Abilities" toggle button for creative + OP players
@@ -1504,6 +1533,7 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
         renderSanityProgress(guiGraphics, x, y);
         renderPassiveAbilitiesText(guiGraphics, x, y);
         renderKillCount(guiGraphics, x, y);
+        renderUniquenessIcon(guiGraphics, x, y);
         RenderSystem.disableBlend();
     }
 
@@ -1511,6 +1541,29 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
         if (!menu.getPathway().equals("red_priest") || menu.getSequence() > 3) return;
         Component text = Component.literal("Kills: " + killCount).withStyle(ChatFormatting.BOLD);
         guiGraphics.drawString(this.font, text, x + 7, y + 154, 0xDDDDDD, true);
+    }
+
+    private void renderUniquenessIcon(GuiGraphics guiGraphics, int x, int y) {
+        if (!ClientUniquenessCache.hasUniqueness()) return;
+        String pathway = ClientUniquenessCache.getPathway();
+        if (pathway.isEmpty()) return;
+
+        // Render uniqueness item icon in top-left area below sequence info
+        ResourceLocation textureLocation = ResourceLocation.fromNamespaceAndPath(
+                LOTMCraft.MOD_ID, "textures/item/" + pathway + "_uniqueness.png"
+        );
+
+        int iconSize = 16;
+        int iconX = x + 7;
+        int iconY = y + 50;
+
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        guiGraphics.blit(textureLocation, iconX, iconY, 0, 0, iconSize, iconSize, iconSize, iconSize);
+
+        // Show kill count for apotheosis progress next to the icon
+        int kills = ClientUniquenessCache.getKillCount();
+        Component killText = Component.literal(kills + "/" + RequestUniquenessApotheosisPacket.KILLS_REQUIRED_FOR_APOTHEOSIS + " kills").withStyle(ChatFormatting.GOLD);
+        guiGraphics.drawString(this.font, killText, iconX + iconSize + 3, iconY + 4, 0xFFAA00, true);
     }
 
     private void renderPassiveAbilitiesText(GuiGraphics guiGraphics, int x, int y) {

@@ -243,6 +243,14 @@ public class ModAttachments {
                             .build()
             );
 
+    public static final Supplier<AttachmentType<UniquenessComponent>> UNIQUENESS_COMPONENT =
+            ATTACHMENT_TYPES.register("uniqueness_component", () ->
+                    AttachmentType.builder(UniquenessComponent::new)
+                            .serialize(UniquenessComponent.SERIALIZER)
+                            .copyOnDeath()
+                            .build()
+            );
+
     public static void register(IEventBus eventBus) {
         ATTACHMENT_TYPES.register(eventBus);
     }

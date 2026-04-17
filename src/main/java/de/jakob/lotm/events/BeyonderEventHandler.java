@@ -47,6 +47,7 @@ import java.util.Objects;
 import java.util.Random;
 
 import static de.jakob.lotm.util.BeyonderData.beyonderMap;
+import static de.jakob.lotm.util.BeyonderData.getSequence;
 
 @EventBusSubscriber(modid = LOTMCraft.MOD_ID)
 public class BeyonderEventHandler {
@@ -91,7 +92,7 @@ public class BeyonderEventHandler {
         float digestionsProgress = serverPlayer.getPersistentData().contains("beyonder_digestion_progress") ? serverPlayer.getPersistentData().getFloat("beyonder_digestion_progress") : 0f;
         boolean griefingEnabled = serverPlayer.getPersistentData().contains("beyonder_griefing_enabled") || !serverPlayer.getPersistentData().getBoolean("beyonder_griefing_enabled");
 
-        BeyonderData.setBeyonder(serverPlayer, oldPathway, oldSequence, true, true, true);
+        BeyonderData.setBeyonder(serverPlayer, oldPathway, oldSequence, true, true, true, true);
         BeyonderData.setDigestionProgress(serverPlayer, digestionsProgress);
         BeyonderData.setGriefingEnabled(serverPlayer, griefingEnabled);
 
@@ -237,7 +238,7 @@ public class BeyonderEventHandler {
         BeyonderCharacteristicItem charItem = BeyonderCharacteristicItemHandler
                 .selectCharacteristicOfPathwayAndSequence(BeyonderData.getPathway(player), dropSequence);
 
-        BeyonderData.setBeyonder(player, data.pathway(), data.sequence(), true, false, true);
+        BeyonderData.setBeyonder(player, data.pathway(), data.sequence(), true, false, true, false);
 
         if (charItem == null) return;
 
@@ -432,11 +433,11 @@ public class BeyonderEventHandler {
             // Capture pathway before regression changes it — the dropped characteristic belongs to the old pathway/seq
             String pathwayBeforeRegress = BeyonderData.getPathway(victim);
             // Check if victim has a characteristic stack at their current sequence
-            boolean hasStack = BeyonderData.getCharStack(victim) > 0;
+            boolean hasStack = BeyonderData.getCurrentCharStack(victim) > 0;
 
             if (hasStack) {
                 // Consume one stack instead of desequencing
-                BeyonderData.setCharStack(victim, BeyonderData.getCharStack(victim), true);
+                BeyonderData.setCharStack(victim, BeyonderData.getCurrentCharStack(victim) - 1, getSequence(victim), true);
             } else {
                 // No stack — desequence the victim, using regressSeq so domain-switched players restore to their previous pathway
                 if (victim instanceof ServerPlayer sp && BeyonderData.beyonderMap.get(sp).isPresent()) {

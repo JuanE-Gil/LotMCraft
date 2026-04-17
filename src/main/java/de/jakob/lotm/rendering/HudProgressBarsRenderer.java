@@ -16,7 +16,7 @@ import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 
 @EventBusSubscriber(modid = LOTMCraft.MOD_ID, value = Dist.CLIENT)
-public class SpiritualityBarRenderer {
+public class HudProgressBarsRenderer {
 
     @SubscribeEvent
     public static void onClientTick(ClientTickEvent.Post event) {
@@ -105,13 +105,15 @@ public class SpiritualityBarRenderer {
         if (mc.player == null || mc.level == null || mc.options.hideGui) return;
         if (!ClientBeyonderCache.isBeyonder(mc.player.getUUID())) return;
 
+        float sanity = mc.player.getData(ModAttachments.SANITY_COMPONENT.get()).getSanity();
+        if(sanity == 1) return;
+
         int barWidth = 14;
         int barHeight = 120;
         int screenWidth = guiGraphics.guiWidth();
         int barX = screenWidth - barWidth - 6;
         int barY = 60;
 
-        float sanity = mc.player.getData(ModAttachments.SANITY_COMPONENT.get()).getSanity();
 
         guiGraphics.fill(barX, barY, barX + barWidth, barY + barHeight, 0x80000000);
 
