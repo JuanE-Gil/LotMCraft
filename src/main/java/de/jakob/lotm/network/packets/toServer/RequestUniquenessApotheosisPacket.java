@@ -24,6 +24,9 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
  */
 public record RequestUniquenessApotheosisPacket() implements CustomPacketPayload {
 
+    /** Kills required for apotheosis - must match client-side check in IntrospectScreen. */
+    public static final int KILLS_REQUIRED_FOR_APOTHEOSIS = 500;
+
     public static final Type<RequestUniquenessApotheosisPacket> TYPE =
             new Type<>(ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "request_uniqueness_apotheosis"));
 
@@ -67,7 +70,7 @@ public record RequestUniquenessApotheosisPacket() implements CustomPacketPayload
         int requiredStack = player.serverLevel().getGameRules().getInt(ModGameRules.CHARSTACK_REQUIRED_FOR_APOTHEOSIS);
         int killCount = comp.getKillCount();
 
-        if (charStack < requiredStack || killCount < 500) {
+        if (charStack < requiredStack || killCount < KILLS_REQUIRED_FOR_APOTHEOSIS) {
             player.displayClientMessage(
                     Component.translatable("lotm.uniqueness.fail"),
                     true

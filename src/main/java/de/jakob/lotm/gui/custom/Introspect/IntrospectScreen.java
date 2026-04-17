@@ -297,7 +297,7 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
             boolean canApotheosize = false;
             if (this.minecraft != null && this.minecraft.player != null) {
                 int charStack = ClientBeyonderCache.getCharStack(this.minecraft.player.getUUID());
-                canApotheosize = ClientUniquenessCache.getKillCount() >= 500 && charStack >= 2;
+                canApotheosize = ClientUniquenessCache.getKillCount() >= RequestUniquenessApotheosisPacket.KILLS_REQUIRED_FOR_APOTHEOSIS && charStack >= 2;
             }
             final boolean finalCanApotheosize = canApotheosize;
 
@@ -1562,7 +1562,7 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
 
         // Show kill count for apotheosis progress next to the icon
         int kills = ClientUniquenessCache.getKillCount();
-        Component killText = Component.literal(kills + "/500 kills").withStyle(ChatFormatting.GOLD);
+        Component killText = Component.literal(kills + "/" + RequestUniquenessApotheosisPacket.KILLS_REQUIRED_FOR_APOTHEOSIS + " kills").withStyle(ChatFormatting.GOLD);
         guiGraphics.drawString(this.font, killText, iconX + iconSize + 3, iconY + 4, 0xFFAA00, true);
     }
 

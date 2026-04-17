@@ -33,6 +33,8 @@ public class UniquenessEventHandler {
     private static final int SPAWN_CHECK_INTERVAL = 6000; // ticks
     private static final double SPAWN_CHANCE = 0.01; // 1%
 
+    private static final int SPAWN_RADIUS_BLOCKS = 40;
+
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post event) {
         var server = event.getServer();
@@ -67,9 +69,9 @@ public class UniquenessEventHandler {
         if (targetPlayer == null) return;
 
         Vec3 spawnPos = targetPlayer.position().add(
-                (RANDOM.nextDouble() - 0.5) * 40,
+                (RANDOM.nextDouble() - 0.5) * SPAWN_RADIUS_BLOCKS * 2,
                 0,
-                (RANDOM.nextDouble() - 0.5) * 40
+                (RANDOM.nextDouble() - 0.5) * SPAWN_RADIUS_BLOCKS * 2
         );
         // Ensure spawn is at ground level
         int groundY = level.getHeightmapPos(

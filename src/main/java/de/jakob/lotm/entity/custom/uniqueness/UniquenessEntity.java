@@ -37,7 +37,12 @@ public class UniquenessEntity extends Entity {
     private static final EntityDataAccessor<String> PATHWAY =
             SynchedEntityData.defineId(UniquenessEntity.class, EntityDataSerializers.STRING);
 
+    /** Damage dealt to angel (seq <= 2) beyonders who touch the uniqueness. */
+    private static final float UNIQUENESS_ANGEL_DAMAGE = 50.0f;
+
     /** Tracks all active uniqueness entities by pathway (server-side). */
+    private static final int MAX_RENDER_DISTANCE_BLOCKS = 64;
+
     public static final Map<String, Integer> ACTIVE_ENTITIES = new HashMap<>();
 
     private int ticksExisted = 0;
@@ -104,9 +109,9 @@ public class UniquenessEntity extends Entity {
         // Others are harmed
         if (seq <= 2 && BeyonderData.isBeyonder(entity)) {
             // Angels (seq <= 2) take massive damage
-            entity.hurt(ModDamageTypes.source(level(), ModDamageTypes.BEYONDER_GENERIC), 50.0f);
+            entity.hurt(ModDamageTypes.source(level(), ModDamageTypes.BEYONDER_GENERIC), UNIQUENESS_ANGEL_DAMAGE);
         } else if (BeyonderData.isBeyonder(entity)) {
-            // Seq > 2 die
+            // Seq > 2 die instantly
             entity.hurt(ModDamageTypes.source(level(), ModDamageTypes.BEYONDER_GENERIC), Float.MAX_VALUE);
         }
     }
@@ -224,7 +229,7 @@ public class UniquenessEntity extends Entity {
 
     @Override
     public boolean shouldRenderAtSqrDistance(double distSq) {
-        return distSq < 4096;
+        return distSq < MAX_RENDER_DISTANCE_BLOCKS * MAX_RENDER_DISTANCE_BLOCKS;
     }
 
     public int getTicksExisted() {
