@@ -16,11 +16,6 @@ public class ClientBeyonderCache {
 
     public static void updateData(UUID playerUUID, String pathway, int sequence, float spirituality, boolean griefingEnabled, boolean isPlayer, float digestionProgress, String[] pathwayHistory, int charStack) {
         dataCache.put(playerUUID, new BeyonderClientData(pathway, sequence, spirituality, griefingEnabled, digestionProgress, pathwayHistory, charStack));
-
-        if(isPlayer) {
-            float progress = spirituality / BeyonderData.getMaxSpirituality(pathway, sequence);
-            SpiritualityProgressTracker.setProgress(playerUUID, progress);
-        }
     }
 
     public static String getPathway(UUID playerUUID) {

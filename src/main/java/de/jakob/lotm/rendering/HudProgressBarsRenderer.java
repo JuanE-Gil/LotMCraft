@@ -5,7 +5,6 @@ import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.ClientSacrificeCache;
 import de.jakob.lotm.util.ClientBeyonderCache;
-import de.jakob.lotm.util.SpiritualityProgressTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
