@@ -2,6 +2,8 @@ package de.jakob.lotm.abilities.justiciar;
 
 import de.jakob.lotm.abilities.core.AbilityUsedEvent;
 import de.jakob.lotm.abilities.core.SelectableAbility;
+import de.jakob.lotm.network.PacketHandler;
+import de.jakob.lotm.network.packets.toServer.AbilitySelectionPacket;
 import de.jakob.lotm.rendering.effectRendering.EffectManager;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityUtil;
@@ -63,15 +65,6 @@ public class ProhibitionAbility extends SelectableAbility {
 
         int casterSeq = BeyonderData.getSequence(entity);
 
-        // Options 5-7 (Outside World, Stand-ins, Marionette) require Seq 4 or lower
-        if (abilityIndex >= 5 && casterSeq > 4) {
-            if (entity instanceof net.minecraft.server.level.ServerPlayer sp) {
-                sp.sendSystemMessage(Component.literal("[Prohibition] This Law is not yet within your authority.")
-                        .withStyle(ChatFormatting.RED));
-            }
-            return;
-        }
-
         // Check for resistance from same-or-higher-rank beyonders in range
         double failChance = casterSeq <= 4 ? 0.15 : 0.4;
 
@@ -128,6 +121,70 @@ public class ProhibitionAbility extends SelectableAbility {
         });
 
         NeoForge.EVENT_BUS.post(new AbilityUsedEvent(serverLevel, entity.position(), entity, this, interactionFlags, ZONE_RADIUS, 20 * 2));
+    }
+
+    @Override
+    public void nextAbility(LivingEntity entity){
+        if(getAbilityNames().length == 0)
+            return;
+
+        if(!selectedAbilities.containsKey(entity.getUUID())) {
+            selectedAbilities.put(entity.getUUID(), 0);
+        }
+
+        int selectedAbility = selectedAbilities.get(entity.getUUID());
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+
+        selectedAbility++;
+        if(selectedAbility >= getAbilityNames().length) {
+            selectedAbility = 0;
+        }
+
+        if((entitySeq > 6 && selectedAbility >= 2)){
+            selectedAbility = 0;
+        }
+
+        if((entitySeq > 4 && selectedAbility >= 3)){
+            selectedAbility = 0;
+        }
+        if((entitySeq > 3 && selectedAbility >= 4)){
+            selectedAbility = 0;
+        }
+
+        selectedAbilities.put(entity.getUUID(), selectedAbility);
+        PacketHandler.sendToServer(new AbilitySelectionPacket(getId(), selectedAbility));
+    }
+
+    @Override
+    public void previousAbility(LivingEntity entity){
+        if(getAbilityNames().length == 0)
+            return;
+
+        if(!selectedAbilities.containsKey(entity.getUUID())) {
+            selectedAbilities.put(entity.getUUID(), 0);
+        }
+
+        int selectedAbility = selectedAbilities.get(entity.getUUID());
+        selectedAbility--;
+        if(selectedAbility <= -1) {
+            selectedAbility = getAbilityNames().length - 1;
+        }
+
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+
+        if((entitySeq > 6 && selectedAbility >= 2)){
+            selectedAbility = 0;
+        }
+
+        if((entitySeq > 4 && selectedAbility >= 3)){
+            selectedAbility = 0;
+        }
+        if((entitySeq > 3 && selectedAbility >= 4)){
+            selectedAbility = 0;
+        }
+
+        selectedAbilities.put(entity.getUUID(), selectedAbility);
+        PacketHandler.sendToServer(new AbilitySelectionPacket(getId(), selectedAbility));
     }
 
     public enum ProhibitionType {
