@@ -794,6 +794,9 @@
   "lotmcraft.verdict_exile_ability": "Verdict: Exile",
   "lotmcraft.verdict_exile_ability.description": "Exile a target upward with a burst of force, granting them slow falling while they are cast away.",
 
+  "lotmcraft.punishment_ability": "Punishment",
+  "lotmcraft.punishment_ability.description": "Mark a target for Punishment. While active, you emanate a dawn like glow. Triggering a Punishment condition grants you a random buff and inflicts a random debuff on the target.",
+
   "lotm.ability.cogitation.tick": "Cogitating",
 
   "item.lotmcraft.ability_not_implemented": "Abilities for this Sequence are not yet implemented",
@@ -819,6 +822,8 @@
   "item.lotmcraft.physical_enhancements_justiciar_ability": "Physical Enhancements",
   "item.lotmcraft.order_justiciar_ability": "Order",
   "item.lotmcraft.order_justiciar_ability.description": "Subconsciously maintain Order. Sense when murder is committed within 40 blocks.",
+  "item.lotmcraft.enhanced_mental_attributes_justiciar_ability": "Enhanced Mental Attributes",
+  "item.lotmcraft.enhanced_mental_attributes_justiciar_ability.description": "Negative effects, Losing Control, and Divination are less effective against you.",
 
   "item.lotmcraft.flaming_hit_ability": "Flaming Hit",
   "item.lotmcraft.fire_resistance_ability": "Fire Resistance",

@@ -70,6 +70,7 @@ public class AuthorityAbility extends SelectableAbility {
                     .map(MobEffectInstance::getEffect)
                     .collect(Collectors.toList());
             toRemove.forEach(target::removeEffect);
+            target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 20 * 8, 0));
         });
 
         NeoForge.EVENT_BUS.post(new AbilityUsedEvent(serverLevel, entity.position(), entity, this, interactionFlags, 15, 20 * 2));
@@ -83,6 +84,7 @@ public class AuthorityAbility extends SelectableAbility {
 
         AbilityUtil.getNearbyEntities(entity, serverLevel, entity.position(), 15).forEach(target -> {
             target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20 * 20, 1)); // Slowness II, 20 seconds
+            target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 20 * 8, 0));
         });
 
         NeoForge.EVENT_BUS.post(new AbilityUsedEvent(serverLevel, entity.position(), entity, this, interactionFlags, 15, 20 * 2));
@@ -95,6 +97,7 @@ public class AuthorityAbility extends SelectableAbility {
         ServerLevel serverLevel = (ServerLevel) level;
 
         AbilityUtil.getNearbyEntities(entity, serverLevel, entity.position(), 15).forEach(target -> {
+            target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 20 * 8, 0));
             if (random.nextDouble() < 0.4) {
                 List<EquipmentSlot> equippedSlots = new ArrayList<>();
                 for (EquipmentSlot slot : ARMOR_SLOTS) {
