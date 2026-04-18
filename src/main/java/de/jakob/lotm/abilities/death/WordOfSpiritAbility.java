@@ -1,7 +1,9 @@
 package de.jakob.lotm.abilities.death;
 
 import de.jakob.lotm.abilities.core.Ability;
+import de.jakob.lotm.abilities.core.interaction.InteractionHandler;
 import de.jakob.lotm.effect.ModEffects;
+import de.jakob.lotm.util.data.Location;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import net.minecraft.network.chat.Component;
@@ -17,9 +19,7 @@ public class WordOfSpiritAbility extends Ability {
     private static final int DURATION_TICKS = 20 * 10; // 10 seconds
 
     public WordOfSpiritAbility(String id) {
-        super(id, 20f); // 1-second cooldown
-        canBeCopied = false;
-        canBeReplicated = false;
+        super(id, 900f);
     }
 
     @Override
@@ -35,6 +35,8 @@ public class WordOfSpiritAbility extends Ability {
     @Override
     public void onAbilityUse(Level level, LivingEntity entity) {
         if (level.isClientSide) return;
+
+        if (InteractionHandler.isInteractionPossibleStrictlyHigher(new Location(entity.position(), (net.minecraft.server.level.ServerLevel) level), "purification", BeyonderData.getSequence(entity), -1)) return;
 
         LivingEntity target = AbilityUtil.getTargetEntity(entity, 25, 1.5f);
         if (target == null) {

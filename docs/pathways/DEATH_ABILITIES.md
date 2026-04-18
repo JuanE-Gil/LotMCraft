@@ -8,7 +8,7 @@
 **Sequence Requirement:** 1  
 **Spirituality Cost:** 30, 000
 **Cooldown:** 5 minutes  
-*(Cannot be copied or replicated)*
+*(Cannot be copied, replicated, or stolen)*
 
 - **Radius:** 120 blocks
 - **Duration:** 3 minutes (3,600 ticks)
@@ -42,7 +42,7 @@
 **Sequence Requirement:** 2  
 **Spirituality Cost:** 8,000  
 **Cooldown:** 3 minutes  
-*(Cannot be copied or replicated)*
+*(Cannot be copied, replicated, or stolen)*
 
 - **Radius:** 15 blocks
 - **Duration:** 1 minute 40 seconds (2,000 ticks)
@@ -77,7 +77,7 @@
 **Sequence Requirement:** 3  
 **Spirituality Cost:** 2,500 (50% of Sequence 3 max)  
 **Cooldown:** 2 minutes  
-*(Cannot be copied or replicated)*
+*(Cannot be copied)*
 
 - **Targeting Range:** 30 blocks (line-of-sight)
 
@@ -103,7 +103,7 @@
 **Sequence Requirement:** 3  
 **Spirituality Cost:** 400  
 **Cooldown:** 60 seconds  
-*(Cannot be copied or replicated)*
+*(Cannot be copied)*
 
 Three selectable sub-abilities:
 
@@ -132,7 +132,7 @@ Three selectable sub-abilities:
 **Sequence Requirement:** 4  
 **Spirituality Cost:** 3000
 **Cooldown:** 1 tick (effectively instant)  
-*(Cannot be copied or replicated)*
+*(Cannot be copied, replicated, or stolen)*
 
 - **Capture Chance:** 50%
 
@@ -165,8 +165,7 @@ Three selectable sub-abilities:
 ### Undying Seal
 **Sequence Requirement:** 4  
 **Spirituality Cost:** 350  
-**Cooldown:** 2 minutes  
-*(Cannot be copied or replicated)*
+**Cooldown:** 2 minutes
 
 - **Duration:** 60 seconds
 
@@ -177,8 +176,7 @@ While active, suppresses all negative artifact effects on the caster for the dur
 ### Door to the Underworld
 **Sequence Requirement:** 5  
 **Spirituality Cost:** 600  
-**Cooldown:** 1 second  
-*(Cannot be copied or replicated)*
+**Cooldown:** 1 second
 
 Two selectable modes:
 
@@ -198,7 +196,7 @@ Two selectable modes:
 **Sequence Requirement:** 5  
 **Spirituality Cost:** 800  
 **Cooldown:** 90 seconds  
-*(Cannot be copied or replicated)*
+*(Cannot be copied or stolen)*
 
 - **Radius:** 10 blocks
 - **Effect Duration:** 20 seconds on all affected entities
@@ -214,8 +212,7 @@ Applies the following to all nearby non-allied entities on use. Entities **2+ se
 ### Word of Spirit
 **Sequence Requirement:** 6  
 **Spirituality Cost:** 300  
-**Cooldown:** 45 seconds  
-*(Cannot be copied or replicated)*
+**Cooldown:** 45 seconds
 
 - **Targeting Range:** 25 blocks
 
@@ -234,8 +231,8 @@ Applies the **Spirit Called** custom effect (Level 0) to the target for 10 secon
 ### Restruction
 **Sequence Requirement:** 6  
 **Spirituality Cost:** 500  
-**Cooldown:** 1 second  
-*(Cannot be copied or replicated)*
+**Cooldown:** 10 seconds (Release bypasses cooldown)  
+*(Cannot be copied or stolen)*
 
 Two selectable modes:
 
@@ -253,8 +250,7 @@ Two selectable modes:
 ### Spirit Channeling
 **Sequence Requirement:** 7  
 **Spirituality Cost:** 300  
-**Cooldown:** 3 ticks  
-*(Cannot be copied or replicated)*
+**Cooldown:** 20 seconds
 
 Captures a spirit from the environment (75% success chance at Seq ≤ 6, 50% otherwise). The spirit type is randomized between **Frost Ghost** and **Earth Spirit**, unlocking different sub-abilities.
 
@@ -268,16 +264,19 @@ Captures a spirit from the environment (75% success chance at Seq ≤ 6, 50% oth
 - Spawns an expanding frost ring from the caster's position over 3 seconds (radius grows by 0.5 every 2 ticks).
 - Entities caught in the ring receive: **Slowness Level 100** (stun) and **Jump Boost Level 128** (prevents jumping) for 3 seconds, then **Slowness III** for 5 seconds.
 - Applies visual freeze ticks.
+- Has no effect on targets **2+ sequences stronger** than the caster.
 
 *Glacial Aegis*
 - Active for up to 10 seconds.
 - **Negates the next hit** taken by the caster entirely (consumes the aegis).
+- Has no effect on targets **2+ sequences stronger** than the caster.
 
 **Earth Spirit Modes:**
 
 *Stone Restrainment*
 - **Targeting Range:** 20 blocks
 - Encases the target in stone for 4 seconds: **Slowness Level 100** + **Jump Boost Level 128** every 2 ticks, plus **1 damage** every 2 ticks (with invulnerability frames reset).
+- Has no effect on targets **2+ sequences stronger** than the caster.
 
 *Earthen Fist*
 - Launches two fists with a slight left/right spread at **0.8 blocks/tick** for up to 40 ticks.
@@ -287,6 +286,7 @@ Captures a spirit from the environment (75% success chance at Seq ≤ 6, 50% oth
 - **Targeting Range:** 25 blocks
 - Creates a swirling quicksand zone with **5-block radius** for 10 seconds (200 ticks, applied every 2 ticks).
 - Entities in range receive **Slowness IV** and are pulled downward.
+- Has no effect on targets **2+ sequences stronger** than the caster.
 
 *Earth Heal*
 - Heals the caster for **10%** of their max HP instantly.
@@ -296,7 +296,7 @@ Captures a spirit from the environment (75% success chance at Seq ≤ 6, 50% oth
 ### Zombie Disguise
 **Sequence Requirement:** 7  
 **Spirituality Cost:** 7/tick  
-*(Toggle — cannot be copied, replicated, or stolen; players only)*
+*(Toggle — cannot be copied, replicated, or stolen)*
 
 While active:
 - Transforms the caster's appearance to a Zombie.
@@ -311,7 +311,7 @@ On deactivation, all bonuses and appearance changes are reverted.
 ### Eye of Death
 **Sequence Requirement:** 8  
 **Spirituality Cost:** 0.5/tick  
-*(Toggle — cannot be copied, replicated, stolen, or used by NPCs; not usable in artifacts)*
+*(Toggle — players only; not usable in artifacts)*
 
 While active:
 - Grants **Night Vision** (refreshed every 25 seconds).
@@ -324,8 +324,8 @@ While active:
 ### Spirit Communication
 **Sequence Requirement:** 8  
 **Spirituality Cost:** 10  
-**Cooldown:** 10 tick  
-*(Cannot be copied, replicated, or stolen; players only; not usable in artifacts)*
+**Cooldown:** 10 seconds  
+*(Players only; not usable in artifacts)*
 
 Four selectable modes:
 
@@ -345,6 +345,7 @@ Four selectable modes:
   - **Slowness Level 100** for 3 seconds — full movement stun
   - **Freeze ticks** (+60) — powder snow freezing visual
   - **Weakness II** for 30 seconds
+- Has no effect on targets **2+ sequences stronger** than the caster.
 
 ---
 

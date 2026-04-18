@@ -1,6 +1,9 @@
 package de.jakob.lotm.abilities.death;
 
 import de.jakob.lotm.abilities.core.ToggleAbility;
+import de.jakob.lotm.abilities.core.interaction.InteractionHandler;
+import de.jakob.lotm.util.BeyonderData;
+import de.jakob.lotm.util.data.Location;
 import de.jakob.lotm.util.shapeShifting.ShapeShiftingUtil;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -34,7 +37,8 @@ public class ZombieDisguiseAbility extends ToggleAbility {
         canBeCopied = false;
         canBeReplicated = false;
         cannotBeStolen = true;
-        canBeUsedByNPC = false;
+        canBeUsedInArtifact = false;
+        canBeShared = false;
     }
 
     @Override
@@ -79,6 +83,11 @@ public class ZombieDisguiseAbility extends ToggleAbility {
     @Override
     public void tick(Level level, LivingEntity entity) {
         if (level.isClientSide) return;
+
+        if (InteractionHandler.isInteractionPossibleStrictlyHigher(new Location(entity.position(), (net.minecraft.server.level.ServerLevel) level), "purification", BeyonderData.getSequence(entity), -1)) {
+            stop(level, entity);
+            return;
+        }
 
         // Continuously refresh resistance so it never falls off while active
         entity.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 40, RESISTANCE_AMPLIFIER, false, false, false));

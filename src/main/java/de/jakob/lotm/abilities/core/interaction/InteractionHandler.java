@@ -22,7 +22,7 @@ import java.util.UUID;
 
 /**
  * Interaction Flags that exist so far:
- * "freezing", "burning", "purification", "drought", "light_source", "light_weak", "light_strong",
+ * "freezing", "burning", "purification", "purification_holy", "drought", "light_source", "light_weak", "light_strong",
  * "explosion", "poison", "calming", "water", "water_strong", "sealing", "darkness",
  * "unluck", "morale_boost", "soul_burn", "blooming", "cleansing", "corruption",
  * "blink_escape", "charm", "petrification", "fog", "curse", "disease", "plague",

@@ -1,7 +1,9 @@
 package de.jakob.lotm.abilities.death;
 
 import de.jakob.lotm.abilities.core.Ability;
+import de.jakob.lotm.abilities.core.interaction.InteractionHandler;
 import de.jakob.lotm.effect.ModEffects;
+import de.jakob.lotm.util.data.Location;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.ParticleUtil;
@@ -32,9 +34,11 @@ public class DeathEnvoyAbility extends Ability {
             new DustParticleOptions(new Vector3f(0.05f, 0.0f, 0.2f), 1.4f);
 
     public DeathEnvoyAbility(String id) {
-        super(id, 20f); // 1-second cooldown
+        super(id, 1800f);
         canBeCopied = false;
-        canBeReplicated = false;
+        cannotBeStolen = true;
+        canBeUsedInArtifact = false;
+        canBeShared = false;
     }
 
     @Override
@@ -51,6 +55,8 @@ public class DeathEnvoyAbility extends Ability {
     public void onAbilityUse(Level level, LivingEntity entity) {
         if (level.isClientSide) return;
         if (!(level instanceof ServerLevel serverLevel)) return;
+
+        if (InteractionHandler.isInteractionPossibleStrictlyHigher(new Location(entity.position(), serverLevel), "purification", BeyonderData.getSequence(entity), -1)) return;
 
         Vec3 center = entity.position().add(0, 0.5, 0);
 

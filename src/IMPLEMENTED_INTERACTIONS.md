@@ -8,7 +8,7 @@ This document outlines all currently implemented interactions between abilities 
 
 When an ability is used, it fires an `AbilityUsedEvent` containing one or more **interaction flags**, a **radius**, and a **cache duration** (in ticks). These events are stored in the `InteractionHandler` and can be queried by other abilities to determine if a relevant interaction is active nearby.
 
-**Sequence rules:** In most cases, an interaction only takes effect if the caster of the triggering ability is of **equal or higher power** (same or lower sequence number) than the affected ability's caster. Some interactions ignore sequence entirely, and one (Night Domain vs `light_strong`) requires the caster to be **strictly higher** in power (by at least 1 sequence).
+**Sequence rules:** In most cases, an interaction only takes effect if the caster of the triggering ability is of **equal or higher power** (same or lower sequence number) than the affected ability's caster. Some interactions ignore sequence entirely, and one (Night Domain vs `light_strong`) requires the caster to be **strictly higher** in power (by at least 1 sequence). Death pathway abilities use an extended rule: purification affects them if the purifier is the same sequence, stronger, or **up to 1 sequence weaker** than the Death caster.
 
 Some abilities use `postsUsedAbilityEventManually = true` in their constructor when the event needs to be posted from a spawned entity (e.g., on projectile impact) rather than on ability activation.
 
@@ -21,6 +21,7 @@ Some abilities use `postsUsedAbilityEventManually = true` in their constructor w
 | `freezing` | Frost/ice-based abilities |
 | `burning` | Fire/flame-based abilities |
 | `purification` | Holy/purifying abilities (primarily Sun pathway) |
+| `purification_holy` | High-powered holy purification — only Flaring Sun, Pure White Light, Sword of Justice, Divine Kingdom Manifestation |
 | `drought` | Weather drying effects |
 | `light_source` | Any light-emitting ability |
 | `light_weak` | Weaker light abilities |
@@ -59,13 +60,13 @@ Some abilities use `postsUsedAbilityEventManually = true` in their constructor w
 
 | Ability | Flags |
 |---------|-------|
-| Flaring Sun | `purification`, `burning`, `light_source`, `light_strong`, `light_weak` |
-| Divine Kingdom Manifestation | `purification`, `light_source`, `light_strong`, `light_weak` |
+| Flaring Sun | `purification`, `purification_holy`, `burning`, `light_source`, `light_strong`, `light_weak` |
+| Divine Kingdom Manifestation | `purification`, `purification_holy`, `light_source`, `light_strong`, `light_weak` |
 | Unshadowed Domain | `purification`, `light_source`, `light_strong`, `light_weak` |
 | Unshadowed Spear | `purification`, `light_source`, `light_strong`, `light_weak` |
 | Spear of Light | `purification`, `light_source`, `light_strong`, `light_weak` |
-| Sword of Justice | `purification`, `light_source`, `light_strong`, `light_weak` |
-| Pure White Light | `purification`, `light_source`, `light_strong`, `light_weak` |
+| Sword of Justice | `purification`, `purification_holy`, `light_source`, `light_strong`, `light_weak` |
+| Pure White Light | `purification`, `purification_holy`, `light_source`, `light_strong`, `light_weak` |
 | Holy Light | `purification`, `light_source`, `light_weak` |
 | Holy Light Summoning | `purification`, `light_source`, `light_weak` |
 | Illuminate | `purification`, `light_source`, `light_weak` |
@@ -238,8 +239,20 @@ Purification is the most widely-effective flag, primarily produced by Sun pathwa
 | Fear Aura | Abyss | Fear aura is cancelled |
 | Mind Fog | Abyss | Fog effect is completely cancelled |
 | Night Domain | Darkness | Domain is **weakened** — reduced blindness/darkness effects, fewer particles, reduced speed slowdown |
-| Divine Kingdom (Death) | Death | Domain entity is cancelled and cleaned up |
-| Nation of the Dead | Death | Domain is cancelled — all effects and overlay immediately removed |
+| Divine Kingdom (Death) | Death | Domain entity is cancelled and cleaned up — only reacts to `purification_holy` (Flaring Sun, Pure White Light, Sword of Justice, Divine Kingdom Manifestation); purifier must be same sequence or up to 1 sequence weaker than the Death caster |
+| Nation of the Dead | Death | Domain is cancelled — only reacts to `purification_holy`; same sequence rule applies |
+| Pale Eye | Death | Ability use is blocked |
+| Hand of Death | Death | Ability use is blocked (all sub-modes) |
+| Internal Underworld | Death | Ability use is blocked (summon and summon all) |
+| Undying Seal | Death | Activation is blocked |
+| Door to the Underworld | Death | Open Portal is blocked; Release still works |
+| Death Envoy | Death | Ability use is blocked |
+| Word of Spirit | Death | Ability use is blocked |
+| Restruction | Death | Summon is blocked; Release still works |
+| Spirit Channeling | Death | All sub-abilities blocked |
+| Spirit Communication | Death | All sub-abilities blocked |
+| Zombie Disguise | Death | Toggle is forcibly deactivated each tick while purification is active |
+| Eye of Death | Death | Toggle is forcibly deactivated each tick while purification is active |
 | Sword of Darkness | Darkness | Darkness attack is purified |
 | Horror Aura | Darkness | Horror aura is cancelled, affected entities are freed |
 | Charm | Demoness | Charm effect is broken |
@@ -249,6 +262,19 @@ Purification is the most widely-effective flag, primarily produced by Sun pathwa
 | Mental Plague | Visionary | Duration reduced from 10 seconds to 2 seconds |
 | Battle Hypnosis (Weaken) | Visionary | Weakness effect removed, weaken modifier cancelled |
 | Battle Hypnosis (Freeze) | Visionary | Movement slowdown removed, ability usage re-enabled |
+
+### `purification_holy`
+
+A subset of purification produced only by Flaring Sun, Pure White Light, Sword of Justice, and Divine Kingdom Manifestation. Used exclusively to interact with Death's two domain abilities, which are immune to ordinary purification.
+
+| Reacting Ability | Pathway | Effect When Triggered |
+|-----------------|---------|----------------------|
+| Divine Kingdom (Death) | Death | Domain entity is cancelled and cleaned up |
+| Nation of the Dead | Death | Domain is cancelled — all effects and overlay immediately removed |
+
+**Sequence rule:** The purifier must be the same sequence or up to 1 sequence weaker than the Death domain caster.
+
+---
 
 ### `burning`
 
@@ -399,7 +425,7 @@ The following flags are produced by abilities but no ability currently reacts to
 - `unluck` — Produced by Curse of Misfortune
 - `space_warp` — Produced by Black Hole, Distortion Field Entity
 - `light_weak` — Produced by many Sun abilities
-- `death` — Produced by Divine Kingdom, Nation of the Dead (reacted to by `purification`+`light_strong` checks, not by the flag itself)
+- `death` — Produced by Divine Kingdom, Nation of the Dead (no ability currently reacts to this flag directly)
 
 These flags are available for future interaction implementations or may be used for conditional logic within the abilities that produce them.
 
@@ -408,8 +434,9 @@ These flags are available for future interaction implementations or may be used 
 ## Cross-Pathway Interaction Summary
 
 ### Sun ↔ Death
-- Sun's Divine Kingdom Manifestation (`purification` + `light_strong`, equal or higher sequence) cancels Death's Divine Kingdom entity and Nation of the Dead
-- Unshadowed Domain (`purification` + `light_strong`) suppresses Nation of the Dead effects even if the Sun caster is 1 sequence weaker than the Death caster
+- **All Death active abilities** are blocked or stopped by any `purification` ability if the purifier is the same sequence, stronger, or up to 1 sequence weaker than the Death caster
+- **Divine Kingdom and Nation of the Dead** are immune to ordinary purification — only `purification_holy` (Flaring Sun, Pure White Light, Sword of Justice, Divine Kingdom Manifestation) can cancel them, subject to the same sequence rule (purifier must be same or up to 1 weaker)
+- Toggle abilities (Zombie Disguise, Eye of Death) are forcibly deactivated each tick while purification is present nearby
 
 ### Sun ↔ Darkness
 - Sun abilities (`purification`, `light_strong`, `light_source`) counter nearly all Darkness pathway abilities

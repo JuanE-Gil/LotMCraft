@@ -1,7 +1,10 @@
 package de.jakob.lotm.abilities.death;
 
 import de.jakob.lotm.abilities.core.SelectableAbility;
+import de.jakob.lotm.abilities.core.interaction.InteractionHandler;
 import de.jakob.lotm.entity.ModEntities;
+import de.jakob.lotm.util.BeyonderData;
+import de.jakob.lotm.util.data.Location;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.ParticleUtil;
 import de.jakob.lotm.util.helper.subordinates.SubordinateUtils;
@@ -54,9 +57,7 @@ public class DoorToTheUnderworldAbility extends SelectableAbility {
             new DustParticleOptions(new Vector3f(0.05f, 0.0f, 0.15f), 2.0f);
 
     public DoorToTheUnderworldAbility(String id) {
-        super(id, 20); // 1-second cooldown
-        canBeCopied = false;
-        canBeReplicated = false;
+        super(id, 20);
     }
 
     @Override
@@ -90,7 +91,10 @@ public class DoorToTheUnderworldAbility extends SelectableAbility {
         if (!(entity instanceof ServerPlayer player)) return;
 
         switch (selectedAbility) {
-            case 0 -> openPortal(serverLevel, player);
+            case 0 -> {
+                if (InteractionHandler.isInteractionPossibleStrictlyHigher(new Location(entity.position(), serverLevel), "purification", BeyonderData.getSequence(entity), -1)) return;
+                openPortal(serverLevel, player);
+            }
             case 1 -> release(player);
         }
     }

@@ -114,10 +114,9 @@ public class DeathDivineKingdomEntity extends Entity {
 
         Vec3 center = position();
 
-        // Sun's Divine Kingdom Manifestation (equal or higher sequence) cancels this domain
+        // Only Flaring Sun, Pure White Light, Sword of Justice, Divine Kingdom Manifestation can cancel this domain
         Location loc = new Location(center, serverLevel);
-        if (InteractionHandler.isInteractionPossible(loc, "purification", casterSeq)
-                && InteractionHandler.isInteractionPossible(loc, "light_strong", casterSeq)) {
+        if (InteractionHandler.isInteractionPossibleStrictlyHigher(loc, "purification_holy", casterSeq, -1)) {
             expire(serverLevel);
             return;
         }

@@ -1,6 +1,9 @@
 package de.jakob.lotm.abilities.death;
 
 import de.jakob.lotm.abilities.core.SelectableAbility;
+import de.jakob.lotm.abilities.core.interaction.InteractionHandler;
+import de.jakob.lotm.util.BeyonderData;
+import de.jakob.lotm.util.data.Location;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.subordinates.SubordinateUtils;
 import net.minecraft.network.chat.Component;
@@ -35,9 +38,9 @@ public class RestructionAbility extends SelectableAbility {
     private static final HashMap<UUID, List<Mob>> summonedMobs = new HashMap<>();
 
     public RestructionAbility(String id) {
-        super(id, 20); // 1-second cooldown
+        super(id, 200);
         canBeCopied = false;
-        canBeReplicated = false;
+        cannotBeStolen = true;
     }
 
     @Override
@@ -68,6 +71,8 @@ public class RestructionAbility extends SelectableAbility {
     @Override
     protected void castSelectedAbility(Level level, LivingEntity entity, int selectedAbility) {
         if (!(level instanceof ServerLevel serverLevel)) return;
+
+        if (selectedAbility == 0 && InteractionHandler.isInteractionPossibleStrictlyHigher(new Location(entity.position(), serverLevel), "purification", BeyonderData.getSequence(entity), -1)) return;
 
         switch (selectedAbility) {
             case 0 -> summon(serverLevel, entity);

@@ -47,9 +47,12 @@ public class NationOfTheDeadAbility extends Ability {
             new DustParticleOptions(new Vector3f(0.05f, 0.0f, 0.1f), 1.8f);
 
     public NationOfTheDeadAbility(String id) {
-        super(id, 20f, "death"); // 1-second cooldown
+        super(id, 3600f, "death");
         canBeCopied = false;
         canBeReplicated = false;
+        cannotBeStolen = true;
+        canBeUsedInArtifact = false;
+        canBeShared = false;
     }
 
     @Override
@@ -81,9 +84,8 @@ public class NationOfTheDeadAbility extends Ability {
             Vec3 center = entity.position();
             Location loc = new Location(center, serverLevel);
 
-            // Sun's Divine Kingdom Manifestation (equal or higher sequence) cancels Nation of the Dead
-            if (InteractionHandler.isInteractionPossible(loc, "purification", casterSeq)
-                    && InteractionHandler.isInteractionPossible(loc, "light_strong", casterSeq)) {
+            // Only Flaring Sun, Pure White Light, Sword of Justice, Divine Kingdom Manifestation can cancel Nation of the Dead
+            if (InteractionHandler.isInteractionPossibleStrictlyHigher(loc, "purification_holy", casterSeq, -1)) {
                 overlayActive.forEach(uuid -> {
                     ServerPlayer player = serverLevel.getServer().getPlayerList().getPlayer(uuid);
                     if (player != null) PacketHandler.sendToPlayer(player, new SyncCullAbilityPacket(false));
@@ -93,9 +95,7 @@ public class NationOfTheDeadAbility extends Ability {
                 return;
             }
 
-            // Unshadowed Domain — works even if Sun caster is 1 sequence weaker than Death caster
-            boolean unshadowedActive = InteractionHandler.isInteractionPossibleStrictlyHigher(loc, "purification", casterSeq, -1)
-                    && InteractionHandler.isInteractionPossibleStrictlyHigher(loc, "light_strong", casterSeq, -1);
+            boolean unshadowedActive = false;
 
             // Visual: sphere of death particles every 10 ticks, ring every tick
             if (ticks.get() % 10 == 0) {

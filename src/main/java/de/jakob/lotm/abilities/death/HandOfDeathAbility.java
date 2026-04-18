@@ -2,7 +2,9 @@ package de.jakob.lotm.abilities.death;
 
 import de.jakob.lotm.abilities.PhysicalEnhancementsAbility;
 import de.jakob.lotm.abilities.core.SelectableAbility;
+import de.jakob.lotm.abilities.core.interaction.InteractionHandler;
 import de.jakob.lotm.damage.ModDamageTypes;
+import de.jakob.lotm.util.data.Location;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.scheduling.ServerScheduler;
@@ -29,9 +31,9 @@ public class HandOfDeathAbility extends SelectableAbility {
     private static final Map<UUID, UUID> activeMarks = new ConcurrentHashMap<>();
 
     public HandOfDeathAbility(String id) {
-        super(id, 20f); // 1-second cooldown
+        super(id, 1200f);
         canBeCopied = false;
-        canBeReplicated = false;
+        canBeShared = false;
     }
 
     @Override
@@ -56,6 +58,8 @@ public class HandOfDeathAbility extends SelectableAbility {
     @Override
     protected void castSelectedAbility(Level level, LivingEntity entity, int abilityIndex) {
         if (!(level instanceof ServerLevel serverLevel)) return;
+
+        if (InteractionHandler.isInteractionPossibleStrictlyHigher(new Location(entity.position(), serverLevel), "purification", BeyonderData.getSequence(entity), -1)) return;
 
         switch (abilityIndex) {
             case 0 -> leftHand(serverLevel, entity);

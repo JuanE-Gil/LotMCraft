@@ -19,9 +19,13 @@ import java.util.Map;
 public class DivineKingdomAbility extends Ability {
 
     public DivineKingdomAbility(String id) {
-        super(id, 20f, "death"); // 1-second cooldown
+        super(id, 6000f, "death");
         canBeCopied = false;
         canBeReplicated = false;
+        cannotBeStolen = true;
+        canBeUsedByNPC = false;
+        canBeUsedInArtifact = false;
+        canBeShared = false;
     }
 
     @Override

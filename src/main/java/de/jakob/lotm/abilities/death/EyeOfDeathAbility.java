@@ -3,6 +3,9 @@ package de.jakob.lotm.abilities.death;
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.ToggleAbility;
 import de.jakob.lotm.abilities.common.SpiritVisionAbility;
+import de.jakob.lotm.abilities.core.interaction.InteractionHandler;
+import de.jakob.lotm.util.BeyonderData;
+import de.jakob.lotm.util.data.Location;
 import de.jakob.lotm.entity.custom.spirits.SpiritBaneEntity;
 import de.jakob.lotm.entity.custom.spirits.SpiritBizarroBaneEntity;
 import de.jakob.lotm.entity.custom.spirits.SpiritBlueWizardEntity;
@@ -50,12 +53,6 @@ public class EyeOfDeathAbility extends ToggleAbility {
 
     public EyeOfDeathAbility(String id) {
         super(id);
-        canBeCopied = false;
-        canBeUsedByNPC = false;
-        doesNotIncreaseDigestion = true;
-        cannotBeStolen = true;
-        canBeReplicated = false;
-        canBeUsedInArtifact = false;
     }
 
     @Override
@@ -77,6 +74,11 @@ public class EyeOfDeathAbility extends ToggleAbility {
 
     @Override
     public void tick(Level level, LivingEntity entity) {
+        if (!level.isClientSide() && InteractionHandler.isInteractionPossibleStrictlyHigher(new Location(entity.position(), (ServerLevel) level), "purification", BeyonderData.getSequence(entity), -1)) {
+            stop(level, entity);
+            return;
+        }
+
         if (level.isClientSide()) {
             List<LivingEntity> nearbyEntities = AbilityUtilClient.getNearbyEntities(entity, (ClientLevel) level, entity.getEyePosition(), 30)
                     .stream().toList();

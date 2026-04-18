@@ -2,7 +2,9 @@ package de.jakob.lotm.abilities.death;
 
 import de.jakob.lotm.abilities.PhysicalEnhancementsAbility;
 import de.jakob.lotm.abilities.core.Ability;
+import de.jakob.lotm.abilities.core.interaction.InteractionHandler;
 import de.jakob.lotm.damage.ModDamageTypes;
+import de.jakob.lotm.util.data.Location;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.ParticleUtil;
@@ -37,9 +39,10 @@ public class PaleEyeAbility extends Ability {
     private static final int TARGET_RANGE = 30;
 
     public PaleEyeAbility(String id) {
-        super(id, 20f); // 1-second cooldown
+        super(id, 2400f);
         canBeCopied = false;
-        canBeReplicated = false;
+        canBeUsedInArtifact = false;
+        canBeShared = false;
     }
 
     @Override
@@ -59,6 +62,8 @@ public class PaleEyeAbility extends Ability {
     public void onAbilityUse(Level level, LivingEntity entity) {
         if (level.isClientSide) return;
         if (!(level instanceof ServerLevel serverLevel)) return;
+
+        if (InteractionHandler.isInteractionPossibleStrictlyHigher(new Location(entity.position(), serverLevel), "purification", BeyonderData.getSequence(entity), -1)) return;
 
         LivingEntity target = AbilityUtil.getTargetEntity(entity, TARGET_RANGE, 1.5f, true);
         if (target == null) {

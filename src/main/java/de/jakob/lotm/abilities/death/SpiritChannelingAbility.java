@@ -3,6 +3,8 @@ package de.jakob.lotm.abilities.death;
 import com.google.common.util.concurrent.AtomicDouble;
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.SelectableAbility;
+import de.jakob.lotm.abilities.core.interaction.InteractionHandler;
+import de.jakob.lotm.util.data.Location;
 import de.jakob.lotm.damage.ModDamageTypes;
 import de.jakob.lotm.network.PacketHandler;
 import de.jakob.lotm.network.packets.toClient.SyncSpiritChannelingPacket;
@@ -70,9 +72,7 @@ public class SpiritChannelingAbility extends SelectableAbility {
     private static final DustParticleOptions STONE_DUST = new DustParticleOptions(new Vector3f(0.5f, 0.5f, 0.5f), 1.5f);
 
     public SpiritChannelingAbility(String id) {
-        super(id, 3f);
-        canBeCopied = false;
-        canBeReplicated = false;
+        super(id, 400f);
     }
 
     @Override
@@ -122,6 +122,8 @@ public class SpiritChannelingAbility extends SelectableAbility {
     @Override
     public void onAbilityUse(Level level, LivingEntity entity) {
         if (level.isClientSide) return;
+
+        if (InteractionHandler.isInteractionPossibleStrictlyHigher(new Location(entity.position(), (ServerLevel) level), "purification", de.jakob.lotm.util.BeyonderData.getSequence(entity), -1)) return;
 
         String[] names = getAbilityNamesForPlayer(entity.getUUID());
         int idx = selectedAbilities.getOrDefault(entity.getUUID(), 0);
@@ -252,6 +254,7 @@ public class SpiritChannelingAbility extends SelectableAbility {
     private void frozenDomain(Level level, LivingEntity entity) {
         if (level.isClientSide) return;
 
+        int casterSeq = de.jakob.lotm.util.BeyonderData.getSequence(entity);
         Vec3 startPos = entity.position();
         AtomicDouble radius = new AtomicDouble(0.5);
 
@@ -259,18 +262,13 @@ public class SpiritChannelingAbility extends SelectableAbility {
             ParticleUtil.spawnParticles((ServerLevel) level, FROST_DUST, startPos.add(0, 1, 0), 60, radius.get(), 0.3, radius.get(), 0);
             ParticleUtil.spawnParticles((ServerLevel) level, ParticleTypes.SNOWFLAKE, startPos.add(0, 0.5, 0), 30, radius.get(), 0.2, radius.get(), 0);
 
-            // Freeze + stun entities in the ring
-            AbilityUtil.addPotionEffectToNearbyEntities((ServerLevel) level, entity, radius.get() + 0.5, startPos,
-                    new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 100, false, false, false));
-            AbilityUtil.addPotionEffectToNearbyEntities((ServerLevel) level, entity, radius.get() + 0.5, startPos,
-                    new MobEffectInstance(MobEffects.JUMP, 60, 128, false, false, false));
-
-            // Then give slowness after stun wears off
-            AbilityUtil.addPotionEffectToNearbyEntities((ServerLevel) level, entity, radius.get() + 0.5, startPos,
-                    new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20 * 5, 2, false, false, false));
-
-            // Apply freeze ticks visual
             for (LivingEntity nearby : AbilityUtil.getNearbyEntities(entity, (ServerLevel) level, startPos, radius.get() + 0.5)) {
+                int targetSeq = de.jakob.lotm.util.BeyonderData.getSequence(nearby);
+                if (targetSeq <= casterSeq - 2) continue;
+
+                nearby.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 100, false, false, false));
+                nearby.addEffect(new MobEffectInstance(MobEffects.JUMP, 60, 128, false, false, false));
+                nearby.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20 * 5, 2, false, false, false));
                 nearby.setTicksFrozen(nearby.getTicksRequiredToFreeze() + 40);
             }
 
@@ -314,6 +312,10 @@ public class SpiritChannelingAbility extends SelectableAbility {
             AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.spirit_channeling.no_target").withColor(0xFF4444));
             return;
         }
+
+        int casterSeq = de.jakob.lotm.util.BeyonderData.getSequence(entity);
+        int targetSeq = de.jakob.lotm.util.BeyonderData.getSequence(target);
+        if (targetSeq <= casterSeq - 2) return;
 
         // Encased in stone: cannot move, takes suffocation-style damage
         AtomicBoolean done = new AtomicBoolean(false);
@@ -406,6 +408,7 @@ public class SpiritChannelingAbility extends SelectableAbility {
             return;
         }
 
+        int casterSeq = de.jakob.lotm.util.BeyonderData.getSequence(entity);
         Vec3 center = target.position().add(0, 0.25, 0);
 
         ServerScheduler.scheduleForDuration(0, 2, 200, () -> {
@@ -419,8 +422,11 @@ public class SpiritChannelingAbility extends SelectableAbility {
                 ParticleUtil.spawnParticles((ServerLevel) level, EARTH_DUST_SMALL, particlePos, 2, 0.1);
             }
 
-            // Heavy slowness on entities in the area (radius 5)
+            // Heavy slowness on entities in the area (radius 5), skip 2+ sequences stronger
             for (LivingEntity nearby : AbilityUtil.getNearbyEntities(entity, (ServerLevel) level, center, 5.0)) {
+                int targetSeq = de.jakob.lotm.util.BeyonderData.getSequence(nearby);
+                if (targetSeq <= casterSeq - 2) continue;
+
                 nearby.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 4, false, false, false));
                 // Sink into ground
                 if (level.getBlockState(net.minecraft.core.BlockPos.containing(

@@ -2,6 +2,8 @@ package de.jakob.lotm.abilities.death;
 
 import de.jakob.lotm.abilities.common.DivinationAbility;
 import de.jakob.lotm.abilities.core.SelectableAbility;
+import de.jakob.lotm.abilities.core.interaction.InteractionHandler;
+import de.jakob.lotm.util.data.Location;
 import de.jakob.lotm.network.PacketHandler;
 import de.jakob.lotm.network.packets.toClient.OpenPlayerDivinationScreenPacket;
 import de.jakob.lotm.network.packets.toClient.OpenStructureDivinationScreenPacket;
@@ -32,11 +34,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class SpiritCommunicationAbility extends SelectableAbility {
 
     public SpiritCommunicationAbility(String id) {
-        super(id, 10);
-        canBeCopied = false;
-        canBeUsedByNPC = false;
-        cannotBeStolen = true;
-        canBeReplicated = false;
+        super(id, 200);
     }
 
     @Override
@@ -61,6 +59,9 @@ public class SpiritCommunicationAbility extends SelectableAbility {
 
     @Override
     protected void castSelectedAbility(Level level, LivingEntity entity, int abilityIndex) {
+        if (!level.isClientSide && level instanceof net.minecraft.server.level.ServerLevel serverLevel
+                && InteractionHandler.isInteractionPossibleStrictlyHigher(new Location(entity.position(), serverLevel), "purification", BeyonderData.getSequence(entity), -1)) return;
+
         switch (abilityIndex) {
             case 0 -> dangerPremonition(level, entity);
             case 1 -> structureDivination(level, entity);
@@ -134,6 +135,10 @@ public class SpiritCommunicationAbility extends SelectableAbility {
 
         LivingEntity target = AbilityUtil.getTargetEntity(entity, 20, 1.5f);
         if (target == null) return;
+
+        int casterSeq = BeyonderData.getSequence(entity);
+        int targetSeq = BeyonderData.getSequence(target);
+        if (targetSeq <= casterSeq - 2) return;
 
         // Stun: MOVEMENT_SLOWDOWN 100 for 3 seconds (60 ticks)
         target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 100, false, true, true));

@@ -1,7 +1,9 @@
 package de.jakob.lotm.abilities.death;
 
 import de.jakob.lotm.abilities.core.SelectableAbility;
+import de.jakob.lotm.abilities.core.interaction.InteractionHandler;
 import de.jakob.lotm.entity.custom.BeyonderNPCEntity;
+import de.jakob.lotm.util.data.Location;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.subordinates.SubordinateUtils;
 import net.minecraft.ChatFormatting;
@@ -55,6 +57,10 @@ public class InternalUnderworldAbility extends SelectableAbility {
         super(id, 1);
         canBeCopied = false;
         canBeReplicated = false;
+        cannotBeStolen = true;
+        canBeUsedByNPC = false;
+        canBeUsedInArtifact = false;
+        canBeShared = false;
     }
 
     @Override
@@ -79,6 +85,8 @@ public class InternalUnderworldAbility extends SelectableAbility {
     protected void castSelectedAbility(Level level, LivingEntity entity, int selectedAbility) {
         if (!(level instanceof ServerLevel serverLevel)) return;
         if (!(entity instanceof ServerPlayer player)) return;
+
+        if (InteractionHandler.isInteractionPossibleStrictlyHigher(new Location(entity.position(), serverLevel), "purification", BeyonderData.getSequence(entity), -1)) return;
 
         switch (selectedAbility) {
             case 0 -> summonSoul(serverLevel, player);
