@@ -1,6 +1,7 @@
 package de.jakob.lotm.util.beyonderMap;
 
 import de.jakob.lotm.LOTMCraft;
+import de.jakob.lotm.abilities.visionary.prophecy.Prophecy;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.gamerule.ModGameRules;
 import de.jakob.lotm.util.BeyonderData;
@@ -50,6 +51,19 @@ public class BeyonderMap extends SavedData {
         }
     }
 
+    public void addProphecy(LivingEntity entity, Prophecy prophecy){
+        if(!(entity instanceof ServerPlayer)) return;
+
+        if(!contains(entity)) put(entity);
+
+        var list = map.get(entity.getUUID()).prophecies();
+        list.add(prophecy);
+
+        map.put(entity.getUUID(), StoredData.builder.copyFrom(map.get(entity.getUUID())).prophecies(list).build());
+
+        setDirty();
+    }
+
     public void onPlayerUUIDChange(ServerPlayer player){
         String name = player.getGameProfile().getName();
 
@@ -69,7 +83,6 @@ public class BeyonderMap extends SavedData {
 
         String pathway = BeyonderData.getPathway(entity);
         int sequence = BeyonderData.getSequence(entity);
-
 
         // Don't store if this is default/empty data
         if(pathway.equals("none") || sequence == LOTMCraft.NON_BEYONDER_SEQ) {
@@ -147,94 +160,6 @@ public class BeyonderMap extends SavedData {
         }
 
         put(entity.getUUID(), StoredData.builder.copyFrom(map.get(entity.getUUID())).honorificName(HonorificName.EMPTY).build());
-    }
-
-    public void addKnownHonorificName(LivingEntity entity, HonorificName name){
-        if(!(entity instanceof ServerPlayer)) return;
-
-        if(!contains(entity)) put(entity);
-
-        var data = map.get(entity.getUUID());
-        data.knownNames().add(name);
-
-        map.put(entity.getUUID(), data);
-
-        setDirty();
-    }
-
-    public void removeKnownHonorificName(LivingEntity entity, HonorificName name){
-        if(!(entity instanceof ServerPlayer)) return;
-
-        if(!contains(entity)) put(entity);
-
-        var data = map.get(entity.getUUID());
-        data.knownNames().remove(name);
-
-        map.put(entity.getUUID(), data);
-
-        setDirty();
-    }
-
-    public void addMessage(LivingEntity entity, MessageType msg){
-        if(!(entity instanceof ServerPlayer)) return;
-
-        if(!contains(entity)) put(entity);
-
-        var data = map.get(entity.getUUID());
-        data.addMsg(msg);
-
-        map.put(entity.getUUID(), data);
-
-        setDirty();
-    }
-
-    public void removeMessage(LivingEntity entity, MessageType msg){
-        if(!(entity instanceof ServerPlayer)) return;
-
-        if(!contains(entity)) put(entity);
-
-        var data = map.get(entity.getUUID());
-        data.removeMsg(msg);
-
-        map.put(entity.getUUID(), data);
-
-        setDirty();
-    }
-
-    public @Nullable MessageType popMessage(LivingEntity entity){
-        if(!(entity instanceof ServerPlayer)) return null;
-
-        if(!contains(entity)) put(entity);
-
-        var data = map.get(entity.getUUID());
-        if(data.msgs().isEmpty()) return null;
-
-        var buff = data.msgs().getFirst();
-        data.removeMsg(buff);
-
-        map.put(entity.getUUID(), data);
-
-        setDirty();
-
-        return buff;
-    }
-
-    public void markRead(LivingEntity entity, int index){
-        if(!(entity instanceof ServerPlayer)) return;
-
-        if(!contains(entity)) put(entity);
-
-        var data = map.get(entity.getUUID());
-        if(data.msgs().isEmpty()) return;
-
-        var msg = data.msgs().remove(index);
-        msg.setRead(true);
-
-        data.msgs().add(msg);
-
-        map.put(entity.getUUID(), data);
-
-        setDirty();
     }
 
     public void remove(LivingEntity entity){

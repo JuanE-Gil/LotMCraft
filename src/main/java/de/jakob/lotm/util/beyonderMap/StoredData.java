@@ -1,6 +1,7 @@
 package de.jakob.lotm.util.beyonderMap;
 
 import de.jakob.lotm.LOTMCraft;
+import de.jakob.lotm.abilities.visionary.prophecy.Prophecy;
 import net.minecraft.nbt.*;
 import net.minecraft.world.phys.Vec3;
 
@@ -8,20 +9,21 @@ import java.util.Arrays;
 import java.util.LinkedList;
 
 public record StoredData(String pathway, Integer sequence, HonorificName honorificName,
-                         String trueName, LinkedList<MessageType> msgs, LinkedList<HonorificName> knownNames,
+                         String trueName,
                          Boolean modified, Vec3 lastPosition,
                          int[] charStack,           // single int — replaces CharacteristicStack
-                         String[] pathwayHistory  // fixed size 10 — replaces PathwayHistory record
+                         String[] pathwayHistory,  // fixed size 10 — replaces PathwayHistory record
+                         LinkedList<Prophecy> prophecies
 ) {
 
     public static final String NBT_PATHWAY         = "beyonder_map_pathway";
     public static final String NBT_SEQUENCE        = "beyonder_map_sequence";
     public static final String NBT_HONORIFIC_NAME  = "beyonder_map_honorific_name";
     public static final String NBT_TRUE_NAME       = "beyonder_map_true_name";
-    public static final String NBT_MESSAGES        = "beyonder_map_messages";
     public static final String NBT_MODIFIED        = "beyonder_map_modified";
     public static final String NBT_CHAR_STACK      = "beyonder_map_char_stack";
     public static final String NBT_PATHWAY_HISTORY = "beyonder_map_pathway_history";
+    public static final String NBT_PROPHECIES      = "beyonder_map_prophecies";
 
     public static final String NBT_LAST_POSITION_X = "beyonder_map_last_position_x";
     public static final String NBT_LAST_POSITION_Y = "beyonder_map_last_position_y";
@@ -58,9 +60,6 @@ public record StoredData(String pathway, Integer sequence, HonorificName honorif
         }
         return any ? sb.toString() : " None";
     }
-
-    public void addMsg(MessageType msg)    { msgs.add(msg); }
-    public void removeMsg(MessageType msg) { msgs.removeIf(str -> str.equals(msg)); }
 
     // ── regression ───────────────────────────────────────────────────────────
 
@@ -115,10 +114,6 @@ public record StoredData(String pathway, Integer sequence, HonorificName honorif
         tag.put(NBT_HONORIFIC_NAME, honorificName.toNBT());
         tag.putString(NBT_TRUE_NAME, trueName);
 
-        ListTag msgList = new ListTag();
-        for (MessageType msg : msgs) msgList.add(msg.toNBT());
-        tag.put(NBT_MESSAGES, msgList);
-
         tag.putBoolean(NBT_MODIFIED, modified);
 
         tag.putDouble(NBT_LAST_POSITION_X, lastPosition.x());
@@ -131,6 +126,12 @@ public record StoredData(String pathway, Integer sequence, HonorificName honorif
             charStackList.add(IntTag.valueOf(stackCount));
         }
         tag.put(NBT_CHAR_STACK, charStackList);
+
+        ListTag propheciesList = new ListTag();
+        for (var prophecy : prophecies) {
+            propheciesList.add(prophecy.toNBT());
+        }
+        tag.put(NBT_PROPHECIES, propheciesList);
 
         // String[10] pathway history stored as a ListTag of StringTags
         ListTag histList = new ListTag();
@@ -147,11 +148,6 @@ public record StoredData(String pathway, Integer sequence, HonorificName honorif
         int    seq      = tag.getInt(NBT_SEQUENCE);
         HonorificName name = HonorificName.fromNBT(tag.getCompound(NBT_HONORIFIC_NAME));
         String trueName = tag.getString(NBT_TRUE_NAME);
-
-        LinkedList<MessageType> msgs = new LinkedList<>();
-        for (var t : tag.getList(NBT_MESSAGES, Tag.TAG_COMPOUND)) {
-            if (t instanceof CompoundTag c) msgs.add(MessageType.fromNBT(c));
-        }
 
         boolean modified = tag.getBoolean(NBT_MODIFIED);
 
@@ -177,7 +173,15 @@ public record StoredData(String pathway, Integer sequence, HonorificName honorif
             }
         }
 
-        return new StoredData(path, seq, name, trueName, msgs,
-                new LinkedList<>(), modified, lastPos, charStack, history);
+        LinkedList<Prophecy> prophecies = new LinkedList<>();
+        if (tag.contains(NBT_PROPHECIES, Tag.TAG_LIST)) {
+            ListTag propList = tag.getList(NBT_PROPHECIES, Tag.TAG_COMPOUND);
+            for (var obj : propList) {
+                if (obj instanceof CompoundTag compound)
+                    prophecies.add(Prophecy.fromNBT(compound));
+            }
+        }
+
+        return new StoredData(path, seq, name, trueName, modified, lastPos, charStack, history, prophecies);
     }
 }

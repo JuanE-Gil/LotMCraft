@@ -647,10 +647,6 @@ public class PacketHandler {
                 InventoryOpenedPacket.STREAM_CODEC,
                 InventoryOpenedPacket::handle);
 
-        registrar.playToServer(
-                OpenMessagePacket.TYPE,
-                OpenMessagePacket.STREAM_CODEC,
-                OpenMessagePacket::handle);
 
         registrar.playToServer(
                 OpenHonorificNamesMenuPacket.TYPE,
@@ -666,11 +662,6 @@ public class PacketHandler {
                 SetHonorificNamePacket.TYPE,
                 SetHonorificNamePacket.STREAM_CODEC,
                 SetHonorificNamePacket::handle);
-
-        registrar.playToServer(
-                OpenMessagesMenuPacket.TYPE,
-                OpenMessagesMenuPacket.STREAM_CODEC,
-                OpenMessagesMenuPacket::handle);
 
         registrar.playToServer(
                 PlayerDivinationSelectedPacket.TYPE,
