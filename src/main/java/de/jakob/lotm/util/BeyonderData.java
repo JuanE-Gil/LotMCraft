@@ -555,7 +555,17 @@ public class BeyonderData {
         return history;
     }
 
+    public static boolean hasSwitchedPathway(LivingEntity entity) {
+        String currentPathway = getPathway(entity);
+        String[] history = getPathwayHistory(entity);
+        for (String entry : history) {
+            if (entry != null && !entry.isEmpty() && !entry.equals(currentPathway)) return true;
+        }
+        return false;
+    }
+
     public static void digest(Player player, float amount, boolean countTowardsCooldown) {
+        if (hasSwitchedPathway(player)) amount /= 2f;
         float current = getDigestionProgress(player);
         float newAmount = Math.min(1.0f, current + amount);
         if(newAmount == 1.0f && current < 1.0f) {
