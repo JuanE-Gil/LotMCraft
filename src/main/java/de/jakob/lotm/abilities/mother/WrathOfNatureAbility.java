@@ -57,7 +57,7 @@ public class WrathOfNatureAbility extends SelectableAbility {
         if(!(level instanceof ServerLevel serverLevel)) {
             return;
         }
-
+        double multiplier = (int) Math.max(multiplier(entity)/2,1);
         if(!serverLevel.getEntitiesOfClass(BigMoonEntity.class, entity.getBoundingBox().inflate(100)).isEmpty()) {
             AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.wrath_of_nature.moon_on_cooldown").withColor(0xF44336));
             return;
@@ -67,7 +67,7 @@ public class WrathOfNatureAbility extends SelectableAbility {
 
         NeoForge.EVENT_BUS.post(new AbilityUsedEvent(serverLevel, targetPos, entity, this, new String[]{"explosion"}, 25, 20 * 30));
 
-        BigMoonEntity moonEntity = new BigMoonEntity(serverLevel, (float) DamageLookup.lookupDps(2, .7f, 2, 20) * (float) BeyonderData.getMultiplierForSequence(2), BeyonderData.isGriefingEnabled(entity), entity.getUUID(), 20 * 30);
+        BigMoonEntity moonEntity = new BigMoonEntity(serverLevel, (float) DamageLookup.lookupDps(2, .7f, 2, 20) * (float) multiplier, BeyonderData.isGriefingEnabled(entity), entity.getUUID(), 20 * 30);
         moonEntity.setPos(targetPos.x, targetPos.y + 25, targetPos.z);
         serverLevel.addFreshEntity(moonEntity);
     }
@@ -78,7 +78,7 @@ public class WrathOfNatureAbility extends SelectableAbility {
 
             NeoForge.EVENT_BUS.post(new AbilityUsedEvent((ServerLevel) level, center, entity, this, new String[]{"burning"}, 55, 20 * 15));
 
-            double multiplier = multiplier(entity);
+            double multiplier = (int) Math.max(multiplier(entity)/3,1);
             // Affect entities
             ServerScheduler.scheduleForDuration(0, 4, 20 * 15, () -> {
                 AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 55, DamageLookup.lookupDps(1, .5, 4, 20) * multiplier, center, true, false, 20 * 8);
@@ -137,7 +137,7 @@ public class WrathOfNatureAbility extends SelectableAbility {
 
     private void lightning(Level level, LivingEntity entity) {
         Vec3 targetLocFinak = AbilityUtil.getTargetLocation(entity, 70, 2, true);
-        double multiplier = multiplier(entity);
+        double multiplier = (int) Math.max(multiplier(entity)/2,1);
 
         if(!level.isClientSide)
             NeoForge.EVENT_BUS.post(new AbilityUsedEvent((ServerLevel) level, targetLocFinak, entity, this, new String[]{"explosion"}, 50, 20 * 4));

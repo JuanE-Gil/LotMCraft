@@ -75,6 +75,7 @@ public record OpenIntrospectMenuPacket(int sequence, String pathway) implements 
                 PacketHandler.sendToPlayer(player, new SyncIntrospectMenuPacket(sequence, pathway, sanity));
                 PacketHandler.sendToPlayer(player, new SyncAbilityWheelDataPacket(abilityWheelComponent.getAbilities()));
                 PacketHandler.sendToPlayer(player, new SyncKillCountPacket(player.getData(ModAttachments.KILL_COUNT_COMPONENT).getKillCount()));
+                PacketHandler.syncUniquenessToPlayer(player);
             }
         });
     }

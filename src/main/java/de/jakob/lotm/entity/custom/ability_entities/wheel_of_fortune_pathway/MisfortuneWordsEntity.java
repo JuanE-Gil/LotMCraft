@@ -71,8 +71,8 @@ public class MisfortuneWordsEntity extends Entity {
                 LuckComponent luckComponent = e.getData(ModAttachments.LUCK_COMPONENT.get());
                 int luck = luckComponent.getLuck();
 
-                if(luck < 1000 && luck > -1440) {
-                    luckComponent.setLuck(1440);
+                if(luck < 1000 && luck > -3000) {
+                    luckComponent.setLuck(-3000);
                 }
 
                 if(!affectedEntities.contains(e.getUUID())) {

@@ -13,6 +13,7 @@ import de.jakob.lotm.util.scheduling.ServerScheduler;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -27,9 +28,13 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.UUID;
 
 public class MundaneConceptualTheft extends SelectableAbility {
+    public static final HashMap<UUID, Integer> stolenDistanceMap = new HashMap<>(80);
+
     public MundaneConceptualTheft(String id) {
         super(id, 1);
     }
@@ -115,10 +120,19 @@ public class MundaneConceptualTheft extends SelectableAbility {
 
         if(entitySeq > 6) return;
 
-        Vec3 targetLoc = AbilityUtil.getTargetBlock(entity, (1 << (9 - entitySeq)), true).getCenter().add(0, 1, 0);
+        Vec3 targetLoc = AbilityUtil.getTargetBlock(entity, TheftHandler.getDistancePerSeq(entitySeq), true).getCenter().add(0, 1, 0);
         level.playSound(null, targetLoc.x, targetLoc.y, targetLoc.z, SoundEvents.ENDERMAN_TELEPORT, SoundSource.BLOCKS, .5f, 1);
 
         var validatedPos = TeleportationUtil.clampToBorder(level, targetLoc);
+
+        if(entity instanceof ServerPlayer player) {
+            int distance = (int) player.position().distanceTo(validatedPos);
+            int storedDistance = 0;
+            if(stolenDistanceMap.containsKey(player.getUUID()))
+                storedDistance = stolenDistanceMap.get(player.getUUID());
+
+            stolenDistanceMap.put(player.getUUID(), storedDistance + distance);
+        }
 
         entity.teleportTo(validatedPos.x, validatedPos.y, validatedPos.z);
     }

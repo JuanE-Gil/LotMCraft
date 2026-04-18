@@ -45,13 +45,22 @@ public class DivinationAbility extends SelectableAbility {
 
     @Override
     public Map<String, Integer> getRequirements() {
-        return new HashMap<>(Map.of(
-                "fool", 9,
-                "door", 7,
-                "hermit", 9,
-                "demoness", 7,
-                "wheel_of_fortune", 8
+        Map<String, Integer> reqs = new HashMap(
+                Map.of(
+                        "fool", 9,
+                        "door", 7,
+                        "hermit", 9,
+                        "demoness", 7,
+                        "wheel_of_fortune", 8,
+                        "abyss", 4,
+                        "darkness", 4
         ));
+
+        for(String pathway : BeyonderData.pathways) {
+            if (!reqs.containsKey(pathway))
+                reqs.put(pathway, 4);
+        }
+        return reqs;
     }
 
     @Override

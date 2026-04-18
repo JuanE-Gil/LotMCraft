@@ -45,7 +45,7 @@ public class SurgeOfDarknessAbility extends Ability {
     public void onAbilityUse(Level level, LivingEntity entity) {
         if (!level.isClientSide) {
             Vec3 center = entity.position();
-
+            float multiplier = multiplier(entity);
             // Affect entities
             ServerScheduler.scheduleForDuration(0, 4, 20 * 15, () -> {
                 // Surge of Darkness is weakened by light_strong
@@ -59,13 +59,13 @@ public class SurgeOfDarknessAbility extends Ability {
 
                 AbilityUtil.getNearbyEntities(entity, (ServerLevel) level, center, 45).forEach(e -> {
                     SanityComponent sanityComponent = e.getData(ModAttachments.SANITY_COMPONENT);
-                    sanityComponent.decreaseSanityWithSequenceDifference(.0025f, e, AbilityUtil.getSeqWithArt(entity, this), BeyonderData.getSequence(e));
+                    sanityComponent.decreaseSanityWithSequenceDifference(0.0525f*(int) Math.max(multiplier/2,1), e, AbilityUtil.getSeqWithArt(entity, this), BeyonderData.getSequence(e));
                 });
 
-                AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 45, DamageLookup.lookupDps(3, .5, 4, 20) * multiplier(entity) * damageMult, center, true, false, ModDamageTypes.source(level, ModDamageTypes.DARKNESS_GENERIC, entity));
+                AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 45*(int) Math.max(multiplier/2,1), DamageLookup.lookupDps(3, .5, 4, 20) * multiplier(entity) * damageMult, center, true, false, ModDamageTypes.source(level, ModDamageTypes.DARKNESS_GENERIC, entity));
             }, () -> clearArtifactScaling(entity), (ServerLevel) level);
 
-            List<BlockPos> affectedBlocks = AbilityUtil.getBlocksInEllipsoid((ServerLevel) level, center, 45, 18, true, false, true)
+            List<BlockPos> affectedBlocks = AbilityUtil.getBlocksInEllipsoid((ServerLevel) level, center, 45*(int) Math.max(multiplier/2,1), 18*(int) Math.max(multiplier/2,1), true, false, true)
                     .stream().filter(blockPos -> !level.getBlockState(blockPos).isAir()).toList();
 
             // Sort blocks by distance from center for spreading effect

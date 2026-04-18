@@ -1,12 +1,15 @@
 package de.jakob.lotm.abilities.darkness;
 
+import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.abilities.core.interaction.InteractionHandler;
 import de.jakob.lotm.attachments.DisabledAbilitiesComponent;
 import de.jakob.lotm.attachments.ModAttachments;
+import de.jakob.lotm.effect.ModEffects;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.data.Location;
 import de.jakob.lotm.util.helper.AbilityUtil;
+import de.jakob.lotm.util.helper.DamageLookup;
 import de.jakob.lotm.util.helper.ParticleUtil;
 import de.jakob.lotm.util.helper.VectorUtil;
 import de.jakob.lotm.util.scheduling.ServerScheduler;
@@ -53,10 +56,10 @@ public class HairEntanglementAbility extends Ability {
     public void onAbilityUse(Level level, LivingEntity entity) {
         if(level.isClientSide)
             return;
-
+        float multiplier = multiplier(entity);
         for(int i = 0; i < 8; i++) {
             Vec3 startPos = VectorUtil.getRelativePosition(entity.getEyePosition().add(entity.getLookAngle().normalize()), entity.getLookAngle().normalize(),  random.nextDouble(-4.5, 3f), random.nextDouble(-7, 7), random.nextDouble(-2, 5));
-            Vec3 targetLoc = AbilityUtil.getTargetLocation(entity, 35, 1.4f);
+            Vec3 targetLoc = AbilityUtil.getTargetLocation(entity, 35*(int) Math.max(multiplier/20,1), 1.4f);
 
             final float step = .15f;
             final float length = (float) startPos.distanceTo(targetLoc);
@@ -76,29 +79,33 @@ public class HairEntanglementAbility extends Ability {
             }
             return;
         }
-
+        int targetEntitySeq = BeyonderData.getSequence(targetEntity);
+        float multiplier_target = multiplier(targetEntity);
         pacifiedEntities.add(targetEntity.getUUID());
-        int duration = 20 * 60;
+        int duration = 20 * 30*(int) Math.max(multiplier/4,1)/  (int) Math.max(multiplier_target/4,1);
 
         int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
         int targetSeq = BeyonderData.getSequence(targetEntity);
-
+        Location eLoc = new Location(targetEntity.position(), (ServerLevel) level);
         if(AbilityUtil.isTargetSignificantlyStronger(entitySeq, targetSeq)) {
-            duration = 35;
+            duration = 35*(int) Math.max(multiplier/4,1);
         }
         if(AbilityUtil.isTargetSignificantlyWeaker(entitySeq, targetSeq)) {
-            duration = 20 * 90;
+            duration = 20 * 60*(int) Math.max(multiplier/4,1);
         }
 
-        if(!BeyonderData.isBeyonder(targetEntity) || BeyonderData.getSequence(targetEntity) - 1 > entitySeq) {
+        if(targetEntitySeq > entitySeq-1 ) {
             if(targetEntity instanceof Mob) {
                 ((Mob) targetEntity).setNoAi(true);
                 ServerScheduler.scheduleDelayed(duration, () -> ((Mob) targetEntity).setNoAi(false));
             }
             if(BeyonderData.isBeyonder(targetEntity)) {
-                DisabledAbilitiesComponent component = targetEntity.getData(ModAttachments.DISABLED_ABILITIES_COMPONENT);
-                component.disableAbilityUsageForTime("hair_entanglement", duration, targetEntity);
+                boolean hasMorale = InteractionHandler.isInteractionPossibleForEntity(eLoc, "morale_boost", targetSeq, targetEntity);
+                int durationmorale = hasMorale? 20*2:20*4;
+                double reduction = -4*(int)Math.max(multiplier(entity)/4,1);
+                BeyonderData.addModifierWithTimeLimit(targetEntity, "hair_entanglement_multiplier_reduction", reduction, durationmorale);
             }
+            LOTMCraft.LOGGER.info("multiplier{}", (multiplier(entity)));
         }
 
         Location loc = new Location(targetEntity.position(), targetEntity.level());
@@ -136,11 +143,16 @@ public class HairEntanglementAbility extends Ability {
                 return;
             }
 
-            targetEntity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, 10, false, false, false));
-            targetEntity.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 20, 10, false, false, false));
-            targetEntity.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 20, 10, false, false, false));
+            targetEntity.addEffect(new MobEffectInstance(ModEffects.ASLEEP, 40, 10, false, false, false));
+            targetEntity.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 40, 10, false, false, false));
+            targetEntity.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 40, 10, false, false, false));
+            targetEntity.setDeltaMovement(Vec3.ZERO);
+            targetEntity.setOnGround(true);
+            var pos = targetEntity.position();
             targetEntity.setDeltaMovement(new Vec3(0, 0, 0));
             targetEntity.hurtMarked = true;
+
+            targetEntity.teleportTo(pos.x, pos.y, pos.z);
         }, null, (ServerLevel) level, () -> AbilityUtil.getTimeInArea(entity, new Location(entity.position(), level)));
         taskIdRef.set(taskId);
 

@@ -133,7 +133,7 @@ public class AdvancementUtil {
         if (!beyonderMap.check(pathway, sequence)) return;
 
         boolean fullyDigested = getDigestionProgress(player) == 1.0f;
-        int charStackCount = BeyonderData.getCharStack(player);
+        int charStackCount = BeyonderData.getCurrentCharStack(player);
         double failureChance = (fullyDigested && sequence == 1 && charStackCount < 2) ? 0.0 : 1.0;
 
         int duration = calculateAdvancementDuration(sequence);
@@ -148,7 +148,7 @@ public class AdvancementUtil {
         ServerScheduler.scheduleDelayed(event.getDuration(), () -> {
             if (!activeAdvancements.containsKey(entity.getUUID())) return;
             activeAdvancements.remove(entity.getUUID());
-            addCharStack(player);
+            addCharStack(player, sequence);
             sendThirdPersonPacket(entity);
         });
     }

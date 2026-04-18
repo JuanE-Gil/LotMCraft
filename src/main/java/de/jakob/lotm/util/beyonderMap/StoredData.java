@@ -1,10 +1,7 @@
 package de.jakob.lotm.util.beyonderMap;
 
 import de.jakob.lotm.LOTMCraft;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.*;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.Arrays;
@@ -13,7 +10,7 @@ import java.util.LinkedList;
 public record StoredData(String pathway, Integer sequence, HonorificName honorificName,
                          String trueName, LinkedList<MessageType> msgs, LinkedList<HonorificName> knownNames,
                          Boolean modified, Vec3 lastPosition,
-                         int charStack,           // single int — replaces CharacteristicStack
+                         int[] charStack,           // single int — replaces CharacteristicStack
                          String[] pathwayHistory  // fixed size 10 — replaces PathwayHistory record
 ) {
 
@@ -70,9 +67,9 @@ public record StoredData(String pathway, Integer sequence, HonorificName honorif
     public StoredData regressSeq() { return regressSeq(true); }
 
     public StoredData regressSeq(boolean respectCharStack) {
-        if (respectCharStack && charStack > 0) {
+        if (respectCharStack && charStack[sequence] > 0) {
             // Still has stacks — lose one, stay at current sequence
-            return builder.copyFrom(this).charStack(charStack - 1).build();
+            return builder.copyFrom(this).charStack(charStack[sequence] - 1, sequence).build();
         }
 
         int newSequence = sequence + 1;
@@ -103,7 +100,7 @@ public record StoredData(String pathway, Integer sequence, HonorificName honorif
                 .pathway(regressedPathway)
                 .sequence(newSequence)
                 .honorificName((newSequence >= 3) ? HonorificName.EMPTY : honorificName)
-                .charStack(0)   // reset stack on regression
+                .charStack(0, sequence)   // reset stack on regression
                 .pathwayHistory(becomesNonBeyonder ? new String[10] : clearedHistory)
                 .build();
     }
@@ -129,7 +126,11 @@ public record StoredData(String pathway, Integer sequence, HonorificName honorif
         tag.putDouble(NBT_LAST_POSITION_Z, lastPosition.z());
 
         // single int stack
-        tag.putInt(NBT_CHAR_STACK, charStack);
+        ListTag charStackList = new ListTag();
+        for (int stackCount : charStack) {
+            charStackList.add(IntTag.valueOf(stackCount));
+        }
+        tag.put(NBT_CHAR_STACK, charStackList);
 
         // String[10] pathway history stored as a ListTag of StringTags
         ListTag histList = new ListTag();
@@ -159,7 +160,13 @@ public record StoredData(String pathway, Integer sequence, HonorificName honorif
                 tag.getDouble(NBT_LAST_POSITION_Y),
                 tag.getDouble(NBT_LAST_POSITION_Z));
 
-        int charStack = tag.getInt(NBT_CHAR_STACK);
+        int[] charStack = new int[10];
+        if (tag.contains(NBT_CHAR_STACK, Tag.TAG_LIST)) {
+            ListTag charStackList = tag.getList(NBT_CHAR_STACK, Tag.TAG_INT);
+            for (int i = 0; i < Math.min(charStackList.size(), 10); i++) {
+                charStack[i] = charStackList.getInt(i);
+            }
+        }
 
         String[] history = new String[10];
         if (tag.contains(NBT_PATHWAY_HISTORY, Tag.TAG_LIST)) {

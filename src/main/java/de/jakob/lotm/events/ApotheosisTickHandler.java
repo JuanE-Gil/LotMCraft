@@ -4,6 +4,8 @@ import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.attachments.ApotheosisComponent;
 import de.jakob.lotm.attachments.DisabledAbilitiesComponent;
 import de.jakob.lotm.attachments.ModAttachments;
+import de.jakob.lotm.attachments.UniquenessComponent;
+import de.jakob.lotm.network.PacketHandler;
 import de.jakob.lotm.network.packets.handlers.ClientHandler;
 import de.jakob.lotm.rendering.effectRendering.EffectManager;
 import de.jakob.lotm.rendering.effectRendering.MovableEffectManager;
@@ -14,6 +16,7 @@ import de.jakob.lotm.util.helper.ParticleUtil;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -60,6 +63,16 @@ public class ApotheosisTickHandler {
         component.setApotheosisTicksLeftAndSync(component.getApotheosisTicksLeft() - 1, (ServerLevel) player.level(), player);
         if(component.getApotheosisTicksLeft() == 0) {
             BeyonderData.setBeyonder(player, BeyonderData.getPathway(player), 0);
+
+            UniquenessComponent comp = player.getData(ModAttachments.UNIQUENESS_COMPONENT);
+
+            // Reset uniqueness component
+            comp.setHasUniqueness(false);
+            comp.setUniquenessPathway("");
+            comp.resetKillCount();
+
+            // Sync to client
+            PacketHandler.syncUniquenessToPlayer((ServerPlayer) player);
         }
     }
 
