@@ -46,7 +46,7 @@ public class BeyonderMap extends SavedData {
             CompoundTag mapTag = nbt.getCompound(NBT_BEYONDER_MAP);
 
             for (String key : mapTag.getAllKeys()) {
-                map.put(UUID.fromString(key), StoredData.fromNBT(mapTag.getCompound(key)));
+                map.put(UUID.fromString(key), StoredData.fromNBT(mapTag.getCompound(key), provider));
             }
         }
     }
@@ -58,6 +58,22 @@ public class BeyonderMap extends SavedData {
 
         var list = map.get(entity.getUUID()).prophecies();
         list.add(prophecy);
+
+        map.put(entity.getUUID(), StoredData.builder.copyFrom(map.get(entity.getUUID())).prophecies(list).build());
+
+        setDirty();
+    }
+
+    public void removeProphecy(LivingEntity entity, Prophecy prophecy){
+        if(!(entity instanceof ServerPlayer)) return;
+
+        if(!contains(entity)) {
+            put(entity);
+            return;
+        }
+
+        var list = map.get(entity.getUUID()).prophecies();
+        list.remove(prophecy);
 
         map.put(entity.getUUID(), StoredData.builder.copyFrom(map.get(entity.getUUID())).prophecies(list).build());
 
@@ -282,7 +298,7 @@ public class BeyonderMap extends SavedData {
 
         CompoundTag tag = new CompoundTag();
         for(var obj : map.entrySet()){
-            tag.put(obj.getKey().toString(), obj.getValue().toNBT());
+            tag.put(obj.getKey().toString(), obj.getValue().toNBT(provider));
         }
 
         compoundTag.put(NBT_BEYONDER_MAP, tag);

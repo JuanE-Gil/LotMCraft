@@ -2,11 +2,14 @@ package de.jakob.lotm.abilities.visionary.prophecy.triggers;
 
 import de.jakob.lotm.abilities.visionary.prophecy.actions.ActionBase;
 import de.jakob.lotm.abilities.visionary.prophecy.actions.ActionsEnum;
+import de.jakob.lotm.abilities.visionary.prophecy.actions.context.ActionContextBase;
 import de.jakob.lotm.abilities.visionary.prophecy.actions.context.ActionContextEnum;
+import de.jakob.lotm.abilities.visionary.prophecy.actions.implementations.DropItemAction;
 import de.jakob.lotm.abilities.visionary.prophecy.triggers.context.TriggerContextBase;
 import de.jakob.lotm.abilities.visionary.prophecy.triggers.context.TriggerContextEnum;
 import de.jakob.lotm.abilities.visionary.prophecy.triggers.context.implementations.TriggerPositionContext;
 import de.jakob.lotm.abilities.visionary.prophecy.triggers.implementations.PositionTrigger;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
@@ -30,25 +33,35 @@ public abstract class  TriggerBase {
 
     public abstract TriggerEnum getType();
 
-    public CompoundTag toNBT(){
+    public CompoundTag toNBT(HolderLookup.Provider provider){
         CompoundTag tag = new CompoundTag();
 
-        tag.put(ACTION, action.toNBT());
-        tag.put(CONTEXT, context.toNBT());
+        tag.put(ACTION, action.toNBT(provider));
+        tag.put(CONTEXT, context.toNBT(provider));
         action.getType().toNBT(tag, ACTION_TYPE);
         context.getType().toNBT(tag, CONTEXT_TYPE);
 
         return tag;
     }
 
-    public abstract void checkTrigger(Level level, LivingEntity entity);
+    public UUID getTarget(){
+        return context.getTargetId();
+    }
 
-    public static TriggerBase load(TriggerEnum type, CompoundTag tag) {
+    public abstract boolean checkTrigger(Level level, LivingEntity entity);
+
+    public static TriggerBase load(TriggerEnum type, CompoundTag tag, HolderLookup.Provider provider) {
         ActionsEnum actionType = ActionsEnum.fromNBT(tag, ACTION_TYPE);
         TriggerContextEnum contextType = TriggerContextEnum.fromNBT(tag, CONTEXT_TYPE);
 
         return switch (type) {
-            case POSITION -> PositionTrigger.load(tag, actionType, contextType);
+            case POSITION -> PositionTrigger.load(tag, actionType, contextType, provider);
+        };
+    }
+
+    public static TriggerBase create(TriggerEnum type, ActionBase action, TriggerContextBase context){
+        return switch (type){
+            case POSITION -> new PositionTrigger(action, context);
         };
     }
 }

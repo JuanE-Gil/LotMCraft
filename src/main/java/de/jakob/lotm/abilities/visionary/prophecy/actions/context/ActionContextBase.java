@@ -1,6 +1,10 @@
 package de.jakob.lotm.abilities.visionary.prophecy.actions.context;
 
+import de.jakob.lotm.abilities.visionary.prophecy.TokenStream;
+import de.jakob.lotm.abilities.visionary.prophecy.actions.context.implementations.ActionItemsContext;
 import de.jakob.lotm.abilities.visionary.prophecy.actions.context.implementations.ActionPositionContext;
+import de.jakob.lotm.abilities.visionary.prophecy.actions.implementations.DropItemAction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.LivingEntity;
 
@@ -21,17 +25,27 @@ public abstract class ActionContextBase {
 
     public abstract ActionContextEnum getType();
 
-    public CompoundTag toNBT(){
+    public abstract ActionContextBase fillFromStream(TokenStream stream);
+
+    public CompoundTag toNBT(HolderLookup.Provider provider){
         CompoundTag tag = new CompoundTag();
         tag.putUUID(TARGET_ID, targetId);
         return tag;
     }
 
-    public static ActionContextBase load(ActionContextEnum type, CompoundTag tag) {
+    public static ActionContextBase load(ActionContextEnum type, CompoundTag tag, HolderLookup.Provider provider) {
         UUID id = tag.getUUID(TARGET_ID);
 
         return switch (type) {
-            case POSITION -> ActionPositionContext.load(tag, id);
+            case POSITION -> ActionPositionContext.load(tag, id, provider);
+            case ITEM -> ActionItemsContext.load(tag, id, provider);
+        };
+    }
+
+    public static ActionContextBase create(ActionContextEnum type, UUID id){
+        return switch (type){
+            case ITEM -> new ActionItemsContext(id);
+            case POSITION -> new ActionPositionContext(id);
         };
     }
 }

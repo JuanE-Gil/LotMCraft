@@ -6,6 +6,7 @@ import de.jakob.lotm.abilities.core.ToggleAbility;
 import de.jakob.lotm.abilities.visionary.prophecy.Prophecy;
 import de.jakob.lotm.abilities.visionary.prophecy.actions.context.implementations.ActionPositionContext;
 import de.jakob.lotm.abilities.visionary.prophecy.actions.implementations.DropItemAction;
+import de.jakob.lotm.abilities.visionary.prophecy.triggers.TriggerHelper;
 import de.jakob.lotm.abilities.visionary.prophecy.triggers.context.TriggerContextEnum;
 import de.jakob.lotm.abilities.visionary.prophecy.triggers.context.implementations.TriggerPositionContext;
 import de.jakob.lotm.abilities.visionary.prophecy.triggers.implementations.PositionTrigger;
@@ -85,35 +86,13 @@ public class StoryWritingAbility extends ToggleAbility {
 
         String rawMessage = event.getRawText();
 
-        var split = rawMessage.split(" ");
-
-        LOTMCraft.LOGGER.info("raw: {}, split: {}", rawMessage, split);
-
-        if(split[0].equals("if")){
-            String nick = split[1];
-            UUID targetID = BeyonderData.beyonderMap.getKeyByName(nick);
-
-            if(targetID == null)
-                return;
-
-            if(split[2].equals("is") && split[3].equals("on")){
-                int x = Integer.parseInt(split[4]);
-                int y = Integer.parseInt(split[5]);
-                int z = Integer.parseInt(split[6]);
-
-                TriggerPositionContext context = new TriggerPositionContext(targetID, new Vec3(x, y, z));
-
-                if(split[7].equals("then")){
-                    if(split[8].equals("drop")){
-                        DropItemAction action = new DropItemAction(new ActionPositionContext(targetID, new Vec3(x, y, z)));
-
-                        PositionTrigger trigger = new PositionTrigger(action, context);
-
-                        BeyonderData.beyonderMap.addProphecy(player, new Prophecy(targetID, trigger, trigger.getType()));
-                    }
-                }
-            }
+        var trigger = TriggerHelper.deduceWithContext(rawMessage);
+        if(trigger == null){
+            return;
         }
+
+        BeyonderData.beyonderMap.addProphecy(player, new Prophecy(trigger.getTarget(), trigger, trigger.getType()));
+        event.setCanceled(true);
     }
 
     @SubscribeEvent
@@ -123,7 +102,7 @@ public class StoryWritingAbility extends ToggleAbility {
         var op = BeyonderData.beyonderMap.get(player);
         if(op.isPresent()){
             for(var obj : op.get().prophecies()){
-                obj.trigger().checkTrigger(player.level(), player);
+                obj.checkAndPerform(player.level(), player);
             }
         }
     }

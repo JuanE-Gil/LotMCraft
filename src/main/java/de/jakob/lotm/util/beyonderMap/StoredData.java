@@ -2,6 +2,7 @@ package de.jakob.lotm.util.beyonderMap;
 
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.visionary.prophecy.Prophecy;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.*;
 import net.minecraft.world.phys.Vec3;
 
@@ -106,7 +107,7 @@ public record StoredData(String pathway, Integer sequence, HonorificName honorif
 
     // ── NBT ──────────────────────────────────────────────────────────────────
 
-    public CompoundTag toNBT() {
+    public CompoundTag toNBT(HolderLookup.Provider provider) {
         CompoundTag tag = new CompoundTag();
 
         tag.putString(NBT_PATHWAY, pathway);
@@ -129,7 +130,7 @@ public record StoredData(String pathway, Integer sequence, HonorificName honorif
 
         ListTag propheciesList = new ListTag();
         for (var prophecy : prophecies) {
-            propheciesList.add(prophecy.toNBT());
+            propheciesList.add(prophecy.toNBT(provider));
         }
         tag.put(NBT_PROPHECIES, propheciesList);
 
@@ -143,7 +144,7 @@ public record StoredData(String pathway, Integer sequence, HonorificName honorif
         return tag;
     }
 
-    public static StoredData fromNBT(CompoundTag tag) {
+    public static StoredData fromNBT(CompoundTag tag, HolderLookup.Provider provider) {
         String path     = tag.getString(NBT_PATHWAY);
         int    seq      = tag.getInt(NBT_SEQUENCE);
         HonorificName name = HonorificName.fromNBT(tag.getCompound(NBT_HONORIFIC_NAME));
@@ -178,7 +179,7 @@ public record StoredData(String pathway, Integer sequence, HonorificName honorif
             ListTag propList = tag.getList(NBT_PROPHECIES, Tag.TAG_COMPOUND);
             for (var obj : propList) {
                 if (obj instanceof CompoundTag compound)
-                    prophecies.add(Prophecy.fromNBT(compound));
+                    prophecies.add(Prophecy.fromNBT(compound, provider));
             }
         }
 

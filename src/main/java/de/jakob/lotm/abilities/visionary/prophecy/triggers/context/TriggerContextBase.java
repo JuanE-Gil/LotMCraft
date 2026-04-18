@@ -1,9 +1,12 @@
 package de.jakob.lotm.abilities.visionary.prophecy.triggers.context;
 
+import de.jakob.lotm.abilities.visionary.prophecy.TokenStream;
 import de.jakob.lotm.abilities.visionary.prophecy.actions.context.ActionContextBase;
 import de.jakob.lotm.abilities.visionary.prophecy.actions.context.ActionContextEnum;
+import de.jakob.lotm.abilities.visionary.prophecy.actions.context.implementations.ActionItemsContext;
 import de.jakob.lotm.abilities.visionary.prophecy.actions.context.implementations.ActionPositionContext;
 import de.jakob.lotm.abilities.visionary.prophecy.triggers.context.implementations.TriggerPositionContext;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.LivingEntity;
 
@@ -24,17 +27,29 @@ public abstract class TriggerContextBase {
 
     public abstract TriggerContextEnum getType();
 
-    public CompoundTag toNBT(){
+    public abstract TriggerContextBase fillFromStream(TokenStream stream);
+
+    public UUID getTargetId(){
+        return targetId;
+    }
+
+    public CompoundTag toNBT(HolderLookup.Provider provider){
         CompoundTag tag = new CompoundTag();
         tag.putUUID(TARGET_ID, targetId);
         return tag;
     }
 
-    public static TriggerContextBase load(TriggerContextEnum type, CompoundTag tag) {
+    public static TriggerContextBase load(TriggerContextEnum type, CompoundTag tag, HolderLookup.Provider provider) {
         UUID id = tag.getUUID(TARGET_ID);
 
         return switch (type) {
-            case POSITION -> TriggerPositionContext.load(tag, id);
+            case POSITION -> TriggerPositionContext.load(tag, id, provider);
+        };
+    }
+
+    public static TriggerContextBase create(TriggerContextEnum type, UUID id){
+        return switch (type){
+            case POSITION -> new TriggerPositionContext(id);
         };
     }
 }

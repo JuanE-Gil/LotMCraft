@@ -2,8 +2,11 @@ package de.jakob.lotm.abilities.visionary.prophecy;
 
 import de.jakob.lotm.abilities.visionary.prophecy.triggers.TriggerBase;
 import de.jakob.lotm.abilities.visionary.prophecy.triggers.TriggerEnum;
+import de.jakob.lotm.util.BeyonderData;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import org.checkerframework.checker.units.qual.C;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
 
 import java.util.UUID;
 
@@ -12,19 +15,25 @@ public record Prophecy(UUID targetID, TriggerBase trigger, TriggerEnum triggerTy
     public static final String TRIGGER = "trigger";
     public static final String TRIGGER_TYPE = "trigger_type";
 
-    public CompoundTag toNBT(){
+    public void checkAndPerform(Level level, LivingEntity entity){
+        if(trigger.checkTrigger(level, entity)){
+            BeyonderData.beyonderMap.removeProphecy(entity, this);
+        }
+    }
+
+    public CompoundTag toNBT(HolderLookup.Provider provider){
         CompoundTag tag = new CompoundTag();
 
         tag.putUUID(TARGET_ID, targetID);
-        tag.put(TRIGGER, trigger.toNBT());
+        tag.put(TRIGGER, trigger.toNBT(provider));
         trigger.getType().toNBT(tag, TRIGGER_TYPE);
 
         return tag;
     }
 
-    public static Prophecy fromNBT(CompoundTag tag){
+    public static Prophecy fromNBT(CompoundTag tag, HolderLookup.Provider provider){
         UUID id = tag.getUUID(TARGET_ID);
-        var trigger = TriggerBase.load(TriggerEnum.fromNBT(tag, TRIGGER_TYPE), tag);
+        var trigger = TriggerBase.load(TriggerEnum.fromNBT(tag, TRIGGER_TYPE), tag, provider);
 
         return new Prophecy(id, trigger, trigger.getType());
     }
