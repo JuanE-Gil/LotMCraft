@@ -119,6 +119,7 @@ public class AbilityHandler {
 
 
         // FOOL PATHWAY
+        abilities.add(new FoolingAbility("fooling_ability"));
         abilities.add(new AirBulletAbility("air_bullet_ability"));
         abilities.add(new FlameControllingAbility("flame_controlling_ability"));
         abilities.add(new PaperFigurineSubstituteAbility("paper_figurine_substitute_ability"));
