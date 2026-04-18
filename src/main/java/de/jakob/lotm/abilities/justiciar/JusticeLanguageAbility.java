@@ -111,7 +111,7 @@ public class JusticeLanguageAbility extends SelectableAbility {
         FLOG_ACTIVE.add(caster.getUUID());
 
         if (caster instanceof ServerPlayer sp) {
-            sp.sendSystemMessage(Component.literal("Flog is prepared — next attack will deal bleeding")
+            sp.sendSystemMessage(Component.literal("Flog is prepared your next attack will deal bleeding")
                     .withStyle(ChatFormatting.GOLD));
         }
 
