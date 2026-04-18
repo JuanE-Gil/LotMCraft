@@ -180,12 +180,9 @@ public class BeyonderData {
         component.setSequence(sequence);
         if(clearCharStack) component.clearCharacteristicStack();
         else component.setCharacteristicStack(0, sequence);
-        component.setSpirituality(getMaxSpirituality(sequence));
+        component.setSpirituality(getMaxSpirituality(pathway, sequence));
         component.setDigestionProgress(0);
         component.setGriefingEnabled(griefing);
-
-        if(entity instanceof Player player)
-            SpiritualityProgressTracker.setProgress(player.getUUID(), 1.0f);
 
         BeyonderDataTickHandler.invalidateCache(entity);
 
@@ -208,7 +205,7 @@ public class BeyonderData {
                 PacketHandler.syncBeyonderDataToPlayer(serverPlayer);
                 beyonderMap.put(serverPlayer);
 
-                SyncBeyonderDataPacket packet = new SyncBeyonderDataPacket(pathway, sequence, 0.0f, false, 0.0f, component.getPathwayHistory(), 0);
+                SyncBeyonderDataPacket packet = new SyncBeyonderDataPacket(pathway, sequence, component.getSpirituality(), false, 0.0f, component.getPathwayHistory(), 0);
                 PacketHandler.sendToAllPlayers(packet);
 
                 // Disband team if the leader is no longer eligible (Red Priest seq <= 3).
@@ -297,23 +294,20 @@ public class BeyonderData {
         if(entity.level().isClientSide) {
             return ClientBeyonderCache.getSpirituality(entity.getUUID());
         }
-        if(!(entity instanceof Player player))
-            return getMaxSpirituality(getSequence(entity));
+        if(!(entity instanceof Player))
+            return getMaxSpirituality(getPathway(entity), getSequence(entity));
         float spirituality = entity.getData(ModAttachments.BEYONDER_COMPONENT).getSpirituality();
-        float maxSpirituality = getMaxSpirituality(getSequence(entity));
+        float maxSpirituality = getMaxSpirituality(getPathway(entity), getSequence(entity));
 
         if(maxSpirituality <= 0) {
             return 0.0f;
         }
 
-        float progress = spirituality / maxSpirituality;
-        SpiritualityProgressTracker.setProgress(player.getUUID(), progress);
-
         return Math.max(0, spirituality);
     }
 
     public static void reduceSpirituality(LivingEntity entity, float amount) {
-        if(!(entity instanceof Player player))
+        if(!(entity instanceof Player))
             return;
         float current = getSpirituality(entity);
         entity.getData(ModAttachments.BEYONDER_COMPONENT).setSpirituality(Math.max(0, current - amount));
@@ -323,9 +317,6 @@ public class BeyonderData {
         if(maxSpirituality <= 0) {
             return;
         }
-
-        float progress = (current - amount) / maxSpirituality;
-        SpiritualityProgressTracker.setProgress(player.getUUID(), progress);
 
         // Sync to client if this is server-side
         if (!entity.level().isClientSide() && entity instanceof ServerPlayer serverPlayer) {
@@ -394,7 +385,7 @@ public class BeyonderData {
             return;
 
         float current = getSpirituality(player);
-        float newAmount = Math.min(getMaxSpirituality(getSequence(player)), current + amount);
+        float newAmount = Math.min(getMaxSpirituality(getPathway(player), getSequence(player)), current + amount);
         player.getData(ModAttachments.BEYONDER_COMPONENT).setSpirituality(newAmount);
 
         float maxSpirituality = getMaxSpirituality(getPathway(player), getSequence(player));
@@ -403,17 +394,10 @@ public class BeyonderData {
             return;
         }
 
-        float progress = newAmount / maxSpirituality;
-        SpiritualityProgressTracker.setProgress(player.getUUID(), progress);
-
         // Sync to client if this is server-side
         if (!player.level().isClientSide() && player instanceof ServerPlayer serverPlayer) {
             PacketHandler.syncBeyonderDataToPlayer(serverPlayer);
         }
-    }
-
-    public static float getMaxSpirituality(int sequence) {
-        return sequence > -1 && sequence != LOTMCraft.NON_BEYONDER_SEQ && sequence < spiritualityLookup.length ? spiritualityLookup[sequence] : 0.0f;
     }
 
     public static void setDigestionProgress(LivingEntity entity, float progress) {
@@ -441,7 +425,7 @@ public class BeyonderData {
                     -> getMaxSpirituality(seq, 1);
             case "red_priest" -> getMaxSpirituality(seq, 0.8f);
             case "paragon" -> getMaxSpirituality(seq, 0.6f);
-            default -> 0f;
+            default -> 1f;
         };
     }
 
@@ -458,7 +442,6 @@ public class BeyonderData {
         component.setDigestionProgress(0);
 
         if(entity instanceof Player player) {
-            SpiritualityProgressTracker.removeProgress(player);
             beyonderMap.remove(player);
         }
 
