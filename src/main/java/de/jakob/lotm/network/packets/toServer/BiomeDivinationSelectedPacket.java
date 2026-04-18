@@ -51,7 +51,8 @@ public record BiomeDivinationSelectedPacket(String biomeId) implements CustomPac
             case 3             -> 15000;
             case 2             -> ((int) (worldBorder * 0.001) > 15000) ? (int) (worldBorder * 0.001) : 30000;
             case 1             -> ((int) (worldBorder * 0.01) > 30000) ? (int) (worldBorder * 0.01) : 60000;
-            default            -> 0;
+            case 0             -> ((int) (worldBorder * 0.1) > 60000) ? (int) (worldBorder * 0.01) : 600000;
+            default            -> 100;
         };
 
         CompletableFuture.runAsync(() -> {

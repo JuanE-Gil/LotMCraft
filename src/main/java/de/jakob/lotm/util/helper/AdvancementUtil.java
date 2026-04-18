@@ -2,6 +2,7 @@ package de.jakob.lotm.util.helper;
 
 import com.zigythebird.playeranimcore.math.Vec3f;
 import de.jakob.lotm.LOTMCraft;
+import de.jakob.lotm.attachments.*;
 import de.jakob.lotm.attachments.ControllingDataComponent;
 import de.jakob.lotm.attachments.FogComponent;
 import de.jakob.lotm.attachments.ModAttachments;
@@ -64,6 +65,10 @@ public class AdvancementUtil {
 
         if (entity instanceof Player player && player.isCreative()) {
             setBeyonder(entity, pathway, sequence);
+            if (pathway.equals("fool") && sequence <= 2){
+                MiracleOfResurrectionComponent data = entity.getData(ModAttachments.MIRACLE_OF_RESURRECTION);
+                data.setResurrectionAttempts(4);
+            }
             return;
         }
 
@@ -144,6 +149,10 @@ public class AdvancementUtil {
             if (onSuccessPreSet != null) onSuccessPreSet.run();
             setBeyonder(entity, finalPathway, finalSequence);
             sendThirdPersonPacket(entity);
+            if (finalPathway.equals("fool") && finalSequence <= 2){
+                MiracleOfResurrectionComponent data = entity.getData(ModAttachments.MIRACLE_OF_RESURRECTION);
+                data.setResurrectionAttempts(4);
+            }
         });
     }
 

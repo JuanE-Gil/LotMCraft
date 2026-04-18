@@ -262,6 +262,14 @@ public class ModAttachments {
                             .build()
             );
 
+    public static final Supplier<AttachmentType<MiracleOfResurrectionComponent>> MIRACLE_OF_RESURRECTION =
+            ATTACHMENT_TYPES.register("miracle_of_resurrection", () ->
+                    AttachmentType.builder(MiracleOfResurrectionComponent::new)
+                            .serialize(MiracleOfResurrectionComponent.SERIALIZER)
+                            .copyOnDeath()
+                            .build()
+            );
+
     public static void register(IEventBus eventBus) {
         ATTACHMENT_TYPES.register(eventBus);
     }
