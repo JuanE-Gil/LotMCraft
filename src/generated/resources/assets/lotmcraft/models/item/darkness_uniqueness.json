@@ -63,19 +63,19 @@
       "translation": [
         0,
         8,
-        4
+        2
       ]
     },
     "thirdperson_righthand": {
       "rotation": [
         0,
-        -270,
+        -90,
         0
       ],
       "translation": [
         0,
         8,
-        1
+        2
       ]
     }
   },

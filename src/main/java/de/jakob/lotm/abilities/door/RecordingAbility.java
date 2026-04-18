@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class RecordingAbility extends SelectableAbility {
     public RecordingAbility(String id) {
-        super(id, 2f);
+        super(id, 3f);
         this.cannotBeStolen = true;
         canBeCopied = false;
         canBeReplicated = false;

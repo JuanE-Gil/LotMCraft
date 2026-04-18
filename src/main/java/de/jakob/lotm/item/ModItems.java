@@ -82,8 +82,7 @@ public class ModItems {
             () -> new BlockItem(ModBlocks.MYSTICAL_RING.get(), new Item.Properties())
     );
 
-
-    // Uniquenesses
+    // Uniquenesses (registered, so I can use them in the renderer for the Uniqueness Entity)
     public static final DeferredItem<Item> RED_PRIEST_UNIQUENESS = ITEMS.register("red_priest_uniqueness",
             () -> new UniquenessItem(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC), "red_priest")
     );
@@ -111,7 +110,6 @@ public class ModItems {
     public static final DeferredItem<Item> WHEEL_OF_FORTUNE_UNIQUENESS = ITEMS.register("wheel_of_fortune_uniqueness",
             () -> new UniquenessItem(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC), "wheel_of_fortune")
     );
-
 
     public static PotionIngredient selectRandomIngredient(List<PotionIngredient> ingredients, Random random) {
         if (ingredients == null || ingredients.isEmpty()) {

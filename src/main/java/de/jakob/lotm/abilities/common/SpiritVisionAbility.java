@@ -43,14 +43,22 @@ public class SpiritVisionAbility extends ToggleAbility {
 
     @Override
     public Map<String, Integer> getRequirements() {
-        return new HashMap<>(Map.of(
-                "fool", 9,
-                "door", 7,
-                "hermit", 9,
-                "demoness", 7,
-                "mother", 8,
-                "wheel_of_fortune", 9
-        ));
+        Map<String, Integer> reqs = new HashMap(
+                Map.of(
+                        "fool", 9,
+                        "door", 7,
+                        "hermit", 9,
+                        "demoness", 7,
+                        "mother", 8,
+                        "wheel_of_fortune", 9,
+                        "darkness", 7
+                ));
+
+        for(String pathway : BeyonderData.pathways) {
+            if (!reqs.containsKey(pathway))
+                reqs.put(pathway, 5);
+        }
+        return reqs;
     }
 
     @Override

@@ -1,4 +1,4 @@
-// 1.21.1	2026-04-14T12:41:22.2927979	Item Models: lotmcraft
+// 1.21.1	2026-04-18T11:46:19.2924378	Item Models: lotmcraft
 f73b18465ecc4c7209da8e28508db3e3a9a348de assets/lotmcraft/models/item/abyss_demonic_fish_blood.json
 ff1f40acc559743c518a78f4d8d99df759005e37 assets/lotmcraft/models/item/agate_peacock_egg.json
 65b6c713526448dd94ab6c94da2487f1a4242daf assets/lotmcraft/models/item/ancient_logbook.json
@@ -75,7 +75,7 @@ e5dd6827988440365a8eed0425f3632ad574b408 assets/lotmcraft/models/item/crystalliz
 f7bb4edb69604598c7f5c12b9db8800f8da51079 assets/lotmcraft/models/item/crystal_ball.json
 5bed7e7bf1e2d8c330cc662b8b6e44fbc1f434bf assets/lotmcraft/models/item/crystal_sunflower.json
 9d6fcabb71ffc21a6b446966e86f297c90eb62a8 assets/lotmcraft/models/item/darkness_revival_ability.json
-4914eca55e08eb0b5f732f9829582340ed7a3bea assets/lotmcraft/models/item/darkness_uniqueness.json
+a347136cef693d121568c0937b0a4afd7a5a705a assets/lotmcraft/models/item/darkness_uniqueness.json
 8bc61abe6fa1571e9e6b0bad8ccdb7d1374181ad assets/lotmcraft/models/item/deep_sleeper_skull.json
 a5851523c9f6e597c054270b142883e9a1c91a94 assets/lotmcraft/models/item/demon.json
 a5851523c9f6e597c054270b142883e9a1c91a94 assets/lotmcraft/models/item/demoness_of_affliction.json
@@ -113,7 +113,7 @@ bc6df0e8880ecf18ac66253837cb2a23bffe81df assets/lotmcraft/models/item/discerner_
 a5851523c9f6e597c054270b142883e9a1c91a94 assets/lotmcraft/models/item/doctor.json
 53bf2e073a7be41175c64d01457176d8d7687e67 assets/lotmcraft/models/item/doctor_characteristic.json
 2a92cf27f930c351873b3177c3f94b8726fa16a9 assets/lotmcraft/models/item/doctor_potion.json
-06c082348eaeaf313033e33d40c92a2f4431ccc2 assets/lotmcraft/models/item/door_uniqueness.json
+39d162b012a7c05011a6a0256f5063b9c86792a2 assets/lotmcraft/models/item/door_uniqueness.json
 2f4f1eb56203f8705824beffda3c7d29fcc3d3cf assets/lotmcraft/models/item/dragon_eyed_condor_eyeball.json
 a5851523c9f6e597c054270b142883e9a1c91a94 assets/lotmcraft/models/item/dreamwalker.json
 f74d4a7abdd11f6c6c7aefcefe7b2af27a0e0566 assets/lotmcraft/models/item/dreamwalker_characteristic.json
@@ -130,7 +130,7 @@ a5851523c9f6e597c054270b142883e9a1c91a94 assets/lotmcraft/models/item/druid.json
 53bf2e073a7be41175c64d01457176d8d7687e67 assets/lotmcraft/models/item/druid_characteristic.json
 335e37f89352a7664fa95cd93caf312ca8150d52 assets/lotmcraft/models/item/druid_potion.json
 b48664f6747f681c6ac1705854a61ddfaa968b02 assets/lotmcraft/models/item/empty_bottle.json
-c03cde0a13839fe65f8904c16a2ad26b57f9b847 assets/lotmcraft/models/item/error_uniqueness.json
+bd7b5c36de36e3331d67a1dde6d2eb90f6b06706 assets/lotmcraft/models/item/error_uniqueness.json
 7043e58c3277a488cd3abbd02f63231812bc9971 assets/lotmcraft/models/item/excavated_area.json
 a5851523c9f6e597c054270b142883e9a1c91a94 assets/lotmcraft/models/item/faceless.json
 f5f82cd2d74d4f90d50a94802a8b7ebfbb039142 assets/lotmcraft/models/item/faceless_characteristic.json
@@ -146,7 +146,7 @@ a5851523c9f6e597c054270b142883e9a1c91a94 assets/lotmcraft/models/item/folk_of_ra
 bc079732c1039919d5215e7ecd82da8fe0d557ac assets/lotmcraft/models/item/folk_of_rage_characteristic.json
 cd31a2ff8f5df6704d22cd1d35aca7522db5610c assets/lotmcraft/models/item/folk_of_rage_potion.json
 cd79fc5e60945eafffb8c09e443d2b816d106570 assets/lotmcraft/models/item/fool_card.json
-d24d9a1c9a51174b8741200d7f2f3fd07630ff03 assets/lotmcraft/models/item/fool_uniqueness.json
+467213d7da5d5a7e00fc984e6c40f3e9154bd239 assets/lotmcraft/models/item/fool_uniqueness.json
 6148244133fc734e585cc01fe7d729baa49b80bc assets/lotmcraft/models/item/goat_horned_blackfish_blood.json
 ba973641ef5550da2597873305b02717284e8659 assets/lotmcraft/models/item/golden_blood.json
 f07135695348ab8e47f302514f4c413be2656cb1 assets/lotmcraft/models/item/golden_phoenix_eyes.json

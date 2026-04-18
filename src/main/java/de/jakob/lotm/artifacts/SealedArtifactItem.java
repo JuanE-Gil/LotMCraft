@@ -1,5 +1,7 @@
 package de.jakob.lotm.artifacts;
 
+import de.jakob.lotm.LOTMCraft;
+import de.jakob.lotm.abilities.abyss.LanguageOfFoulnessAbility;
 import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.abilities.core.SelectableAbility;
 import de.jakob.lotm.attachments.ModAttachments;

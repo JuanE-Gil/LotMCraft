@@ -42,6 +42,9 @@ public class ModEffects {
 
     public static final Holder<MobEffect> SPIRIT_CALLED = MOB_EFFECTS.register("spirit_called",
             () -> new SpiritCalledEffect(MobEffectCategory.HARMFUL, 0x7ECFCF));
+  
+    public static final Holder<MobEffect> FOOLING = MOB_EFFECTS.register("fooling",
+            () -> new FoolingEffect(MobEffectCategory.HARMFUL, 0xE040FB)); 
 
     public static void register(IEventBus eventBus) {
         MOB_EFFECTS.register(eventBus);

@@ -1,9 +1,7 @@
 package de.jakob.lotm.attachments;
 
 import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.*;
 import net.minecraft.world.level.levelgen.structure.structures.OceanMonumentPieces;
 import net.neoforged.neoforge.common.util.INBTSerializable;
 import org.jetbrains.annotations.UnknownNullability;
@@ -15,7 +13,7 @@ public class BeyonderComponent implements INBTSerializable<CompoundTag> {
     private int sequence = 10;
     private String pathway = "none";
     private String[] pathwayHistory = new String[10];
-    private int characteristicStack = 0;
+    private int[] characteristicStack = new int[10];
     private float spirituality = 0;
     private float digestionProgress = 0;
     private boolean isGriefingEnabled = true;
@@ -37,6 +35,9 @@ public class BeyonderComponent implements INBTSerializable<CompoundTag> {
     }
 
     public String[] getPathwayHistory() {
+        for(int i = 0; i < sequence; i++) {
+            pathwayHistory[i] = null;
+        }
         return pathwayHistory;
     }
 
@@ -44,12 +45,16 @@ public class BeyonderComponent implements INBTSerializable<CompoundTag> {
         this.pathwayHistory = pathwayHistory;
     }
 
-    public int getCharacteristicStack() {
+    public int[] getCharacteristicStack() {
         return characteristicStack;
     }
 
-    public void setCharacteristicStack(int characteristicStack) {
-        this.characteristicStack = characteristicStack;
+    public void setCharacteristicStack(int characteristicStack, int sequence) {
+        this.characteristicStack[sequence] = characteristicStack;
+    }
+
+    public void clearCharacteristicStack() {
+        this.characteristicStack = new int[10];
     }
 
     public float getSpirituality() {
@@ -91,7 +96,13 @@ public class BeyonderComponent implements INBTSerializable<CompoundTag> {
             pathwayHistoryTag.add(StringTag.valueOf(pathwayEntry));
         }
         tag.put("pathwayHistory", pathwayHistoryTag);
-        tag.putInt("characteristicStack", characteristicStack);
+
+        ListTag characteristicStackTag = new ListTag();
+        for (int stackCount : characteristicStack) {
+            characteristicStackTag.add(IntTag.valueOf(stackCount));
+        }
+        tag.put("characteristicStack", characteristicStackTag);
+
         tag.putFloat("spirituality", spirituality);
         tag.putFloat("digestionProgress", digestionProgress);
         tag.putBoolean("isGriefingEnabled", isGriefingEnabled);
@@ -114,7 +125,12 @@ public class BeyonderComponent implements INBTSerializable<CompoundTag> {
             }
         }
 
-        this.characteristicStack = compoundTag.getInt("characteristicStack");
+        ListTag characteristicStackTag = compoundTag.getList("characteristicStack", 3); // 3 is the ID for IntTag
+        this.characteristicStack = new int[10];
+        for (int i = 0; i < characteristicStackTag.size(); i++) {
+            this.characteristicStack[i] = characteristicStackTag.getInt(i);
+        }
+
         this.spirituality = compoundTag.getFloat("spirituality");
         this.digestionProgress = compoundTag.getFloat("digestionProgress");
         this.isGriefingEnabled = compoundTag.getBoolean("isGriefingEnabled");

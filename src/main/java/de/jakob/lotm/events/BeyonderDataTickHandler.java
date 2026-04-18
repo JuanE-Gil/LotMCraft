@@ -9,6 +9,10 @@ import de.jakob.lotm.abilities.core.ToggleAbility;
 import de.jakob.lotm.abilities.door.passives.VoidImmunityAbility;
 import de.jakob.lotm.abilities.wheel_of_fortune.passives.PassiveLuckAbility;
 import de.jakob.lotm.attachments.*;
+import de.jakob.lotm.effect.FoolingEffect;
+import de.jakob.lotm.effect.ModEffects;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import de.jakob.lotm.item.ModItems;
 import de.jakob.lotm.item.custom.MarionetteControllerItem;
 import de.jakob.lotm.item.custom.SubordinateControllerItem;
@@ -87,6 +91,30 @@ public class BeyonderDataTickHandler {
             disabledFlightComponent.setCooldownTicks(disabledFlightComponent.getCooldownTicks() - 1);
         }
 
+        // Tick Fooling attachment — re-apply a 2-tick cosmetic effect each tick so the HUD always shows it
+        if (!livingEntity.level().isClientSide) {
+            FoolingComponent foolingComponent = livingEntity.getData(ModAttachments.FOOLING_COMPONENT);
+            if (foolingComponent.isFooled()) {
+                // Trigger a new stun on the interval, based on remaining ticks
+                if (foolingComponent.getTicksRemaining() % FoolingEffect.STUN_INTERVAL_TICKS == 0) {
+                    foolingComponent.applyStun(FoolingEffect.STUN_DURATION_TICKS);
+                }
+
+                // Zero velocity and suppress client movement every tick while stunned
+                if (foolingComponent.isStunned()) {
+                    livingEntity.setDeltaMovement(0, 0, 0);
+                    livingEntity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 2, 254, false, false, false));
+                    livingEntity.hurtMarked = true;
+                }
+
+                foolingComponent.tick();
+                // Re-apply with the actual remaining ticks so the HUD countdown is accurate
+                livingEntity.addEffect(new MobEffectInstance(ModEffects.FOOLING, foolingComponent.getTicksRemaining(), 0, false, true, true));
+            } else if (livingEntity.hasEffect(ModEffects.FOOLING)) {
+                livingEntity.removeEffect(ModEffects.FOOLING);
+            }
+        }
+
         if(BeyonderData.isBeyonder(livingEntity)) {
             if(entity.tickCount % 200 == 0) {
                 invalidateCache(livingEntity);
@@ -126,7 +154,7 @@ public class BeyonderDataTickHandler {
 
         if (BeyonderData.isBeyonder(player)) {
             // Regenerate Spirituality
-            float amount = BeyonderData.getMaxSpirituality(BeyonderData.getSequence(player)) * 0.0006f;
+            float amount = BeyonderData.getMaxSpirituality(BeyonderData.getPathway(player), BeyonderData.getSequence(player)) * 0.0006f;
             BeyonderData.incrementSpirituality(player, amount);
 
             // Slowly digest potion

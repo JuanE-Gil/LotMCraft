@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ReplicatingAbility extends SelectableAbility {
     public ReplicatingAbility(String id) {
-        super(id, 2f);
+        super(id, 3f);
 
         canBeCopied = false;
         canBeUsedByNPC = false;

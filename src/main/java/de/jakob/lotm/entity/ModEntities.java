@@ -404,6 +404,16 @@ public class ModEntities {
                     .updateInterval(1)
                     .build("damage_tracker"));
 
+    public static final DeferredHolder<EntityType<?>, EntityType<de.jakob.lotm.entity.custom.uniqueness.UniquenessEntity>> UNIQUENESS_ENTITY =
+            ENTITY_TYPES.register("uniqueness_entity", () ->
+                    EntityType.Builder.<de.jakob.lotm.entity.custom.uniqueness.UniquenessEntity>of(
+                                    de.jakob.lotm.entity.custom.uniqueness.UniquenessEntity::new, MobCategory.MISC)
+                            .sized(0.5F, 0.5F)
+                            .clientTrackingRange(64)
+                            .updateInterval(1)
+                            .build("uniqueness_entity")
+            );
+
     public static void register(IEventBus eventBus) {
         ENTITY_TYPES.register(eventBus);
     }

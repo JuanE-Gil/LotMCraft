@@ -53,7 +53,7 @@ public class BlessingAbility extends Ability {
             return;
         }
 
-        LivingEntity target = AbilityUtil.getTargetEntity(entity, 20, 2, false, true);
+        LivingEntity target = AbilityUtil.getTargetEntity(entity, (int) (15 * (multiplier(entity) * multiplier(entity))), 2, false, true);
 
         if(target == null) {
             if(entity instanceof ServerPlayer player) {
@@ -72,7 +72,7 @@ public class BlessingAbility extends Ability {
 
         int amplifier = Math.min(Math.round(multiplier(entity) * 750), 3000);
         LuckComponent component = target.getData(ModAttachments.LUCK_COMPONENT.get());
-        component.addLuckWithMax(amplifier, (int) (multiplier(entity) * 900));
+        component.addLuckWithMax(amplifier, 3000);
         NeoForge.EVENT_BUS.post(new AbilityUsedEvent(serverLevel, target.position(), entity, target, this, interactionFlags, interactionRadius, interactionCacheTicks));
     }
 }

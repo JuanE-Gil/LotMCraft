@@ -27,7 +27,7 @@ import java.util.Map;
 
 public class PureWhiteLightAbility extends Ability {
     public PureWhiteLightAbility(String id) {
-        super(id, 4, "purification", "purification_holy", "light_source", "light_strong", "light_weak");
+        super(id, 6, "purification", "light_source", "light_strong", "light_weak", "purification_holy");
         interactionRadius = 25;
         postsUsedAbilityEventManually = true;
         canBeCopied = false;
@@ -69,7 +69,7 @@ public class PureWhiteLightAbility extends Ability {
 
         AtomicDouble radius = new AtomicDouble(2);
 
-        double multiplier = multiplier(entity);
+        double multiplier = multiplier(entity)/5;
         Vec3 finalTargetLoc = targetLoc;
         ServerScheduler.scheduleForDuration(29, 2, 110, () -> {
             if(BeyonderData.isGriefingEnabled(entity)) {

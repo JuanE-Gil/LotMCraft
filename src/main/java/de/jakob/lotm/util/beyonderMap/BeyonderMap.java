@@ -1,6 +1,7 @@
 package de.jakob.lotm.util.beyonderMap;
 
 import de.jakob.lotm.LOTMCraft;
+import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.gamerule.ModGameRules;
 import de.jakob.lotm.util.BeyonderData;
 import net.minecraft.core.HolderLookup;
@@ -70,6 +71,7 @@ public class BeyonderMap extends SavedData {
         String pathway = BeyonderData.getPathway(entity);
         int sequence = BeyonderData.getSequence(entity);
 
+
         // Don't store if this is default/empty data
         if(pathway.equals("none") || sequence == LOTMCraft.NON_BEYONDER_SEQ) {
             return; // Don't overwrite existing data with empty data
@@ -82,11 +84,18 @@ public class BeyonderMap extends SavedData {
                 ((ServerPlayer) entity).getGameProfile().getName(), sequence, pathway,
                 isNull ? "none" : data.trueName(), isNull ? LOTMCraft.NON_BEYONDER_SEQ : data.sequence(), isNull ? "none" : data.pathway());
 
+        int[] componentCharStack = entity.getData(ModAttachments.BEYONDER_COMPONENT)
+                .getCharacteristicStack();
+
+        String[] pathwayHistory = entity.getData(ModAttachments.BEYONDER_COMPONENT).getPathwayHistory();
+
         map.put(entity.getUUID(), StoredData.builder
                 .copyFrom(data)
                 .pathway(pathway)
                 .sequence(sequence)
                 .trueName(((ServerPlayer) entity).getGameProfile().getName())
+                .charStackArray(componentCharStack)
+                .pathwayHistory(pathwayHistory)
                 .build());
 
         setDirty();
@@ -283,7 +292,7 @@ public class BeyonderMap extends SavedData {
         for (var obj : map.values()) {
             if (obj.pathway().equals(path) && obj.sequence() == seq) {
                 res++;
-                res += obj.charStack(); // single int
+                res += obj.charStack()[seq];
             }
         }
         return res;
@@ -463,11 +472,11 @@ public class BeyonderMap extends SavedData {
         setDirty();
     }
 
-    public void addStack(LivingEntity entity, int value) {
+    public void addStack(LivingEntity entity, int value, int sequence) {
         if (!contains(entity)) put(entity);
 
-        int current = beyonderMap.get(entity.getUUID()).get().charStack();
-        setStack(entity, current + value);
+        int current = beyonderMap.get(entity.getUUID()).get().charStack()[sequence];
+        setStack(entity, current + value, sequence);
     }
 
     /**
@@ -489,12 +498,23 @@ public class BeyonderMap extends SavedData {
         setDirty();
     }
 
-    public void setStack(LivingEntity entity, int value) {
+    public void setStack(LivingEntity entity, int value, int sequence) {
         if (!contains(entity)) put(entity);
 
         map.put(entity.getUUID(), StoredData.builder
                 .copyFrom(map.get(entity.getUUID()))
-                .charStack(value)
+                .charStack(value, sequence)
+                .build());
+
+        setDirty();
+    }
+
+    public void clearStack(LivingEntity entity) {
+        if (!contains(entity)) put(entity);
+
+        map.put(entity.getUUID(), StoredData.builder
+                .copyFrom(map.get(entity.getUUID()))
+                .clearCharStack()
                 .build());
 
         setDirty();

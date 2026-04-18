@@ -1,5 +1,6 @@
 package de.jakob.lotm.abilities.common;
 
+import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.abilities.core.AbilityUsedEvent;
 import de.jakob.lotm.attachments.LuckComponent;
@@ -49,7 +50,7 @@ public class CurseOfMisfortuneAbility extends Ability {
             return;
         }
 
-        LivingEntity target = AbilityUtil.getTargetEntity(entity, 20, 2);
+        LivingEntity target = AbilityUtil.getTargetEntity(entity, (int) (15 * (multiplier(entity) * multiplier(entity))), 2);
 
         if(target == null) {
             if(entity instanceof ServerPlayer player) {
@@ -79,10 +80,13 @@ public class CurseOfMisfortuneAbility extends Ability {
 
         double resistance = AbilityUtil.getSequenceResistanceFactor(entitySeq, targetSeq);
         float multiplier = multiplier(entity);
-        int amplifier = (int) Math.min(Math.round(multiplier * 6.25f * (1.0 - resistance)) * 120, 3000);
+        int amplifier = (int) Math.min(Math.round(multiplier * 6.25f * (1.0 - resistance)) * 120, 6500);
+
+        LOTMCraft.LOGGER.info("mult: {}, amp: {}, res: {}", multiplier, amplifier, resistance);
         if (amplifier <= 0) {
             return; // Full resistance – curse has no meaningful effect
         }
+
         LuckComponent luckComponent = target.getData(ModAttachments.LUCK_COMPONENT);
         luckComponent.addLuckWithMin(-amplifier, -3000);
         NeoForge.EVENT_BUS.post(new AbilityUsedEvent(serverLevel, target.position(), entity, target, this, interactionFlags, interactionRadius, interactionCacheTicks));

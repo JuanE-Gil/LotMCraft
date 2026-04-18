@@ -133,7 +133,7 @@ public abstract class PhysicalEnhancementsAbility extends PassiveAbilityItem {
                 var data = dataOp.get();
 
                 ControllingDataComponent controllingData = player.getData(ModAttachments.CONTROLLING_DATA);
-                if (data.charStack() > 0 && controllingData.getTargetUUID() == null) {
+                if (Arrays.stream(data.charStack()).anyMatch(i -> i > 0) && controllingData.getTargetUUID() == null) {
 
                     if (sequenceLevel < 9) {
                         currentEnhancements = currentEnhancements.stream()
@@ -161,16 +161,22 @@ public abstract class PhysicalEnhancementsAbility extends PassiveAbilityItem {
         return BeyonderData.getSequence(entity);
     }
 
-    protected int recalculateHealthLevelWithStacks(int seq, int prevLevel, int stack){
+    protected int recalculateHealthLevelWithStacks(int seq, int prevLevel, int[] stack){
         int result = prevLevel;
 
-        switch (seq){
-            case 8 -> result += stack;
-            case 7 -> result += stack * 2;
-            case 6, 5 -> result += stack * 3;
-            case 4, 3 -> result += stack * 5;
-            case 2 -> result += stack * 7;
-            case 1 -> result += stack * 7;
+        for(int i = 9; i >= seq; i--){
+            int buff = stack[i];
+
+            buff = (i == 1 && buff >= 0) ? buff : (buff > 0) ? 1 : 0;
+
+            switch (i){
+                case 8 -> result += buff;
+                case 7 -> result += buff * 2;
+                case 6, 5 -> result += buff * 3;
+                case 4, 3 -> result += buff * 5;
+                case 2 -> result += buff * 7;
+                case 1 -> result += buff * 7;
+            }
         }
 
         return result;
