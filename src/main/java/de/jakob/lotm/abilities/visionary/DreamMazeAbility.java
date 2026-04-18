@@ -42,7 +42,6 @@ public class DreamMazeAbility extends SelectableAbility {
     public DreamMazeAbility(String id) {
         super(id, 7);
         this.canBeCopied = false;
-        this.canBeReplicated = false;
         this.canBeUsedByNPC = false;
 
     }

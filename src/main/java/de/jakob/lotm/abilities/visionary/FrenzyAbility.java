@@ -23,7 +23,7 @@ import java.util.Map;
 
 public class FrenzyAbility extends Ability {
     public FrenzyAbility(String id) {
-        super(id, 1.5f, "corruption");
+        super(id, 5f, "corruption");
     }
 
     @Override
@@ -69,7 +69,7 @@ public class FrenzyAbility extends Ability {
 
         target.hurt(entity.damageSources().source(ModDamageTypes.LOOSING_CONTROL), (float) (DamageLookup.lookupDamage(7, .85) * multiplier(entity)));
 
-        target.getData(ModAttachments.SANITY_COMPONENT).increaseSanityAndSync((float) (-0.065f * multiplier(entity)), target);
+        target.getData(ModAttachments.SANITY_COMPONENT).decreaseSanityWithSequenceDifference((float) (0.065f * multiplier(entity)), target, entitySeq, BeyonderData.getSequence(target));
 
         ParticleUtil.spawnParticles((ServerLevel) level, dust, target.getEyePosition(), 80, 0.5f);
     }

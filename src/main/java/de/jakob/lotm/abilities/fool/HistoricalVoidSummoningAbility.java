@@ -92,10 +92,8 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
     public HistoricalVoidSummoningAbility(String id) {
         super(id, 1);
 
-        canBeCopied = false;
         canBeUsedByNPC = false;
         cannotBeStolen = true;
-        canBeReplicated = false;
         canBeUsedInArtifact = false;
     }
 

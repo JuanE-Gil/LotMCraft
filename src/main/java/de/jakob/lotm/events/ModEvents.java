@@ -44,6 +44,7 @@ import de.jakob.lotm.entity.custom.ability_entities.OriginalBodyEntity;
 import de.jakob.lotm.entity.custom.spirits.*;
 import de.jakob.lotm.network.PacketHandler;
 import de.jakob.lotm.network.packets.toClient.SyncSharedAbilitiesDataPacket;
+import de.jakob.lotm.rendering.models.door.DoorHighMythicalCreatureModel;
 import de.jakob.lotm.rendering.models.fool.FoolMythicalCreatureModel;
 import de.jakob.lotm.rendering.models.red_priest.RedPriestMythicalCreatureModel;
 import de.jakob.lotm.rendering.models.sun.SunMythicalCreatureModel;
@@ -134,6 +135,7 @@ public class ModEvents {
         event.registerLayerDefinition(WheelOfFortuneMythicalCreatureModel.LAYER_LOCATION, WheelOfFortuneMythicalCreatureModel::createBodyLayer);
         event.registerLayerDefinition(RedPriestMythicalCreatureModel.LAYER_LOCATION, RedPriestMythicalCreatureModel::createBodyLayer);
         event.registerLayerDefinition(SunMythicalCreatureModel.LAYER_LOCATION, SunMythicalCreatureModel::createBodyLayer);
+        event.registerLayerDefinition(DoorHighMythicalCreatureModel.LAYER_LOCATION, DoorHighMythicalCreatureModel::createBodyLayer);
     }
 
     @SubscribeEvent
@@ -227,6 +229,7 @@ public class ModEvents {
         LuckCheckCommand.register(event.getDispatcher());
         SkinChangeCommand.register(event.getDispatcher());
         AllyRequestCommands.register(event.getDispatcher());
+        AllyCommand.register(event.getDispatcher());
         SanityCommand.register(event.getDispatcher());
         DigestionCommand.register(event.getDispatcher());
         QuestCommand.register(event.getDispatcher());
@@ -239,6 +242,7 @@ public class ModEvents {
         TeamInviteResponseCommand.register(event.getDispatcher());
         SetBeyonderLogCommand.register(event.getDispatcher());
         KillCountCommand.register(event.getDispatcher());
+        UniquenessCommand.register(event.getDispatcher());
     }
 
     @SubscribeEvent
@@ -277,6 +281,9 @@ public class ModEvents {
         MinecraftServer server = player.getServer();
         if (server == null) return;
 
+        // Sync uniqueness data on login
+        PacketHandler.syncUniquenessToPlayer(player);
+
         TeamComponent team = player.getData(ModAttachments.TEAM_COMPONENT.get());
 
         if (team.isInTeam()) {
@@ -299,36 +306,6 @@ public class ModEvents {
             }
             if (!current.memberUUIDs().equals(team.memberUUIDs())) {
                 player.setData(ModAttachments.TEAM_COMPONENT.get(), current);
-            }
-        }
-    }
-
-    @SubscribeEvent
-    public static void onPlayerClone(PlayerEvent.Clone event) {
-        Player original = event.getOriginal();
-        Player newPlayer = event.getEntity();
-
-        // Only copy data if the original player was a beyonder
-        if (isBeyonder(original)) {
-            String pathway = getPathway(original);
-            int sequence = getSequence(original);
-            boolean griefingEnabled = original.getPersistentData().getBoolean(NBT_GRIEFING_ENABLED);
-            Tag markedEntities = original.getPersistentData().get(MARKED_ENTITIES_TAG);
-
-            // Copy the data to the new player
-            CompoundTag newTag = newPlayer.getPersistentData();
-            newTag.putString(NBT_PATHWAY, pathway);
-            newTag.putInt(NBT_SEQUENCE, sequence);
-            newTag.putFloat(NBT_SPIRITUALITY, BeyonderData.getMaxSpirituality(sequence));
-            newTag.putBoolean(NBT_GRIEFING_ENABLED, griefingEnabled);
-            if (markedEntities != null) {
-                newTag.put(MARKED_ENTITIES_TAG, markedEntities.copy());
-            }
-
-            // Update spirituality progress tracker
-            if (getMaxSpirituality(sequence) > 0) {
-                float progress = 1;
-                SpiritualityProgressTracker.setProgress(newPlayer.getUUID(), progress);
             }
         }
     }

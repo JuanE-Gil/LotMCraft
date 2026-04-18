@@ -71,7 +71,7 @@ public class DefilingSeedAbility extends Ability {
     );
 
     public DefilingSeedAbility(String id) {
-        super(id, 5, "corruption");
+        super(id, 7, "corruption");
         this.canBeCopied = false;
     }
 

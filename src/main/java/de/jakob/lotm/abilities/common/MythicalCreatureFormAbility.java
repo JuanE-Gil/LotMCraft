@@ -93,7 +93,11 @@ public class MythicalCreatureFormAbility extends ToggleAbility {
         TransformationComponent transformationComponent = entity.getData(ModAttachments.TRANSFORMATION_COMPONENT);
         transformationComponent.setTransformedAndSync(true, entity);
         transformationComponent.setTransformationIndexAndSync(TransformationComponent.TransformationType.MYTHICAL_CREATURE, entity);
-        transformationComponent.setAdditionalDataAndSync(BeyonderData.getPathway(entity), entity);
+        String additionalData = BeyonderData.getPathway(entity);
+        if(additionalData.equals("door") && BeyonderData.getSequence(entity) <= 2) {
+            additionalData = "door_high";
+        }
+        transformationComponent.setAdditionalDataAndSync(additionalData, entity);
     }
 
     @Override

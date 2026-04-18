@@ -1,12 +1,15 @@
 package de.jakob.lotm.events;
 
 import de.jakob.lotm.LOTMCraft;
+import de.jakob.lotm.abilities.core.Ability;
+import de.jakob.lotm.util.helper.AbilityUtil;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 
 import de.jakob.lotm.attachments.DisabledAbilitiesComponent;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.damage.ModDamageTypes;
+import net.minecraft.client.multiplayer.ClientLevel;
 import de.jakob.lotm.effect.LoosingControlEffect;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.ParticleUtil;
@@ -291,8 +294,8 @@ public class LuckHandler {
             makeEntitySlip(entity, level);
 
         if (BeyonderData.isBeyonder(entity)) {
-            if (Math.random() < getMultiplierReductionChance(magnitude))
-                reduceMultiplierTemporarily(entity, level, magnitude);
+           /* if (Math.random() < getMultiplierReductionChance(magnitude))
+                reduceMultiplierTemporarily(entity, level, magnitude);*/
             if (Math.random() < getAbilityDisableChance(magnitude))
                 disableAbilitiesTemporarily(entity, level, magnitude);
         }
@@ -331,9 +334,9 @@ public class LuckHandler {
         if (target.isDeadOrDying() || target.level() != level) {
             combatTargets.remove(entity.getUUID());
             return;
-        }
-
-        float damage = 2.5f * (float) lerpClamped(luck, 0, 3000, 1, 8);
+        };
+        float scalable_damage = (float) (Math.abs(luck) *0.0054+ 2.4722);
+        float damage =(float) lerpClamped(luck, 0, 3000, 1, scalable_damage);
         target.hurt(target.damageSources().generic(), damage);
 
         Random random = new Random();
@@ -380,9 +383,13 @@ public class LuckHandler {
         long now = System.currentTimeMillis();
         if (lastTripTime.containsKey(uuid) && now - lastTripTime.get(uuid) < 2000) return;
         lastTripTime.put(uuid, now);
-
-        float damage = (float) lerpClamped(magnitude, 0, 3000, 5, 40);
+        float scalable_damage = (float) (Math.abs(magnitude) *0.0077+ 3.3088);
+        // scalable_damage = 20+(Math.abs(magnitude)*0.018);
+        float damage = (float) lerpClamped(magnitude, 0, 3000, 5, scalable_damage);
+        LOTMCraft.LOGGER.info("text1: {}, actual luck {}, damage final {}", magnitude,(float) lerpClamped(magnitude, 0, 3000, 5, scalable_damage),damage);
         entity.hurt(ModDamageTypes.source(level, ModDamageTypes.UNLUCK), damage);
+
+
 
         Random random = new Random();
         entity.setDeltaMovement(random.nextDouble(-0.2, 0.2), 0.1, random.nextDouble(-0.2, 0.2));
@@ -445,7 +452,7 @@ public class LuckHandler {
 
         ParticleUtil.spawnParticles(level, UNLUCK_DUST, entity.position(), 30, .5, .1, .5, 0);
     }
-
+/* For some reason putting minus there breaks all unluck and without minus it just buffs the target...
     private static void reduceMultiplierTemporarily(LivingEntity entity, ServerLevel level, int magnitude) {
         UUID uuid = entity.getUUID();
         long now = System.currentTimeMillis();
@@ -457,15 +464,15 @@ public class LuckHandler {
 
         BeyonderData.addModifierWithTimeLimit(entity, "unluck_multiplier_reduction", reduction, duration);
         ParticleUtil.spawnParticles(level, UNLUCK_DUST, entity.position().add(0, entity.getEyeHeight() / 2, 0), 40, .4, entity.getEyeHeight() / 2, .4, 0);
-    }
+    }*/
 
     private static void disableAbilitiesTemporarily(LivingEntity entity, ServerLevel level, int magnitude) {
         UUID uuid = entity.getUUID();
         long now = System.currentTimeMillis();
-        if (lastAbilityDisableTime.containsKey(uuid) && now - lastAbilityDisableTime.get(uuid) < 15000) return;
+        if (lastAbilityDisableTime.containsKey(uuid) && now - lastAbilityDisableTime.get(uuid) < 5000) return;
         lastAbilityDisableTime.put(uuid, now);
-
-        int duration = (int) lerpClamped(magnitude, 0, 3000, 2000, 5000);
+        double entityMultiplier = Math.max(BeyonderData.getMultiplier(entity)/2,1);
+        int duration = (int) (lerpClamped(magnitude, 0, 3000, 2000, 5000))/(int) entityMultiplier;
 
         DisabledAbilitiesComponent component = entity.getData(ModAttachments.DISABLED_ABILITIES_COMPONENT);
         component.disableAbilityUsageForTime("unluck_ability_disabled", duration, entity);
@@ -534,9 +541,11 @@ public class LuckHandler {
         return lerpClamped(magnitude, 0, 3000, 0.002, 0.025);
     }
 
+    /*
     private static double getMultiplierReductionChance(int magnitude) {
         return lerpClamped(magnitude, 0, 3000, 0.0008, 0.010);
     }
+    */
 
     private static double getAbilityDisableChance(int magnitude) {
         return lerpClamped(magnitude, 0, 3000, 0.0003, 0.005);

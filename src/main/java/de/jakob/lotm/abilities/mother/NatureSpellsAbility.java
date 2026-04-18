@@ -87,7 +87,7 @@ public class NatureSpellsAbility extends SelectableAbility {
 
         double multiplier = multiplier(entity);
 
-        ServerScheduler.scheduleForDuration(0, 2, 20 * 25, () -> {
+        ServerScheduler.scheduleForDuration(0, 2, 20 * 10*(int) Math.max(multiplier(entity)/2,1), () -> {
             if(target.isDeadOrDying()) {
                 affectedByNatureWrath.remove(target.getUUID());
                 return;
@@ -98,7 +98,7 @@ public class NatureSpellsAbility extends SelectableAbility {
             ParticleUtil.spawnParticles(serverLevel, greenDustSmall, target.position().add(0, entity.getEyeHeight() / 2, 0), 10, .2, entity.getEyeHeight() / 2, .2, 0);
 
             if(random.nextInt(20) == 0) {
-                target.hurt(ModDamageTypes.source(serverLevel, ModDamageTypes.BEYONDER_GENERIC, entity), (float) (DamageLookup.lookupDamage(5, .775f) * multiplier));
+                target.hurt(ModDamageTypes.source(serverLevel, ModDamageTypes.BEYONDER_GENERIC, entity), (float) (DamageLookup.lookupDamage(5, .775f) * (int) Math.max(multiplier(entity)/2,1)));
             }
 
             if(random.nextInt(25) == 0) {
@@ -159,8 +159,8 @@ public class NatureSpellsAbility extends SelectableAbility {
             ParticleUtil.spawnParticles(serverLevel, greenDustSmall, entity.position().add(0, entity.getEyeHeight() / 2, 0), 10, .2, entity.getEyeHeight() / 2, .2, 0);
 
             BeyonderData.addModifierWithTimeLimit(entity, "child_of_oak", 1.25f, 1500);
-            entity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 20, 1, false, false, false));
-            entity.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 20, 0, false, false, false));
+            entity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 40, 1, false, false, false));
+            entity.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 40, 0, false, false, false));
 
         }, 5, () -> castingChildOfOak.remove(entity.getUUID()), finished);
     }

@@ -42,7 +42,7 @@ public class MaliceSeedAbility extends Ability {
     private static final DustParticleOptions maliceDust = new DustParticleOptions(new Vector3f(0.4f, 0f, 0.1f), 2f);
 
     public MaliceSeedAbility(String id) {
-        super(id, 240, "corruption");
+        super(id, 400, "corruption");
         this.canBeCopied = false;
         this.canBeReplicated = false;
         this.canBeUsedInArtifact = false;

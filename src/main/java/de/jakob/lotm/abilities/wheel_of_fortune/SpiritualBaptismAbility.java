@@ -6,6 +6,7 @@ import de.jakob.lotm.attachments.LuckComponent;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.attachments.SanityComponent;
 import de.jakob.lotm.rendering.effectRendering.EffectManager;
+import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
@@ -25,9 +26,8 @@ import java.util.stream.Collectors;
 
 public class SpiritualBaptismAbility extends SelectableAbility {
     public SpiritualBaptismAbility(String id) {
-        super(id, 10, "cleansing");
+        super(id, 5, "cleansing");
         canBeCopied = false;
-        canBeReplicated = false;
     }
 
     @Override
@@ -61,7 +61,7 @@ public class SpiritualBaptismAbility extends SelectableAbility {
             return;
         }
 
-        performBaptism(entity, serverLevel);
+        performBaptism(entity, entity, serverLevel);
     }
 
     private void onTarget(Level level, LivingEntity entity){
@@ -69,16 +69,16 @@ public class SpiritualBaptismAbility extends SelectableAbility {
             return;
         }
 
-        LivingEntity target = AbilityUtil.getTargetEntity(entity, 20, 2, false, true);
+        LivingEntity target = AbilityUtil.getTargetEntity(entity, (int) (15 * (multiplier(entity) * multiplier(entity))), 2, false, true);
 
         if(target == null) {
             target = entity;
         }
 
-        performBaptism(target, serverLevel);
+        performBaptism(entity, target, serverLevel);
     }
 
-    private void performBaptism(LivingEntity target, ServerLevel serverLevel){
+    private void performBaptism(LivingEntity caster, LivingEntity target, ServerLevel serverLevel){
         EffectManager.playEffect(EffectManager.Effect.SPIRITUAL_BAPTISM, target.getX(), target.getY(), target.getZ(), serverLevel);
         target.addEffect(new MobEffectInstance(MobEffects.HEAL, 5, 40, false, false, false));
 
@@ -103,6 +103,6 @@ public class SpiritualBaptismAbility extends SelectableAbility {
         }
 
         SanityComponent sanityComponent = target.getData(ModAttachments.SANITY_COMPONENT);
-        sanityComponent.increaseSanityAndSync(.15f, target);
+        sanityComponent.increaseSanityWithSequenceDifference(.15f, target, AbilityUtil.getSeqWithArt(caster, this), BeyonderData.getSequence(target));
     }
 }

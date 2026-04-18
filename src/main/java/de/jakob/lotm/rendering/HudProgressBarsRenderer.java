@@ -1,6 +1,7 @@
 package de.jakob.lotm.rendering;
 
 import de.jakob.lotm.LOTMCraft;
+import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.util.ClientSacrificeCache;
 import de.jakob.lotm.util.ClientBeyonderCache;
 import de.jakob.lotm.util.SpiritualityProgressTracker;
@@ -15,7 +16,7 @@ import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 
 @EventBusSubscriber(modid = LOTMCraft.MOD_ID, value = Dist.CLIENT)
-public class SpiritualityBarRenderer {
+public class HudProgressBarsRenderer {
 
     @SubscribeEvent
     public static void onClientTick(ClientTickEvent.Post event) {
@@ -32,6 +33,7 @@ public class SpiritualityBarRenderer {
         event.registerAbove(VanillaGuiLayers.HOTBAR, ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "progress_bar"), (guiGraphics, deltaTracker) -> {
             renderProgressBar(guiGraphics);
             renderSacrificeBar(guiGraphics);
+            renderSanityBar(guiGraphics);
         });
     }
 
@@ -92,6 +94,34 @@ public class SpiritualityBarRenderer {
         if (progressHeight > 0) {
             drawVerticalGradient(guiGraphics, barX, progressStartY, barWidth, progressHeight,
                     0xFFFF4444, 0xFFAA0000);
+        }
+
+        ResourceLocation backgroundTexture = ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "textures/gui/spirituality_bar_background.png");
+        guiGraphics.blit(backgroundTexture, barX - 4, barY - 4, barWidth + 8, barHeight + 8, 0, 0, 44, 256, 44, 256);
+    }
+
+    private static void renderSanityBar(GuiGraphics guiGraphics) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null || mc.level == null || mc.options.hideGui) return;
+        if (!ClientBeyonderCache.isBeyonder(mc.player.getUUID())) return;
+
+        float sanity = mc.player.getData(ModAttachments.SANITY_COMPONENT.get()).getSanity();
+        if(sanity == 1) return;
+
+        int barWidth = 14;
+        int barHeight = 120;
+        int screenWidth = guiGraphics.guiWidth();
+        int barX = screenWidth - barWidth - 6;
+        int barY = 60;
+
+
+        guiGraphics.fill(barX, barY, barX + barWidth, barY + barHeight, 0x80000000);
+
+        int progressHeight = (int) (barHeight * sanity);
+        int progressStartY = barY + barHeight - progressHeight;
+        if (progressHeight > 0) {
+            drawVerticalGradient(guiGraphics, barX, progressStartY, barWidth, progressHeight,
+                    0xFFe8bb68, 0xFFF5ad2a);
         }
 
         ResourceLocation backgroundTexture = ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "textures/gui/spirituality_bar_background.png");

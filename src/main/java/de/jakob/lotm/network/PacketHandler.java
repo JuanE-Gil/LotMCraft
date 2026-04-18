@@ -4,7 +4,6 @@ import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.network.packets.toClient.*;
 import de.jakob.lotm.network.packets.toServer.*;
 import de.jakob.lotm.util.BeyonderData;
-import de.jakob.lotm.util.beyonderMap.PathwayHistory;
 import de.jakob.lotm.util.beyonderMap.StoredData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -41,6 +40,12 @@ public class PacketHandler {
                 SyncBeyonderDataPacket.TYPE,
                 SyncBeyonderDataPacket.STREAM_CODEC,
                 SyncBeyonderDataPacket::handle
+        );
+
+        registrar.playToClient(
+                SyncApotheosisPacket.TYPE,
+                SyncApotheosisPacket.STREAM_CODEC,
+                SyncApotheosisPacket::handle
         );
 
         registrar.playToClient(
@@ -435,6 +440,12 @@ public class PacketHandler {
                 SyncSkillScalingPacket.STREAM_CODEC,
                 SyncSkillScalingPacket::handle
         );
+
+        registrar.playToClient(
+                SyncUniquenessPacket.TYPE,
+                SyncUniquenessPacket.STREAM_CODEC,
+                SyncUniquenessPacket::handle
+        );
     }
 
     private static void registerServerPackets(PayloadRegistrar registrar) {
@@ -685,6 +696,12 @@ public class PacketHandler {
                 SyncArtifactAbilityWheel.STREAM_CODEC,
                 SyncArtifactAbilityWheel::handle
         );
+
+        registrar.playToServer(
+                RequestUniquenessApotheosisPacket.TYPE,
+                RequestUniquenessApotheosisPacket.STREAM_CODEC,
+                RequestUniquenessApotheosisPacket::handle
+        );
     }
 
     public static void sendToServer(CustomPacketPayload packet) {
@@ -701,12 +718,9 @@ public class PacketHandler {
         float spirituality = BeyonderData.getSpirituality(player);
         boolean griefingEnabled = BeyonderData.isGriefingEnabled(player);
         float digestionProgress = BeyonderData.getDigestionProgress(player);
-        Optional<StoredData> storedData = beyonderMap.get(player);
-        int charStackCount = storedData.map(data -> data.charStack().get(sequence)).orElse(0);
+        int charStackCount = BeyonderData.getCurrentCharStack(player);
 
-        PathwayHistory history = BeyonderData.beyonderMap != null && BeyonderData.beyonderMap.get(player).isPresent()
-                ? BeyonderData.beyonderMap.get(player).get().pathwayHistory()
-                : new PathwayHistory();
+        String[] history = BeyonderData.getPathwayHistory(player);
 
         SyncBeyonderDataPacket packet = new SyncBeyonderDataPacket(pathway, sequence, spirituality, griefingEnabled, digestionProgress, history, charStackCount);
         sendToPlayer(player, packet);
@@ -719,7 +733,7 @@ public class PacketHandler {
         int sequence = BeyonderData.getSequence(entity);
 
         SyncLivingEntityBeyonderDataPacket packet =
-                new SyncLivingEntityBeyonderDataPacket(entity.getId(), pathway, sequence, BeyonderData.getMaxSpirituality(sequence));
+                new SyncLivingEntityBeyonderDataPacket(entity.getId(), pathway, sequence, BeyonderData.getMaxSpirituality(pathway, sequence));
 
         sendToAllPlayers(packet);
     }
@@ -747,6 +761,16 @@ public class PacketHandler {
         level.players().forEach(player -> sendToPlayer(player, payload));
     }
 
+    public static void syncUniquenessToPlayer(ServerPlayer player) {
+        de.jakob.lotm.attachments.UniquenessComponent comp = player.getData(de.jakob.lotm.attachments.ModAttachments.UNIQUENESS_COMPONENT);
+        SyncUniquenessPacket packet = new SyncUniquenessPacket(
+                comp.hasUniqueness(),
+                comp.getUniquenessPathway(),
+                comp.getKillCount()
+        );
+        sendToPlayer(player, packet);
+    }
+
     // Helper method to sync to all players (useful for when other players need to see beyonder status)
     public static void syncBeyonderDataToAllPlayers(ServerPlayer targetPlayer) {
         String pathway = BeyonderData.getPathway(targetPlayer);
@@ -754,10 +778,9 @@ public class PacketHandler {
         float spirituality = BeyonderData.getSpirituality(targetPlayer);
         boolean griefingEnabled = BeyonderData.isGriefingEnabled(targetPlayer);
         float digestionProgress = BeyonderData.getDigestionProgress(targetPlayer);
-        Optional<StoredData> storedData = beyonderMap.get(targetPlayer);
-        int charStackCount = storedData.map(data -> data.charStack().get(sequence)).orElse(0);
+        int charStackCount = BeyonderData.getCurrentCharStack(targetPlayer);
 
-        SyncBeyonderDataPacket packet = new SyncBeyonderDataPacket(pathway, sequence, spirituality, griefingEnabled, digestionProgress, new PathwayHistory(), charStackCount);
+        SyncBeyonderDataPacket packet = new SyncBeyonderDataPacket(pathway, sequence, spirituality, griefingEnabled, digestionProgress, new String[10], charStackCount);
 
         targetPlayer.getServer().getPlayerList().getPlayers().forEach(player -> {
             sendToPlayer(player, packet);

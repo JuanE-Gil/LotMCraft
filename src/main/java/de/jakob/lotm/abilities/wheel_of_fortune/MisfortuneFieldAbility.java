@@ -19,7 +19,6 @@ import java.util.Map;
 public class MisfortuneFieldAbility extends Ability {
     public MisfortuneFieldAbility(String id) {
         super(id, 30);
-        canBeCopied = false;
     }
 
     @Override
@@ -41,9 +40,10 @@ public class MisfortuneFieldAbility extends Ability {
         EffectManager.playEffect(EffectManager.Effect.MISFORTUNE_FIELD, entity.getX(), entity.getY(), entity.getZ(), serverLevel);
 
         Vec3 startPos = entity.position();
-        int amplifier = Math.round(multiplier(entity) * 350f);
+        float multiplier = multiplier(entity);
+        int amplifier = Math.min(Math.round(multiplier * 6.25f ) * 80, 6500);
         ServerScheduler.scheduleForDuration(0, 2, 20 * 20, () -> {
-            AbilityUtil.getNearbyEntities(entity, serverLevel, startPos, 20).forEach(e -> {
+            AbilityUtil.getNearbyEntities(entity, serverLevel, startPos, 20*multiplier).forEach(e -> {
                 LuckComponent luckComponent = e.getData(ModAttachments.LUCK_COMPONENT.get());
                 luckComponent.addLuckWithMin(-amplifier, -amplifier);
             });

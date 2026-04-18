@@ -19,8 +19,6 @@ public class TheftAbility extends Ability {
         super(id, 1.75f);
 
         canBeUsedByNPC = false;
-        canBeCopied = false;
-        canBeReplicated = false;
     }
 
     @Override

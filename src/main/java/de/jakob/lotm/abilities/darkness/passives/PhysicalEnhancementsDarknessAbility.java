@@ -56,7 +56,6 @@ public class PhysicalEnhancementsDarknessAbility extends PhysicalEnhancementsAbi
             case 8, 7 -> List.of(
                     new PhysicalEnhancement(EnhancementType.STRENGTH, 2 + strengthModifier),
                     new PhysicalEnhancement(EnhancementType.NIGHT_VISION, 1),
-                    new PhysicalEnhancement(EnhancementType.RESISTANCE, 4 + resistanceModifier),
                     new PhysicalEnhancement(EnhancementType.SPEED, 2 + speedModifier),
                     new PhysicalEnhancement(EnhancementType.HEALTH, 5),
                     new PhysicalEnhancement(EnhancementType.REGENERATION, 2)
@@ -65,7 +64,7 @@ public class PhysicalEnhancementsDarknessAbility extends PhysicalEnhancementsAbi
             case 6 -> List.of(
                     new PhysicalEnhancement(EnhancementType.STRENGTH, 2 + strengthModifier),
                     new PhysicalEnhancement(EnhancementType.NIGHT_VISION, 1),
-                    new PhysicalEnhancement(EnhancementType.RESISTANCE, 6 + resistanceModifier),
+                    new PhysicalEnhancement(EnhancementType.RESISTANCE, 1 + resistanceModifier),
                     new PhysicalEnhancement(EnhancementType.SPEED, 2 + speedModifier),
                     new PhysicalEnhancement(EnhancementType.HEALTH, 7),
                     new PhysicalEnhancement(EnhancementType.REGENERATION, 2)
@@ -74,7 +73,7 @@ public class PhysicalEnhancementsDarknessAbility extends PhysicalEnhancementsAbi
             case 5 -> List.of(
                     new PhysicalEnhancement(EnhancementType.STRENGTH, 2 + strengthModifier),
                     new PhysicalEnhancement(EnhancementType.NIGHT_VISION, 1),
-                    new PhysicalEnhancement(EnhancementType.RESISTANCE, 8 + resistanceModifier),
+                    new PhysicalEnhancement(EnhancementType.RESISTANCE, 2 + resistanceModifier),
                     new PhysicalEnhancement(EnhancementType.SPEED, 2 + speedModifier),
                     new PhysicalEnhancement(EnhancementType.HEALTH, 9),
                     new PhysicalEnhancement(EnhancementType.REGENERATION, 2)
@@ -83,7 +82,7 @@ public class PhysicalEnhancementsDarknessAbility extends PhysicalEnhancementsAbi
             case 4 -> List.of(
                     new PhysicalEnhancement(EnhancementType.STRENGTH, 3 + strengthModifier),
                     new PhysicalEnhancement(EnhancementType.NIGHT_VISION, 1),
-                    new PhysicalEnhancement(EnhancementType.RESISTANCE, 13 + resistanceModifier),
+                    new PhysicalEnhancement(EnhancementType.RESISTANCE, 7 + resistanceModifier),
                     new PhysicalEnhancement(EnhancementType.SPEED, 4 + speedModifier),
                     new PhysicalEnhancement(EnhancementType.HEALTH, 16),
                     new PhysicalEnhancement(EnhancementType.REGENERATION, 3)
@@ -92,7 +91,7 @@ public class PhysicalEnhancementsDarknessAbility extends PhysicalEnhancementsAbi
             case 3 -> List.of(
                     new PhysicalEnhancement(EnhancementType.STRENGTH, 3 + strengthModifier),
                     new PhysicalEnhancement(EnhancementType.NIGHT_VISION, 1),
-                    new PhysicalEnhancement(EnhancementType.RESISTANCE, 14 + resistanceModifier),
+                    new PhysicalEnhancement(EnhancementType.RESISTANCE, 8 + resistanceModifier),
                     new PhysicalEnhancement(EnhancementType.SPEED, 4 + speedModifier),
                     new PhysicalEnhancement(EnhancementType.HEALTH, 17),
                     new PhysicalEnhancement(EnhancementType.REGENERATION, 3)
@@ -101,7 +100,7 @@ public class PhysicalEnhancementsDarknessAbility extends PhysicalEnhancementsAbi
             case 2 -> List.of(
                     new PhysicalEnhancement(EnhancementType.STRENGTH, 4 + strengthModifier),
                     new PhysicalEnhancement(EnhancementType.NIGHT_VISION, 1),
-                    new PhysicalEnhancement(EnhancementType.RESISTANCE, 17 + resistanceModifier),
+                    new PhysicalEnhancement(EnhancementType.RESISTANCE, 11 + resistanceModifier),
                     new PhysicalEnhancement(EnhancementType.SPEED, 5 + speedModifier),
                     new PhysicalEnhancement(EnhancementType.HEALTH, 25),
                     new PhysicalEnhancement(EnhancementType.REGENERATION, 4)
@@ -110,7 +109,7 @@ public class PhysicalEnhancementsDarknessAbility extends PhysicalEnhancementsAbi
             case 1 -> List.of(
                     new PhysicalEnhancement(EnhancementType.STRENGTH, 4 + strengthModifier),
                     new PhysicalEnhancement(EnhancementType.NIGHT_VISION, 1),
-                    new PhysicalEnhancement(EnhancementType.RESISTANCE, 18 + resistanceModifier),
+                    new PhysicalEnhancement(EnhancementType.RESISTANCE, 12 + resistanceModifier),
                     new PhysicalEnhancement(EnhancementType.SPEED, 5 + speedModifier),
                     new PhysicalEnhancement(EnhancementType.HEALTH, 30),
                     new PhysicalEnhancement(EnhancementType.REGENERATION, 4)

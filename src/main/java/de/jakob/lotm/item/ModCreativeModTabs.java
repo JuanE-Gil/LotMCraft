@@ -33,7 +33,6 @@ public class ModCreativeModTabs {
                         output.accept(ModBlocks.BREWING_CAULDRON.get());
                         output.accept(ModBlocks.VOID);
                         output.accept(ModBlocks.SOLID_VOID);
-                        output.accept(ModItems.RED_PRIEST_UNIQUENESS);
                     })
                     .build());
 

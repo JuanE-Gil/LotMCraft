@@ -1,6 +1,7 @@
 package de.jakob.lotm.abilities.red_priest;
 
 import de.jakob.lotm.abilities.core.Ability;
+import de.jakob.lotm.attachments.ControllingDataComponent;
 import de.jakob.lotm.attachments.KillCountComponent;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.attachments.SacrificeRevertComponent;
@@ -10,12 +11,15 @@ import de.jakob.lotm.network.PacketHandler;
 import de.jakob.lotm.network.packets.toClient.SyncKillCountPacket;
 import de.jakob.lotm.network.packets.toClient.SyncSacrificeDurationPacket;
 import de.jakob.lotm.rendering.effectRendering.EffectManager;
+import de.jakob.lotm.damage.ModDamageTypes;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityWheelHelper;
 import de.jakob.lotm.util.helper.ParticleUtil;
 import de.jakob.lotm.util.scheduling.ServerScheduler;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -35,7 +39,7 @@ public class SacrificeAbility extends Ability {
     private static final int MAX_DURATION_SECONDS = 60;
 
     public SacrificeAbility(String id) {
-        super(id, 43200);
+        super(id, 20 * 60 * 5);
         canBeCopied = false;
         canBeReplicated = false;
         canBeUsedInArtifact = false;
@@ -59,6 +63,15 @@ public class SacrificeAbility extends Ability {
         if (level.isClientSide) return;
         if (!(entity instanceof ServerPlayer player)) return;
         if (!(level instanceof ServerLevel serverLevel)) return;
+
+        ControllingDataComponent controllingData = player.getData(ModAttachments.CONTROLLING_DATA);
+        if (controllingData.getTargetUUID() != null) {
+            player.connection.send(new net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket(
+                    net.minecraft.network.chat.Component.literal("Sacrifice cannot be used while controlling a puppet")
+                            .withStyle(net.minecraft.ChatFormatting.RED)
+            ));
+            return;
+        }
 
         int currentSeq = BeyonderData.getSequence(player);
         if (currentSeq > 3 || currentSeq < 1) return;
@@ -92,12 +105,10 @@ public class SacrificeAbility extends Ability {
         // Activate after animation completes (20 ticks banner + 15 ticks ball = 35 ticks)
         int animationTicks = 35;
         ServerScheduler.scheduleDelayed(animationTicks, () -> {
-            if (player.connection == null) return;
-
             float savedDigestion = BeyonderData.getDigestionProgress(player);
-            BeyonderData.setBeyonder(player, pathway, tempSeq, true);
+            BeyonderData.setBeyonder(player, pathway, tempSeq, true, false, false, false);
             // Temp sequence starts at 0 digestion — prevents drinking potions to exploit the advance
-            player.getPersistentData().putFloat(BeyonderData.NBT_DIGESTION_PROGRESS, 0.0f);
+            BeyonderData.setDigestionProgress(player, 0);
             PacketHandler.syncBeyonderDataToPlayer(player);
             AbilityWheelHelper.removeUnusableAbilities(player);
 
@@ -108,15 +119,14 @@ public class SacrificeAbility extends Ability {
 
             // Revert while online after duration expires
             ServerScheduler.scheduleDelayed(durationTicks, () -> {
-                if (player.connection == null) return;
                 SacrificeRevertComponent r = player.getData(ModAttachments.SACRIFICE_REVERT_COMPONENT);
                 if (!r.isActive()) return;
                 if (BeyonderData.isBeyonder(player)
                         && BeyonderData.getPathway(player).equals(pathway)
                         && BeyonderData.getSequence(player) == tempSeq) {
                     float digestion = r.getSavedDigestion();
-                    BeyonderData.setBeyonder(player, pathway, currentSeq, true);
-                    player.getPersistentData().putFloat(BeyonderData.NBT_DIGESTION_PROGRESS, digestion);
+                    BeyonderData.setBeyonder(player, pathway, currentSeq, true, false, false, false);
+                    BeyonderData.setDigestionProgress(player, digestion);
                     PacketHandler.syncBeyonderDataToPlayer(player);
                     AbilityWheelHelper.removeUnusableAbilities(player);
                 }
@@ -161,5 +171,15 @@ public class SacrificeAbility extends Ability {
                         player.getX(), player.getY(), player.getZ(), level, player);
             }, level);
         }, level);
+    }
+
+    @Override
+    public void onHold(Level level, LivingEntity entity) {
+        if(!(entity instanceof ServerPlayer player)) return;
+
+        KillCountComponent killCount = player.getData(ModAttachments.KILL_COUNT_COMPONENT);
+        int kills = killCount.getKillCount();
+
+        player.displayClientMessage(Component.translatable("lotm.kills").append(": " + kills).withStyle(ChatFormatting.RED), true);
     }
 }

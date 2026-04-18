@@ -82,13 +82,6 @@ public class ModItems {
             () -> new BlockItem(ModBlocks.MYSTICAL_RING.get(), new Item.Properties())
     );
 
-
-    // Uniquenesses
-    public static final DeferredItem<Item> RED_PRIEST_UNIQUENESS = ITEMS.register("red_priest_uniqueness",
-            () -> new UniquenessItem(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC), "red_priest")
-    );
-
-
     public static PotionIngredient selectRandomIngredient(List<PotionIngredient> ingredients, Random random) {
         if (ingredients == null || ingredients.isEmpty()) {
             return null;

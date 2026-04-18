@@ -8,7 +8,6 @@ import de.jakob.lotm.gamerule.ModGameRules;
 import de.jakob.lotm.network.PacketHandler;
 import de.jakob.lotm.network.packets.toClient.UseAbilityPacket;
 import de.jakob.lotm.util.BeyonderData;
-import de.jakob.lotm.util.beyonderMap.PathwayHistory;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -175,17 +174,15 @@ public abstract class Ability {
 
         // Check historical pathways from domain switches — abilities from the previous pathway are
         // accessible only down to the switch point (e.g. switched at seq 4, so only fool seq 5–9 carry over)
-        if(!entity.level().isClientSide() && BeyonderData.beyonderMap != null) {
-            var stored = BeyonderData.beyonderMap.get(entity.getUUID());
-            if (stored.isPresent()) {
-                PathwayHistory history = stored.get().pathwayHistory();
-                for (int seq = sequence + 1; seq <= 9; seq++) {
-                    String historicalPathway = history.get(seq);
-                    if (historicalPathway != null
-                            && getRequirements().containsKey(historicalPathway)
-                            && getRequirements().get(historicalPathway) >= seq) {
-                        return true;
-                    }
+        if(!entity.level().isClientSide()) {
+            String[] pathwayHistory = BeyonderData.getPathwayHistory(entity);
+            if(pathwayHistory.length < 10) return false;
+            for (int seq = sequence + 1; seq <= 9; seq++) {
+                String historicalPathway = pathwayHistory[seq];
+                if (historicalPathway != null
+                        && getRequirements().containsKey(historicalPathway)
+                        && getRequirements().get(historicalPathway) >= seq) {
+                    return true;
                 }
             }
         }
@@ -236,12 +233,16 @@ public abstract class Ability {
 
         int requiredSequence = getRequirements().get(BeyonderData.getPathway(entity));
 
-        // If user's sequence is numerically higher (weaker) → cannot digest at all
         if (sequence > requiredSequence) {
             return 0f;
         }
 
-        return (1f / (100f * Math.max(.5f, ((10 - sequence) * .5f)))) * (entity.level().getGameRules().getInt(ModGameRules.DIGESTION_RATE) / 100f);
+        float cooldownMultiplier = Math.clamp(((float) cooldown) / (20 * 7), .1f, 2.25f);
+
+        float rawDigestion = (1f / (100f * Math.max(.5f, ((10 - requiredSequence) * .5f)))) * cooldownMultiplier;
+        float digestion = rawDigestion * (entity.level().getGameRules().getInt(ModGameRules.DIGESTION_RATE) / 100f);
+
+        return digestion;
     }
 
     public ResourceLocation getTextureLocation() {

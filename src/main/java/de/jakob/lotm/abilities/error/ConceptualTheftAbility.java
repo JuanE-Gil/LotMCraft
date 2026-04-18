@@ -25,11 +25,10 @@ import java.util.Map;
 
 public class ConceptualTheftAbility extends SelectableAbility {
     public ConceptualTheftAbility(String id) {
-        super(id, 15);
+        super(id, 10);
 
         canBeUsedByNPC = false;
         canBeCopied = false;
-        canBeReplicated = false;
     }
 
     @Override
@@ -44,10 +43,12 @@ public class ConceptualTheftAbility extends SelectableAbility {
 
     @Override
     protected String[] getAbilityNames() {
-        return new String[]{"ability.lotmcraft.conceptual_theft.day_night",
+        return new String[]{
+                "ability.lotmcraft.conceptual_theft.day_night",
                 "ability.lotmcraft.conceptual_theft.area",
                 "ability.lotmcraft.conceptual_theft.digestion",
                 "ability.lotmcraft.conceptual_theft.sanity",
+                "ability.lotmcraft.conceptual_theft.luck"
         };
     }
 
@@ -63,6 +64,23 @@ public class ConceptualTheftAbility extends SelectableAbility {
             case 2 -> stealDigestion(level, entity);
             case 3 -> stealSanity(level, entity);
         }
+    }
+
+    private  void stealLuck(Level level, LivingEntity entity){
+        if(!(level instanceof ServerLevel serverLevel)) {
+            if(entity instanceof Player player) {
+                player.playSound(SoundEvents.BELL_RESONATE, 1, 1);
+            }
+            return;
+        }
+
+        LivingEntity target = AbilityUtil.getTargetEntity(entity, (int) (15 * (multiplier(entity) * multiplier(entity))), 1.5f);
+        if(target == null) {
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.conceptual_theft.no_target").withColor(0x4742c9));
+            return;
+        }
+
+        TheftHandler.performLuckTheft(entity, target, random, this);
     }
 
     private void stealSanity(Level level, LivingEntity entity){

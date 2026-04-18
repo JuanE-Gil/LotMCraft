@@ -40,7 +40,7 @@ public class FogRenderer {
         event.setCanceled(true);
     }
 
-    @SubscribeEvent(priority = EventPriority.HIGH)
+    @SubscribeEvent(priority = EventPriority.LOW)
     public static void onRenderFog(ViewportEvent.ComputeFogColor event) {
         Player player = Minecraft.getInstance().player;
         if(player == null) {
