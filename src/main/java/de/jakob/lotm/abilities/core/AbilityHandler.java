@@ -258,6 +258,8 @@ public class AbilityHandler {
         abilities.add(new BalancingAbility("balancing_ability"));
         abilities.add(new SwordOfJudgmentAbility("sword_of_judgment_ability"));
         abilities.add(new DeliveringJudgmentAbility("delivering_judgment_ability"));
+        abilities.add(new ExileOfBalanceAbility("exile_of_balance_ability"));
+        abilities.add(new IndividualBalanceAbility("individual_balance_ability"));
 
         // ERROR PATHWAY
         abilities.add(new TheftAbility("theft_ability"));

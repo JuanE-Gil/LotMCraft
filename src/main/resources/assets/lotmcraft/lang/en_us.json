@@ -842,6 +842,12 @@
   "lotmcraft.delivering_judgment_ability": "Delivering Judgment",
   "lotmcraft.delivering_judgment_ability.description": "Teleport instantly to the target who has resisted your Laws the most.",
 
+  "lotmcraft.exile_of_balance_ability": "Exile of Balance",
+  "lotmcraft.exile_of_balance_ability.description": "Assess the balance of nearby forces. Beyonders on the dominant side are exiled from the battle for 10 seconds to 2 minutes, unable to deal damage or use abilities.",
+
+  "lotmcraft.individual_balance_ability": "Individual Balance",
+  "lotmcraft.individual_balance_ability.description": "In a one-on-one confrontation, seal the target's Sequence 1 abilities for 1 minute, bringing both combatants to equal footing.",
+
   "item.lotmcraft.chaos_hunting_justiciar_ability": "Chaos Hunting",
   "item.lotmcraft.chaos_hunting_justiciar_ability.description": "Beyonders who outrank you and those of disaster pathways are revealed with a glow outline visible only to you, within 60 blocks.",
 

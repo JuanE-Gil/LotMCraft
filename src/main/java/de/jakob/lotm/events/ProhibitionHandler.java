@@ -3,7 +3,10 @@ package de.jakob.lotm.events;
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.AbilityUseEvent;
 import de.jakob.lotm.abilities.justiciar.BalancingAbility;
+import de.jakob.lotm.abilities.justiciar.ExileOfBalanceAbility;
+import de.jakob.lotm.abilities.justiciar.IndividualBalanceAbility;
 import de.jakob.lotm.abilities.justiciar.ProhibitionAbility;
+import de.jakob.lotm.util.BeyonderData;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -16,6 +19,8 @@ import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+
+import java.util.Map;
 
 @EventBusSubscriber(modid = LOTMCraft.MOD_ID)
 public class ProhibitionHandler {
@@ -155,6 +160,50 @@ public class ProhibitionHandler {
 
     public static boolean isInMarionetteZone(Vec3 pos, ServerLevel level) {
         return isInZone(pos, level, ProhibitionAbility.ProhibitionType.MARIONETTE_INTERCHANGE);
+    }
+
+    @SubscribeEvent
+    public static void onAbilityUseExile(AbilityUseEvent event) {
+        LivingEntity entity = event.getEntity();
+        if (!(entity.level() instanceof ServerLevel sl)) return;
+        Long expiry = ExileOfBalanceAbility.EXILED_ENTITIES.get(entity.getUUID());
+        if (expiry != null && sl.getGameTime() < expiry) {
+            event.setCanceled(true);
+            if (entity instanceof ServerPlayer sp) {
+                sp.sendSystemMessage(Component.literal("[Exile of Balance] You cannot participate in this battle.")
+                        .withStyle(ChatFormatting.RED));
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onDamageExile(LivingDamageEvent.Pre event) {
+        if (!(event.getSource().getEntity() instanceof LivingEntity attacker)) return;
+        if (!(attacker.level() instanceof ServerLevel sl)) return;
+        Long expiry = ExileOfBalanceAbility.EXILED_ENTITIES.get(attacker.getUUID());
+        if (expiry != null && sl.getGameTime() < expiry) {
+            event.setNewDamage(0);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onAbilityUseIndividualBalance(AbilityUseEvent event) {
+        LivingEntity entity = event.getEntity();
+        if (!(entity.level() instanceof ServerLevel sl)) return;
+        Long expiry = IndividualBalanceAbility.INDIVIDUALLY_BALANCED.get(entity.getUUID());
+        if (expiry == null || sl.getGameTime() >= expiry) return;
+
+        // Block abilities whose pathway requirement is sequence 1 or lower (i.e., Seq 1 abilities)
+        String pathway = BeyonderData.getPathway(entity);
+        Map<String, Integer> reqs = event.getAbility().getRequirements();
+        Integer reqSeq = reqs.get(pathway);
+        if (reqSeq != null && reqSeq <= 1) {
+            event.setCanceled(true);
+            if (entity instanceof ServerPlayer sp) {
+                sp.sendSystemMessage(Component.literal("[Individual Balance] Your Sequence 1 abilities are sealed.")
+                        .withStyle(ChatFormatting.RED));
+            }
+        }
     }
 
     private static boolean isInZone(Vec3 pos, ServerLevel level, ProhibitionAbility.ProhibitionType type) {
