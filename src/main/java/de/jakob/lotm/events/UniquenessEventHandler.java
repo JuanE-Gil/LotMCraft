@@ -7,11 +7,13 @@ import de.jakob.lotm.entity.custom.uniqueness.UniquenessEntity;
 import de.jakob.lotm.gamerule.ModGameRules;
 import de.jakob.lotm.network.PacketHandler;
 import de.jakob.lotm.util.BeyonderData;
+import net.minecraft.data.worldgen.DimensionTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -24,9 +26,9 @@ import java.util.Random;
 public class UniquenessEventHandler {
 
     private static final Random RANDOM = new Random();
-    private static final int SPAWN_CHECK_INTERVAL = 6000; // ticks
+    private static final int SPAWN_CHECK_INTERVAL = 20 * 5;
 
-    private static final int SPAWN_RADIUS_BLOCKS = 40;
+    private static final int SPAWN_RADIUS_BLOCKS = 180;
 
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post event) {
@@ -55,6 +57,7 @@ public class UniquenessEventHandler {
 
         ServerPlayer targetPlayer = findSeq1Player(level, pathway);
         if (targetPlayer == null) return;
+        if(targetPlayer.level().dimension() != Level.OVERWORLD) return;
 
         Vec3 spawnPos = targetPlayer.position().add(
                 (RANDOM.nextDouble() - 0.5) * SPAWN_RADIUS_BLOCKS * 2,
@@ -116,7 +119,7 @@ public class UniquenessEventHandler {
         }
 
         Entity killer = event.getSource().getEntity();
-        if (killer instanceof ServerPlayer killerPlayer && BeyonderData.isBeyonder(entity)) {
+        if (killer instanceof ServerPlayer killerPlayer) {
             UniquenessComponent killerComp = killerPlayer.getData(ModAttachments.UNIQUENESS_COMPONENT);
             if (killerComp.hasUniqueness()) {
                 killerComp.incrementKillCount();

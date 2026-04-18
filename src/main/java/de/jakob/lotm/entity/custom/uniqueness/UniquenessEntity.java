@@ -5,6 +5,8 @@ import de.jakob.lotm.attachments.UniquenessComponent;
 import de.jakob.lotm.damage.ModDamageTypes;
 import de.jakob.lotm.entity.ModEntities;
 import de.jakob.lotm.util.BeyonderData;
+import de.jakob.lotm.util.helper.ParticleUtil;
+import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -20,6 +22,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 
 import java.util.HashMap;
 import java.util.List;
@@ -80,9 +83,10 @@ public class UniquenessEntity extends Entity {
         }
 
         ticksExisted++;
-
         String pathway = getPathway();
         if (pathway.isEmpty()) return;
+
+        ParticleUtil.spawnSphereParticles((ServerLevel) level(), new DustParticleOptions(getPathwayColor(), 1), position().add(0, .5, 0), 2.3, 50);
 
         // Check nearby entities for hitbox interactions
         AABB hitbox = this.getBoundingBox().inflate(0.5);
@@ -91,6 +95,18 @@ public class UniquenessEntity extends Entity {
         for (LivingEntity entity : nearby) {
             handleEntityContact(entity, pathway);
         }
+    }
+
+    private Vector3f getPathwayColor() {
+        int color = BeyonderData.pathwayInfos.containsKey(getPathway())
+                ? BeyonderData.pathwayInfos.get(getPathway()).color()
+                : 0xFFFFFF;
+
+        return new Vector3f(
+                ((color >> 16) & 0xFF) / 255f,
+                ((color >> 8) & 0xFF) / 255f,
+                (color & 0xFF) / 255f
+        );
     }
 
     private void handleEntityContact(LivingEntity entity, String pathway) {

@@ -34,20 +34,15 @@ public class UniquenessEntityRenderer extends EntityRenderer<UniquenessEntity> {
         String pathway = entity.getPathway();
         if (pathway.isEmpty()) return;
 
-        // Get the item for this pathway uniqueness
         ItemStack stack = getUniquenessItemStack(pathway);
         if (stack.isEmpty()) return;
 
         poseStack.pushPose();
 
-        // Bob up and down like ground items
         float tick = entity.getTicksExisted() + partialTick;
-        float bobOffset = (float) Math.sin(tick * 0.1f) * 0.1f;
 
-        // Translate to sit just above the ground with a gentle bob
-        poseStack.translate(0, 0.25 + bobOffset, 0);
+        poseStack.translate(0, .75, 0);
 
-        // Slowly rotate around Y axis
         poseStack.mulPose(Axis.YP.rotationDegrees(tick * 3f));
 
         // Render the item using the game's item renderer
