@@ -162,7 +162,6 @@ public class BeyonderData {
             callPassiveEffectsOnRemoved(entity, serverLevel);
         }
 
-
         if(entity instanceof ServerPlayer player) {
             if(!skipCheck && !beyonderMap.check(pathway, sequence)) return;
 
@@ -190,9 +189,6 @@ public class BeyonderData {
         component.setSpirituality(getMaxSpirituality(pathway, sequence));
         component.setDigestionProgress(0);
         component.setGriefingEnabled(griefing);
-
-        if(entity instanceof Player player)
-            SpiritualityProgressTracker.setProgress(player.getUUID(), 1.0f);
 
         BeyonderDataTickHandler.invalidateCache(entity);
 
@@ -313,14 +309,11 @@ public class BeyonderData {
             return 0.0f;
         }
 
-        float progress = spirituality / maxSpirituality;
-        SpiritualityProgressTracker.setProgress(player.getUUID(), progress);
-
         return Math.max(0, spirituality);
     }
 
     public static void reduceSpirituality(LivingEntity entity, float amount) {
-        if(!(entity instanceof Player player))
+        if(!(entity instanceof Player))
             return;
         float current = getSpirituality(entity);
         entity.getData(ModAttachments.BEYONDER_COMPONENT).setSpirituality(Math.max(0, current - amount));
@@ -330,9 +323,6 @@ public class BeyonderData {
         if(maxSpirituality <= 0) {
             return;
         }
-
-        float progress = (current - amount) / maxSpirituality;
-        SpiritualityProgressTracker.setProgress(player.getUUID(), progress);
 
         // Sync to client if this is server-side
         if (!entity.level().isClientSide() && entity instanceof ServerPlayer serverPlayer) {
@@ -410,9 +400,6 @@ public class BeyonderData {
             return;
         }
 
-        float progress = newAmount / maxSpirituality;
-        SpiritualityProgressTracker.setProgress(player.getUUID(), progress);
-
         // Sync to client if this is server-side
         if (!player.level().isClientSide() && player instanceof ServerPlayer serverPlayer) {
             PacketHandler.syncBeyonderDataToPlayer(serverPlayer);
@@ -461,7 +448,6 @@ public class BeyonderData {
         component.setDigestionProgress(0);
 
         if(entity instanceof Player player) {
-            SpiritualityProgressTracker.removeProgress(player);
             beyonderMap.remove(player);
         }
 

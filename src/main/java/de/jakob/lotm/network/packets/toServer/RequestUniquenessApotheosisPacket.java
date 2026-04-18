@@ -6,6 +6,7 @@ import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.attachments.UniquenessComponent;
 import de.jakob.lotm.gamerule.ModGameRules;
 import de.jakob.lotm.network.PacketHandler;
+import de.jakob.lotm.network.packets.toClient.SyncApotheosisPacket;
 import de.jakob.lotm.util.BeyonderData;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.chat.Component;
@@ -100,17 +101,10 @@ public record RequestUniquenessApotheosisPacket() implements CustomPacketPayload
                 )
         );
 
-        apotheosis.setApotheosisTicksLeftAndSync(20 * 60 * 5, (ServerLevel) player.level(), player);
         apotheosis.setPathway(pathway);
+        apotheosis.setApotheosisTicksLeftAndSync(20 * 60 * 5, (ServerLevel) player.level(), player);
 
         player.level().players().forEach(p -> p.playSound(SoundEvents.WITHER_SPAWN));
-
-        // Reset uniqueness component
-        comp.setHasUniqueness(false);
-        comp.setUniquenessPathway("");
-        comp.resetKillCount();
-
-        // Sync to client
-        PacketHandler.syncUniquenessToPlayer(player);
+        player.closeContainer();
     }
 }

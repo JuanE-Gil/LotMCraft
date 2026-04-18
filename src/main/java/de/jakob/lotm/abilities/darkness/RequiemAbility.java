@@ -83,12 +83,12 @@ public class RequiemAbility extends Ability {
             }
             return;
         }
-
-        NeoForge.EVENT_BUS.post(new AbilityUsedEvent((ServerLevel) level, entity.position(), entity, targetEntity, this, interactionFlags, interactionRadius, interactionCacheTicks));
-
         Location currentLoc = new Location(entity.position(), serverLevel);
         int seq = AbilityUtil.getSeqWithArt(entity, this);
         boolean purified = InteractionHandler.isInteractionPossible(currentLoc, "purification", seq);
+
+        NeoForge.EVENT_BUS.post(new AbilityUsedEvent((ServerLevel) level, entity.position(), entity, targetEntity, this, interactionFlags, interactionRadius, interactionCacheTicks));
+
         pacifiedEntities.add(targetEntity.getUUID());
 
         float multiplier_target = multiplier(targetEntity);

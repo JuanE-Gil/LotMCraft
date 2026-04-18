@@ -2,9 +2,9 @@ package de.jakob.lotm.rendering;
 
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.attachments.ModAttachments;
+import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.ClientSacrificeCache;
 import de.jakob.lotm.util.ClientBeyonderCache;
-import de.jakob.lotm.util.SpiritualityProgressTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
@@ -53,8 +53,8 @@ public class HudProgressBarsRenderer {
         int progressColorEnd = 0xFF50E3C2;
 
         // Check if current player has progress
-        if (SpiritualityProgressTracker.hasProgress(mc.player.getUUID()) && (ClientBeyonderCache.isBeyonder(mc.player.getUUID())) && !mc.options.hideGui) {
-            float progress = SpiritualityProgressTracker.getProgress(mc.player.getUUID());
+        if ((ClientBeyonderCache.isBeyonder(mc.player.getUUID())) && !mc.options.hideGui) {
+            float progress = ClientBeyonderCache.getSpirituality(mc.player.getUUID()) / BeyonderData.getMaxSpirituality(ClientBeyonderCache.getPathway(mc.player.getUUID()), ClientBeyonderCache.getSequence(mc.player.getUUID()));
 
             // Draw background
             guiGraphics.fill(barX, barY, barX + barWidth, barY + barHeight, backgroundColor);

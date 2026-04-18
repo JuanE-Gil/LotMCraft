@@ -97,7 +97,7 @@ public class HorrorAuraAbility extends Ability {
                 }
 
                 SanityComponent sanityComponent = e.getData(ModAttachments.SANITY_COMPONENT);
-                sanityComponent.decreaseSanityWithSequenceDifference(-0.008125f*(int) Math.max(multiplier/2,1), e, AbilityUtil.getSeqWithArt(entity, this), BeyonderData.getSequence(e));
+                sanityComponent.decreaseSanityWithSequenceDifference(0.008125f*(int) Math.max(multiplier/2,1), e, AbilityUtil.getSeqWithArt(entity, this), BeyonderData.getSequence(e));
             });
             ticks.getAndIncrement();
         }, () -> this.clearArtifactScaling(entity), serverLevel, () -> AbilityUtil.getTimeInArea(entity, new Location(entity.position(), serverLevel)));

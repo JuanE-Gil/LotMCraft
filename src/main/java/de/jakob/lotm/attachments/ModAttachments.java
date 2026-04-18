@@ -243,6 +243,10 @@ public class ModAttachments {
                             .build()
             );
 
+    public static final Supplier<AttachmentType<FoolingComponent>> FOOLING_COMPONENT =
+            ATTACHMENT_TYPES.register("fooling_component", () ->
+                    AttachmentType.serializable(FoolingComponent::new).build());
+                                      
     public static final Supplier<AttachmentType<UniquenessComponent>> UNIQUENESS_COMPONENT =
             ATTACHMENT_TYPES.register("uniqueness_component", () ->
                     AttachmentType.builder(UniquenessComponent::new)

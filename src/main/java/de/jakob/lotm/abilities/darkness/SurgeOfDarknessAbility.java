@@ -59,7 +59,7 @@ public class SurgeOfDarknessAbility extends Ability {
 
                 AbilityUtil.getNearbyEntities(entity, (ServerLevel) level, center, 45).forEach(e -> {
                     SanityComponent sanityComponent = e.getData(ModAttachments.SANITY_COMPONENT);
-                    sanityComponent.decreaseSanityWithSequenceDifference(.0025f, e, AbilityUtil.getSeqWithArt(entity, this), BeyonderData.getSequence(e));
+                    sanityComponent.decreaseSanityWithSequenceDifference(0.0525f*(int) Math.max(multiplier/2,1), e, AbilityUtil.getSeqWithArt(entity, this), BeyonderData.getSequence(e));
                 });
 
                 AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 45*(int) Math.max(multiplier/2,1), DamageLookup.lookupDps(3, .5, 4, 20) * multiplier(entity) * damageMult, center, true, false, ModDamageTypes.source(level, ModDamageTypes.DARKNESS_GENERIC, entity));

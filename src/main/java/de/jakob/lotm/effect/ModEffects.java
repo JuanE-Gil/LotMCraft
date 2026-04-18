@@ -40,6 +40,9 @@ public class ModEffects {
     public static final Holder<MobEffect> CONCEALMENT = MOB_EFFECTS.register("concealment",
             () -> new ConcealmentEffect(MobEffectCategory.BENEFICIAL, 0x161718));
 
+    public static final Holder<MobEffect> FOOLING = MOB_EFFECTS.register("fooling",
+            () -> new FoolingEffect(MobEffectCategory.HARMFUL, 0xE040FB)); // Jester purple
+
     public static void register(IEventBus eventBus) {
         MOB_EFFECTS.register(eventBus);
     }

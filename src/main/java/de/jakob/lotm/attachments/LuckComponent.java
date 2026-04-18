@@ -1,6 +1,5 @@
 package de.jakob.lotm.attachments;
 
-import de.jakob.lotm.LOTMCraft;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.neoforged.neoforge.common.util.INBTSerializable;
@@ -37,8 +36,6 @@ public class LuckComponent implements INBTSerializable<CompoundTag> {
     public void addLuckWithMax(int amount, int max) {
         if (amount >= 0 && this.luck + amount > max) {
             this.luck = max;
-        } else if (amount < 0 && this.luck + amount < max) {
-            this.luck = -max;
         } else {
             this.luck += amount;
         }

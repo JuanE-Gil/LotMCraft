@@ -77,18 +77,14 @@ public class NightDomainAbility extends Ability {
                 AbilityUtil.addPotionEffectToNearbyEntities(serverLevel, entity, 35*(int) Math.max(multiplier/2,1), startPos, new MobEffectInstance(MobEffects.DARKNESS, 20, 20, false, false, false));
             }
 
-
-            AbilityUtil.getNearbyEntities(entity, serverLevel, entity.getEyePosition(), 10*(int) Math.max(multiplier/2,1)).forEach(e -> {
-                LuckComponent luckComponent = e.getData(ModAttachments.LUCK_COMPONENT);
-                luckComponent.addLuckWithMax(120*(int) Math.max(multiplier/2,1), purified ? -240*(int) Math.max(multiplier/2,1) : -960*(int) Math.max(multiplier/2,1));
-
-            });
             AbilityUtil.addPotionEffectToNearbyEntities(serverLevel, entity, 35, startPos, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, purified ? 1 : 5, false, false, false));
 
             AbilityUtil.damageNearbyEntities(serverLevel, entity, 35*(int) Math.max(multiplier/2,1), DamageLookup.lookupDps(4, .85, 2, 20) * 20, startPos, true, false, ModDamageTypes.source(level, ModDamageTypes.DARKNESS_GENERIC, entity));
 
             AbilityUtil.getNearbyEntities(entity, serverLevel, startPos, 35).forEach(e -> {
-                BeyonderData.addModifierWithTimeLimit(e, "night_domain_debuff", .65, 2000);
+                LuckComponent luckComponent = e.getData(ModAttachments.LUCK_COMPONENT);
+                luckComponent.addLuckWithMin(-120*(int) Math.max(multiplier/2,1), purified ? -240*(int) Math.max(multiplier/2,1) : -960*(int) Math.max(multiplier/2,1));
+                BeyonderData.addModifierWithTimeLimit(e, "night_domain_debuff", .65, 2000); 
             });
             BeyonderData.addModifierWithTimeLimit(entity, "night_domain_buff", 1.35f, 2000);
 

@@ -42,6 +42,17 @@ public class ModItemModelProvider extends ItemModelProvider {
         tintableItem(ModItems.SEALED_ARTIFACT_STAR.get());
         basicItem(ModItems.BLOOD.get());
 
+        uniqueness(ModItems.RED_PRIEST_UNIQUENESS.get());
+        uniqueness(ModItems.FOOL_UNIQUENESS.get());
+        uniqueness(ModItems.TYRANT_UNIQUENESS.get());
+        uniqueness(ModItems.SUN_UNIQUENESS.get());
+        uniqueness(ModItems.ERROR_UNIQUENESS.get());
+        uniqueness(ModItems.DARKNESS_UNIQUENESS.get());
+        uniqueness(ModItems.DOOR_UNIQUENESS.get());
+        uniqueness(ModItems.VISIONARY_UNIQUENESS.get());
+        uniqueness(ModItems.WHEEL_OF_FORTUNE_UNIQUENESS.get());
+
+
         PotionItemHandler.ITEMS.getEntries().forEach(i -> {
             basicItem(i.get());
         });
@@ -69,7 +80,46 @@ public class ModItemModelProvider extends ItemModelProvider {
         basicItem(ModItems.MOD_ICON.get());
     }
 
-
+    private void uniqueness(Item item) {
+        String itemName = getItemName(item);
+        getBuilder(itemName)
+                .parent(getExistingFile(mcLoc("item/generated")))
+                .texture("layer0", modLoc("item/" + itemName))
+                .transforms()
+                .transform(ItemDisplayContext.THIRD_PERSON_RIGHT_HAND)
+                .rotation(0, -90, 0)
+                .translation(0, 8, 2)
+                .scale(1f, 1f, 1f)
+                .end()
+                .transform(ItemDisplayContext.THIRD_PERSON_LEFT_HAND)
+                .rotation(0, 90, 0)
+                .translation(0, 8, 2)
+                .scale(1f, 1f, 1f)
+                .end()
+                .transform(ItemDisplayContext.FIRST_PERSON_RIGHT_HAND)
+                .rotation(0, -90, 0)
+                .translation(1.13f, 4f, 1.13f)
+                .scale(0.68f, 0.68f, 0.68f)
+                .end()
+                .transform(ItemDisplayContext.FIRST_PERSON_LEFT_HAND)
+                .rotation(0, 90, 0)
+                .translation(1.13f, 4f, 1.13f)
+                .scale(0.68f, 0.68f, 0.68f)
+                .end()
+                .transform(ItemDisplayContext.GUI)
+                .rotation(0, 0, 0)
+                .translation(0, 0, 0)
+                .scale(1.25f, 1.25f, 1.25f)
+                .end()
+                .transform(ItemDisplayContext.GROUND)
+                .translation(0, 5, 0)
+                .scale(2.5f, 2.5f, 2.5f)
+                .end()
+                .transform(ItemDisplayContext.FIXED)
+                .scale(1, 1, 1)
+                .end()
+                .end();
+    }
 
     // Helper method for items that need custom display properties (auto-detects texture name)
     private void itemWithCustomDisplay(Item item) {
