@@ -251,6 +251,9 @@ public class AbilityHandler {
         abilities.add(new PunishmentAbility("punishment_ability"));
         abilities.add(new LawAbility("law_ability"));
         abilities.add(new ExecutionAbility("execution_ability"));
+        abilities.add(new BalancingAbility("balancing_ability"));
+        abilities.add(new SwordOfJudgmentAbility("sword_of_judgment_ability"));
+        abilities.add(new DeliveringJudgmentAbility("delivering_judgment_ability"));
 
         // ERROR PATHWAY
         abilities.add(new TheftAbility("theft_ability"));

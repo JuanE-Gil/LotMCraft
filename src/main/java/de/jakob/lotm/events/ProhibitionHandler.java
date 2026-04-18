@@ -2,6 +2,7 @@ package de.jakob.lotm.events;
 
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.AbilityUseEvent;
+import de.jakob.lotm.abilities.justiciar.BalancingAbility;
 import de.jakob.lotm.abilities.justiciar.ProhibitionAbility;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -12,6 +13,7 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
+import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
@@ -135,6 +137,16 @@ public class ProhibitionHandler {
             player.sendSystemMessage(Component.literal("[Item Use] is Prohibited here")
                     .withStyle(ChatFormatting.RED));
         }
+    }
+
+    @SubscribeEvent
+    public static void onEffectApplicable(MobEffectEvent.Applicable event) {
+        if (!(event.getEntity() instanceof LivingEntity le)) return;
+        if (!(le.level() instanceof ServerLevel sl)) return;
+        Vec3 pos = le.position();
+        boolean inZone = BalancingAbility.ACTIVE_ZONES.stream()
+                .anyMatch(z -> z.isActive() && z.isInZone(pos, sl));
+        if (inZone) event.setResult(MobEffectEvent.Applicable.Result.DO_NOT_APPLY);
     }
 
     public static boolean isInStandInsZone(Vec3 pos, ServerLevel level) {

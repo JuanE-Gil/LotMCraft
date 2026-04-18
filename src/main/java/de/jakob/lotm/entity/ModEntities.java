@@ -10,6 +10,7 @@ import de.jakob.lotm.entity.custom.ability_entities.mother_pathway.CoffinEntity;
 import de.jakob.lotm.entity.custom.ability_entities.mother_pathway.DesolateAreaEntity;
 import de.jakob.lotm.entity.custom.projectiles.*;
 import de.jakob.lotm.entity.custom.ability_entities.red_priest_pathway.WarBannerEntity;
+import de.jakob.lotm.entity.custom.ability_entities.justiciar_pathway.JudgmentSwordEntity;
 import de.jakob.lotm.entity.custom.ability_entities.sun_pathway.JusticeSwordEntity;
 import de.jakob.lotm.entity.custom.ability_entities.sun_pathway.SunEntity;
 import de.jakob.lotm.entity.custom.ability_entities.sun_pathway.SunKingdomEntity;
@@ -116,6 +117,17 @@ public class ModEntities {
                     .fireImmune()
                     .noSummon()
                     .build("big_sun"));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<JudgmentSwordEntity>> JUDGMENT_SWORD =
+            ENTITY_TYPES.register("judgment_sword", () -> EntityType.Builder.of(
+                            (EntityType<JudgmentSwordEntity> type, Level level) ->
+                                    new JudgmentSwordEntity(type, level),
+                            MobCategory.MISC)
+                    .sized(2f, 2f)
+                    .clientTrackingRange(10)
+                    .updateInterval(1)
+                    .fireImmune()
+                    .build("judgment_sword"));
 
     public static final DeferredHolder<EntityType<?>, EntityType<JusticeSwordEntity>> JUSTICE_SWORD =
             ENTITY_TYPES.register("justice_sword", () -> EntityType.Builder.of(

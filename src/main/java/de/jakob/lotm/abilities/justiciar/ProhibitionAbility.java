@@ -17,11 +17,13 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ProhibitionAbility extends SelectableAbility {
 
     public static final List<ProhibitionZone> ACTIVE_ZONES = new CopyOnWriteArrayList<>();
+    public static final Map<UUID, Integer> FAIL_COUNT_BY_ENTITY = new ConcurrentHashMap<>();
 
     private static final int ZONE_DURATION = 3600;
     private static final int MAX_ZONES_PER_TYPE = 3;
@@ -68,15 +70,14 @@ public class ProhibitionAbility extends SelectableAbility {
         // Check for resistance from same-or-higher-rank beyonders in range
         double failChance = casterSeq <= 4 ? 0.15 : 0.4;
 
-        boolean failed = AbilityUtil.getNearbyEntities(entity, serverLevel, entity.position(), (int) ZONE_RADIUS)
+        Optional<LivingEntity> resistor = AbilityUtil.getNearbyEntities(entity, serverLevel, entity.position(), (int) ZONE_RADIUS)
                 .stream()
                 .filter(e -> e != entity && BeyonderData.isBeyonder(e))
-                .anyMatch(target -> {
-                    int targetSeq = BeyonderData.getSequence(target);
-                    return targetSeq <= casterSeq && random.nextDouble() < failChance;
-                });
+                .filter(target -> BeyonderData.getSequence(target) <= casterSeq && random.nextDouble() < failChance)
+                .findFirst();
 
-        if (failed) {
+        if (resistor.isPresent()) {
+            FAIL_COUNT_BY_ENTITY.merge(resistor.get().getUUID(), 1, Integer::sum);
             if (entity instanceof net.minecraft.server.level.ServerPlayer sp) {
                 sp.sendSystemMessage(Component.literal("Your Verdict has Failed").withStyle(ChatFormatting.RED));
             }
