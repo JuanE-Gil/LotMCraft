@@ -2,6 +2,7 @@ package de.jakob.lotm.util.beyonderMap;
 
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.attachments.ModAttachments;
+import de.jakob.lotm.attachments.UniquenessComponent;
 import de.jakob.lotm.gamerule.ModGameRules;
 import de.jakob.lotm.util.BeyonderData;
 import net.minecraft.core.HolderLookup;
@@ -71,6 +72,9 @@ public class BeyonderMap extends SavedData {
         String pathway = BeyonderData.getPathway(entity);
         int sequence = BeyonderData.getSequence(entity);
 
+        UniquenessComponent uniquenessComponent = entity.getData(ModAttachments.UNIQUENESS_COMPONENT);
+        String uniqueness = uniquenessComponent.hasUniqueness() ? uniquenessComponent.getUniquenessPathway() : "none";
+
 
         // Don't store if this is default/empty data
         if(pathway.equals("none") || sequence == LOTMCraft.NON_BEYONDER_SEQ) {
@@ -96,10 +100,13 @@ public class BeyonderMap extends SavedData {
                 .trueName(((ServerPlayer) entity).getGameProfile().getName())
                 .charStackArray(componentCharStack)
                 .pathwayHistory(pathwayHistory)
+                .uniqueness(uniqueness)
                 .build());
 
         setDirty();
     }
+
+
 
     public void put(LivingEntity entity, StoredData data){
         if(!(entity instanceof ServerPlayer)) return;
@@ -159,6 +166,26 @@ public class BeyonderMap extends SavedData {
         data.knownNames().add(name);
 
         map.put(entity.getUUID(), data);
+
+        setDirty();
+    }
+
+    public boolean anyPlayerHoldsUniqueness(String pathway) {
+        for (var data : map.values()) {
+            if (data.uniqueness().equalsIgnoreCase(pathway)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void setUniqueness(LivingEntity entity, String pathway) {
+        if (!(entity instanceof ServerPlayer)) return;
+
+        if (!contains(entity)) put(entity);
+
+        var data = map.get(entity.getUUID());
+        map.put(entity.getUUID(), StoredData.builder.copyFrom(data).uniqueness(pathway).build());
 
         setDirty();
     }

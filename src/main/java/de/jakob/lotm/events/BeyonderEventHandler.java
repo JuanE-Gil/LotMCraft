@@ -73,7 +73,7 @@ public class BeyonderEventHandler {
                     beyonderMap.markModified(serverPlayer, false);
 
                 } else if (beyonderMap.isDiffPathSeq(serverPlayer)) {
-                    // If they have data but it differs, update the map to match NBT (NBT is source of truth)
+                    // If they have data but it differs, update the map to match
                     beyonderMap.put(serverPlayer);
                 }
             }

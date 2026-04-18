@@ -10,8 +10,9 @@ import java.util.LinkedList;
 public record StoredData(String pathway, Integer sequence, HonorificName honorificName,
                          String trueName, LinkedList<MessageType> msgs, LinkedList<HonorificName> knownNames,
                          Boolean modified, Vec3 lastPosition,
-                         int[] charStack,           // single int — replaces CharacteristicStack
-                         String[] pathwayHistory  // fixed size 10 — replaces PathwayHistory record
+                         int[] charStack,
+                         String[] pathwayHistory,
+                         String uniqueness //none if no uniqueness :)
 ) {
 
     public static final String NBT_PATHWAY         = "beyonder_map_pathway";
@@ -22,6 +23,7 @@ public record StoredData(String pathway, Integer sequence, HonorificName honorif
     public static final String NBT_MODIFIED        = "beyonder_map_modified";
     public static final String NBT_CHAR_STACK      = "beyonder_map_char_stack";
     public static final String NBT_PATHWAY_HISTORY = "beyonder_map_pathway_history";
+    public static final String NBT_UNIQUENESS = "beyonder_map_uniqueness";
 
     public static final String NBT_LAST_POSITION_X = "beyonder_map_last_position_x";
     public static final String NBT_LAST_POSITION_Y = "beyonder_map_last_position_y";
@@ -102,6 +104,7 @@ public record StoredData(String pathway, Integer sequence, HonorificName honorif
                 .honorificName((newSequence >= 3) ? HonorificName.EMPTY : honorificName)
                 .charStack(0, sequence)   // reset stack on regression
                 .pathwayHistory(becomesNonBeyonder ? new String[10] : clearedHistory)
+                .uniqueness("none")
                 .build();
     }
 
@@ -119,6 +122,7 @@ public record StoredData(String pathway, Integer sequence, HonorificName honorif
         for (MessageType msg : msgs) msgList.add(msg.toNBT());
         tag.put(NBT_MESSAGES, msgList);
 
+        tag.putString(NBT_UNIQUENESS, uniqueness == null || uniqueness.isBlank() ? "none" : uniqueness);
         tag.putBoolean(NBT_MODIFIED, modified);
 
         tag.putDouble(NBT_LAST_POSITION_X, lastPosition.x());
@@ -154,6 +158,7 @@ public record StoredData(String pathway, Integer sequence, HonorificName honorif
         }
 
         boolean modified = tag.getBoolean(NBT_MODIFIED);
+        String uniqueness = tag.contains(NBT_UNIQUENESS) ? tag.getString(NBT_UNIQUENESS) : "none";
 
         Vec3 lastPos = new Vec3(
                 tag.getDouble(NBT_LAST_POSITION_X),
@@ -178,6 +183,6 @@ public record StoredData(String pathway, Integer sequence, HonorificName honorif
         }
 
         return new StoredData(path, seq, name, trueName, msgs,
-                new LinkedList<>(), modified, lastPos, charStack, history);
+                new LinkedList<>(), modified, lastPos, charStack, history, uniqueness);
     }
 }

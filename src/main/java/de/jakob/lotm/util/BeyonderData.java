@@ -193,6 +193,11 @@ public class BeyonderData {
             component.getPathwayHistory()[sequence] = pathway;
         }
 
+        UniquenessComponent uniquenessComponent = entity.getData(ModAttachments.UNIQUENESS_COMPONENT);
+        uniquenessComponent.setHasUniqueness(false);
+        uniquenessComponent.resetKillCount();
+        if(entity instanceof ServerPlayer serverPlayer) PacketHandler.syncUniquenessToPlayer(serverPlayer);
+
         LuckComponent luckComponent = entity.getData(ModAttachments.LUCK_COMPONENT);
         luckComponent.setLuck(0);
 
@@ -524,6 +529,8 @@ public class BeyonderData {
             return ClientBeyonderCache.getCharStack(entity.getUUID());
         }
 
+        if(sequence > 9 || sequence < 1) return 0;
+
         return entity.getData(ModAttachments.BEYONDER_COMPONENT).getCharacteristicStack()[sequence];
     }
 
@@ -540,7 +547,11 @@ public class BeyonderData {
             return ClientBeyonderCache.getCharStack(entity.getUUID());
         }
 
-        return entity.getData(ModAttachments.BEYONDER_COMPONENT).getCharacteristicStack()[getSequence(entity)];
+        int sequence = getSequence(entity);
+
+        if(sequence > 9 || sequence < 1) return 0;
+
+        return entity.getData(ModAttachments.BEYONDER_COMPONENT).getCharacteristicStack()[sequence];
     }
 
     public static String[] getPathwayHistory(LivingEntity entity) {

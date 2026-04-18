@@ -19,6 +19,7 @@ public class StoredDataBuilder {
     private Vec3 lastPosition;
     private int[] charStack;
     private String[] pathwayHistory;
+    private String uniqueness;
 
     public StoredDataBuilder(){
         clean();
@@ -35,6 +36,7 @@ public class StoredDataBuilder {
         lastPosition = new Vec3(0, 0, 0);
         charStack = new int[10];
         pathwayHistory = new String[10];
+            uniqueness = "none";
     }
 
     public StoredDataBuilder copyFrom(@Nullable StoredData data){
@@ -106,6 +108,11 @@ public class StoredDataBuilder {
         return this;
     }
 
+    public StoredDataBuilder uniqueness(String uniqueness) {
+        this.uniqueness = uniqueness;
+        return this;
+    }
+
     public StoredDataBuilder charStackArray(int[] stack) {
         this.charStack = Arrays.copyOf(stack, 10);
         return this;
@@ -120,7 +127,7 @@ public class StoredDataBuilder {
         StoredData buff = new StoredData(pathway, sequence,
                 honorificName, trueName,
                 msgs, knownNames, modified,
-                lastPosition, charStack, pathwayHistory);
+                lastPosition, charStack, pathwayHistory, uniqueness);
 
         clean();
 

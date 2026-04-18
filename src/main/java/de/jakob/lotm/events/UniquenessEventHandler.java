@@ -26,7 +26,7 @@ import java.util.Random;
 public class UniquenessEventHandler {
 
     private static final Random RANDOM = new Random();
-    private static final int SPAWN_CHECK_INTERVAL = 20 * 5;
+    private static final int SPAWN_CHECK_INTERVAL = 6000;
 
     private static final int SPAWN_RADIUS_BLOCKS = 180;
 
@@ -42,10 +42,10 @@ public class UniquenessEventHandler {
         }
     }
 
-    private static void trySpawnUniqueness(ServerLevel level, String pathway) {
+    public static void trySpawnUniqueness(ServerLevel level, String pathway) {
         if (UniquenessEntity.existsInWorld(level, pathway)) return;
 
-        if (anyPlayerHoldsUniqueness(level, pathway)) return;
+        if (UniquenessEntity.anyPlayerHoldsUniqueness(level, pathway)) return;
 
         if (BeyonderData.beyonderMap != null && BeyonderData.beyonderMap.count(pathway, 0) > 0) return;
 
@@ -73,18 +73,6 @@ public class UniquenessEventHandler {
         UniquenessEntity.trySpawn(level, finalPos, pathway);
     }
 
-    private static boolean anyPlayerHoldsUniqueness(ServerLevel level, String pathway) {
-        for (ServerPlayer player : level.players()) {
-            UniquenessComponent comp = player.getData(ModAttachments.UNIQUENESS_COMPONENT);
-            if (comp.hasUniqueness() && pathway.equalsIgnoreCase(comp.getUniquenessPathway())) {
-                return true;
-            }
-        }
-        // Also check all players in the beyonder map (even offline) via the stored attachment
-        // For offline players we rely on the attachment serialization (copyOnDeath preserves it)
-        return false;
-    }
-
     private static ServerPlayer findSeq1Player(ServerLevel level, String pathway) {
         for (ServerPlayer player : level.players()) {
             if (BeyonderData.getSequence(player) == 1
@@ -110,6 +98,7 @@ public class UniquenessEventHandler {
                 serverLevel.getServer().execute(() -> {
                     comp.setHasUniqueness(false);
                     comp.setUniquenessPathway("");
+                    BeyonderData.beyonderMap.setUniqueness(player, "none");
                     UniquenessEntity.trySpawn(serverLevel, deathPos, pathway);
                     if (player instanceof ServerPlayer sp) {
                         PacketHandler.syncUniquenessToPlayer(sp);

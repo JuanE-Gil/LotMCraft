@@ -6,6 +6,7 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.attachments.UniquenessComponent;
 import de.jakob.lotm.entity.custom.uniqueness.UniquenessEntity;
+import de.jakob.lotm.events.UniquenessEventHandler;
 import de.jakob.lotm.network.PacketHandler;
 import de.jakob.lotm.util.BeyonderData;
 import net.minecraft.commands.CommandSourceStack;
@@ -14,6 +15,7 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
 
@@ -39,6 +41,25 @@ public class UniquenessCommand {
                                 .executes(context -> {
                                     String pathway = StringArgumentType.getString(context, "pathway");
                                     return removeUniqueness(context.getSource(), pathway);
+                                })
+                        )
+                )
+                .then(Commands.literal("spawn")
+                        .then(Commands.argument("pathway", StringArgumentType.string())
+                                .suggests(PATHWAY_SUGGESTIONS)
+                                .executes(context -> {
+                                    String pathway = StringArgumentType.getString(context, "pathway");
+
+                                    if (UniquenessEntity.existsInWorld(context.getSource().getLevel(), pathway)) return 0;
+
+                                    if (UniquenessEntity.anyPlayerHoldsUniqueness(context.getSource().getLevel(), pathway)) return 0;
+
+                                    if (BeyonderData.beyonderMap != null && BeyonderData.beyonderMap.count(pathway, 0) > 0) return 0;
+
+                                    if (BeyonderData.beyonderMap == null || BeyonderData.beyonderMap.count(pathway, 1) == 0) return 0;
+
+                                    UniquenessEntity.trySpawn(context.getSource().getLevel(), context.getSource().getPosition(), pathway);
+                                    return 1;
                                 })
                         )
                 )
@@ -104,6 +125,7 @@ public class UniquenessCommand {
             UniquenessComponent comp = holder.getData(ModAttachments.UNIQUENESS_COMPONENT);
             comp.setHasUniqueness(false);
             comp.setUniquenessPathway("");
+            BeyonderData.beyonderMap.setUniqueness(holder, "none");
             PacketHandler.syncUniquenessToPlayer(holder);
             source.sendSuccess(() -> Component.literal("Removed uniqueness from " + holder.getName().getString()), false);
         }

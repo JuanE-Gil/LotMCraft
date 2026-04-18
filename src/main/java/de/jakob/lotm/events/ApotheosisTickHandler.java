@@ -70,6 +70,7 @@ public class ApotheosisTickHandler {
             comp.setHasUniqueness(false);
             comp.setUniquenessPathway("");
             comp.resetKillCount();
+            BeyonderData.beyonderMap.setUniqueness(player, "none");
 
             // Sync to client
             PacketHandler.syncUniquenessToPlayer((ServerPlayer) player);
