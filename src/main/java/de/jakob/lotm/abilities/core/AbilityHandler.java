@@ -249,6 +249,8 @@ public class AbilityHandler {
         abilities.add(new JusticeLanguageAbility("justice_language_ability"));
         abilities.add(new VerdictExileAbility("verdict_exile_ability"));
         abilities.add(new PunishmentAbility("punishment_ability"));
+        abilities.add(new LawAbility("law_ability"));
+        abilities.add(new ExecutionAbility("execution_ability"));
 
         // ERROR PATHWAY
         abilities.add(new TheftAbility("theft_ability"));

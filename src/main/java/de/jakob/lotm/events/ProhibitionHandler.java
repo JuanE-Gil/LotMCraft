@@ -29,6 +29,24 @@ public class ProhibitionHandler {
                 sp.sendSystemMessage(Component.literal("[Beyonder Abilities] is Prohibited here")
                         .withStyle(ChatFormatting.RED));
             }
+            return;
+        }
+
+        // Outside World — cancel ability use by players who are near-but-outside the zone
+        long now = serverLevel.getGameTime();
+        for (ProhibitionAbility.ProhibitionZone zone : ProhibitionAbility.ACTIVE_ZONES) {
+            if (zone.type != ProhibitionAbility.ProhibitionType.OUTSIDE_WORLD) continue;
+            if (!zone.level.equals(serverLevel)) continue;
+            if (zone.expiryTick < now) continue;
+            double dist = entity.position().distanceTo(zone.center);
+            if (dist > 40.0 && dist <= 50.0) {
+                event.setCanceled(true);
+                if (entity instanceof ServerPlayer sp) {
+                    sp.sendSystemMessage(Component.literal("[Outside World] Abilities from outside are Prohibited here")
+                            .withStyle(ChatFormatting.RED));
+                }
+                break;
+            }
         }
     }
 
@@ -87,6 +105,24 @@ public class ProhibitionHandler {
                         .withStyle(ChatFormatting.RED));
             }
         }
+
+        // Outside World — push players away from outside the zone who approach too close
+        for (ProhibitionAbility.ProhibitionZone zone : ProhibitionAbility.ACTIVE_ZONES) {
+            if (!zone.type.equals(ProhibitionAbility.ProhibitionType.OUTSIDE_WORLD)) continue;
+            if (!zone.level.equals(serverLevel)) continue;
+            if (!zone.isActive()) continue;
+            if (zone.ownerId.equals(player.getUUID())) continue;
+
+            double dist = pos.distanceTo(zone.center);
+            if (dist > 40.0 && dist <= 43.0) {
+                Vec3 direction = pos.subtract(zone.center).normalize();
+                if (direction.lengthSqr() < 0.001) direction = new Vec3(1, 0, 0);
+                player.setDeltaMovement(direction.scale(1.5));
+                player.hurtMarked = true;
+                player.sendSystemMessage(Component.literal("[Outside World] is Prohibited here")
+                        .withStyle(ChatFormatting.RED));
+            }
+        }
     }
 
     @SubscribeEvent
@@ -99,6 +135,14 @@ public class ProhibitionHandler {
             player.sendSystemMessage(Component.literal("[Item Use] is Prohibited here")
                     .withStyle(ChatFormatting.RED));
         }
+    }
+
+    public static boolean isInStandInsZone(Vec3 pos, ServerLevel level) {
+        return isInZone(pos, level, ProhibitionAbility.ProhibitionType.STAND_INS);
+    }
+
+    public static boolean isInMarionetteZone(Vec3 pos, ServerLevel level) {
+        return isInZone(pos, level, ProhibitionAbility.ProhibitionType.MARIONETTE_INTERCHANGE);
     }
 
     private static boolean isInZone(Vec3 pos, ServerLevel level, ProhibitionAbility.ProhibitionType type) {

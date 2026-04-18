@@ -49,7 +49,10 @@ public class ProhibitionAbility extends SelectableAbility {
                 "ability.lotmcraft.prohibition.combat",
                 "ability.lotmcraft.prohibition.flying",
                 "ability.lotmcraft.prohibition.item_use",
-                "ability.lotmcraft.prohibition.players"
+                "ability.lotmcraft.prohibition.players",
+                "ability.lotmcraft.prohibition.outside_world",
+                "ability.lotmcraft.prohibition.stand_ins",
+                "ability.lotmcraft.prohibition.marionette_interchange"
         };
     }
 
@@ -58,14 +61,26 @@ public class ProhibitionAbility extends SelectableAbility {
         if (level.isClientSide) return;
         ServerLevel serverLevel = (ServerLevel) level;
 
+        int casterSeq = BeyonderData.getSequence(entity);
+
+        // Options 5-7 (Outside World, Stand-ins, Marionette) require Seq 4 or lower
+        if (abilityIndex >= 5 && casterSeq > 4) {
+            if (entity instanceof net.minecraft.server.level.ServerPlayer sp) {
+                sp.sendSystemMessage(Component.literal("[Prohibition] This Law is not yet within your authority.")
+                        .withStyle(ChatFormatting.RED));
+            }
+            return;
+        }
+
         // Check for resistance from same-or-higher-rank beyonders in range
+        double failChance = casterSeq <= 4 ? 0.15 : 0.4;
+
         boolean failed = AbilityUtil.getNearbyEntities(entity, serverLevel, entity.position(), (int) ZONE_RADIUS)
                 .stream()
                 .filter(e -> e != entity && BeyonderData.isBeyonder(e))
                 .anyMatch(target -> {
                     int targetSeq = BeyonderData.getSequence(target);
-                    int casterSeq = BeyonderData.getSequence(entity);
-                    return targetSeq <= casterSeq && random.nextDouble() < 0.4;
+                    return targetSeq <= casterSeq && random.nextDouble() < failChance;
                 });
 
         if (failed) {
@@ -120,7 +135,10 @@ public class ProhibitionAbility extends SelectableAbility {
         COMBAT("Combat"),
         FLYING("Flying"),
         ITEM_USE("Item Use"),
-        PLAYERS("Players");
+        PLAYERS("Players"),
+        OUTSIDE_WORLD("Outside World"),
+        STAND_INS("Stand-ins"),
+        MARIONETTE_INTERCHANGE("Marionette Interchange");
 
         public final String displayName;
 

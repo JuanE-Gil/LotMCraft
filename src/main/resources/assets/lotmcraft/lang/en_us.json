@@ -778,6 +778,9 @@
   "ability.lotmcraft.prohibition.flying": "Prohibit Flying",
   "ability.lotmcraft.prohibition.item_use": "Prohibit Item Use",
   "ability.lotmcraft.prohibition.players": "Prohibit Players",
+  "ability.lotmcraft.prohibition.outside_world": "Prohibit Outside World",
+  "ability.lotmcraft.prohibition.stand_ins": "Law: Prohibit Stand-ins",
+  "ability.lotmcraft.prohibition.marionette_interchange": "Law: Prohibit Marionette Interchange",
 
   "lotmcraft.imprison_ability": "Imprison",
   "lotmcraft.imprison_ability.description": "Imprison a target, freezing them in place. Drains 300 Spirituality from you every 4 seconds. Re-cast to release.",
@@ -796,6 +799,16 @@
 
   "lotmcraft.punishment_ability": "Punishment",
   "lotmcraft.punishment_ability.description": "Mark a target for Punishment. While active, you emanate a dawn like glow. Triggering a Punishment condition grants you a random buff and inflicts a random debuff on the target.",
+
+  "lotmcraft.law_ability": "Law",
+  "lotmcraft.law_ability.description": "Declare a Law. The broader the Law, the shorter its duration.",
+  "ability.lotmcraft.law.weaken_mysticism": "Weaken Mysticism, Enhance Reality",
+  "ability.lotmcraft.law.enhance_mysticism": "Weaken Reality, Enhance Mysticism",
+  "ability.lotmcraft.law.solace": "Solace",
+  "ability.lotmcraft.law.law_of_sealing": "Law of Sealing",
+
+  "lotmcraft.execution_ability": "Execution",
+  "lotmcraft.execution_ability.description": "Execute a target from afar. Has a high chance of failing.",
 
   "lotm.ability.cogitation.tick": "Cogitating",
 
