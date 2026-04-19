@@ -544,6 +544,12 @@ public class ClientHandler {
         de.jakob.lotm.util.ClientSpiritCache.setSpiritTypeOrdinal(packet.spiritType());
     }
 
+    public static void handleSyncIntrospectMenuPacket(SyncIntrospectMenuPacket packet, UUID playerUUID) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.screen instanceof IntrospectScreen screen) {
+            screen.updateMenuData(packet.sequence(), packet.pathway(), ClientBeyonderCache.getDigestionProgress(playerUUID), packet.sanity());
+        }
+    }
     public static void handleApotheosisPacket(SyncApotheosisPacket packet) {
         ClientLevel level = Minecraft.getInstance().level;
         if (level == null) return;

@@ -119,19 +119,29 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
         if (showAllAbilities) {
             availableAbilities.addAll(LOTMCraft.abilityHandler.getAllAbilitiesUpToSequenceOrdered(menu.getSequence()));
         } else {
-            availableAbilities.addAll(LOTMCraft.abilityHandler.getByPathwayAndSequenceOrderedBySequence(menu.getPathway(), menu.getSequence()));
+            String[] pathwayHistoryCheck = ClientBeyonderCache.getPathwayHistory(minecraft.player.getUUID());
+            boolean hasSwitched = java.util.Arrays.stream(pathwayHistoryCheck)
+                    .anyMatch(e -> e != null && !e.isEmpty() && !e.equals(menu.getPathway()));
+            int[] stacks = BeyonderData.getCharStacks(minecraft.player);
+            boolean hasCharStack = false;
+            for (int i = 1; i <= 4; i++) {
+                if (stacks[i] > 0) { hasCharStack = true; break; }
+            }
+            if (hasSwitched && !hasCharStack) {
+                availableAbilities.addAll(LOTMCraft.abilityHandler.getByPathwayAndSequenceOrderedBySequence(menu.getPathway(), menu.getSequence())
+                        .stream().filter(a -> a.getRequirements().getOrDefault(menu.getPathway(), -1) <= 4)
+                        .filter(a -> !a.getId().equals("cogitation_ability") && !a.getId().equals("ally_ability")).toList());
+            } else {
+                availableAbilities.addAll(LOTMCraft.abilityHandler.getByPathwayAndSequenceOrderedBySequence(menu.getPathway(), menu.getSequence())
+                        .stream().filter(a -> !a.getId().equals("cogitation_ability") && !a.getId().equals("ally_ability")).toList());
+            }
 
-            // Also include abilities from previous pathways retained via domain switches.
-            // The switch point seq (e.g. 5) is where they left the old pathway, so only abilities
-            // from seq 5 and above (requirement >= switchSeq) carry over — not the seq 4 ability.
-            if (this.minecraft != null && this.minecraft.player != null) {
-                String[] pathwayHistory = ClientBeyonderCache.getPathwayHistory(this.minecraft.player.getUUID());
-                for (int seq = menu.getSequence() + 1; seq <= 9; seq++) {
-                    String historicalPathway = pathwayHistory[seq];
-                    if (historicalPathway != null && !historicalPathway.isEmpty()) {
-                        availableAbilities.addAll(LOTMCraft.abilityHandler.getByPathwayAndSequenceOrderedBySequence(historicalPathway, seq));
-                        break;
-                    }
+            String[] pathwayHistory = ClientBeyonderCache.getPathwayHistory(minecraft.player.getUUID());
+            for (int seq = menu.getSequence() + 1; seq <= 9; seq++) {
+                String historicalPathway = pathwayHistory[seq];
+                if (historicalPathway != null && !historicalPathway.isEmpty() && !historicalPathway.equals(menu.getPathway())) {
+                    availableAbilities.addAll(LOTMCraft.abilityHandler.getByPathwayAndSequenceOrderedBySequence(historicalPathway, seq));
+                    break;
                 }
             }
         }

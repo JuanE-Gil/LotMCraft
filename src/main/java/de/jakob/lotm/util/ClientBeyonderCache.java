@@ -11,11 +11,11 @@ public class ClientBeyonderCache {
     private static final Map<UUID, BeyonderClientData> dataCache = new ConcurrentHashMap<>();
 
     public static void updateData(UUID playerUUID, String pathway, int sequence, float spirituality, boolean griefingEnabled, boolean isPlayer, float digestionProgress) {
-        updateData(playerUUID, pathway, sequence, spirituality, griefingEnabled, isPlayer, digestionProgress, new String[10], 0);
+        updateData(playerUUID, pathway, sequence, spirituality, griefingEnabled, isPlayer, digestionProgress, new String[10], new int[10]);
     }
 
-    public static void updateData(UUID playerUUID, String pathway, int sequence, float spirituality, boolean griefingEnabled, boolean isPlayer, float digestionProgress, String[] pathwayHistory, int charStack) {
-        dataCache.put(playerUUID, new BeyonderClientData(pathway, sequence, spirituality, griefingEnabled, digestionProgress, pathwayHistory, charStack));
+    public static void updateData(UUID playerUUID, String pathway, int sequence, float spirituality, boolean griefingEnabled, boolean isPlayer, float digestionProgress, String[] pathwayHistory, int[] charStacks) {
+        dataCache.put(playerUUID, new BeyonderClientData(pathway, sequence, spirituality, griefingEnabled, digestionProgress, pathwayHistory, charStacks));
     }
 
     public static String getPathway(UUID playerUUID) {
@@ -30,13 +30,23 @@ public class ClientBeyonderCache {
 
     public static int getCharStack(UUID playerUUID) {
         BeyonderClientData data = dataCache.get(playerUUID);
-        return data != null ? data.charStack() : 0;
+        if (data == null) return 0;
+        int seq = data.sequence();
+        return (seq >= 0 && seq < 10) ? data.charStacks()[seq] : 0;
+    }
+
+    public static int[] getCharStacks(UUID playerUUID) {
+        BeyonderClientData data = dataCache.get(playerUUID);
+        return data != null ? data.charStacks() : new int[10];
     }
 
     public static void setCharStack(UUID playerUUID, int charStack) {
         BeyonderClientData data = dataCache.get(playerUUID);
         if (data != null) {
-            dataCache.put(playerUUID, new BeyonderClientData(data.pathway(), data.sequence(), data.spirituality(), data.griefingEnabled(), data.digestionProgress(), data.pathwayHistory(), charStack));
+            int[] stacks = java.util.Arrays.copyOf(data.charStacks(), 10);
+            int seq = data.sequence();
+            if (seq >= 0 && seq < 10) stacks[seq] = charStack;
+            dataCache.put(playerUUID, new BeyonderClientData(data.pathway(), data.sequence(), data.spirituality(), data.griefingEnabled(), data.digestionProgress(), data.pathwayHistory(), stacks));
         }
     }
 
@@ -81,5 +91,5 @@ public class ClientBeyonderCache {
     }
 
     // Inner record to store client-side beyonder data
-    private record BeyonderClientData(String pathway, int sequence, float spirituality, boolean griefingEnabled, float digestionProgress, String[] pathwayHistory, int charStack) {}
+    private record BeyonderClientData(String pathway, int sequence, float spirituality, boolean griefingEnabled, float digestionProgress, String[] pathwayHistory, int[] charStacks) {}
 }

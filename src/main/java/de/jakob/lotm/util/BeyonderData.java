@@ -27,12 +27,6 @@ import net.minecraft.world.entity.player.Player;
 import java.util.*;
 
 public class BeyonderData {
-    public static final String NBT_PATHWAY = "beyonder_pathway";
-    public static final String NBT_SEQUENCE = "beyonder_sequence";
-    public static final String NBT_SPIRITUALITY = "beyonder_spirituality";
-    public static final String NBT_GRIEFING_ENABLED = "beyonder_griefing_enabled";
-    public static final String NBT_DIGESTION_PROGRESS = "beyonder_digestion_progress";
-
     private static final int[] spiritualityLookup = {150000, 20000, 10000, 5000, 3900, 1900, 1200, 780, 200, 180};
     private static final double[] multiplier = {9, 4.25, 3.25, 2.15, 1.85, 1.4, 1.25, 1.1, 1.0, 1.0};
     private static final double[] sanityDecreaseMultiplier = {.003, .0125, .025, .05, .1, .65, .75, .88, 1.0, 1.0};
@@ -213,7 +207,7 @@ public class BeyonderData {
                 PacketHandler.syncBeyonderDataToPlayer(serverPlayer);
                 playerMap.put(serverPlayer);
 
-                SyncBeyonderDataPacket packet = new SyncBeyonderDataPacket(pathway, sequence, 0.0f, false, 0.0f, component.getPathwayHistory(), 0);
+                SyncBeyonderDataPacket packet = new SyncBeyonderDataPacket(pathway, sequence, component.getSpirituality(), false, 0.0f, component.getPathwayHistory(), component.getCharacteristicStack());
                 PacketHandler.sendToAllPlayers(packet);
 
                 // Disband team if the leader is no longer eligible (Red Priest seq <= 3).
@@ -302,7 +296,7 @@ public class BeyonderData {
         if(entity.level().isClientSide) {
             return ClientBeyonderCache.getSpirituality(entity.getUUID());
         }
-        if(!(entity instanceof Player player))
+        if(!(entity instanceof Player))
             return getMaxSpirituality(getPathway(entity), getSequence(entity));
         float spirituality = entity.getData(ModAttachments.BEYONDER_COMPONENT).getSpirituality();
         float maxSpirituality = getMaxSpirituality(getPathway(entity), getSequence(entity));
@@ -408,6 +402,18 @@ public class BeyonderData {
         }
     }
 
+    public static void setDigestionProgress(LivingEntity entity, float progress) {
+        if(!(entity instanceof Player player))
+            return;
+
+        player.getData(ModAttachments.BEYONDER_COMPONENT).setDigestionProgress(progress);
+
+        // Sync to client if this is server-side
+        if (!player.level().isClientSide() && player instanceof ServerPlayer serverPlayer) {
+            PacketHandler.syncBeyonderDataToPlayer(serverPlayer);
+        }
+    }
+
     public static float getMaxSpirituality(String path, int seq){
         if(seq >= LOTMCraft.NON_BEYONDER_SEQ || !(seq < spiritualityLookup.length) || seq <= -1)
             return 0f;
@@ -421,24 +427,12 @@ public class BeyonderData {
                     -> getMaxSpirituality(seq, 1);
             case "red_priest" -> getMaxSpirituality(seq, 0.8f);
             case "paragon" -> getMaxSpirituality(seq, 0.6f);
-            default -> 0f;
+            default -> 1f;
         };
     }
 
     private static float getMaxSpirituality(int sequence, float mult) {
         return spiritualityLookup[sequence] * mult;
-    }
-
-    public static void setDigestionProgress(LivingEntity entity, float progress) {
-        if(!(entity instanceof Player player))
-            return;
-
-        player.getData(ModAttachments.BEYONDER_COMPONENT).setDigestionProgress(progress);
-
-        // Sync to client if this is server-side
-        if (!player.level().isClientSide() && player instanceof ServerPlayer serverPlayer) {
-            PacketHandler.syncBeyonderDataToPlayer(serverPlayer);
-        }
     }
 
     public static void clearBeyonderData(LivingEntity entity) {
@@ -457,7 +451,7 @@ public class BeyonderData {
         if (!entity.level().isClientSide()) {
             if(entity instanceof ServerPlayer serverPlayer) {
                 // Send empty data to clear client cache
-                SyncBeyonderDataPacket packet = new SyncBeyonderDataPacket("none", 10, 0.0f, false, 0.0f, new String[10], 0);
+                SyncBeyonderDataPacket packet = new SyncBeyonderDataPacket("none", 10, 0.0f, false, 0.0f, new String[10], new int[10]);
                 PacketHandler.sendToPlayer(serverPlayer, packet);
             }
             else {
@@ -537,6 +531,14 @@ public class BeyonderData {
         return entity.getData(ModAttachments.BEYONDER_COMPONENT).getCharacteristicStack()[sequence];
     }
 
+    public static int[] getCharStacks(LivingEntity entity) {
+        if(entity.level().isClientSide) {
+            return ClientBeyonderCache.getCharStacks(entity.getUUID());
+        }
+
+        return entity.getData(ModAttachments.BEYONDER_COMPONENT).getCharacteristicStack();
+    }
+
     public static int getCurrentCharStack(LivingEntity entity) {
         if(entity.level().isClientSide) {
             return ClientBeyonderCache.getCharStack(entity.getUUID());
@@ -563,7 +565,14 @@ public class BeyonderData {
 
     public static boolean hasSwitchedPathway(LivingEntity entity) {
         String currentPathway = getPathway(entity);
-        String[] history = getPathwayHistory(entity);
+        String[] history;
+        if (entity.level().isClientSide) {
+            history = ClientBeyonderCache.getPathwayHistory(entity.getUUID());
+        } else {
+            var data = playerMap.get(entity);
+            if (data.isEmpty()) return false;
+            history = data.get().pathwayHistory();
+        }
         for (String entry : history) {
             if (entry != null && !entry.isEmpty() && !entry.equals(currentPathway)) return true;
         }
