@@ -52,6 +52,7 @@ public class BeyonderData {
         implementedRecipes.put("abyss", List.of(new Integer[]{9, 8, 7, 6, 5, 4, 3, 2, 1}));
         implementedRecipes.put("wheel_of_fortune", List.of(new Integer[]{9, 8, 7, 6, 5, 4, 3, 2, 1}));
         implementedRecipes.put("error", List.of(new Integer[]{9, 8, 7, 6, 5, 4, 3, 2, 1}));
+        implementedRecipes.put("death", List.of(new Integer[]{9, 8, 7, 6, 5, 4, 3, 2, 1}));
 
     }
 
@@ -90,10 +91,10 @@ public class BeyonderData {
             "demoness",
             "red_priest",
             "mother",
-            "mother",
             "abyss",
             "visionary",
-            "wheel_of_fortune"
+            "wheel_of_fortune",
+            "death"
     );
 
     public static int getHighestImplementedSequence(String pathway) {

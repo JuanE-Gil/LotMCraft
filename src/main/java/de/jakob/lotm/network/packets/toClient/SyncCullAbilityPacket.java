@@ -1,7 +1,7 @@
 package de.jakob.lotm.network.packets.toClient;
 
 import de.jakob.lotm.LOTMCraft;
-import de.jakob.lotm.rendering.CullOverlay;
+import de.jakob.lotm.network.packets.handlers.ClientHandler;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -28,11 +28,7 @@ public record SyncCullAbilityPacket(boolean active) implements CustomPacketPaylo
     public static void handle(SyncCullAbilityPacket packet, IPayloadContext context) {
         context.enqueueWork(() -> {
             if (context.flow().getReceptionSide().isClient()) {
-                if(packet.active()) {
-                    CullOverlay.playersWithCullActivated.add(context.player().getUUID());
-                } else {
-                    CullOverlay.playersWithCullActivated.remove(context.player().getUUID());
-                }
+                ClientHandler.syncCullAbility(packet.active(), context.player().getUUID());
             }
         });
     }

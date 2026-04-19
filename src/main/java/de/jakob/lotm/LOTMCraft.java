@@ -15,6 +15,7 @@ import de.jakob.lotm.entity.ModEntities;
 import de.jakob.lotm.entity.client.ability_entities.big_moon.BigMoonRenderer;
 import de.jakob.lotm.entity.client.ability_entities.big_sun.BigSunRenderer;
 import de.jakob.lotm.entity.client.ability_entities.darkness_pathway.concealed_domain.ConcealedDomainRenderer;
+import de.jakob.lotm.entity.client.ability_entities.death_pathway.DeathDivineKingdomEntityRenderer;
 import de.jakob.lotm.entity.client.ability_entities.door_pathway.apprentice_door.ApprenticeDoorRenderer;
 import de.jakob.lotm.entity.client.ability_entities.door_pathway.black_hole.BlackHoleRenderer;
 import de.jakob.lotm.entity.client.ability_entities.door_pathway.space_collapse.SpaceCollapseRenderer;
@@ -251,6 +252,7 @@ public class LOTMCraft
             EntityRenderers.register(ModEntities.GIANT_LIGHTNING.get(), GiantLightningRenderer::new);
             EntityRenderers.register(ModEntities.ELECTROMAGNETIC_TORNADO.get(), ElectromagneticTornadoRenderer::new);
             EntityRenderers.register(ModEntities.SUN_KINGDOM.get(), SunKingdomEntityRenderer::new);
+            EntityRenderers.register(ModEntities.DEATH_DIVINE_KINGDOM.get(), DeathDivineKingdomEntityRenderer::new);
             EntityRenderers.register(ModEntities.DISTORTION_FIELD.get(), DistortionFieldRenderer::new);
             EntityRenderers.register(ModEntities.SPEAR_OF_DESTRUCTION.get(), SpearOfDestructionProjectileRenderer::new);
             EntityRenderers.register(ModEntities.RETURN_PORTAL.get(), ReturnPortalRenderer::new);
