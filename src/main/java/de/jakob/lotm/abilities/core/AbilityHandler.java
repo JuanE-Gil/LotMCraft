@@ -246,6 +246,7 @@ public class AbilityHandler {
         abilities.add(new CycleOfFateAbility("cycle_of_fate_ability"));
 
         // JUSTICIAR PATHWAY
+        abilities.add(new OrderProxyAbility("order_proxy_ability"));
         abilities.add(new AuthorityAbility("authority_ability"));
         abilities.add(new ProhibitionAbility("prohibition_ability"));
         abilities.add(new ImprisonAbility("imprison_ability"));

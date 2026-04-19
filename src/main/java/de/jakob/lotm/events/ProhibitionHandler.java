@@ -112,7 +112,6 @@ public class ProhibitionHandler {
                         .withStyle(ChatFormatting.RED));
             }
         }
-
         // Outside World — push players away from outside the zone who approach too close
         for (ProhibitionAbility.ProhibitionZone zone : ProhibitionAbility.ACTIVE_ZONES) {
             if (!zone.type.equals(ProhibitionAbility.ProhibitionType.OUTSIDE_WORLD)) continue;

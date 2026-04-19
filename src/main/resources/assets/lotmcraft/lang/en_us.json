@@ -794,6 +794,15 @@
   "ability.lotmcraft.authority.slow": "Slow",
   "ability.lotmcraft.authority.armor_remove": "Armor Remove",
 
+  "lotmcraft.order_proxy_ability": "Order Proxy",
+  "lotmcraft.order_proxy_ability.description": "The Hand of Order's combined authority. Sacrifice yourself for a brief transcendence, declare permanent prohibitions, or impose permanent laws.",
+  "ability.lotmcraft.order_proxy.order_sacrifice": "Order Sacrifice",
+  "ability.lotmcraft.order_proxy.prohibition_resurrecting": "Order Prohibition: Resurrecting",
+  "ability.lotmcraft.order_proxy.prohibition_dying": "Order Prohibition: Dying",
+  "ability.lotmcraft.order_proxy.prohibition_demigods": "Order Prohibition: Demigods",
+  "ability.lotmcraft.order_proxy.law_combat": "Order Law: Combat",
+  "ability.lotmcraft.order_proxy.law_losing_control": "Order Law: Losing Control",
+
   "lotmcraft.prohibition_ability": "Prohibition",
   "lotmcraft.prohibition_ability.description": "Declare a type of activity Prohibited within a 40-block zone. Up to 3 zones per type may be active simultaneously.",
   "ability.lotmcraft.prohibition.beyonder_abilities": "Prohibit Beyonder Abilities",
@@ -874,6 +883,8 @@
   "item.lotmcraft.physical_enhancements_visionary_ability": "Physical Enhancements",
   "item.lotmcraft.physical_enhancements_wheel_of_fortune_ability": "Physical Enhancements",
   "item.lotmcraft.physical_enhancements_justiciar_ability": "Physical Enhancements",
+
+
   "item.lotmcraft.order_justiciar_ability": "Order",
   "item.lotmcraft.order_justiciar_ability.description": "Subconsciously maintain Order. Sense when murder is committed within 40 blocks.",
   "item.lotmcraft.enhanced_mental_attributes_justiciar_ability": "Enhanced Mental Attributes",
