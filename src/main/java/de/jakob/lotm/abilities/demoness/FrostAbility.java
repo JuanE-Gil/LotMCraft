@@ -34,7 +34,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class FrostAbility extends SelectableAbility {
 
     public FrostAbility(String id) {
-        super(id, .75f, "freezing");
+        super(id, 1f, "freezing");
         postsUsedAbilityEventManually = true;
     }
 
@@ -89,7 +89,7 @@ public class FrostAbility extends SelectableAbility {
 
             ParticleUtil.spawnParticles((ServerLevel) level, ParticleTypes.SNOWFLAKE, startPos, 70, radius.get(), 0.3, radius.get(), 0);
 
-            AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, radius.get() - .4, radius.get() + .4, DamageLookup.lookupDamage(7, .8) * (float) multiplier(entity), startPos, true, false, true, 0, 0, ModDamageTypes.source(level, ModDamageTypes.DEMONESS_GENERIC, entity));
+            AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, radius.get() - .4, radius.get() + .4, DamageLookup.lookupDamage(7, .8) *(int) Math.max(multiplier(entity)/3,1), startPos, true, false, true, 0, 0, ModDamageTypes.source(level, ModDamageTypes.DEMONESS_GENERIC, entity));
             AbilityUtil.addPotionEffectToNearbyEntities((ServerLevel) level, entity, radius.get(), startPos, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20 * 5, 10, false, false, false));
 
             if(BeyonderData.isGriefingEnabled(entity)) {
@@ -130,11 +130,11 @@ public class FrostAbility extends SelectableAbility {
             return;
 
         Vec3 startPos = VectorUtil.getRelativePosition(entity.getEyePosition().add(entity.getLookAngle().normalize()), entity.getLookAngle().normalize(), 0, random.nextDouble(1, 2.85f), random.nextDouble(-.1, .6));
-        Vec3 direction = AbilityUtil.getTargetLocation(entity, 50, 1.4f).subtract(startPos).normalize();
+        Vec3 direction = AbilityUtil.getTargetLocation(entity, 50*(int) Math.max(multiplier(entity)/4,1), 1.4f).subtract(startPos).normalize();
 
         level.playSound(null, startPos.x, startPos.y, startPos.z, Blocks.ICE.getSoundType(Blocks.ICE.defaultBlockState(), level, BlockPos.containing(startPos.x, startPos.y, startPos.z), null).getBreakSound(), entity.getSoundSource(), 1.0f, 1.0f);
 
-        FrostSpearProjectileEntity spear = new FrostSpearProjectileEntity(level, entity, DamageLookup.lookupDamage(7, .8) * (float) multiplier(entity), BeyonderData.isGriefingEnabled(entity));
+        FrostSpearProjectileEntity spear = new FrostSpearProjectileEntity(level, entity, DamageLookup.lookupDamage(7, .8) *(int) Math.max(multiplier(entity)/3,1), BeyonderData.isGriefingEnabled(entity));
         spear.setPos(startPos.x, startPos.y, startPos.z); // Set initial position
         spear.shoot(direction.x, direction.y, direction.z, 1.6f, 0);
         level.addFreshEntity(spear);
@@ -146,7 +146,7 @@ public class FrostAbility extends SelectableAbility {
             return;
 
         Vec3 startPos = VectorUtil.getRelativePosition(entity.getEyePosition().add(entity.getLookAngle().normalize()), entity.getLookAngle().normalize(), 0, random.nextDouble(-.65, .65), random.nextDouble(-.1, .6));
-        Vec3 direction = AbilityUtil.getTargetLocation(entity, 10, 1.4f).subtract(startPos).normalize();
+        Vec3 direction = AbilityUtil.getTargetLocation(entity, 10*(int) Math.max(multiplier(entity)/4,1), 1.4f).subtract(startPos).normalize();
 
         AtomicReference<Vec3> currentPos = new AtomicReference<>(startPos);
 
@@ -160,7 +160,7 @@ public class FrostAbility extends SelectableAbility {
 
             Vec3 pos = currentPos.get();
 
-            if(AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 2.5f, DamageLookup.lookupDamage(7, .75) * (float) multiplier(entity), pos, true, false, true, 0, ModDamageTypes.source(level, ModDamageTypes.DEMONESS_GENERIC, entity))) {
+            if(AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 2.5f, DamageLookup.lookupDamage(7, .75) *(int) Math.max(multiplier(entity)/3,1), pos, true, false, true, 0, ModDamageTypes.source(level, ModDamageTypes.DEMONESS_GENERIC, entity))) {
                 hasHit.set(true);
                 AbilityUtil.addPotionEffectToNearbyEntities((ServerLevel) level, entity, 2.5f, pos, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20 * 3, 5, false, false, false));
                 return;
