@@ -16,7 +16,7 @@ public class MiracleOfResurrectionComponent {
     }
 
     public void setResurrectionAttempts(int count) {
-        resurrectionAttempts = count;
+        this.resurrectionAttempts = count;
     }
 
     public static final IAttachmentSerializer<CompoundTag, MiracleOfResurrectionComponent> SERIALIZER =

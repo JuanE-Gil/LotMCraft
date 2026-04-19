@@ -270,6 +270,14 @@ public class ModAttachments {
                             .build()
             );
 
+    public static final Supplier<AttachmentType<ShapeShiftComponent>> SHAPE_SHIFT =
+            ATTACHMENT_TYPES.register("shape_shift", () ->
+                    AttachmentType.builder(ShapeShiftComponent::new)
+                            .serialize(ShapeShiftComponent.SERIALIZER)
+                            .copyOnDeath()
+                            .build()
+            );
+
     public static void register(IEventBus eventBus) {
         ATTACHMENT_TYPES.register(eventBus);
     }

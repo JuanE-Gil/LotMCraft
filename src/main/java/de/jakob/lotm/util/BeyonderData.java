@@ -313,26 +313,6 @@ public class BeyonderData {
         return Math.max(0, spirituality);
     }
 
-    public static void setSpirituality(LivingEntity entity, float amount) {
-        if(!(entity instanceof Player player))
-            return;
-        entity.getPersistentData().putFloat(NBT_SPIRITUALITY, Math.max(0, amount));
-
-        float maxSpirituality = getMaxSpirituality(getSequence(entity));
-
-        if(maxSpirituality <= 0) {
-            return;
-        }
-
-        float progress = (amount) / maxSpirituality;
-        SpiritualityProgressTracker.setProgress(player.getUUID(), progress);
-
-        // Sync to client if this is server-side
-        if (!entity.level().isClientSide() && entity instanceof ServerPlayer serverPlayer) {
-            PacketHandler.syncBeyonderDataToPlayer(serverPlayer);
-        }
-    }
-
     public static void reduceSpirituality(LivingEntity entity, float amount) {
         if(!(entity instanceof Player))
             return;

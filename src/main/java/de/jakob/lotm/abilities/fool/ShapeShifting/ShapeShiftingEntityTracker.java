@@ -8,6 +8,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
@@ -59,6 +60,10 @@ public class ShapeShiftingEntityTracker {
         Set<String> currentlyNearby = new HashSet<>();
 
         for (Entity entity : nearbyEntities) {
+            if (entity instanceof Player targetPlayer) {
+                if (targetPlayer.isCreative() || targetPlayer.isSpectator()) continue;
+            }
+
             String entityType = getEntityTypeString(entity);
             currentlyNearby.add(entityType);
 

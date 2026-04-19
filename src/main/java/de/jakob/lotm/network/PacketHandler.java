@@ -304,12 +304,6 @@ public class PacketHandler {
         );
 
         registrar.playToClient(
-                SkinDataPacket.TYPE,
-                SkinDataPacket.STREAM_CODEC,
-                SkinDataPacket::handle
-        );
-
-        registrar.playToClient(
                 DarknessEffectPacket.TYPE,
                 DarknessEffectPacket.STREAM_CODEC,
                 DarknessEffectPacket::handle
@@ -656,18 +650,6 @@ public class PacketHandler {
         );
 
         registrar.playToServer(
-                SkinChangePacket.TYPE,
-                SkinChangePacket.STREAM_CODEC,
-                SkinChangePacket::handle
-        );
-
-        registrar.playToServer(
-                SkinRestorePacket.TYPE,
-                SkinRestorePacket.STREAM_CODEC,
-                SkinRestorePacket::handle
-        );
-
-        registrar.playToServer(
                 InventoryOpenedPacket.TYPE,
                 InventoryOpenedPacket.STREAM_CODEC,
                 InventoryOpenedPacket::handle);
@@ -778,11 +760,6 @@ public class PacketHandler {
     public static void sendToTrackingAndSelf(Entity entity, CustomPacketPayload payload) {
         if (!(entity.level() instanceof ServerLevel)) return;
         PacketDistributor.sendToPlayersTrackingEntityAndSelf(entity, payload);
-    }
-
-    public static void syncSkinDataToAllPlayers(String playerName, String skinTexture, String skinSignature) {
-        SkinDataPacket packet = new SkinDataPacket(playerName, skinTexture, skinSignature);
-        sendToAllPlayers(packet);
     }
 
     public static void sendToAllPlayers(CustomPacketPayload payload) {
