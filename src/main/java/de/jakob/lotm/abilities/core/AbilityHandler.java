@@ -246,8 +246,8 @@ public class AbilityHandler {
         abilities.add(new CycleOfFateAbility("cycle_of_fate_ability"));
 
         // JUSTICIAR PATHWAY
-        abilities.add(new OrderProxyAbility("order_proxy_ability"));
         abilities.add(new AuthorityAbility("authority_ability"));
+        abilities.add(new EyeOfOrderAbility("eye_of_order_ability"));
         abilities.add(new ProhibitionAbility("prohibition_ability"));
         abilities.add(new ImprisonAbility("imprison_ability"));
         abilities.add(new ConfinementAbility("confinement_ability"));
@@ -261,6 +261,7 @@ public class AbilityHandler {
         abilities.add(new DeliveringJudgmentAbility("delivering_judgment_ability"));
         abilities.add(new ExileOfBalanceAbility("exile_of_balance_ability"));
         abilities.add(new IndividualBalanceAbility("individual_balance_ability"));
+        abilities.add(new OrderProxyAbility("order_proxy_ability"));
 
         // ERROR PATHWAY
         abilities.add(new TheftAbility("theft_ability"));
