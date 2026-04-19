@@ -9,6 +9,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.common.NeoForgeMod;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,7 +27,7 @@ public class GolemCreationAbility extends Ability {
 
     @Override
     public float getSpiritualityCost() {
-        return 600;
+        return 1200;
     }
 
     @Override
@@ -41,15 +42,18 @@ public class GolemCreationAbility extends Ability {
         serverLevel.addFreshEntity(golem);
         AttributeInstance maxHealth = golem.getAttribute(Attributes.MAX_HEALTH);
         if (maxHealth != null) {
-            maxHealth.setBaseValue(200.0);
+            maxHealth.setBaseValue(200.0*(int)Math.max(multiplier(entity)/4,1));
         }
-
+        AttributeInstance attribute = golem.getAttribute(Attributes.SCALE);
+        if (attribute != null) {
+            attribute.setBaseValue(2*(int)Math.max(multiplier(entity)/4,1));
+        }
         AttributeInstance attackDamage = golem.getAttribute(Attributes.ATTACK_DAMAGE);
         if (attackDamage != null) {
-            attackDamage.setBaseValue(40.0);
+            attackDamage.setBaseValue(40.0*(int)Math.max(multiplier(entity)/4,1));
         }
 
-        golem.setHealth(200.0F);
+        golem.setHealth(200.0F*(int)Math.max(multiplier(entity)/4,1));
         AllyUtil.makeAllies(entity, golem, false);
     }
 }

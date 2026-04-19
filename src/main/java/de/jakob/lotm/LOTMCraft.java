@@ -47,6 +47,7 @@ import de.jakob.lotm.entity.client.ability_entities.tyrant_pathway.electromagnet
 import de.jakob.lotm.entity.client.ability_entities.door_pathway.exile_doors.ExileDoorsRenderer;
 import de.jakob.lotm.entity.client.ability_entities.tyrant_pathway.giant_lightning.GiantLightningRenderer;
 import de.jakob.lotm.entity.client.ability_entities.grafting.GraftingLocationRenderer;
+import de.jakob.lotm.entity.client.ability_entities.justiciar_pathway.judgment_sword.JudgmentSwordRenderer;
 import de.jakob.lotm.entity.client.ability_entities.sun_pathway.justice_sword.JusticeSwordRenderer;
 import de.jakob.lotm.entity.client.ability_entities.tyrant_pathway.lightning.LightningRenderer;
 import de.jakob.lotm.entity.client.ability_entities.tyrant_pathway.lightning_branch.LightningBranchRenderer;
@@ -244,6 +245,7 @@ public class LOTMCraft
             EntityRenderers.register(ModEntities.BLACK_HOLE.get(), BlackHoleRenderer::new);
             EntityRenderers.register(ModEntities.WAR_BANNER.get(), WarBannerRenderer::new);
             EntityRenderers.register(ModEntities.Meteor.get(), MeteorRenderer::new);
+            EntityRenderers.register(ModEntities.JUDGMENT_SWORD.get(), JudgmentSwordRenderer::new);
             EntityRenderers.register(ModEntities.JUSTICE_SWORD.get(), JusticeSwordRenderer::new);
             EntityRenderers.register(ModEntities.SUN.get(), SunRenderer::new);
             EntityRenderers.register(ModEntities.SPEAR_OF_LIGHT.get(), SpearOfLightProjectileRenderer::new);
@@ -273,6 +275,7 @@ public class LOTMCraft
 
             // Spirits
             EntityRenderers.register(ModEntities.SPIRIT_DERVISH_ENTITY.get(), SpiritDervishRenderer::new);
+            EntityRenderers.register(ModEntities.UNIQUENESS_ENTITY.get(), de.jakob.lotm.entity.client.uniqueness.UniquenessEntityRenderer::new);
             EntityRenderers.register(ModEntities.SPIRIT_BUBBLES_ENTITY.get(), SpiritBubblesRenderer::new);
             EntityRenderers.register(ModEntities.SPIRIT_BLUE_WIZARD.get(), SpiritBlueWizardRenderer::new);
             EntityRenderers.register(ModEntities.SPIRIT_TRANSLUCENT_WIZARD.get(), SpiritTranslucentWizardRenderer::new);

@@ -120,6 +120,7 @@ public class AbilityHandler {
 
 
         // FOOL PATHWAY
+        abilities.add(new FoolingAbility("fooling_ability"));
         abilities.add(new AirBulletAbility("air_bullet_ability"));
         abilities.add(new FlameControllingAbility("flame_controlling_ability"));
         abilities.add(new PaperFigurineSubstituteAbility("paper_figurine_substitute_ability"));
@@ -140,9 +141,11 @@ public class AbilityHandler {
         abilities.add(new SpiritCommandingAbility("spirit_commanding_ability"));
         abilities.add(new NightDomainAbility("night_domain_ability"));
         abilities.add(new HairEntanglementAbility("hair_entanglement_ability"));
+        abilities.add(new LesserConcealmentAbility("lesser_concealment_ability"));
         abilities.add(new HorrorAuraAbility("horror_aura_ability"));
         abilities.add(new SurgeOfDarknessAbility("surge_of_darkness_ability"));
         abilities.add(new ConcealmentAbility("concealment_ability"));
+        abilities.add(new IdentityConcealmentAbility("identity_concealment_ability"));
         abilities.add(new ConcealedDomainAbility("concealed_domain_ability"));
         abilities.add(new SwordOfDarknessAbility("sword_of_darkness_ability"));
 
@@ -233,6 +236,7 @@ public class AbilityHandler {
         abilities.add(new PsycheStormAbility("psyche_storm_ability"));
         abilities.add(new CalamityAttractionAbility("calamity_attraction_ability"));
         abilities.add(new LuckReleaseAbility("luck_release_ability"));
+        abilities.add(new LuckPerceptionAbility("luck_perception_ability"));
         abilities.add(new MisfortuneGiftingAbility("misfortune_gifting_ability"));
         abilities.add(new MisfortuneFieldAbility("misfortune_field_ability"));
         abilities.add(new BlessingAbility("blessing_ability"));
@@ -242,14 +246,21 @@ public class AbilityHandler {
         abilities.add(new CycleOfFateAbility("cycle_of_fate_ability"));
 
         // JUSTICIAR PATHWAY
+        abilities.add(new OrderProxyAbility("order_proxy_ability"));
         abilities.add(new AuthorityAbility("authority_ability"));
         abilities.add(new ProhibitionAbility("prohibition_ability"));
         abilities.add(new ImprisonAbility("imprison_ability"));
         abilities.add(new ConfinementAbility("confinement_ability"));
         abilities.add(new JusticeLanguageAbility("justice_language_ability"));
         abilities.add(new VerdictExileAbility("verdict_exile_ability"));
-        abilities.add(new EyeOfOrderAbility("eye_of_order_ability"));
-
+        abilities.add(new PunishmentAbility("punishment_ability"));
+        abilities.add(new LawAbility("law_ability"));
+        abilities.add(new ExecutionAbility("execution_ability"));
+        abilities.add(new BalancingAbility("balancing_ability"));
+        abilities.add(new SwordOfJudgmentAbility("sword_of_judgment_ability"));
+        abilities.add(new DeliveringJudgmentAbility("delivering_judgment_ability"));
+        abilities.add(new ExileOfBalanceAbility("exile_of_balance_ability"));
+        abilities.add(new IndividualBalanceAbility("individual_balance_ability"));
 
         // ERROR PATHWAY
         abilities.add(new TheftAbility("theft_ability"));

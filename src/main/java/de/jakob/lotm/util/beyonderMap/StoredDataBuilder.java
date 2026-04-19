@@ -17,7 +17,7 @@ public class StoredDataBuilder {
     private LinkedList<HonorificName> knownNames;
     private Boolean modified;
     private Vec3 lastPosition;
-    private int charStack;
+    private int[] charStack;
     private String[] pathwayHistory;
 
     public StoredDataBuilder(){
@@ -33,7 +33,7 @@ public class StoredDataBuilder {
         knownNames = new LinkedList<>();
         modified = false;
         lastPosition = new Vec3(0, 0, 0);
-        charStack = 0;
+        charStack = new int[10];
         pathwayHistory = new String[10];
     }
 
@@ -49,7 +49,7 @@ public class StoredDataBuilder {
             knownNames = data.knownNames();
             modified = data.modified();
             lastPosition = data.lastPosition();
-            charStack = data.charStack();
+            charStack = Arrays.copyOf(data.charStack(), 10);
             pathwayHistory = Arrays.copyOf(data.pathwayHistory(), 10);
         }
 
@@ -96,8 +96,18 @@ public class StoredDataBuilder {
         return this;
     }
 
-    public StoredDataBuilder charStack(int stack) {
-        charStack = stack;
+    public StoredDataBuilder charStack(int stack, int sequence) {
+        charStack[sequence] = stack;
+        return this;
+    }
+
+    public StoredDataBuilder clearCharStack() {
+        charStack = new int[10];
+        return this;
+    }
+
+    public StoredDataBuilder charStackArray(int[] stack) {
+        this.charStack = Arrays.copyOf(stack, 10);
         return this;
     }
 

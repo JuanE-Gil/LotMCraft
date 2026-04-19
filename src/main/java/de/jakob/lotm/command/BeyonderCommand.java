@@ -72,7 +72,7 @@ public class BeyonderCommand {
             }
             
             // Call the setBeyonder method
-            BeyonderData.setBeyonder(target, pathway, sequence);
+            BeyonderData.setBeyonder(target, pathway, sequence, false, true, true, true);
 
             if(target instanceof Player player) {
                 var optional = BeyonderData.beyonderMap.get(player);

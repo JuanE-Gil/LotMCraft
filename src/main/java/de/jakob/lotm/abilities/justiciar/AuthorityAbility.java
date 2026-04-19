@@ -2,7 +2,9 @@ package de.jakob.lotm.abilities.justiciar;
 
 import de.jakob.lotm.abilities.core.AbilityUsedEvent;
 import de.jakob.lotm.abilities.core.SelectableAbility;
+import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityUtil;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffect;
@@ -58,6 +60,15 @@ public class AuthorityAbility extends SelectableAbility {
         }
     }
 
+    // ── Seq 4 Enhancement: Stun ───────────────────────────────────────────────
+
+    private void applyStunIfEnhanced(LivingEntity caster, LivingEntity target) {
+        if (BeyonderData.getSequence(caster) <= 4) {
+            target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 127, false, false));
+            target.setDeltaMovement(Vec3.ZERO);
+        }
+    }
+
     // ── Spell 1: Strip Defense ────────────────────────────────────────────────
 
     private void stripDefense(Level level, LivingEntity entity) {
@@ -70,6 +81,8 @@ public class AuthorityAbility extends SelectableAbility {
                     .map(MobEffectInstance::getEffect)
                     .collect(Collectors.toList());
             toRemove.forEach(target::removeEffect);
+            target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 20 * 8, 0));
+            applyStunIfEnhanced(entity, target);
         });
 
         NeoForge.EVENT_BUS.post(new AbilityUsedEvent(serverLevel, entity.position(), entity, this, interactionFlags, 15, 20 * 2));
@@ -83,6 +96,8 @@ public class AuthorityAbility extends SelectableAbility {
 
         AbilityUtil.getNearbyEntities(entity, serverLevel, entity.position(), 15).forEach(target -> {
             target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20 * 20, 1)); // Slowness II, 20 seconds
+            target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 20 * 8, 0));
+            applyStunIfEnhanced(entity, target);
         });
 
         NeoForge.EVENT_BUS.post(new AbilityUsedEvent(serverLevel, entity.position(), entity, this, interactionFlags, 15, 20 * 2));
@@ -95,6 +110,8 @@ public class AuthorityAbility extends SelectableAbility {
         ServerLevel serverLevel = (ServerLevel) level;
 
         AbilityUtil.getNearbyEntities(entity, serverLevel, entity.position(), 15).forEach(target -> {
+            target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 20 * 8, 0));
+            applyStunIfEnhanced(entity, target);
             if (random.nextDouble() < 0.4) {
                 List<EquipmentSlot> equippedSlots = new ArrayList<>();
                 for (EquipmentSlot slot : ARMOR_SLOTS) {

@@ -2,7 +2,11 @@ package de.jakob.lotm.events;
 
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.AbilityUseEvent;
+import de.jakob.lotm.abilities.justiciar.BalancingAbility;
+import de.jakob.lotm.abilities.justiciar.ExileOfBalanceAbility;
+import de.jakob.lotm.abilities.justiciar.IndividualBalanceAbility;
 import de.jakob.lotm.abilities.justiciar.ProhibitionAbility;
+import de.jakob.lotm.util.BeyonderData;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -12,8 +16,11 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
+import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+
+import java.util.Map;
 
 @EventBusSubscriber(modid = LOTMCraft.MOD_ID)
 public class ProhibitionHandler {
@@ -28,6 +35,24 @@ public class ProhibitionHandler {
             if (entity instanceof ServerPlayer sp) {
                 sp.sendSystemMessage(Component.literal("[Beyonder Abilities] is Prohibited here")
                         .withStyle(ChatFormatting.RED));
+            }
+            return;
+        }
+
+        // Outside World — cancel ability use by players who are near-but-outside the zone
+        long now = serverLevel.getGameTime();
+        for (ProhibitionAbility.ProhibitionZone zone : ProhibitionAbility.ACTIVE_ZONES) {
+            if (zone.type != ProhibitionAbility.ProhibitionType.OUTSIDE_WORLD) continue;
+            if (!zone.level.equals(serverLevel)) continue;
+            if (zone.expiryTick < now) continue;
+            double dist = entity.position().distanceTo(zone.center);
+            if (dist > 40.0 && dist <= 50.0) {
+                event.setCanceled(true);
+                if (entity instanceof ServerPlayer sp) {
+                    sp.sendSystemMessage(Component.literal("[Outside World] Abilities from outside are Prohibited here")
+                            .withStyle(ChatFormatting.RED));
+                }
+                break;
             }
         }
     }
@@ -87,6 +112,23 @@ public class ProhibitionHandler {
                         .withStyle(ChatFormatting.RED));
             }
         }
+        // Outside World — push players away from outside the zone who approach too close
+        for (ProhibitionAbility.ProhibitionZone zone : ProhibitionAbility.ACTIVE_ZONES) {
+            if (!zone.type.equals(ProhibitionAbility.ProhibitionType.OUTSIDE_WORLD)) continue;
+            if (!zone.level.equals(serverLevel)) continue;
+            if (!zone.isActive()) continue;
+            if (zone.ownerId.equals(player.getUUID())) continue;
+
+            double dist = pos.distanceTo(zone.center);
+            if (dist > 40.0 && dist <= 43.0) {
+                Vec3 direction = pos.subtract(zone.center).normalize();
+                if (direction.lengthSqr() < 0.001) direction = new Vec3(1, 0, 0);
+                player.setDeltaMovement(direction.scale(1.5));
+                player.hurtMarked = true;
+                player.sendSystemMessage(Component.literal("[Outside World] is Prohibited here")
+                        .withStyle(ChatFormatting.RED));
+            }
+        }
     }
 
     @SubscribeEvent
@@ -98,6 +140,68 @@ public class ProhibitionHandler {
             event.setCanceled(true);
             player.sendSystemMessage(Component.literal("[Item Use] is Prohibited here")
                     .withStyle(ChatFormatting.RED));
+        }
+    }
+
+    @SubscribeEvent
+    public static void onEffectApplicable(MobEffectEvent.Applicable event) {
+        if (!(event.getEntity() instanceof LivingEntity le)) return;
+        if (!(le.level() instanceof ServerLevel sl)) return;
+        Vec3 pos = le.position();
+        boolean inZone = BalancingAbility.ACTIVE_ZONES.stream()
+                .anyMatch(z -> z.isActive() && z.isInZone(pos, sl));
+        if (inZone) event.setResult(MobEffectEvent.Applicable.Result.DO_NOT_APPLY);
+    }
+
+    public static boolean isInStandInsZone(Vec3 pos, ServerLevel level) {
+        return isInZone(pos, level, ProhibitionAbility.ProhibitionType.STAND_INS);
+    }
+
+    public static boolean isInMarionetteZone(Vec3 pos, ServerLevel level) {
+        return isInZone(pos, level, ProhibitionAbility.ProhibitionType.MARIONETTE_INTERCHANGE);
+    }
+
+    @SubscribeEvent
+    public static void onAbilityUseExile(AbilityUseEvent event) {
+        LivingEntity entity = event.getEntity();
+        if (!(entity.level() instanceof ServerLevel sl)) return;
+        Long expiry = ExileOfBalanceAbility.EXILED_ENTITIES.get(entity.getUUID());
+        if (expiry != null && sl.getGameTime() < expiry) {
+            event.setCanceled(true);
+            if (entity instanceof ServerPlayer sp) {
+                sp.sendSystemMessage(Component.literal("[Exile of Balance] You cannot participate in this battle.")
+                        .withStyle(ChatFormatting.RED));
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onDamageExile(LivingDamageEvent.Pre event) {
+        if (!(event.getSource().getEntity() instanceof LivingEntity attacker)) return;
+        if (!(attacker.level() instanceof ServerLevel sl)) return;
+        Long expiry = ExileOfBalanceAbility.EXILED_ENTITIES.get(attacker.getUUID());
+        if (expiry != null && sl.getGameTime() < expiry) {
+            event.setNewDamage(0);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onAbilityUseIndividualBalance(AbilityUseEvent event) {
+        LivingEntity entity = event.getEntity();
+        if (!(entity.level() instanceof ServerLevel sl)) return;
+        Long expiry = IndividualBalanceAbility.INDIVIDUALLY_BALANCED.get(entity.getUUID());
+        if (expiry == null || sl.getGameTime() >= expiry) return;
+
+        // Block abilities whose pathway requirement is sequence 1 or lower (i.e., Seq 1 abilities)
+        String pathway = BeyonderData.getPathway(entity);
+        Map<String, Integer> reqs = event.getAbility().getRequirements();
+        Integer reqSeq = reqs.get(pathway);
+        if (reqSeq != null && reqSeq <= 1) {
+            event.setCanceled(true);
+            if (entity instanceof ServerPlayer sp) {
+                sp.sendSystemMessage(Component.literal("[Individual Balance] Your Sequence 1 abilities are sealed.")
+                        .withStyle(ChatFormatting.RED));
+            }
         }
     }
 

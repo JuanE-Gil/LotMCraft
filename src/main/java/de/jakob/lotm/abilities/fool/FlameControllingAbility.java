@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class FlameControllingAbility extends Ability {
     public FlameControllingAbility(String id) {
-        super(id, .75f);
+        super(id, 4.5f);
     }
 
     @Override
@@ -41,9 +41,9 @@ public class FlameControllingAbility extends Ability {
     public void onAbilityUse(Level level, LivingEntity entity) {
         if(level.isClientSide)
             return;
-
+        float multiplier = multiplier(entity);
         Vec3 startPos = VectorUtil.getRelativePosition(entity.getEyePosition().add(entity.getLookAngle().normalize()), entity.getLookAngle().normalize(), 0, random.nextDouble(-.65, .65), random.nextDouble(-.1, .6));
-        Vec3 direction = AbilityUtil.getTargetLocation(entity, 10, 1.4f).subtract(startPos).normalize();
+        Vec3 direction = AbilityUtil.getTargetLocation(entity, 10*(int) multiplier, 1.4f).subtract(startPos).normalize();
 
         AtomicReference<Vec3> currentPos = new AtomicReference<>(startPos);
 
@@ -51,7 +51,6 @@ public class FlameControllingAbility extends Ability {
 
         level.playSound(null, startPos.x, startPos.y, startPos.z, SoundEvents.BLAZE_SHOOT, entity.getSoundSource(), 1.0f, 1.0f);
 
-        double multiplier = multiplier(entity);
 
         ServerScheduler.scheduleForDuration(0, 1, 20 * 20, () -> {
             if(hasHit.get())
@@ -59,7 +58,7 @@ public class FlameControllingAbility extends Ability {
 
             Vec3 pos = currentPos.get();
 
-            if(AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 2.5f, DamageLookup.lookupDamage(7, .83) * (float) multiplier, pos, true, false, true, 0, 20 * 5)) {
+            if(AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 2.5f, DamageLookup.lookupDamage(7, .83) * multiplier, pos, true, false, true, 0, 20 * 5)) {
                 hasHit.set(true);
                 return;
             }

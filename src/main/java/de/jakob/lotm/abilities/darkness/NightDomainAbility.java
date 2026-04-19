@@ -55,7 +55,7 @@ public class NightDomainAbility extends Ability {
         Vec3 startPos = entity.position();
 
         EffectManager.playEffect(EffectManager.Effect.NIGHT_DOMAIN, entity.position().x, entity.position().y, entity.position().z, serverLevel, entity);
-
+        float multiplier = multiplier(entity);
         final UUID[] taskIdHolder = new UUID[1];
         taskIdHolder[0] = ServerScheduler.scheduleForDuration(0, 2, 20 * 25, () -> {
             Location currentLoc = new Location(entity.position(), serverLevel);
@@ -71,19 +71,19 @@ public class NightDomainAbility extends Ability {
             // Night Domain is weakened by purification interactions
             boolean purified = InteractionHandler.isInteractionPossible(currentLoc, "purification", seq);
 
-            ParticleUtil.spawnParticles(serverLevel, dust, startPos, purified ? 30 : 80, 35, .25, 35, 0);
+            ParticleUtil.spawnParticles(serverLevel, dust, startPos, purified ? 30 : 80, 35*(int) Math.max(multiplier/2,1), .25*(int) Math.max(multiplier/2,1), 35*(int) Math.max(multiplier/2,1), 0);
             if(!purified) {
-                AbilityUtil.addPotionEffectToNearbyEntities(serverLevel, entity, 35, startPos, new MobEffectInstance(MobEffects.BLINDNESS, 20, 20, false, false, false));
-                AbilityUtil.addPotionEffectToNearbyEntities(serverLevel, entity, 35, startPos, new MobEffectInstance(MobEffects.DARKNESS, 20, 20, false, false, false));
+                AbilityUtil.addPotionEffectToNearbyEntities(serverLevel, entity, 35*(int) Math.max(multiplier/2,1), startPos, new MobEffectInstance(MobEffects.BLINDNESS, 20, 20, false, false, false));
+                AbilityUtil.addPotionEffectToNearbyEntities(serverLevel, entity, 35*(int) Math.max(multiplier/2,1), startPos, new MobEffectInstance(MobEffects.DARKNESS, 20, 20, false, false, false));
             }
 
             AbilityUtil.addPotionEffectToNearbyEntities(serverLevel, entity, 35, startPos, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, purified ? 1 : 5, false, false, false));
 
-            AbilityUtil.damageNearbyEntities(serverLevel, entity, 35, DamageLookup.lookupDps(4, .85, 2, 20) * multiplier(entity), startPos, true, false, ModDamageTypes.source(level, ModDamageTypes.DARKNESS_GENERIC, entity));
+            AbilityUtil.damageNearbyEntities(serverLevel, entity, 35*(int) Math.max(multiplier/2,1), DamageLookup.lookupDps(4, .85, 2, 20) * 20, startPos, true, false, ModDamageTypes.source(level, ModDamageTypes.DARKNESS_GENERIC, entity));
 
             AbilityUtil.getNearbyEntities(entity, serverLevel, startPos, 35).forEach(e -> {
                 LuckComponent luckComponent = e.getData(ModAttachments.LUCK_COMPONENT);
-                luckComponent.addLuckWithMin(-12, purified ? -120 : -480);
+                luckComponent.addLuckWithMin(-120*(int) Math.max(multiplier/2,1), purified ? -240*(int) Math.max(multiplier/2,1) : -960*(int) Math.max(multiplier/2,1));
                 BeyonderData.addModifierWithTimeLimit(e, "night_domain_debuff", .65, 2000); 
             });
             BeyonderData.addModifierWithTimeLimit(entity, "night_domain_buff", 1.35f, 2000);

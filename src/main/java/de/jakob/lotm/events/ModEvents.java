@@ -22,6 +22,7 @@ import de.jakob.lotm.entity.client.ability_entities.wheel_of_fortune_pathway.cyc
 import de.jakob.lotm.entity.client.ability_entities.mother_pathway.desolate_area.DesolateAreaModel;
 import de.jakob.lotm.entity.client.ability_entities.door_pathway.exile_doors.ExileDoorsModel;
 import de.jakob.lotm.entity.client.ability_entities.door_pathway.return_portal.HighSequenceDoorsModel;
+import de.jakob.lotm.entity.client.ability_entities.justiciar_pathway.judgment_sword.JudgmentSwordModel;
 import de.jakob.lotm.entity.client.ability_entities.sun_pathway.justice_sword.JusticeSwordModel;
 import de.jakob.lotm.entity.client.projectiles.fireball.FireballModel;
 import de.jakob.lotm.entity.client.projectiles.flaming_spear.FlamingSpearProjectileModel;
@@ -52,16 +53,12 @@ import de.jakob.lotm.rendering.models.wheel_of_fortune.WheelOfFortuneMythicalCre
 import de.jakob.lotm.util.helper.TeamUtils;
 import de.jakob.lotm.rendering.models.door.DoorMythicalCreatureModel;
 import de.jakob.lotm.rendering.models.tyrant.TyrantMythicalCreatureModel;
-import de.jakob.lotm.util.BeyonderData;
-import de.jakob.lotm.util.SpiritualityProgressTracker;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.SpawnPlacementTypes;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -106,6 +103,7 @@ public class ModEvents {
         event.registerLayerDefinition(ExileDoorsModel.LAYER_LOCATION, ExileDoorsModel::createBodyLayer);
         event.registerLayerDefinition(WarBannerModel.LAYER_LOCATION, WarBannerModel::createBodyLayer);
         event.registerLayerDefinition(MeteorModel.LAYER_LOCATION, MeteorModel::createBodyLayer);
+        event.registerLayerDefinition(JudgmentSwordModel.LAYER_LOCATION, JudgmentSwordModel::createBodyLayer);
         event.registerLayerDefinition(JusticeSwordModel.LAYER_LOCATION, JusticeSwordModel::createBodyLayer);
         event.registerLayerDefinition(SpearOfLightProjectileModel.LAYER_LOCATION, SpearOfLightProjectileModel::createBodyLayer);
         event.registerLayerDefinition(VolcanoModel.LAYER_LOCATION, VolcanoModel::createBodyLayer);
@@ -229,6 +227,7 @@ public class ModEvents {
         LuckCheckCommand.register(event.getDispatcher());
         SkinChangeCommand.register(event.getDispatcher());
         AllyRequestCommands.register(event.getDispatcher());
+        AllyCommand.register(event.getDispatcher());
         SanityCommand.register(event.getDispatcher());
         DigestionCommand.register(event.getDispatcher());
         QuestCommand.register(event.getDispatcher());
@@ -241,6 +240,7 @@ public class ModEvents {
         TeamInviteResponseCommand.register(event.getDispatcher());
         SetBeyonderLogCommand.register(event.getDispatcher());
         KillCountCommand.register(event.getDispatcher());
+        UniquenessCommand.register(event.getDispatcher());
     }
 
     @SubscribeEvent
@@ -278,6 +278,9 @@ public class ModEvents {
 
         MinecraftServer server = player.getServer();
         if (server == null) return;
+
+        // Sync uniqueness data on login
+        PacketHandler.syncUniquenessToPlayer(player);
 
         TeamComponent team = player.getData(ModAttachments.TEAM_COMPONENT.get());
 

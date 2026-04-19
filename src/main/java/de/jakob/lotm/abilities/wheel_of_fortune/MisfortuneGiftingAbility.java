@@ -4,6 +4,7 @@ import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.attachments.LuckComponent;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.effect.ModEffects;
+import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.ParticleUtil;
 import net.minecraft.core.particles.DustParticleOptions;
@@ -18,6 +19,7 @@ import org.joml.Vector3f;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class MisfortuneGiftingAbility extends Ability {
     public MisfortuneGiftingAbility(String id) {
@@ -43,7 +45,7 @@ public class MisfortuneGiftingAbility extends Ability {
             return;
         }
 
-        LivingEntity target = AbilityUtil.getTargetEntity(entity, 20, 2);
+        LivingEntity target = AbilityUtil.getTargetEntity(entity, (int) (15 * (multiplier(entity) * multiplier(entity))), 2);
 
         if(target == null) {
             if(entity instanceof ServerPlayer player) {
@@ -54,11 +56,12 @@ public class MisfortuneGiftingAbility extends Ability {
 
             return;
         }
-
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+        int targetSeq = BeyonderData.getSequence(target);
         double eyeHeight = target.getEyeHeight();
         ParticleUtil.spawnParticles(serverLevel, dust, target.position().add(0, eyeHeight / 2, 0), 120, .3, eyeHeight / 2, .3, 0);
-
-        int amplifier = Math.round(multiplier(entity) * 250);
+        double resistance = AbilityUtil.getSequenceResistanceFactor(entitySeq, targetSeq);
+        int amplifier =(int) Math.min(Math.round(multiplier(entity) * 3.125f * (1.0 - resistance)) * 120, 6500);;
         LuckComponent luckComponent = target.getData(ModAttachments.LUCK_COMPONENT.get());
         luckComponent.addLuckWithMin(-amplifier, (int) (-amplifier * 1.25f));
     }

@@ -3,6 +3,7 @@ package de.jakob.lotm.abilities.demoness.passives;
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.PassiveAbilityHandler;
 import de.jakob.lotm.abilities.PassiveAbilityItem;
+import de.jakob.lotm.abilities.justiciar.LawAbility;
 import de.jakob.lotm.damage.ModDamageTypes;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.ParticleUtil;
@@ -56,6 +57,7 @@ public class MirrorRevivalAbility extends PassiveAbilityItem {
         if(event.getSource().is(ModDamageTypes.LOOSING_CONTROL)) {
             return;
         }
+        if (LawAbility.SOLACE_KILLED.contains(entity.getUUID())) return;
 
         BlockPos glassPos = getNearestGlassBlock((ServerLevel) entity.level(), entity.position(), 100);
         if(glassPos == null) {
