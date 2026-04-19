@@ -520,11 +520,6 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
                 // Track this summon
                 incrementSummonedCount(player, summonTime, SummonType.ENTITY, entityUUID);
 
-                // Make the summoned entity an ally of the player
-                if(entity instanceof LivingEntity livingEntity) {
-                    AllyUtil.makeAllies(player, livingEntity);
-                }
-
                 player.sendSystemMessage(Component.translatable("ability.lotmcraft.historical_void_summoning.summoned_entity", entity.getName().getString()).withStyle(ChatFormatting.GREEN));
 
                 // Schedule removal after duration

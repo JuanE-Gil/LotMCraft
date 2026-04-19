@@ -728,4 +728,23 @@ public class BeyonderNPCEntity extends PathfinderMob {
         HOSTILE_BEHAVIOR,   // Entity is hostile and actively seeking targets
         RETALIATION         // Entity is neutral but fighting back after being attacked
     }
+
+    // ========================= Despawn =========================
+
+    @Override
+    public boolean removeWhenFarAway(double distanceToClosestPlayer) {
+        MarionetteComponent component = this.getData(ModAttachments.MARIONETTE_COMPONENT.get());
+        if (component.isMarionette()) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public void checkDespawn() {
+        MarionetteComponent component = this.getData(ModAttachments.MARIONETTE_COMPONENT.get());
+        if (!component.isMarionette()) {
+            super.checkDespawn();
+        }
+    }
 }
