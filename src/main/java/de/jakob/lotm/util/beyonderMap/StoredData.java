@@ -43,7 +43,7 @@ public record StoredData(String pathway, Integer sequence, HonorificName honorif
                 + "\n--- Seq: " + sequence
                 + "\n--- Honorific Name: " + honorificName.getAllInfo()
                 + "\n--- Logout Position: " + (int) lastPosition.x + " " + (int) lastPosition.y + " " + (int) lastPosition.z
-                + "\n--- Char stack: " + charStack
+                + "\n--- Char stack: " + java.util.Arrays.toString(charStack)
                 + "\n--- Pathway history: " + getPathwayHistoryInfo()
                 + "\n--- Was modified: " + modified;
     }
