@@ -430,6 +430,12 @@ public class PacketHandler {
         );
 
         registrar.playToClient(
+                PlayAnimationPacket.TYPE,
+                PlayAnimationPacket.STREAM_CODEC,
+                PlayAnimationPacket::handle
+        );
+
+        registrar.playToClient(
                 SyncOriginalBodyOwnerPacket.TYPE,
                 SyncOriginalBodyOwnerPacket.STREAM_CODEC,
                 SyncOriginalBodyOwnerPacket::handle

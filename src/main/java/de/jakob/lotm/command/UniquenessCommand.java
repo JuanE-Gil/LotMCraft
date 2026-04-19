@@ -56,9 +56,7 @@ public class UniquenessCommand {
 
                                     if (BeyonderData.beyonderMap != null && BeyonderData.beyonderMap.count(pathway, 0) > 0) return 0;
 
-                                    if (BeyonderData.beyonderMap == null || BeyonderData.beyonderMap.count(pathway, 1) == 0) return 0;
-
-                                    UniquenessEntity.trySpawn(context.getSource().getLevel(), context.getSource().getPosition(), pathway);
+                                    UniquenessEntity.trySpawn(context.getSource().getLevel(), context.getSource().getPosition().add(0, -2, 0), pathway);
                                     return 1;
                                 })
                         )

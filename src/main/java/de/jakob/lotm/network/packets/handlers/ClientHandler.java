@@ -22,10 +22,12 @@ import de.jakob.lotm.rendering.*;
 import de.jakob.lotm.rendering.effectRendering.impl.VFXRenderer;
 import de.jakob.lotm.util.ClientBeyonderCache;
 import de.jakob.lotm.util.ClientSacrificeCache;
+import de.jakob.lotm.util.helper.AnimationUtil;
 import de.jakob.lotm.util.helper.RingExpansionRenderer;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
@@ -526,5 +528,17 @@ public class ClientHandler {
             living.getData(ModAttachments.APOTHEOSIS_COMPONENT).setApotheosisTicksLeft(packet.ticks());
             living.getData(ModAttachments.APOTHEOSIS_COMPONENT).setPathway(packet.pathway());
         }
+    }
+
+    public static void playAnimation(PlayAnimationPacket packet) {
+        ClientLevel level = Minecraft.getInstance().level;
+        if (level == null) return;
+
+        Entity entity = level.getEntity(packet.playerId());
+        if(!(entity instanceof AbstractClientPlayer player)) {
+            return;
+        }
+
+        AnimationUtil.playAnimation(player, AnimationUtil.getResourceLocationById(packet.animId()));
     }
 }

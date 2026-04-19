@@ -316,7 +316,7 @@ public class ModEntities {
 
     public static final Supplier<EntityType<SpiritBaneEntity>> SPIRIT_BANE =
             ENTITY_TYPES.register("spirit_bane", () -> EntityType.Builder.of(SpiritBaneEntity::new, MobCategory.MONSTER)
-                    .sized(1.3f, 2f).build("spirit_bane"));
+                    .sized(1.6f, 3.85f).build("spirit_bane"));
 
     public static final Supplier<EntityType<SpiritMalmouthEntity>> SPIRIT_MALMOUTH =
             ENTITY_TYPES.register("spirit_malmouth", () -> EntityType.Builder.of(SpiritMalmouthEntity::new, MobCategory.MONSTER)

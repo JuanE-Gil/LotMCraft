@@ -51,6 +51,9 @@ public class ModItemModelProvider extends ItemModelProvider {
         uniqueness(ModItems.DOOR_UNIQUENESS.get());
         uniqueness(ModItems.VISIONARY_UNIQUENESS.get());
         uniqueness(ModItems.WHEEL_OF_FORTUNE_UNIQUENESS.get());
+        uniqueness(ModItems.ABYSS_UNIQUENESS.get());
+        uniqueness(ModItems.MOTHER_UNIQUENESS.get());
+        uniqueness(ModItems.DEMONESS_UNIQUENESS.get());
 
 
         PotionItemHandler.ITEMS.getEntries().forEach(i -> {
