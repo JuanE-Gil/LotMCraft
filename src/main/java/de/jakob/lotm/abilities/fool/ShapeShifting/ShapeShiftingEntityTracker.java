@@ -3,6 +3,7 @@ package de.jakob.lotm.abilities.fool.ShapeShifting;
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.attachments.MemorisedEntities;
 import de.jakob.lotm.attachments.ModAttachments;
+import de.jakob.lotm.util.BeyonderData;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -26,10 +27,9 @@ public class ShapeShiftingEntityTracker {
     public static void onPlayerTick(PlayerTickEvent.Post event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             if (player.tickCount % CHECK_INTERVAL == 0){
-                String pathway = player.getPersistentData().getString("beyonder_pathway");
-                int sequence = player.getPersistentData().getInt("beyonder_sequence");
+                int sequence = BeyonderData.getSequence(player);
                 if (sequence <= 9){
-                    if (pathway.equals("fool")){
+                    if (BeyonderData.getPathway(player).equals("fool")){
                         RADIUS = 5.0f + (10 - (float) sequence);
                         REQUIRED_TIME = 400 - ((10 - sequence) * 20);
                     }
@@ -85,7 +85,7 @@ public class ShapeShiftingEntityTracker {
     }
 
     private static void sendSuccessMessage(ServerPlayer player, String entityName) {
-        if (player.getPersistentData().getString("beyonder_pathway").equals("fool")) {
+        if (BeyonderData.getPathway(player).equals("fool")) {
             String name = entityName.split(":")[1];
             player.sendSystemMessage(Component.literal("§fYou memorised the shape of §b" + name));
         }

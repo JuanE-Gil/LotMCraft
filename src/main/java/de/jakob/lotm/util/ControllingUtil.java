@@ -310,33 +310,16 @@ public class ControllingUtil {
         AbilityBarComponent targetBarData = target.getData(ModAttachments.ABILITY_BAR_COMPONENT);
         targetBarData.setAbilities(sourceBarData.getAbilities());
 
-        // copy persistent data for beyonders
-        CompoundTag sourceData = source.getPersistentData();
-        CompoundTag targetData = target.getPersistentData();
-        if (sourceData.getString("beyonder_pathway").isEmpty()) {
-            targetData.remove("beyonder_pathway");
-            targetData.remove("beyonder_sequence");
-            targetData.remove("beyonder_digestion_progress");
-            targetData.remove("beyonder_griefing_enabled");
-            PhysicalEnhancementsAbility.resetEnhancements(target.getUUID());
-        } else {
-            targetData.putString("beyonder_pathway", sourceData.getString("beyonder_pathway"));
-            targetData.putInt("beyonder_sequence", sourceData.getInt("beyonder_sequence"));
-            targetData.putFloat("beyonder_digestion_progress", sourceData.getFloat("beyonder_digestion_progress"));
-            targetData.putBoolean("beyonder_griefing_enabled", sourceData.getBoolean("beyonder_griefing_enabled"));
-            if (!(target instanceof ServerPlayer)) {
-                targetData.putFloat("beyonder_spirituality", sourceData.getFloat("beyonder_spirituality"));
+        if (BeyonderData.isBeyonder(source)) {
+            BeyonderData.setBeyonder(target, BeyonderData.getPathway(source), BeyonderData.getSequence(source));
+            if (source instanceof Player sourcePlayer && target instanceof Player targetPlayer) {
+                BeyonderData.digest(targetPlayer, BeyonderData.getDigestionProgress(sourcePlayer), false);
+                BeyonderData.setGriefingEnabled(targetPlayer, BeyonderData.isGriefingEnabled(sourcePlayer));
             }
+            BeyonderData.setSpirituality(target, BeyonderData.getSpirituality(source));
+        } else {
+            BeyonderData.clearBeyonderData(target);
         }
-
-        // sync the changes to the client
-        if(target instanceof ServerPlayer serverPlayer) {
-            PacketHandler.syncBeyonderDataToPlayer(serverPlayer);
-        }
-        else {
-            PacketHandler.syncBeyonderDataToEntity(target);
-        }
-
     }
 
     private static void copyEntities (LivingEntity source, LivingEntity target) {

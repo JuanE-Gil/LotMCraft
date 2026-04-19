@@ -3,6 +3,7 @@ package de.jakob.lotm.util.shapeShifting;
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.entity.custom.BeyonderNPCEntity;
 import de.jakob.lotm.network.packets.toClient.ShapeShiftingSyncPacket;
+import de.jakob.lotm.util.BeyonderData;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -32,8 +33,7 @@ public class ShapeShiftingUtil {
             String entityName = entityType;
             entityName = entityName.contains(":") ? entityName.split(":")[1] : entityName;
             if (List.of("bat", "phantom", "blaze", "allay", "bee", "ghast", "parrot", "vex").contains(entityName)) {
-                System.out.println(" pers : " + player.getPersistentData().getInt("beyonder_sequence"));
-                if (player.getPersistentData().getInt("beyonder_sequence") > 4) {
+                if (BeyonderData.getSequence(player) > 4) {
                     return;
                 }
             }
