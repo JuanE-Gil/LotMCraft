@@ -59,8 +59,7 @@ public class IdentityConcealmentAbility extends SelectableAbility {
     @Override
     protected String[] getAbilityNames() {
         return new String[]{
-                "ability.lotmcraft.identityconcealment.conceal_identity",
-                "ability.lotmcraft.identityconcealment.remove_conceal_identity"
+                "ability.lotmcraft.identityconcealment.conceal_identity"
         };
     }
 
@@ -70,7 +69,6 @@ public class IdentityConcealmentAbility extends SelectableAbility {
         if(!(entity instanceof Player)) abilityIndex = 0;
         switch(abilityIndex) {
             case 0 -> concealIdentity(level,entity);
-            case 1 -> removeConcealIdentity(level,entity);
         }
     }
     private void concealIdentity(Level level, LivingEntity entity) {
@@ -90,44 +88,23 @@ public class IdentityConcealmentAbility extends SelectableAbility {
             //NameUtils.setPlayerName(player, playerName);
             AttributeInstance attribute = player.getAttribute(NeoForgeMod.NAMETAG_DISTANCE);
             if (attribute != null) {
-                attribute.setBaseValue(0);
+                if (attribute.getValue() == 0){
+                    attribute.setBaseValue(64);
+                }else{
+                attribute.setBaseValue(0);};
             }
             return;
         }
         //NameUtils.setPlayerName((ServerPlayer) targetEntity, playerName);
         AttributeInstance attribute = targetEntity.getAttribute(NeoForgeMod.NAMETAG_DISTANCE);
         if (attribute != null) {
-            attribute.setBaseValue(0);
-        }
-
-
-    };
-    private void removeConcealIdentity(Level level, LivingEntity entity) {
-        if(level.isClientSide) return;
-
-        if(!(entity instanceof ServerPlayer player)) return;
-
-        level.playSound(null,
-                player.blockPosition(),
-                SoundEvents.AMETHYST_BLOCK_CHIME,
-                SoundSource.BLOCKS,
-                10.0f,
-                1.0f);
-        LivingEntity targetEntity = AbilityUtil.getTargetEntity(entity, 16, 2);
-        if(targetEntity == null){
-            //ShapeShiftingUtil.resetShape(player);
-            AttributeInstance attribute = player.getAttribute(NeoForgeMod.NAMETAG_DISTANCE);
-            if (attribute != null) {
+            if (attribute.getValue() == 0){
                 attribute.setBaseValue(64);
-            }
-            return;
-        };
-        //ShapeShiftingUtil.resetShape((ServerPlayer) targetEntity);
-        AttributeInstance attribute = targetEntity.getAttribute(NeoForgeMod.NAMETAG_DISTANCE);
-        if (attribute != null) {
-            attribute.setBaseValue(64);
+            }else{
+            attribute.setBaseValue(0);};
         }
 
-    };
 
+    };
+// TODO: After Visionary changes make conceal traces subability
 }

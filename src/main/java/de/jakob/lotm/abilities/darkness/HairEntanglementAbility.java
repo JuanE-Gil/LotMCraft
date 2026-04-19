@@ -59,7 +59,7 @@ public class HairEntanglementAbility extends Ability {
         float multiplier = multiplier(entity);
         for(int i = 0; i < 8; i++) {
             Vec3 startPos = VectorUtil.getRelativePosition(entity.getEyePosition().add(entity.getLookAngle().normalize()), entity.getLookAngle().normalize(),  random.nextDouble(-4.5, 3f), random.nextDouble(-7, 7), random.nextDouble(-2, 5));
-            Vec3 targetLoc = AbilityUtil.getTargetLocation(entity, 35*(int) Math.max(multiplier/20,1), 1.4f);
+            Vec3 targetLoc = AbilityUtil.getTargetLocation(entity, 35*(int) Math.max(multiplier/2,1), 1.4f);
 
             final float step = .15f;
             final float length = (float) startPos.distanceTo(targetLoc);

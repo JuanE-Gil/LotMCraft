@@ -79,10 +79,9 @@ public class LanguageOfFoulnessAbility extends SelectableAbility {
 
         ServerScheduler.scheduleForDuration(0, 1, 20 * 8, () -> {
             if(random.nextInt(8) == 0) {
-                target.hurt(ModDamageTypes.source(serverLevel, ModDamageTypes.BEYONDER_GENERIC, entity), (float) (DamageLookup.lookupDps(6, .8, 8, 20) *
-                         multiplier(entity)));
+                target.hurt(ModDamageTypes.source(serverLevel, ModDamageTypes.BEYONDER_GENERIC, entity), (float) (DamageLookup.lookupDps(6, .8, 8, 8) * (int) Math.max(multiplier(entity)/4,1)));
             }
-            target.addEffect(new MobEffectInstance(MobEffects.WITHER, 15, 3, false, false, false));
+            target.addEffect(new MobEffectInstance(MobEffects.WITHER, 8*20, 3, false, false, false));
         }, null, serverLevel, () -> AbilityUtil.getTimeInArea(entity, new Location(entity.position(), serverLevel)));
     }
 
@@ -93,24 +92,24 @@ public class LanguageOfFoulnessAbility extends SelectableAbility {
             return;
         }
 
-        target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 20 * 8, 1, false, false, false));
-        target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 20 * 8, 1, false, false, false));
-        target.addEffect(new MobEffectInstance(ModEffects.LOOSING_CONTROL, 20 * 8, random.nextInt(3), false, false, false));
+        target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 20 * 8* (int) Math.max(multiplier(entity)/2,1), 1, false, false, false));
+        target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 20 * 8* (int) Math.max(multiplier(entity)/2,1), 1, false, false, false));
+        target.addEffect(new MobEffectInstance(ModEffects.LOOSING_CONTROL, 20 * 8* (int) Math.max(multiplier(entity)/2,1), random.nextInt(3), false, false, false));
     }
 
     private void castSlow(ServerLevel serverLevel, LivingEntity entity, LivingEntity target) {
         int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
 
-        int duration = 8 * 20;
+        int duration = 8 * 20* (int) Math.max(multiplier(entity)/2,1);
 
         if(AbilityUtil.isTargetSignificantlyStronger(entitySeq, BeyonderData.getSequence(target))) {
-            duration = 10;
+            duration = 10* (int) Math.max(multiplier(entity)/4,1);
         }
 
         ServerScheduler.scheduleForDuration(0, 1, duration, () -> {
             target.setDeltaMovement(0, 0, 0);
             target.hurtMarked = true;
-            target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 15, 20, false, false, false));
+            target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 20, false, false, false));
         }, null, serverLevel, () -> AbilityUtil.getTimeInArea(entity, new Location(entity.position(), serverLevel)));
     }
 }

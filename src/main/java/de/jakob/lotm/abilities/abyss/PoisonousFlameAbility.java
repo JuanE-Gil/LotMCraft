@@ -104,7 +104,7 @@ public class PoisonousFlameAbility extends Ability {
         AbilityUtil.damageNearbyEntities(
                 (ServerLevel) level,
                 entity,
-                2.75,
+                2.75* (int) multiplier(entity),
                 DamageLookup.lookupDamage(8, .9) *
                         multiplier(entity),
                 startPos,
@@ -118,7 +118,7 @@ public class PoisonousFlameAbility extends Ability {
 
         if(!purified) {
             AbilityUtil.addPotionEffectToNearbyEntities(
-                    (ServerLevel) level, entity, 3, startPos, new MobEffectInstance(MobEffects.POISON, 20 * 8, 2, false, true)
+                    (ServerLevel) level, entity, 3, startPos, new MobEffectInstance(MobEffects.POISON, 20 * 8* (int) Math.max(multiplier(entity)/2,1), 2, false, true)
             );
         }
 
