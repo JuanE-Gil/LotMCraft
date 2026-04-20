@@ -31,7 +31,7 @@ public class HandOfDeathAbility extends SelectableAbility {
     private static final Map<UUID, UUID> activeMarks = new ConcurrentHashMap<>();
 
     public HandOfDeathAbility(String id) {
-        super(id, 1200f);
+        super(id, 60f);
         canBeCopied = false;
         canBeShared = false;
     }

@@ -41,7 +41,8 @@ public class AdvancementUtil {
     private static final List<HashSet<String>> PATHWAY_DOMAINS = List.of(
             new HashSet<>(Set.of("fool", "error", "door")),
             new HashSet<>(Set.of("red_priest", "demoness")),
-            new HashSet<>(Set.of("sun", "tyrant", "visionary"))
+            new HashSet<>(Set.of("sun", "tyrant", "visionary")),
+            new HashSet<>(Set.of("darkness", "death"))
     );
 
     @SubscribeEvent

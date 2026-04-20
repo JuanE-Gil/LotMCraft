@@ -19,7 +19,7 @@ public class WordOfSpiritAbility extends Ability {
     private static final int DURATION_TICKS = 20 * 10; // 10 seconds
 
     public WordOfSpiritAbility(String id) {
-        super(id, 900f);
+        super(id, 45f);
     }
 
     @Override

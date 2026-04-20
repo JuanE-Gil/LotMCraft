@@ -39,7 +39,7 @@ public class PaleEyeAbility extends Ability {
     private static final int TARGET_RANGE = 30;
 
     public PaleEyeAbility(String id) {
-        super(id, 2400f);
+        super(id, 120f);
         canBeCopied = false;
         canBeUsedInArtifact = false;
         canBeShared = false;

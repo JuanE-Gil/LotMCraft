@@ -34,7 +34,7 @@ public class DeathEnvoyAbility extends Ability {
             new DustParticleOptions(new Vector3f(0.05f, 0.0f, 0.2f), 1.4f);
 
     public DeathEnvoyAbility(String id) {
-        super(id, 1800f);
+        super(id, 90f);
         canBeCopied = false;
         cannotBeStolen = true;
         canBeUsedInArtifact = false;

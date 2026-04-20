@@ -176,7 +176,7 @@ While active, suppresses all negative artifact effects on the caster for the dur
 ### Door to the Underworld
 **Sequence Requirement:** 5  
 **Spirituality Cost:** 600  
-**Cooldown:** 1 second
+**Cooldown:** 10 second
 
 Two selectable modes:
 

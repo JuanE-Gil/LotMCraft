@@ -19,7 +19,7 @@ import java.util.Map;
 public class DivineKingdomAbility extends Ability {
 
     public DivineKingdomAbility(String id) {
-        super(id, 6000f, "death");
+        super(id, 300f, "death");
         canBeCopied = false;
         canBeReplicated = false;
         cannotBeStolen = true;

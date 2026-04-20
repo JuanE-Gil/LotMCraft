@@ -47,7 +47,7 @@ public class NationOfTheDeadAbility extends Ability {
             new DustParticleOptions(new Vector3f(0.05f, 0.0f, 0.1f), 1.8f);
 
     public NationOfTheDeadAbility(String id) {
-        super(id, 3600f, "death");
+        super(id, 180f, "death");
         canBeCopied = false;
         canBeReplicated = false;
         cannotBeStolen = true;

@@ -24,7 +24,7 @@ public class UndyingSealAbility extends Ability {
     private static final ConcurrentHashMap<UUID, Long> sealedPlayers = new ConcurrentHashMap<>();
 
     public UndyingSealAbility(String id) {
-        super(id, 2400f);
+        super(id, 120f);
         canBeUsedByNPC = false;
     }
 

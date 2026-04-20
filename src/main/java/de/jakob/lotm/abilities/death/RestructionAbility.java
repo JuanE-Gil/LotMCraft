@@ -38,7 +38,7 @@ public class RestructionAbility extends SelectableAbility {
     private static final HashMap<UUID, List<Mob>> summonedMobs = new HashMap<>();
 
     public RestructionAbility(String id) {
-        super(id, 200);
+        super(id, 10f);
         canBeCopied = false;
         cannotBeStolen = true;
     }
