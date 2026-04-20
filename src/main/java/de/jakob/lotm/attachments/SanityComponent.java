@@ -107,7 +107,7 @@ public class SanityComponent {
     }
 
     public void addVirtualPersonaStack() {
-        if (virtualPersonaStacks < 10) virtualPersonaStacks++;
+        virtualPersonaStacks++;
     }
 
     public void setVirtualPersonaStacks(int stacks) {

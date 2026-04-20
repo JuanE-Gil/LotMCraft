@@ -450,10 +450,6 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
         PacketHandler.sendToServer(new OpenHonorificNamesMenuPacket());
     }
 
-    private void openMessagesMenu() {
-        PacketHandler.sendToServer(new OpenMessagesMenuPacket());
-    }
-
     private boolean isCreativeOp() {
         return this.minecraft != null && this.minecraft.player != null
                 && this.minecraft.player.isCreative()

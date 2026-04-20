@@ -53,6 +53,14 @@ public class SpectatingAbility extends ToggleAbility {
 
         LivingEntity lookedAt = AbilityUtil.getTargetEntity(entity, 40, 1.2f);
 
+        if(lookedAt != null) {
+            if (PsychologicalInvisibilityAbility.invisiblePlayers.containsKey(lookedAt.getUUID())) {
+                if (AbilityUtil.getSeqWithArt(entity, this) >=
+                        PsychologicalInvisibilityAbility.invisiblePlayers.get(lookedAt.getUUID()))
+                    return;
+            }
+        }
+
         PacketHandler.sendToPlayer(player, new SyncSpectatingAbilityPacket(true, lookedAt == null ? -1 : lookedAt.getId()));
 
         entity.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 20 * 17, 1, false, false, false));

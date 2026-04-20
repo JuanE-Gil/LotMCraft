@@ -116,6 +116,10 @@ public class BeyonderDataTickHandler {
         }
 
         if(BeyonderData.isBeyonder(livingEntity)) {
+            if(entity.getData(ModAttachments.SANITY_COMPONENT.get()).getSanity() == 0.0f){
+                entity.kill();
+            }
+
             if(entity.tickCount % 200 == 0) {
                 invalidateCache(livingEntity);
                 PhysicalEnhancementsAbility.resetEnhancements(event.getEntity().getUUID());

@@ -1,6 +1,5 @@
 package de.jakob.lotm.abilities.darkness;
 
-import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.abilities.core.interaction.InteractionHandler;
 import de.jakob.lotm.attachments.DisabledAbilitiesComponent;
@@ -105,7 +104,6 @@ public class HairEntanglementAbility extends Ability {
                 double reduction = -4*(int)Math.max(multiplier(entity)/4,1);
                 BeyonderData.addModifierWithTimeLimit(targetEntity, "hair_entanglement_multiplier_reduction", reduction, durationmorale);
             }
-            LOTMCraft.LOGGER.info("multiplier{}", (multiplier(entity)));
         }
 
         Location loc = new Location(targetEntity.position(), targetEntity.level());

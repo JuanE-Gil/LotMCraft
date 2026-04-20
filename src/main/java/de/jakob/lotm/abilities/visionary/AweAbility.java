@@ -49,7 +49,6 @@ public class AweAbility extends Ability {
             return;
 
         level.playSound(null, BlockPos.containing(entity.position()), SoundEvents.ENDER_DRAGON_GROWL, SoundSource.BLOCKS, 1, 1);
-        ParticleUtil.spawnParticles((ServerLevel) level, dust, entity.position(), 1300, 17, 3, 17, 0);
 
         int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
         AbilityUtil.addPotionEffectToNearbyEntities((ServerLevel) level, entity, 25, entity.position(), new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20 * 10, 11, false, false, false), new MobEffectInstance(MobEffects.WEAKNESS, 20 * 10, 6, false, false, false));

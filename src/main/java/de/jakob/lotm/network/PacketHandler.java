@@ -4,7 +4,6 @@ import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.network.packets.toClient.*;
 import de.jakob.lotm.network.packets.toServer.*;
 import de.jakob.lotm.util.BeyonderData;
-import de.jakob.lotm.util.beyonderMap.StoredData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerLevel;
@@ -15,10 +14,6 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
-
-import java.util.Optional;
-
-import static de.jakob.lotm.util.BeyonderData.beyonderMap;
 
 public class PacketHandler {
 
@@ -412,6 +407,12 @@ public class PacketHandler {
         );
 
         registrar.playToClient(
+                SyncPsychologicalInvisibilityPacket.TYPE,
+                SyncPsychologicalInvisibilityPacket.STREAM_CODEC,
+                SyncPsychologicalInvisibilityPacket::handle
+        );
+
+        registrar.playToClient(
                 AddClientSideTagPacket.TYPE,
                 AddClientSideTagPacket.STREAM_CODEC,
                 AddClientSideTagPacket::handle
@@ -659,10 +660,6 @@ public class PacketHandler {
                 InventoryOpenedPacket.STREAM_CODEC,
                 InventoryOpenedPacket::handle);
 
-        registrar.playToServer(
-                OpenMessagePacket.TYPE,
-                OpenMessagePacket.STREAM_CODEC,
-                OpenMessagePacket::handle);
 
         registrar.playToServer(
                 OpenHonorificNamesMenuPacket.TYPE,
@@ -678,11 +675,6 @@ public class PacketHandler {
                 SetHonorificNamePacket.TYPE,
                 SetHonorificNamePacket.STREAM_CODEC,
                 SetHonorificNamePacket::handle);
-
-        registrar.playToServer(
-                OpenMessagesMenuPacket.TYPE,
-                OpenMessagesMenuPacket.STREAM_CODEC,
-                OpenMessagesMenuPacket::handle);
 
         registrar.playToServer(
                 PlayerDivinationSelectedPacket.TYPE,
