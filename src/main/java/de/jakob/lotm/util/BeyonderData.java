@@ -54,6 +54,7 @@ public class BeyonderData {
         implementedRecipes.put("abyss", List.of(new Integer[]{9, 8, 7, 6, 5, 4, 3, 2, 1}));
         implementedRecipes.put("wheel_of_fortune", List.of(new Integer[]{9, 8, 7, 6, 5, 4, 3, 2, 1}));
         implementedRecipes.put("error", List.of(new Integer[]{9, 8, 7, 6, 5, 4, 3, 2, 1}));
+        implementedRecipes.put("death", List.of(new Integer[]{9, 8, 7, 6, 5, 4, 3, 2, 1}));
 
     }
 
@@ -92,10 +93,10 @@ public class BeyonderData {
             "demoness",
             "red_priest",
             "mother",
-            "mother",
             "abyss",
             "visionary",
-            "wheel_of_fortune"
+            "wheel_of_fortune",
+            "death"
     );
 
     public static int getHighestImplementedSequence(String pathway) {
@@ -194,6 +195,11 @@ public class BeyonderData {
         if(addToPathwayHistory) {
             component.getPathwayHistory()[sequence] = pathway;
         }
+
+        UniquenessComponent uniquenessComponent = entity.getData(ModAttachments.UNIQUENESS_COMPONENT);
+        uniquenessComponent.setHasUniqueness(false);
+        uniquenessComponent.resetKillCount();
+        if(entity instanceof ServerPlayer serverPlayer) PacketHandler.syncUniquenessToPlayer(serverPlayer);
 
         LuckComponent luckComponent = entity.getData(ModAttachments.LUCK_COMPONENT);
         luckComponent.setLuck(0);
@@ -526,6 +532,8 @@ public class BeyonderData {
             return ClientBeyonderCache.getCharStack(entity.getUUID());
         }
 
+        if(sequence > 9 || sequence < 1) return 0;
+
         return entity.getData(ModAttachments.BEYONDER_COMPONENT).getCharacteristicStack()[sequence];
     }
 
@@ -534,7 +542,11 @@ public class BeyonderData {
             return ClientBeyonderCache.getCharStack(entity.getUUID());
         }
 
-        return entity.getData(ModAttachments.BEYONDER_COMPONENT).getCharacteristicStack()[getSequence(entity)];
+        int sequence = getSequence(entity);
+
+        if(sequence > 9 || sequence < 1) return 0;
+
+        return entity.getData(ModAttachments.BEYONDER_COMPONENT).getCharacteristicStack()[sequence];
     }
 
     public static String[] getPathwayHistory(LivingEntity entity) {
@@ -549,7 +561,17 @@ public class BeyonderData {
         return history;
     }
 
+    public static boolean hasSwitchedPathway(LivingEntity entity) {
+        String currentPathway = getPathway(entity);
+        String[] history = getPathwayHistory(entity);
+        for (String entry : history) {
+            if (entry != null && !entry.isEmpty() && !entry.equals(currentPathway)) return true;
+        }
+        return false;
+    }
+
     public static void digest(Player player, float amount, boolean countTowardsCooldown) {
+        if (hasSwitchedPathway(player)) amount /= 2f;
         float current = getDigestionProgress(player);
         float newAmount = Math.min(1.0f, current + amount);
         if(newAmount == 1.0f && current < 1.0f) {

@@ -14,14 +14,13 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.HashMap;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 public abstract class KillBeyonderQuest extends Quest {
 
@@ -103,6 +102,7 @@ public abstract class KillBeyonderQuest extends Quest {
         BlockPos playerPos = player.blockPosition();
         Random random = new Random();
         BlockPos structurePos = null;
+        List<BlockPos> structureBlocks = new ArrayList<>();
 
         int maxAttempts = 800;
         boolean structurePlaced = false;
@@ -122,7 +122,7 @@ public abstract class KillBeyonderQuest extends Quest {
             BlockPos groundPos = findGroundLevel(level, searchX, searchZ);
 
             if (groundPos != null && canPlaceStructure(level, groundPos)) {
-                placeStructure(level, groundPos, random);
+                structureBlocks = placeStructure(level, groundPos, random);
                 structurePos = groundPos;
                 structurePlaced = true;
             }
@@ -138,6 +138,7 @@ public abstract class KillBeyonderQuest extends Quest {
         if (blockEntity instanceof MysticalRingBlockEntity ringBE) {
             ringBE.setPathway(pathway.isEmpty() ? BeyonderData.implementedPathways.get(random.nextInt(BeyonderData.implementedPathways.size())) : pathway);
             ringBE.setSequence(beyonderSequence);
+            ringBE.setBlocksToRemovedWhenActivated(structureBlocks);
         }
 
         QuestComponent component = player.getData(ModAttachments.QUEST_COMPONENT);
@@ -199,11 +200,9 @@ public abstract class KillBeyonderQuest extends Quest {
         return true;
     }
 
-    /**
-     * Places the stone structure at the given location
-     */
-    private void placeStructure(ServerLevel level, BlockPos center, Random random) {
+    private List<BlockPos> placeStructure(ServerLevel level, BlockPos center, Random random) {
         int radius = 3;
+        List<BlockPos> placedBlocks = new java.util.ArrayList<>();
 
         // Place varied stone floor (7x7) with pattern
         for (int x = -radius; x <= radius; x++) {
@@ -214,7 +213,6 @@ public abstract class KillBeyonderQuest extends Quest {
                 if (Math.abs(x) == radius || Math.abs(z) == radius) {
                     level.setBlock(floorPos, Blocks.STONE_BRICKS.defaultBlockState(), 3);
                 } else {
-                    // Inner floor variation
                     float rand = random.nextFloat();
                     if (rand < 0.6f) {
                         level.setBlock(floorPos, Blocks.STONE.defaultBlockState(), 3);
@@ -224,6 +222,7 @@ public abstract class KillBeyonderQuest extends Quest {
                         level.setBlock(floorPos, Blocks.MOSSY_COBBLESTONE.defaultBlockState(), 3);
                     }
                 }
+                placedBlocks.add(floorPos);
             }
         }
 
@@ -235,7 +234,6 @@ public abstract class KillBeyonderQuest extends Quest {
             for (int y = 1; y <= pillarHeight; y++) {
                 BlockPos pillarPos = center.offset(offset[0], y, offset[1]);
 
-                // Add variation to pillars
                 if (y == 1 || y == pillarHeight) {
                     level.setBlock(pillarPos, Blocks.CHISELED_STONE_BRICKS.defaultBlockState(), 3);
                 } else if (random.nextFloat() < 0.2f) {
@@ -243,58 +241,67 @@ public abstract class KillBeyonderQuest extends Quest {
                 } else {
                     level.setBlock(pillarPos, Blocks.STONE_BRICKS.defaultBlockState(), 3);
                 }
+                placedBlocks.add(pillarPos);
             }
 
-            // Add stone brick slab on top of each pillar
             BlockPos topPos = center.offset(offset[0], pillarHeight + 1, offset[1]);
             level.setBlock(topPos, Blocks.STONE_BRICK_SLAB.defaultBlockState(), 3);
+            placedBlocks.add(topPos);
         }
 
-        // Add connecting stone brick walls between pillars at height 1
         // North wall
         for (int x = -1; x <= 1; x++) {
             BlockPos wallPos = center.offset(x, 1, -2);
             level.setBlock(wallPos, Blocks.STONE_BRICK_WALL.defaultBlockState(), 3);
+            placedBlocks.add(wallPos);
         }
         // South wall
         for (int x = -1; x <= 1; x++) {
             BlockPos wallPos = center.offset(x, 1, 2);
             level.setBlock(wallPos, Blocks.STONE_BRICK_WALL.defaultBlockState(), 3);
+            placedBlocks.add(wallPos);
         }
         // West wall
         for (int z = -1; z <= 1; z++) {
             BlockPos wallPos = center.offset(-2, 1, z);
             level.setBlock(wallPos, Blocks.STONE_BRICK_WALL.defaultBlockState(), 3);
+            placedBlocks.add(wallPos);
         }
         // East wall
         for (int z = -1; z <= 1; z++) {
             BlockPos wallPos = center.offset(2, 1, z);
             level.setBlock(wallPos, Blocks.STONE_BRICK_WALL.defaultBlockState(), 3);
+            placedBlocks.add(wallPos);
         }
 
-        // Enhanced center decoration - small pedestal
         level.setBlock(center, Blocks.CHISELED_STONE_BRICKS.defaultBlockState(), 3);
         level.setBlock(center.above(), Blocks.STONE_BRICK_SLAB.defaultBlockState(), 3);
 
-        // Add corner accent blocks
+        placedBlocks.add(center);
+        placedBlocks.add(center.above());
+
         int[][] innerCorners = {{-1, -1}, {-1, 1}, {1, -1}, {1, 1}};
         for (int[] corner : innerCorners) {
             BlockPos cornerPos = center.offset(corner[0], 0, corner[1]);
             level.setBlock(cornerPos, Blocks.POLISHED_ANDESITE.defaultBlockState(), 3);
+            placedBlocks.add(cornerPos);
         }
 
-        // Add lanterns on pillars
         for (int[] offset : pillarOffsets) {
             BlockPos lanternPos = center.offset(offset[0], pillarHeight + 1, offset[1]);
             level.setBlock(lanternPos, Blocks.LANTERN.defaultBlockState(), 3);
+            placedBlocks.add(lanternPos);
         }
 
-        // Add some scattered decorative blocks
         if (random.nextFloat() < 0.5f) {
             level.setBlock(center.offset(0, 1, -1), Blocks.POTTED_FERN.defaultBlockState(), 3);
+            placedBlocks.add(center.offset(0, 1, -1));
         }
         if (random.nextFloat() < 0.5f) {
             level.setBlock(center.offset(0, 1, 1), Blocks.POTTED_DEAD_BUSH.defaultBlockState(), 3);
+            placedBlocks.add(center.offset(0, 1, 1));
         }
+
+        return placedBlocks;
     }
 }

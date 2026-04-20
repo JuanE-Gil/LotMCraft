@@ -42,6 +42,23 @@ public class UniquenessCommand {
                                 })
                         )
                 )
+                .then(Commands.literal("spawn")
+                        .then(Commands.argument("pathway", StringArgumentType.string())
+                                .suggests(PATHWAY_SUGGESTIONS)
+                                .executes(context -> {
+                                    String pathway = StringArgumentType.getString(context, "pathway");
+
+                                    if (UniquenessEntity.existsInWorld(context.getSource().getLevel(), pathway)) return 0;
+
+                                    if (UniquenessEntity.anyPlayerHoldsUniqueness(context.getSource().getLevel(), pathway)) return 0;
+
+                                    if (BeyonderData.playerMap != null && BeyonderData.playerMap.count(pathway, 0) > 0) return 0;
+
+                                    UniquenessEntity.trySpawn(context.getSource().getLevel(), context.getSource().getPosition().add(0, -2, 0), pathway);
+                                    return 1;
+                                })
+                        )
+                )
         );
     }
 
@@ -104,6 +121,7 @@ public class UniquenessCommand {
             UniquenessComponent comp = holder.getData(ModAttachments.UNIQUENESS_COMPONENT);
             comp.setHasUniqueness(false);
             comp.setUniquenessPathway("");
+            BeyonderData.playerMap.setUniqueness(holder, "none");
             PacketHandler.syncUniquenessToPlayer(holder);
             source.sendSuccess(() -> Component.literal("Removed uniqueness from " + holder.getName().getString()), false);
         }

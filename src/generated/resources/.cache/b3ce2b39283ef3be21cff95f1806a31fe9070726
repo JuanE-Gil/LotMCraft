@@ -1,5 +1,6 @@
-// 1.21.1	2026-04-18T11:46:19.2924378	Item Models: lotmcraft
+// 1.21.1	2026-04-19T13:36:54.8170853	Item Models: lotmcraft
 f73b18465ecc4c7209da8e28508db3e3a9a348de assets/lotmcraft/models/item/abyss_demonic_fish_blood.json
+d79ff3aedef37faf54603234b4a98f66afb8991f assets/lotmcraft/models/item/abyss_uniqueness.json
 ff1f40acc559743c518a78f4d8d99df759005e37 assets/lotmcraft/models/item/agate_peacock_egg.json
 65b6c713526448dd94ab6c94da2487f1a4242daf assets/lotmcraft/models/item/ancient_logbook.json
 516355edf340e64cd07c544fa62fd7174c28d2f7 assets/lotmcraft/models/item/ancient_wraith_artifact.json
@@ -96,6 +97,7 @@ d63ff674de475a8539701ac2d673c32c41c9bca1 assets/lotmcraft/models/item/demoness_o
 a5851523c9f6e597c054270b142883e9a1c91a94 assets/lotmcraft/models/item/demoness_of_unaging.json
 818dfb19426408b6ced42b590c78543cc27669b0 assets/lotmcraft/models/item/demoness_of_unaging_characteristic.json
 0e7e04f3d8da7f2fb53b82247acd8cf51c53f37b assets/lotmcraft/models/item/demoness_of_unaging_potion.json
+720fe597148558643573e4ad54e7e9355de35ed6 assets/lotmcraft/models/item/demoness_uniqueness.json
 cd1ba193d2729afb68f30d5b059c8907dfa4fb96 assets/lotmcraft/models/item/demon_characteristic.json
 e52e106bc89c4b66f56de521de5ff8d903f1d254 assets/lotmcraft/models/item/demon_potion.json
 a5851523c9f6e597c054270b142883e9a1c91a94 assets/lotmcraft/models/item/desire_apostle.json
@@ -230,6 +232,7 @@ a5851523c9f6e597c054270b142883e9a1c91a94 assets/lotmcraft/models/item/monster.js
 74fed5f94dff2e1561ee7ffea83413071be10ab6 assets/lotmcraft/models/item/monster_characteristic.json
 b6fde8a1f9aa8b1badc66efc8e72c1ea21702132 assets/lotmcraft/models/item/monster_potion.json
 24261c6d0868cadc2cd8723d3f2ec38741343c29 assets/lotmcraft/models/item/moon.json
+2fbfa7f3bc26a477e385dff9c0ce8f9d7cf9e946 assets/lotmcraft/models/item/mother_uniqueness.json
 f1caa54d29eca7a72716c885546fb828c3eb35d3 assets/lotmcraft/models/item/murloc_bladder.json
 a5851523c9f6e597c054270b142883e9a1c91a94 assets/lotmcraft/models/item/naturewalker.json
 e90ee5d776f7b0a3fc4cb8dcd0e2d7c499dbff4b assets/lotmcraft/models/item/naturewalker_characteristic.json

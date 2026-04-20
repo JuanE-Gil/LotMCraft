@@ -32,7 +32,6 @@ public abstract class PassiveAbilityItem extends Item {
 
     public boolean shouldApplyTo(LivingEntity entity) {
         if (entity.level().isClientSide()) {
-            // Client-side: use cached data
             String pathway = ClientBeyonderCache.getPathway(entity.getUUID());
             int sequence = ClientBeyonderCache.getSequence(entity.getUUID());
 
@@ -40,31 +39,42 @@ public abstract class PassiveAbilityItem extends Item {
                 return false;
             }
 
-            if(!getRequirements().containsKey(pathway))
-                return false;
-
-            // Check if pathway has requirements
-            Integer minSeq = getRequirements().get(pathway);
-            if (minSeq == null) {
-                return false;
+            if(getRequirements().containsKey(pathway)) {
+                Integer minSeq = getRequirements().get(pathway);
+                if (minSeq != null && sequence <= minSeq) return true;
             }
 
-            // Check sequence
-            return sequence <= minSeq;
+            if (!(this instanceof PhysicalEnhancementsAbility)) {
+                String[] history = ClientBeyonderCache.getPathwayHistory(entity.getUUID());
+                for (int i = sequence + 1; i < history.length; i++) {
+                    String histPathway = history[i];
+                    if (histPathway == null || histPathway.isEmpty()) continue;
+                    Integer minSeq = getRequirements().get(histPathway);
+                    if (minSeq != null && i <= minSeq) return true;
+                }
+            }
+
+            return false;
         } else {
             String pathway = BeyonderData.getPathway(entity);
             int sequence = BeyonderData.getSequence(entity);
 
-            if(!getRequirements().containsKey(pathway))
-                return false;
-
-            // Check if pathway has requirements
-            Integer minSeq = getRequirements().get(pathway);
-            if (minSeq == null) {
-                return false;
+            if(getRequirements().containsKey(pathway)) {
+                Integer minSeq = getRequirements().get(pathway);
+                if (minSeq != null && sequence <= minSeq) return true;
             }
 
-            return sequence <= minSeq;
+            if (!(this instanceof PhysicalEnhancementsAbility)) {
+                String[] history = BeyonderData.getPathwayHistory(entity);
+                for (int i = sequence + 1; i < history.length; i++) {
+                    String histPathway = history[i];
+                    if (histPathway == null || histPathway.isEmpty()) continue;
+                    Integer minSeq = getRequirements().get(histPathway);
+                    if (minSeq != null && i <= minSeq) return true;
+                }
+            }
+
+            return false;
         }
     }
 

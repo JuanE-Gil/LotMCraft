@@ -22,10 +22,12 @@ import de.jakob.lotm.rendering.*;
 import de.jakob.lotm.rendering.effectRendering.impl.VFXRenderer;
 import de.jakob.lotm.util.ClientBeyonderCache;
 import de.jakob.lotm.util.ClientSacrificeCache;
+import de.jakob.lotm.util.helper.AnimationUtil;
 import de.jakob.lotm.util.helper.RingExpansionRenderer;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
@@ -101,6 +103,19 @@ public class ClientHandler {
         }
         else {
             SpiritVisionOverlayRenderer.entitiesLookedAt.remove(player.getUUID());
+        }
+    }
+
+    public static void syncEyeOfDeathAbility(SyncEyeOfDeathAbilityPacket packet, Player player) {
+        if (packet.active()) {
+            Level level = Minecraft.getInstance().level;
+            if (level == null) return;
+
+            Entity entity = packet.entityId() == -1 ? null : level.getEntity(packet.entityId());
+            LivingEntity living = entity instanceof LivingEntity ? (LivingEntity) entity : null;
+            EyeOfDeathOverlayRenderer.entitiesLookedAt.put(player.getUUID(), living);
+        } else {
+            EyeOfDeathOverlayRenderer.entitiesLookedAt.remove(player.getUUID());
         }
     }
 
@@ -517,6 +532,18 @@ public class ClientHandler {
         ClientSacrificeCache.setRemainingTicks(totalTicks);
     }
 
+    public static void syncCullAbility(boolean active, UUID playerUUID) {
+        if (active) {
+            CullOverlay.playersWithCullActivated.add(playerUUID);
+        } else {
+            CullOverlay.playersWithCullActivated.remove(playerUUID);
+        }
+    }
+
+    public static void handleSpiritChannelingPacket(de.jakob.lotm.network.packets.toClient.SyncSpiritChannelingPacket packet) {
+        de.jakob.lotm.util.ClientSpiritCache.setSpiritTypeOrdinal(packet.spiritType());
+    }
+
     public static void handleApotheosisPacket(SyncApotheosisPacket packet) {
         ClientLevel level = Minecraft.getInstance().level;
         if (level == null) return;
@@ -526,5 +553,17 @@ public class ClientHandler {
             living.getData(ModAttachments.APOTHEOSIS_COMPONENT).setApotheosisTicksLeft(packet.ticks());
             living.getData(ModAttachments.APOTHEOSIS_COMPONENT).setPathway(packet.pathway());
         }
+    }
+
+    public static void playAnimation(PlayAnimationPacket packet) {
+        ClientLevel level = Minecraft.getInstance().level;
+        if (level == null) return;
+
+        Entity entity = level.getEntity(packet.playerId());
+        if(!(entity instanceof AbstractClientPlayer player)) {
+            return;
+        }
+
+        AnimationUtil.playAnimation(player, AnimationUtil.getResourceLocationById(packet.animId()));
     }
 }

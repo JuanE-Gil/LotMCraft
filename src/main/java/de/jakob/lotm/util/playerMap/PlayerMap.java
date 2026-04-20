@@ -3,6 +3,7 @@ package de.jakob.lotm.util.playerMap;
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.visionary.prophecy.Prophecy;
 import de.jakob.lotm.attachments.ModAttachments;
+import de.jakob.lotm.attachments.UniquenessComponent;
 import de.jakob.lotm.gamerule.ModGameRules;
 import de.jakob.lotm.util.BeyonderData;
 import net.minecraft.core.HolderLookup;
@@ -49,6 +50,26 @@ public class PlayerMap extends SavedData {
                 map.put(UUID.fromString(key), StoredData.fromNBT(mapTag.getCompound(key), provider));
             }
         }
+    }
+
+    public boolean anyPlayerHoldsUniqueness(String pathway) {
+        for (var data : map.values()) {
+            if (data.uniqueness().equalsIgnoreCase(pathway)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void setUniqueness(LivingEntity entity, String pathway) {
+        if (!(entity instanceof ServerPlayer)) return;
+
+        if (!contains(entity)) put(entity);
+
+        var data = map.get(entity.getUUID());
+        map.put(entity.getUUID(), StoredData.builder.copyFrom(data).uniqueness(pathway).build());
+
+        setDirty();
     }
 
     public void addProphecy(UUID entity, Prophecy prophecy){
@@ -108,7 +129,10 @@ public class PlayerMap extends SavedData {
         String pathway = BeyonderData.getPathway(entity);
         int sequence = BeyonderData.getSequence(entity);
 
-        //Need to store any data
+        UniquenessComponent uniquenessComponent = entity.getData(ModAttachments.UNIQUENESS_COMPONENT);
+        String uniqueness = uniquenessComponent.hasUniqueness() ? uniquenessComponent.getUniquenessPathway() : "none";
+
+
         // Don't store if this is default/empty data
 //        if(pathway.equals("none") || sequence == LOTMCraft.NON_BEYONDER_SEQ) {
 //            return; // Don't overwrite existing data with empty data
@@ -133,6 +157,7 @@ public class PlayerMap extends SavedData {
                 .trueName(((ServerPlayer) entity).getGameProfile().getName())
                 .charStackArray(componentCharStack)
                 .pathwayHistory(pathwayHistory)
+                .uniqueness(uniqueness)
                 .build());
 
         setDirty();

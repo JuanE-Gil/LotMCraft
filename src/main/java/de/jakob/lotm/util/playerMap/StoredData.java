@@ -2,6 +2,8 @@ package de.jakob.lotm.util.playerMap;
 
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.visionary.prophecy.Prophecy;
+import de.jakob.lotm.util.playerMap.HonorificName;
+import de.jakob.lotm.util.playerMap.StoredDataBuilder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.*;
 import net.minecraft.world.phys.Vec3;
@@ -12,8 +14,9 @@ import java.util.LinkedList;
 public record StoredData(String pathway, Integer sequence, HonorificName honorificName,
                          String trueName,
                          Boolean modified, Vec3 lastPosition,
-                         int[] charStack,           // single int — replaces CharacteristicStack
-                         String[] pathwayHistory,  // fixed size 10 — replaces PathwayHistory record
+                         int[] charStack,
+                         String[] pathwayHistory,
+                         String uniqueness, //none if no uniqueness :)
                          LinkedList<Prophecy> prophecies
 ) {
 
@@ -25,6 +28,7 @@ public record StoredData(String pathway, Integer sequence, HonorificName honorif
     public static final String NBT_CHAR_STACK      = "beyonder_map_char_stack";
     public static final String NBT_PATHWAY_HISTORY = "beyonder_map_pathway_history";
     public static final String NBT_PROPHECIES      = "beyonder_map_prophecies";
+    public static final String NBT_UNIQUENESS = "beyonder_map_uniqueness";
 
     public static final String NBT_LAST_POSITION_X = "beyonder_map_last_position_x";
     public static final String NBT_LAST_POSITION_Y = "beyonder_map_last_position_y";
@@ -44,22 +48,10 @@ public record StoredData(String pathway, Integer sequence, HonorificName honorif
                 + "\n--- Seq: " + sequence
                 + "\n--- Honorific Name: " + honorificName.getAllInfo()
                 + "\n--- Logout Position: " + (int) lastPosition.x + " " + (int) lastPosition.y + " " + (int) lastPosition.z
-                + "\n--- Char stack: " + mapCharStackAsIntToString()
+                + "\n--- Char stack: " + java.util.Arrays.toString(charStack)
                 + "\n--- Pathway history: " + getPathwayHistoryInfo()
                 + "\n--- Amount of prophecies: " + prophecies.size()
                 + "\n--- Was modified: " + modified;
-    }
-
-    private String mapCharStackAsIntToString(){
-        StringBuilder result = new StringBuilder();
-
-        for(int i = 9; i >= 1; i--){
-            if(charStack[i] != 0){
-                result.append("\nSeq ").append(i).append(": ").append(charStack[i]);
-            }
-        }
-
-        return result.toString();
     }
 
     private String getPathwayHistoryInfo() {
@@ -115,6 +107,7 @@ public record StoredData(String pathway, Integer sequence, HonorificName honorif
                 .honorificName((newSequence >= 3) ? HonorificName.EMPTY : honorificName)
                 .charStack(0, sequence)   // reset stack on regression
                 .pathwayHistory(becomesNonBeyonder ? new String[10] : clearedHistory)
+                .uniqueness("none")
                 .build();
     }
 
@@ -128,6 +121,7 @@ public record StoredData(String pathway, Integer sequence, HonorificName honorif
         tag.put(NBT_HONORIFIC_NAME, honorificName.toNBT());
         tag.putString(NBT_TRUE_NAME, trueName);
 
+        tag.putString(NBT_UNIQUENESS, uniqueness == null || uniqueness.isBlank() ? "none" : uniqueness);
         tag.putBoolean(NBT_MODIFIED, modified);
 
         tag.putDouble(NBT_LAST_POSITION_X, lastPosition.x());
@@ -164,6 +158,7 @@ public record StoredData(String pathway, Integer sequence, HonorificName honorif
         String trueName = tag.getString(NBT_TRUE_NAME);
 
         boolean modified = tag.getBoolean(NBT_MODIFIED);
+        String uniqueness = tag.contains(NBT_UNIQUENESS) ? tag.getString(NBT_UNIQUENESS) : "none";
 
         Vec3 lastPos = new Vec3(
                 tag.getDouble(NBT_LAST_POSITION_X),
@@ -196,6 +191,6 @@ public record StoredData(String pathway, Integer sequence, HonorificName honorif
             }
         }
 
-        return new StoredData(path, seq, name, trueName, modified, lastPos, charStack, history, prophecies);
+        return new StoredData(path, seq, name, trueName, modified, lastPos, charStack, history, uniqueness ,prophecies);
     }
 }

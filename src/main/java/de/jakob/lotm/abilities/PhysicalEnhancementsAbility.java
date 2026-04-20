@@ -22,6 +22,7 @@ import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
+import net.neoforged.neoforge.event.entity.living.LivingHealEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 
 import java.util.*;
@@ -44,7 +45,16 @@ public abstract class PhysicalEnhancementsAbility extends PassiveAbilityItem {
     private static final Map<UUID, Map<EnhancementType, Integer>> entityEnhancements = new ConcurrentHashMap<>();
     private static final Map<UUID, Map<String, TemporaryEnhancement>> temporaryEnhancements = new ConcurrentHashMap<>();
     private static final Map<UUID, Map<String, EnhancementBoost>> enhancementBoosts = new ConcurrentHashMap<>();
-    private static final Map<UUID, Long> reducedRegen = new ConcurrentHashMap<>();
+    public static final Map<UUID, Long> reducedRegen = new ConcurrentHashMap<>();
+
+    /** Suppresses passive regen for the given entity for the specified duration in milliseconds. */
+    public static void suppressRegen(LivingEntity entity, long durationMs) {
+        long expiry = System.currentTimeMillis() + durationMs;
+        if (!reducedRegen.containsKey(entity.getUUID()) || reducedRegen.get(entity.getUUID()) < expiry) {
+            reducedRegen.put(entity.getUUID(), expiry);
+        }
+        entity.removeEffect(MobEffects.REGENERATION);
+    }
 
     // FIX 2: Track the last known sequence level per entity so that attribute modifiers
     // (health, speed, strength, etc.) are only removed/re-added when the sequence actually
@@ -578,6 +588,18 @@ public abstract class PhysicalEnhancementsAbility extends PassiveAbilityItem {
                     event.setAmount(event.getAmount() * damageMultiplier);
                 }
             }
+        }
+
+        @SubscribeEvent
+        public static void onLivingHeal(LivingHealEvent event) {
+            UUID uuid = event.getEntity().getUUID();
+            Long expiry = reducedRegen.get(uuid);
+            if (expiry == null) return;
+            if (System.currentTimeMillis() >= expiry) {
+                reducedRegen.remove(uuid);
+                return;
+            }
+            event.setCanceled(true);
         }
 
         @SubscribeEvent

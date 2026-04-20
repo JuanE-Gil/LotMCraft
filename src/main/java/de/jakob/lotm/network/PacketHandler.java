@@ -281,6 +281,12 @@ public class PacketHandler {
         );
 
         registrar.playToClient(
+                SyncEyeOfDeathAbilityPacket.TYPE,
+                SyncEyeOfDeathAbilityPacket.STREAM_CODEC,
+                SyncEyeOfDeathAbilityPacket::handle
+        );
+
+        registrar.playToClient(
                 RingEffectPacket.TYPE,
                 RingEffectPacket.STREAM_CODEC,
                 RingEffectPacket::handle
@@ -431,6 +437,12 @@ public class PacketHandler {
         );
 
         registrar.playToClient(
+                PlayAnimationPacket.TYPE,
+                PlayAnimationPacket.STREAM_CODEC,
+                PlayAnimationPacket::handle
+        );
+
+        registrar.playToClient(
                 SyncOriginalBodyOwnerPacket.TYPE,
                 SyncOriginalBodyOwnerPacket.STREAM_CODEC,
                 SyncOriginalBodyOwnerPacket::handle
@@ -441,7 +453,13 @@ public class PacketHandler {
                 SyncSkillScalingPacket.STREAM_CODEC,
                 SyncSkillScalingPacket::handle
         );
-
+      
+        registrar.playToClient(
+                SyncSpiritChannelingPacket.TYPE,
+                SyncSpiritChannelingPacket.STREAM_CODEC,
+                SyncSpiritChannelingPacket::handle
+        );
+      
         registrar.playToClient(
                 SyncUniquenessPacket.TYPE,
                 SyncUniquenessPacket.STREAM_CODEC,

@@ -28,22 +28,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * A world entity that represents a pathway's uniqueness.
- * Only one entity per pathway can exist in the world at once.
- * It renders like a floating item with the pathway's uniqueness texture.
- * Sequence 1 of the matching pathway can pick it up.
- * Others who touch it are harmed or killed depending on their sequence.
- */
 public class UniquenessEntity extends Entity {
 
     private static final EntityDataAccessor<String> PATHWAY =
             SynchedEntityData.defineId(UniquenessEntity.class, EntityDataSerializers.STRING);
 
-    /** Damage dealt to angel (seq <= 2) beyonders who touch the uniqueness. */
     private static final float UNIQUENESS_ANGEL_DAMAGE = 50.0f;
 
-    /** Tracks all active uniqueness entities by pathway (server-side). */
+
     private static final int MAX_RENDER_DISTANCE_BLOCKS = 64;
 
     public static final Map<String, Integer> ACTIVE_ENTITIES = new HashMap<>();
@@ -79,6 +71,12 @@ public class UniquenessEntity extends Entity {
 
         if (level().isClientSide) {
             ticksExisted++;
+            return;
+        }
+
+        if(!ACTIVE_ENTITIES.containsValue(this.getId()) || getPathway().isEmpty() || !ACTIVE_ENTITIES.containsKey(getPathway())) {
+            ACTIVE_ENTITIES.remove(getPathway());
+            this.discard();
             return;
         }
 
@@ -135,6 +133,7 @@ public class UniquenessEntity extends Entity {
         UniquenessComponent component = player.getData(ModAttachments.UNIQUENESS_COMPONENT);
         component.setHasUniqueness(true);
         component.setUniquenessPathway(pathway);
+        BeyonderData.playerMap.setUniqueness(player, pathway);
 
         int color = BeyonderData.pathwayInfos.containsKey(pathway)
                 ? BeyonderData.pathwayInfos.get(pathway).color()
@@ -178,6 +177,21 @@ public class UniquenessEntity extends Entity {
         if (!level().isClientSide && !getPathway().isEmpty()) {
             ACTIVE_ENTITIES.put(getPathway(), this.getId());
         }
+    }
+
+    public static boolean anyPlayerHoldsUniqueness(ServerLevel level, String pathway) {
+        for (ServerPlayer player : level.players()) {
+            UniquenessComponent comp = player.getData(ModAttachments.UNIQUENESS_COMPONENT);
+            if (comp.hasUniqueness() && pathway.equalsIgnoreCase(comp.getUniquenessPathway())) {
+                return true;
+            }
+        }
+
+        if(BeyonderData.playerMap.anyPlayerHoldsUniqueness(pathway)) {
+            return true;
+        }
+
+        return false;
     }
 
     @Override

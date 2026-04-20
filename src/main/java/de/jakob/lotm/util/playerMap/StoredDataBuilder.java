@@ -2,6 +2,7 @@ package de.jakob.lotm.util.playerMap;
 
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.visionary.prophecy.Prophecy;
+import de.jakob.lotm.util.playerMap.HonorificName;
 import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
@@ -18,6 +19,7 @@ public class StoredDataBuilder {
     private int[] charStack;
     private String[] pathwayHistory;
     private LinkedList<Prophecy> prophecyList;
+    private String uniqueness;
 
     public StoredDataBuilder(){
         clean();
@@ -33,6 +35,7 @@ public class StoredDataBuilder {
         charStack = new int[10];
         pathwayHistory = new String[10];
         prophecyList = new LinkedList<>();
+            uniqueness = "none";
     }
 
     public StoredDataBuilder copyFrom(@Nullable StoredData data){
@@ -94,6 +97,11 @@ public class StoredDataBuilder {
         return this;
     }
 
+    public StoredDataBuilder uniqueness(String uniqueness) {
+        this.uniqueness = uniqueness;
+        return this;
+    }
+
     public StoredDataBuilder charStackArray(int[] stack) {
         this.charStack = Arrays.copyOf(stack, 10);
         return this;
@@ -112,7 +120,7 @@ public class StoredDataBuilder {
     public StoredData build(){
         StoredData buff = new StoredData(pathway, sequence,
                 honorificName, trueName, modified,
-                lastPosition, charStack, pathwayHistory, prophecyList);
+                lastPosition, charStack, pathwayHistory, uniqueness, prophecyList);
 
         clean();
 

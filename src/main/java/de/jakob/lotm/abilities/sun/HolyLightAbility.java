@@ -90,8 +90,8 @@ public class HolyLightAbility extends Ability {
             ServerScheduler.scheduleDelayed(22, () -> {
                 lights.forEach(l -> level.setBlockAndUpdate(l, Blocks.AIR.defaultBlockState()));
             }, (ServerLevel) level, () -> AbilityUtil.getTimeInArea(entity, new Location(entity.position(), level)));
-        } else if(entity instanceof Player player) {
-            AnimationUtil.playOpenArmAnimation(player);
+
+            if(entity instanceof Player player) AnimationUtil.playOpenArmAnimation(player);
         }
     }
 }

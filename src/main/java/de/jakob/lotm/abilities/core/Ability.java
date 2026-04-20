@@ -113,7 +113,7 @@ public abstract class Ability {
 
         // Use ability client and server sided
         onAbilityUse(serverLevel, newUser);
-        PacketHandler.sendToAllPlayersInSameLevel(new UseAbilityPacket(getId(), newUser.getId()), serverLevel);
+        if(entity instanceof ServerPlayer player) PacketHandler.sendToPlayer(player, new UseAbilityPacket(getId(), newUser.getId()));
 
         if(this.autoClear){
             clearArtifactScaling(entity);
@@ -121,9 +121,6 @@ public abstract class Ability {
 
         // Track ability use for Recording/Replicating detection
         AbilityUseTracker.trackUse(newUser, this, newUser.position(), serverLevel);
-
-        if(entity instanceof ServerPlayer player)
-            LOTMCraft.LOGGER.info("{} used {} on {}", player.getName().toString(), this.id, player.position());
 
         if(!postsUsedAbilityEventManually && !(this instanceof ToggleAbility)) {
             NeoForge.EVENT_BUS.post(new AbilityUsedEvent(serverLevel, newUser.position(), newUser, this, interactionFlags, interactionRadius, interactionCacheTicks));

@@ -13,8 +13,7 @@ import java.util.Map;
 
 public class DivineKingdomManifestationAbility extends Ability {
     public DivineKingdomManifestationAbility(String id) {
-        super(id, 20 * 60 * 2, "purification", "light_source", "light_strong", "light_weak");
-
+        super(id, 20 * 60 * 2, "purification", "light_source", "light_strong", "light_weak", "purification_holy");
         canBeCopied = false;
         canBeUsedByNPC = false;
         canBeReplicated = false;

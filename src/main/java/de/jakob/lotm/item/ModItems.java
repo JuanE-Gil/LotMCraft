@@ -110,6 +110,15 @@ public class ModItems {
     public static final DeferredItem<Item> WHEEL_OF_FORTUNE_UNIQUENESS = ITEMS.register("wheel_of_fortune_uniqueness",
             () -> new UniquenessItem(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC), "wheel_of_fortune")
     );
+    public static final DeferredItem<Item> ABYSS_UNIQUENESS = ITEMS.register("abyss_uniqueness",
+            () -> new UniquenessItem(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC), "abyss")
+    );
+    public static final DeferredItem<Item> MOTHER_UNIQUENESS = ITEMS.register("mother_uniqueness",
+            () -> new UniquenessItem(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC), "mother")
+    );
+    public static final DeferredItem<Item> DEMONESS_UNIQUENESS = ITEMS.register("demoness_uniqueness",
+            () -> new UniquenessItem(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC), "demoness")
+    );
 
     public static PotionIngredient selectRandomIngredient(List<PotionIngredient> ingredients, Random random) {
         if (ingredients == null || ingredients.isEmpty()) {

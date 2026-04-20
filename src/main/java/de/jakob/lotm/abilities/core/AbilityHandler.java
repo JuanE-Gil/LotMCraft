@@ -3,6 +3,7 @@ package de.jakob.lotm.abilities.core;
 import de.jakob.lotm.abilities.abyss.*;
 import de.jakob.lotm.abilities.common.*;
 import de.jakob.lotm.abilities.darkness.*;
+import de.jakob.lotm.abilities.death.*;
 import de.jakob.lotm.abilities.demoness.*;
 import de.jakob.lotm.abilities.door.*;
 import de.jakob.lotm.abilities.error.*;
@@ -13,6 +14,7 @@ import de.jakob.lotm.abilities.sun.*;
 import de.jakob.lotm.abilities.tyrant.*;
 import de.jakob.lotm.abilities.visionary.*;
 import de.jakob.lotm.abilities.wheel_of_fortune.*;
+import de.jakob.lotm.abilities.death.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -259,6 +261,22 @@ public class AbilityHandler {
         abilities.add(new FateSiphoningAbility("fate_siphoning_ability"));
         abilities.add(new ConceptualTheftAbility("conceptual_theft_ability"));
         abilities.add(new TimeManipulationAbility("time_manipulation_ability"));
+
+        // DEATH PATHWAY
+        abilities.add(new DivineKingdomAbility("divine_kingdom_ability"));
+        abilities.add(new NationOfTheDeadAbility("nation_of_the_dead_ability"));
+        abilities.add(new PaleEyeAbility("pale_eye_ability"));
+        abilities.add(new HandOfDeathAbility("hand_of_death_ability"));
+        abilities.add(new EyeOfDeathAbility("eye_of_death_ability"));
+        abilities.add(new SpiritChannelingAbility("spirit_channeling_ability"));
+        abilities.add(new SpiritCommunicationAbility("spirit_communication_ability"));
+        abilities.add(new ZombieDisguiseAbility("zombie_disguise_ability"));
+        abilities.add(new RestructionAbility("restruction_ability"));
+        abilities.add(new WordOfSpiritAbility("word_of_spirit_ability"));
+        abilities.add(new DoorToTheUnderworldAbility("door_to_the_underworld_ability"));
+        abilities.add(new DeathEnvoyAbility("death_envoy_ability"));
+        abilities.add(new InternalUnderworldAbility("internal_underworld_ability"));
+        abilities.add(new UndyingSealAbility("undying_seal_ability"));
     }
 
     public HashSet<Ability> getAbilities() {

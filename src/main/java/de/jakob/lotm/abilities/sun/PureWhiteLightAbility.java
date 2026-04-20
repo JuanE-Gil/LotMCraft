@@ -27,7 +27,7 @@ import java.util.Map;
 
 public class PureWhiteLightAbility extends Ability {
     public PureWhiteLightAbility(String id) {
-        super(id, 6, "purification", "light_source", "light_strong", "light_weak");
+        super(id, 6, "purification", "light_source", "light_strong", "light_weak", "purification_holy");
         interactionRadius = 25;
         postsUsedAbilityEventManually = true;
         canBeCopied = false;
@@ -46,9 +46,6 @@ public class PureWhiteLightAbility extends Ability {
     @Override
     public void onAbilityUse(Level level, LivingEntity entity) {
         if(!(level instanceof ServerLevel serverLevel)) {
-            if(entity instanceof Player player) {
-                AnimationUtil.playOpenArmAnimation(player);
-            }
             return;
         }
 
@@ -87,5 +84,7 @@ public class PureWhiteLightAbility extends Ability {
         ServerScheduler.scheduleDelayed(100, () -> {
             NeoForge.EVENT_BUS.post(new AbilityUsedEvent((ServerLevel) level, finalTargetLoc, entity, this, interactionFlags, interactionRadius, interactionCacheTicks));
         }, (ServerLevel) level, () -> AbilityUtil.getTimeInArea(entity, new Location(entity.position(), level)));
+
+        if(entity instanceof Player player) AnimationUtil.playOpenArmAnimation(player);
     }
 }
