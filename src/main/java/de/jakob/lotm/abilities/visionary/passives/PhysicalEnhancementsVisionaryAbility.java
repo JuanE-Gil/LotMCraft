@@ -1,12 +1,14 @@
 package de.jakob.lotm.abilities.visionary.passives;
 
+import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.PhysicalEnhancementsAbility;
+import net.neoforged.fml.common.EventBusSubscriber;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
+@EventBusSubscriber(modid = LOTMCraft.MOD_ID)
 public class PhysicalEnhancementsVisionaryAbility extends PhysicalEnhancementsAbility {
 
     public PhysicalEnhancementsVisionaryAbility(Properties properties) {
@@ -107,5 +109,4 @@ public class PhysicalEnhancementsVisionaryAbility extends PhysicalEnhancementsAb
             default -> List.of();
         };
     }
-
 }

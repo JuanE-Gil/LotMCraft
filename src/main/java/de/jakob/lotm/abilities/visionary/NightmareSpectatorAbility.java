@@ -56,7 +56,14 @@ public class NightmareSpectatorAbility extends Ability {
             return;
         }
 
-        if(!target.hasEffect(ModEffects.ASLEEP)) {
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+
+        if(BeyonderData.getPathway(target).equals("visionary") && BeyonderData.getSequence(target) < entitySeq){
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.frenzy.failed").withColor(0xFFff124d));
+            return;
+        }
+
+        if(!target.hasEffect(ModEffects.ASLEEP) && entitySeq >= 4) {
             AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.dream_traversal.must_be_asleep").withColor(0xFFff124d));
             return;
         }

@@ -85,6 +85,11 @@ public class BattleHypnosisAbility extends SelectableAbility {
 
         int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
 
+        if(BeyonderData.getPathway(target).equals("visionary") && BeyonderData.getSequence(target) < entitySeq){
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.frenzy.failed").withColor(0xFFff124d));
+            return;
+        }
+
         if(charmCasterUUID != null) {
             Entity charmCasterEntity = ((ServerLevel) level).getEntity(charmCasterUUID);
             int charmCasterSeq = charmCasterEntity instanceof LivingEntity livingCharmCaster ? BeyonderData.getSequence(livingCharmCaster) : LOTMCraft.NON_BEYONDER_SEQ;
@@ -108,6 +113,11 @@ public class BattleHypnosisAbility extends SelectableAbility {
             UUID charmCasterUUID = CharmAbility.getCharmed().get(target.getUUID());
 
             int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+
+            if(BeyonderData.getPathway(target).equals("visionary") && BeyonderData.getSequence(target) < entitySeq){
+                AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.frenzy.failed").withColor(0xFFff124d));
+                continue;
+            }
 
             if (charmCasterUUID != null) {
                 Entity charmCasterEntity = ((ServerLevel) level).getEntity(charmCasterUUID);

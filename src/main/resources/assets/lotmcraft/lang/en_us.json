@@ -681,6 +681,7 @@
   "lotmcraft.frenzy_ability": "Frenzy",
   "lotmcraft.frenzy_ability.description": "Thrown your enemies mind into distress",
   "ability.lotmcraft.frenzy.no_target": "No Target found",
+  "ability.lotmcraft.frenzy.failed": "Failed",
   "lotmcraft.awe_ability": "Awe",
   "lotmcraft.awe_ability.description": "Awe",
   "lotmcraft.placate_ability": "Placate",

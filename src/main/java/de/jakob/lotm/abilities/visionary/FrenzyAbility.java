@@ -62,7 +62,12 @@ public class FrenzyAbility extends Ability {
 
         int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
 
-        if(!BeyonderData.isBeyonder(target) || BeyonderData.getSequence(target) >= entitySeq) {
+        if(BeyonderData.getPathway(target).equals("visionary") && BeyonderData.getSequence(target) < entitySeq){
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.frenzy.failed").withColor(0xFFff124d));
+            return;
+        }
+
+        if(BeyonderData.getSequence(target) >= entitySeq) {
             if (!target.hasEffect(ModEffects.LOOSING_CONTROL) || target.getEffect(ModEffects.LOOSING_CONTROL).getAmplifier() < amplifier)
                 target.addEffect(new MobEffectInstance(ModEffects.LOOSING_CONTROL, 20 * 8, amplifier));
         }

@@ -94,8 +94,6 @@ public class DragonScalesAbility extends ToggleAbility {
                 });
     }
 
-
-
     @SubscribeEvent
     public static void onDamage(LivingIncomingDamageEvent event) {
         var entity = event.getEntity();
