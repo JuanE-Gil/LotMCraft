@@ -384,7 +384,6 @@ public class ConcealmentAbility extends SelectableAbility {
 
         int finalDuration = duration;
 
-
         ServerScheduler.scheduleForDuration(0, 5,duration, () -> {
             targetEntity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, 10, false, false, false));
             targetEntity.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 20, 10, false, false, false));

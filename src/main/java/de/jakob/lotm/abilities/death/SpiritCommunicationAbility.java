@@ -34,7 +34,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class SpiritCommunicationAbility extends SelectableAbility {
 
     public SpiritCommunicationAbility(String id) {
-        super(id, 200);
+        super(id, 100);
     }
 
     @Override

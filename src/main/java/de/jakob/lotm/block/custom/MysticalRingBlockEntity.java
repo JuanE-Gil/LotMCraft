@@ -7,9 +7,12 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
+import java.util.List;
+
 public class MysticalRingBlockEntity extends BlockEntity {
     private String pathway = null;
     private Integer sequence = null;
+    private List<BlockPos> blocksToRemovedWhenActivated = null;
 
     public MysticalRingBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.MYSTICAL_RING_BE.get(), pos, state);
@@ -33,6 +36,15 @@ public class MysticalRingBlockEntity extends BlockEntity {
         return sequence;
     }
 
+    public List<BlockPos> getBlocksToRemovedWhenActivated() {
+        return blocksToRemovedWhenActivated;
+    }
+
+    public void setBlocksToRemovedWhenActivated(List<BlockPos> blocksToRemovedWhenActivated) {
+        this.blocksToRemovedWhenActivated = blocksToRemovedWhenActivated;
+        setChanged();
+    }
+
     public boolean hasSettings() {
         return pathway != null && sequence != null;
     }
@@ -46,6 +58,10 @@ public class MysticalRingBlockEntity extends BlockEntity {
         if (sequence != null) {
             tag.putInt("sequence", sequence);
         }
+        if(blocksToRemovedWhenActivated != null) {
+            long[] blockPosArray = blocksToRemovedWhenActivated.stream().mapToLong(BlockPos::asLong).toArray();
+            tag.putLongArray("blocksToRemove", blockPosArray);
+        }
     }
 
     @Override
@@ -56,6 +72,13 @@ public class MysticalRingBlockEntity extends BlockEntity {
         }
         if (tag.contains("sequence")) {
             sequence = tag.getInt("sequence");
+        }
+        if (tag.contains("blocksToRemove")) {
+            long[] blockPosArray = tag.getLongArray("blocksToRemove");
+            blocksToRemovedWhenActivated = new java.util.ArrayList<>();
+            for (long posLong : blockPosArray) {
+                blocksToRemovedWhenActivated.add(BlockPos.of(posLong));
+            }
         }
     }
 }

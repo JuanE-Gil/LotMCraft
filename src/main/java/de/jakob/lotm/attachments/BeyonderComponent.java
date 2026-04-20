@@ -127,7 +127,7 @@ public class BeyonderComponent implements INBTSerializable<CompoundTag> {
 
         ListTag characteristicStackTag = compoundTag.getList("characteristicStack", 3); // 3 is the ID for IntTag
         this.characteristicStack = new int[10];
-        for (int i = 0; i < characteristicStackTag.size(); i++) {
+        for (int i = 0; i < Math.min(characteristicStackTag.size(), characteristicStack.length); i++) {
             this.characteristicStack[i] = characteristicStackTag.getInt(i);
         }
 

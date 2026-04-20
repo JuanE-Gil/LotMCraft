@@ -72,7 +72,7 @@ public class SpiritChannelingAbility extends SelectableAbility {
     private static final DustParticleOptions STONE_DUST = new DustParticleOptions(new Vector3f(0.5f, 0.5f, 0.5f), 1.5f);
 
     public SpiritChannelingAbility(String id) {
-        super(id, 400f);
+        super(id, 4f);
     }
 
     @Override

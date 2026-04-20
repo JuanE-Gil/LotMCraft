@@ -50,8 +50,7 @@ public class PaleEyeAbility extends Ability {
         return new HashMap<>(Map.of("death", 3));
     }
 
-    // Sequence 3 max spirituality is 5000; cost is half = 2500
-    private static final float SPIRITUALITY_COST = BeyonderData.getMaxSpirituality(3) * 0.5f;
+    private static final float SPIRITUALITY_COST = BeyonderData.getMaxSpirituality("death", 3) * 0.5f;
 
     @Override
     protected float getSpiritualityCost() {
