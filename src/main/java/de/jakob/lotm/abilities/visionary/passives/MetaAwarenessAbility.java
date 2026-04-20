@@ -23,7 +23,7 @@ import java.util.UUID;
 @EventBusSubscriber(modid = LOTMCraft.MOD_ID)
 public class MetaAwarenessAbility extends PassiveAbilityItem {
     private static final Map<UUID, Long> COOLDOWNS = new HashMap<>();
-    private static final long COOLDOWN_MS = 5000; // 5s cooldown per trigger so they cant be spammed up
+    private static final long COOLDOWN_MS = 1000; // 1s cooldown
 
     public MetaAwarenessAbility(Item.Properties properties) {
         super(properties);
@@ -57,7 +57,7 @@ public class MetaAwarenessAbility extends PassiveAbilityItem {
 
             // Full username or one line of hn must appear in the message (case-insensitive)
             if (!message.toLowerCase().contains(username.toLowerCase())
-                    || !BeyonderData.playerMap.containsHonorificNameWithLine(message)) continue;
+                    && !BeyonderData.playerMap.containsHonorificNameWithLine(message)) continue;
 
             triggerAutoPrayer(sender, candidate);
         }
@@ -104,11 +104,6 @@ public class MetaAwarenessAbility extends PassiveAbilityItem {
 
     private static boolean hasMetaAwareness(ServerPlayer player) {
         // Check if the player has this passive item in their inventory
-        for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
-            if (player.getInventory().getItem(i).getItem() instanceof MetaAwarenessAbility) {
-                return true;
-            }
-        }
-        return false;
+        return BeyonderData.getSequence(player) <= 1 && BeyonderData.getPathway(player).equals("visionary");
     }
 }

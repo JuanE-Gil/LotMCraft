@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@EventBusSubscriber(modid = LOTMCraft.MOD_ID)
 public class PhysicalEnhancementsVisionaryAbility extends PhysicalEnhancementsAbility {
 
     public PhysicalEnhancementsVisionaryAbility(Properties properties) {

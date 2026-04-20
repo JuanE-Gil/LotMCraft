@@ -32,10 +32,10 @@ public class StoredDataBuilder {
         trueName = "none";
         modified = false;
         lastPosition = new Vec3(0, 0, 0);
-        charStack = new int[10];
+        charStack = new int[11];
         pathwayHistory = new String[10];
         prophecyList = new LinkedList<>();
-            uniqueness = "none";
+        uniqueness = "none";
     }
 
     public StoredDataBuilder copyFrom(@Nullable StoredData data){
