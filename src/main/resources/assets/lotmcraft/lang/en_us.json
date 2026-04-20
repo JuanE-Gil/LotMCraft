@@ -862,7 +862,8 @@
 
   "lotmcraft.ancient_court_of_judgment_ability": "Ancient Court of Judgment",
   "lotmcraft.ancient_court_of_judgment_ability.description": "Manifest the Ancient Court of Judgment. Every 10 seconds a random prohibition is declared within the court, binding all who stand inside.",
-
+  "lotmcraft.world_judgment_ability": "World Judgment",
+  "lotmcraft.world_judgment_ability.description": "Make the world judge a player. every time they break a law or prohibition they build judgment stacks that slowly brings them negative effects eventually to their death",
 
   "lotm.ability.cogitation.tick": "Cogitating",
 

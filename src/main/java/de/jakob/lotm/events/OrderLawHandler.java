@@ -138,6 +138,7 @@ public class OrderLawHandler {
 
         event.setNewDamage(0);
         applyPunishment(attacker);
+        WorldJudgmentHandler.escalate(attacker);
 
         if (attacker instanceof ServerPlayer sp) {
             sp.sendSystemMessage(Component.literal("[Order Law] Combat is against the Law here.")
@@ -161,6 +162,7 @@ public class OrderLawHandler {
                 serverLevel.getPlayers(p -> zone.isInZone(p.position(), serverLevel)).forEach(player -> {
                     if (!player.hasEffect(ModEffects.LOOSING_CONTROL)) return;
                     applyPunishment(player);
+                    WorldJudgmentHandler.escalate(player);
                     player.sendSystemMessage(Component.literal("[Order Law] Losing Control is against the Law here.")
                             .withStyle(ChatFormatting.RED));
                 });

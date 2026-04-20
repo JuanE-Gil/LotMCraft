@@ -52,6 +52,7 @@ public class AncientCourtHandler {
         if (!(event.getEntity() instanceof LivingEntity le)) return;
         if (!hasProhibition(le, CourtProhibitionType.TELEPORTING)) return;
         event.setCanceled(true);
+        WorldJudgmentHandler.escalate(le);
         sendMessage(le, "Teleporting");
     }
 
@@ -75,9 +76,11 @@ public class AncientCourtHandler {
 
         if (isFood && hasProhibition(entity, CourtProhibitionType.EATING)) {
             event.setCanceled(true);
+            WorldJudgmentHandler.escalate(entity);
             sendMessage(entity, "Eating");
         } else if (isPotion && hasProhibition(entity, CourtProhibitionType.DRINKING)) {
             event.setCanceled(true);
+            WorldJudgmentHandler.escalate(entity);
             sendMessage(entity, "Drinking");
         }
     }
@@ -89,6 +92,7 @@ public class AncientCourtHandler {
         if (!(event.getEntity() instanceof LivingEntity le)) return;
         if (!hasProhibition(le, CourtProhibitionType.BUILDING)) return;
         event.setCanceled(true);
+        WorldJudgmentHandler.escalate(le);
         sendMessage(le, "Building");
     }
 
@@ -99,6 +103,7 @@ public class AncientCourtHandler {
         if (!(event.getPlayer() instanceof ServerPlayer player)) return;
         if (!hasProhibition(player, CourtProhibitionType.DESTRUCTION)) return;
         event.setCanceled(true);
+        WorldJudgmentHandler.escalate(player);
         sendMessage(player, "Destruction");
     }
 
@@ -108,6 +113,7 @@ public class AncientCourtHandler {
     public static void onFallDamage(LivingFallEvent event) {
         if (!hasProhibition(event.getEntity(), CourtProhibitionType.FALL_DAMAGE)) return;
         event.setCanceled(true);
+        // Fall damage prohibition is beneficial — no escalation
     }
 
     // ── SPEAKING ──────────────────────────────────────────────────────────────
@@ -117,6 +123,7 @@ public class AncientCourtHandler {
         ServerPlayer player = event.getPlayer();
         if (!hasProhibition(player, CourtProhibitionType.SPEAKING)) return;
         event.setCanceled(true);
+        WorldJudgmentHandler.escalate(player);
         sendMessage(player, "Speaking");
     }
 
@@ -126,6 +133,7 @@ public class AncientCourtHandler {
     public static void onHeal(LivingHealEvent event) {
         if (!hasProhibition(event.getEntity(), CourtProhibitionType.HEALING)) return;
         event.setCanceled(true);
+        WorldJudgmentHandler.escalate(event.getEntity());
     }
 
     // ── POSITIVE EFFECTS / NEGATIVE EFFECTS ──────────────────────────────────
@@ -148,6 +156,7 @@ public class AncientCourtHandler {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         if (!hasProhibition(player, CourtProhibitionType.INTERACTION)) return;
         event.setCanceled(true);
+        WorldJudgmentHandler.escalate(player);
         sendMessage(player, "Interaction");
     }
 
@@ -156,6 +165,7 @@ public class AncientCourtHandler {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         if (!hasProhibition(player, CourtProhibitionType.INTERACTION)) return;
         event.setCanceled(true);
+        WorldJudgmentHandler.escalate(player);
         sendMessage(player, "Interaction");
     }
 
@@ -173,12 +183,14 @@ public class AncientCourtHandler {
 
         if (prohibition == CourtProhibitionType.SWAPPING_ABILITIES) {
             event.setCanceled(true);
+            WorldJudgmentHandler.escalate(le);
             sendMessage(le, "Swapping Abilities");
             return;
         }
 
         if (prohibition == CourtProhibitionType.BLINKING && id.equals("blink_ability")) {
             event.setCanceled(true);
+            WorldJudgmentHandler.escalate(le);
             sendMessage(le, "Blinking");
             return;
         }
@@ -188,12 +200,14 @@ public class AncientCourtHandler {
                 || id.equals("lesser_concealment_ability") || id.equals("shadow_concealment_ability")
                 || id.equals("identity_concealment_ability"))) {
             event.setCanceled(true);
+            WorldJudgmentHandler.escalate(le);
             sendMessage(le, "Concealment");
             return;
         }
 
         if (prohibition == CourtProhibitionType.SEALING && id.equals("sealing_ability")) {
             event.setCanceled(true);
+            WorldJudgmentHandler.escalate(le);
             sendMessage(le, "Sealing");
         }
     }

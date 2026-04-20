@@ -263,6 +263,7 @@ public class AbilityHandler {
         abilities.add(new IndividualBalanceAbility("individual_balance_ability"));
         abilities.add(new OrderProxyAbility("order_proxy_ability"));
         abilities.add(new AncientCourtOfJudgmentAbility("ancient_court_of_judgment_ability"));
+        abilities.add(new WorldJudgmentAbility("world_judgment_ability"));
 
         // ERROR PATHWAY
         abilities.add(new TheftAbility("theft_ability"));

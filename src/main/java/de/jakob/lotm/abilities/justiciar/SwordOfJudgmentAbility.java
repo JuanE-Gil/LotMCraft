@@ -25,6 +25,9 @@ public class SwordOfJudgmentAbility extends Ability {
         hasOptimalDistance = true;
         optimalDistance = 10f;
         postsUsedAbilityEventManually = true;
+        canBeCopied = true;
+        canBeUsedByNPC = false;
+        canBeReplicated = true;
     }
 
     @Override

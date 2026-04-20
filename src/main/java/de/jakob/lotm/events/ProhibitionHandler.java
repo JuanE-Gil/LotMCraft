@@ -32,6 +32,7 @@ public class ProhibitionHandler {
 
         if (isInZone(entity.position(), serverLevel, ProhibitionAbility.ProhibitionType.BEYONDER_ABILITIES)) {
             event.setCanceled(true);
+            WorldJudgmentHandler.escalate(entity);
             if (entity instanceof ServerPlayer sp) {
                 sp.sendSystemMessage(Component.literal("[Beyonder Abilities] is Prohibited here")
                         .withStyle(ChatFormatting.RED));
@@ -48,6 +49,7 @@ public class ProhibitionHandler {
             double dist = entity.position().distanceTo(zone.center);
             if (dist > 40.0 && dist <= 50.0) {
                 event.setCanceled(true);
+                WorldJudgmentHandler.escalate(entity);
                 if (entity instanceof ServerPlayer sp) {
                     sp.sendSystemMessage(Component.literal("[Outside World] Abilities from outside are Prohibited here")
                             .withStyle(ChatFormatting.RED));
@@ -64,6 +66,7 @@ public class ProhibitionHandler {
 
         if (isInZone(attacker.position(), serverLevel, ProhibitionAbility.ProhibitionType.COMBAT)) {
             event.setNewDamage(0);
+            WorldJudgmentHandler.escalate(attacker);
             if (attacker instanceof ServerPlayer sp) {
                 sp.sendSystemMessage(Component.literal("[Combat] is Prohibited here")
                         .withStyle(ChatFormatting.RED));
@@ -138,6 +141,7 @@ public class ProhibitionHandler {
 
         if (isInZone(player.position(), serverLevel, ProhibitionAbility.ProhibitionType.ITEM_USE)) {
             event.setCanceled(true);
+            WorldJudgmentHandler.escalate(player);
             player.sendSystemMessage(Component.literal("[Item Use] is Prohibited here")
                     .withStyle(ChatFormatting.RED));
         }
