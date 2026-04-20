@@ -40,7 +40,7 @@ public class WordOfSpiritAbility extends Ability {
 
         LivingEntity target = AbilityUtil.getTargetEntity(entity, 25, 1.5f);
         if (target == null) {
-            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.word_of_spirit.no_target").withColor(0xFF4444));
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.word_of_spirit.no_target").withColor(0xFF334f23));
             return;
         }
 
@@ -48,11 +48,11 @@ public class WordOfSpiritAbility extends Ability {
         int targetSeq = BeyonderData.getSequence(target);
         // seqDiff < 0 means target is stronger; block if target is 2+ sequences stronger
         if (targetSeq - casterSeq <= -2) {
-            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.word_of_spirit.too_strong").withColor(0xFF4444));
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.word_of_spirit.too_strong").withColor(0xFF334f23));
             return;
         }
 
         target.addEffect(new MobEffectInstance(ModEffects.SPIRIT_CALLED, DURATION_TICKS, 0, false, true, true));
-        AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.word_of_spirit.applied").withColor(0x7ECFCF));
+        AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.word_of_spirit.applied").withColor(0xFF334f23));
     }
 }
