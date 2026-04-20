@@ -20,7 +20,7 @@ import java.util.Map;
 
 public class ApocalypseAbility extends Ability {
     public ApocalypseAbility(String id) {
-        super(id, 40, "destruction");
+        super(id, 60, "destruction");
         this.canBeCopied = false;
         autoClear = false;
         interactionRadius = 50;

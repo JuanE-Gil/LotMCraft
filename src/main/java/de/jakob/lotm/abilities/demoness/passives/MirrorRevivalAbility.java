@@ -63,12 +63,12 @@ public class MirrorRevivalAbility extends PassiveAbilityItem {
         if(glassPos == null) {
             return;
         }
-
-        event.setCanceled(true);
         SanityComponent sanity = entity.getData(ModAttachments.SANITY_COMPONENT);
-        if (sanity.getSanity() < 5f) return;
+        if (sanity.getSanity() < 0.1) return;
+        LOTMCraft.LOGGER.info("Sanity {}",sanity.getSanity());
+        event.setCanceled(true);
         entity.setHealth(entity.getMaxHealth());
-        sanity.increaseSanityAndSync(-5f, entity);
+        sanity.increaseSanityAndSync(-2.2f, entity);
         entity.teleportTo(glassPos.getX() + 0.5, glassPos.getY() + 1, glassPos.getZ() + 0.5);
         ParticleUtil.spawnParticles(serverLevel, dust, entity.position().add(0, entity.getEyeHeight() / 2, 0), 40, .5, entity.getEyeHeight() / 2, .5, 0.1);
     }
