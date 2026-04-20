@@ -24,6 +24,8 @@ public abstract class ActionBase {
         return tag;
     }
 
+    public abstract int getRequiredSeq();
+
     abstract public void action(Level level, LivingEntity entity);
 
     public static ActionBase load(ActionsEnum type, CompoundTag tag, HolderLookup.Provider providerg) {

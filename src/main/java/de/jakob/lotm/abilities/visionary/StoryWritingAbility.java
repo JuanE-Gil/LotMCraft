@@ -74,7 +74,7 @@ public class StoryWritingAbility extends ToggleAbility {
 
         String rawMessage = event.getRawText();
 
-        var trigger = TriggerHelper.deduceWithContext(rawMessage, writingMap.get(player.getUUID()));
+        var trigger = TriggerHelper.deduceWithContext(rawMessage, writingMap.get(player.getUUID()), player);
         if(trigger == null){
             AbilityUtil.sendActionBar(player, Component.translatable("ability.lotmcraft.story_writing.failed"));
             return;
