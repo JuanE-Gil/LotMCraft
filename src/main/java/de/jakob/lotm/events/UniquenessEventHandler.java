@@ -7,7 +7,6 @@ import de.jakob.lotm.entity.custom.uniqueness.UniquenessEntity;
 import de.jakob.lotm.gamerule.ModGameRules;
 import de.jakob.lotm.network.PacketHandler;
 import de.jakob.lotm.util.BeyonderData;
-import net.minecraft.data.worldgen.DimensionTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -47,9 +46,9 @@ public class UniquenessEventHandler {
 
         if (anyPlayerHoldsUniqueness(level, pathway)) return;
 
-        if (BeyonderData.beyonderMap != null && BeyonderData.beyonderMap.count(pathway, 0) > 0) return;
+        if (BeyonderData.playerMap != null && BeyonderData.playerMap.count(pathway, 0) > 0) return;
 
-        if (BeyonderData.beyonderMap == null || BeyonderData.beyonderMap.count(pathway, 1) == 0) return;
+        if (BeyonderData.playerMap == null || BeyonderData.playerMap.count(pathway, 1) == 0) return;
 
         float spawnChance = level.getGameRules().getInt(ModGameRules.UNIQUENESS_SPAWN_LIKELIHOOD) / 100f;
 

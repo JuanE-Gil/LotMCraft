@@ -1,4 +1,4 @@
-package de.jakob.lotm.util.beyonderMap;
+package de.jakob.lotm.util.playerMap;
 
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.visionary.prophecy.Prophecy;
@@ -44,9 +44,22 @@ public record StoredData(String pathway, Integer sequence, HonorificName honorif
                 + "\n--- Seq: " + sequence
                 + "\n--- Honorific Name: " + honorificName.getAllInfo()
                 + "\n--- Logout Position: " + (int) lastPosition.x + " " + (int) lastPosition.y + " " + (int) lastPosition.z
-                + "\n--- Char stack: " + charStack
+                + "\n--- Char stack: " + mapCharStackAsIntToString()
                 + "\n--- Pathway history: " + getPathwayHistoryInfo()
+                + "\n--- Amount of prophecies: " + prophecies.size()
                 + "\n--- Was modified: " + modified;
+    }
+
+    private String mapCharStackAsIntToString(){
+        StringBuilder result = new StringBuilder();
+
+        for(int i = 9; i >= 1; i--){
+            if(charStack[i] != 0){
+                result.append("\nSeq ").append(i).append(": ").append(charStack[i]);
+            }
+        }
+
+        return result.toString();
     }
 
     private String getPathwayHistoryInfo() {

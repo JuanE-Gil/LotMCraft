@@ -1,6 +1,5 @@
-package de.jakob.lotm.util.beyonderMap;
+package de.jakob.lotm.util.playerMap;
 
-import de.jakob.lotm.LOTMCraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;

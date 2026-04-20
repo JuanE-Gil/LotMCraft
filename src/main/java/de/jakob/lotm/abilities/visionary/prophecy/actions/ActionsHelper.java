@@ -3,14 +3,12 @@ package de.jakob.lotm.abilities.visionary.prophecy.actions;
 import de.jakob.lotm.abilities.visionary.prophecy.TokenStream;
 import de.jakob.lotm.abilities.visionary.prophecy.actions.context.ActionContextBase;
 import de.jakob.lotm.abilities.visionary.prophecy.actions.context.ActionContextEnum;
-import de.jakob.lotm.abilities.visionary.prophecy.actions.implementations.DropItemAction;
 import de.jakob.lotm.util.BeyonderData;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 
 import javax.annotation.Nullable;
-import java.util.HashMap;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -32,15 +30,17 @@ public class ActionsHelper {
     public static @Nullable ActionBase deduceActionWithContext(String str){
         TokenStream stream = new TokenStream(str);
 
-        if(stream.match("if"))
-            stream.next();
-
+        stream.next();
         String nick = stream.peek();
-        UUID id = BeyonderData.beyonderMap.getKeyByName(nick);
+        UUID id = BeyonderData.playerMap.getKeyByName(nick);
+
+        if(id == null) return null;
 
         stream = moveToThen(stream);
+        if(stream == null) return null;
 
-        var actionType = getType(Objects.requireNonNull(stream.next()));
+        stream.next();
+        var actionType = getType(Objects.requireNonNull(stream.peek()));
         if(actionType == null) return null;
 
         var contextType = getContextType(actionType);
@@ -54,6 +54,7 @@ public class ActionsHelper {
 
     private static TokenStream moveToThen(TokenStream stream){
         if(stream.match("then")) return stream;
+        else if (stream.isEmpty()) return null;
         else {
             stream.next();
             return moveToThen(stream);

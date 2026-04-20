@@ -29,8 +29,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.items.ItemStackHandler;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Objects;
-
 public class BrewingCauldronBlockEntity extends BlockEntity implements MenuProvider {
     public final ItemStackHandler itemHandler = new ItemStackHandler(5) {
         @Override
@@ -163,7 +161,7 @@ public class BrewingCauldronBlockEntity extends BlockEntity implements MenuProvi
         itemHandler.setStackInSlot(INPUT_SLOT_SUPP_2, ItemStack.EMPTY);
         itemHandler.setStackInSlot(INPUT_SLOT_MAIN, ItemStack.EMPTY);
 
-        if(BeyonderData.beyonderMap.check(potion.getPathway(), potion.getSequence()))
+        if(BeyonderData.playerMap.check(potion.getPathway(), potion.getSequence()))
             itemHandler.setStackInSlot(OUTPUT_SLOT, new ItemStack(potion, 1));
     }
 

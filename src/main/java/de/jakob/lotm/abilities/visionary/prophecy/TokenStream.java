@@ -14,16 +14,12 @@ public class TokenStream {
         return index < tokens.length ? tokens[index] : null;
     }
 
-    public @Nullable String next() {
-        return index < tokens.length ? tokens[index++] : null;
+    public void next() {
+        index++;
     }
 
     public boolean match(String expected) {
-        if (expected.equalsIgnoreCase(peek())) {
-            index++;
-            return true;
-        }
-        return false;
+        return expected.equalsIgnoreCase(peek());
     }
 
     public boolean isEmpty(){

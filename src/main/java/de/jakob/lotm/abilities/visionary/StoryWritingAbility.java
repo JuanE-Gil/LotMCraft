@@ -1,43 +1,29 @@
 package de.jakob.lotm.abilities.visionary;
 
 import de.jakob.lotm.LOTMCraft;
-import de.jakob.lotm.abilities.core.SelectableAbility;
 import de.jakob.lotm.abilities.core.ToggleAbility;
 import de.jakob.lotm.abilities.visionary.prophecy.Prophecy;
-import de.jakob.lotm.abilities.visionary.prophecy.actions.context.implementations.ActionPositionContext;
-import de.jakob.lotm.abilities.visionary.prophecy.actions.implementations.DropItemAction;
 import de.jakob.lotm.abilities.visionary.prophecy.triggers.TriggerHelper;
-import de.jakob.lotm.abilities.visionary.prophecy.triggers.context.TriggerContextEnum;
-import de.jakob.lotm.abilities.visionary.prophecy.triggers.context.implementations.TriggerPositionContext;
-import de.jakob.lotm.abilities.visionary.prophecy.triggers.implementations.PositionTrigger;
-import de.jakob.lotm.attachments.ModAttachments;
-import de.jakob.lotm.attachments.SanityComponent;
-import de.jakob.lotm.item.ModItems;
-import de.jakob.lotm.item.custom.StoryBookItem;
 import de.jakob.lotm.util.BeyonderData;
-import de.jakob.lotm.util.DivinationUtil;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.ServerChatEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
-import de.jakob.lotm.network.packets.toClient.OpenShapeShiftingScreenPacket;
 
 import java.util.*;
 
 //if <trigger> then <action>
 
-@EventBusSubscriber(modid = LOTMCraft.MOD_ID)
+@EventBusSubscriber(
+        modid = LOTMCraft.MOD_ID
+)
 public class StoryWritingAbility extends ToggleAbility {
-    public static final HashSet<UUID> writingSet = new HashSet<>();
+    public static final HashMap<UUID, Integer> writingMap = new HashMap<>();
 
     public StoryWritingAbility(String id) {
         super(id);
@@ -57,14 +43,14 @@ public class StoryWritingAbility extends ToggleAbility {
     public void start(Level level, LivingEntity entity) {
         if(level.isClientSide) return;
 
-        writingSet.add(entity.getUUID());
+        writingMap.put(entity.getUUID(), AbilityUtil.getSeqWithArt(entity, this));
     }
 
     @Override
     public void stop(Level level, LivingEntity entity) {
         if(level.isClientSide) return;
 
-        writingSet.remove(entity.getUUID());
+        writingMap.remove(entity.getUUID());
         clearArtifactScaling(entity);
     }
 
@@ -75,33 +61,39 @@ public class StoryWritingAbility extends ToggleAbility {
 
     @Override
     protected float getSpiritualityCost() {
-        return 100;
+        return 150;
     }
 
     @SubscribeEvent
     public static void onChatMessageSent(ServerChatEvent event) {
         ServerPlayer player = event.getPlayer();
 
-        if (!writingSet.contains(player.getUUID())) return;
+        if (!writingMap.containsKey(player.getUUID())) return;
+
+        event.setCanceled(true);
 
         String rawMessage = event.getRawText();
 
-        var trigger = TriggerHelper.deduceWithContext(rawMessage);
+        var trigger = TriggerHelper.deduceWithContext(rawMessage, writingMap.get(player.getUUID()));
         if(trigger == null){
+            AbilityUtil.sendActionBar(player, Component.translatable("ability.lotmcraft.story_writing.failed"));
             return;
         }
 
-        BeyonderData.beyonderMap.addProphecy(player, new Prophecy(trigger.getTarget(), trigger, trigger.getType()));
-        event.setCanceled(true);
+        BeyonderData.playerMap.addProphecy(trigger.getTarget(), new Prophecy(trigger.getTarget(), trigger, trigger.getType(), player.getUUID()));
     }
 
     @SubscribeEvent
-    public static void onEntityTickPre(EntityTickEvent.Pre event) {
+    public static void onEntityTickPre(EntityTickEvent.Post event) {
         if(!(event.getEntity() instanceof ServerPlayer player)) return;
 
-        var op = BeyonderData.beyonderMap.get(player);
+        if (player.level().isClientSide()) return;
+
+        var op = BeyonderData.playerMap.get(player);
         if(op.isPresent()){
-            for(var obj : op.get().prophecies()){
+            var prophecies = op.get().prophecies();
+
+            for(var obj : prophecies){
                 obj.checkAndPerform(player.level(), player);
             }
         }

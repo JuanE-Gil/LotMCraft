@@ -80,7 +80,7 @@ public class ActionItemsContext extends ActionContextBase {
 
         tag.putBoolean(NBT_ALL_ITEMS, all);
 
-        return null;
+        return tag;
     }
 
     public static ActionItemsContext load(CompoundTag tag, UUID id, HolderLookup.Provider provider) {

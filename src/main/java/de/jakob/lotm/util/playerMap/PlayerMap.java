@@ -1,4 +1,4 @@
-package de.jakob.lotm.util.beyonderMap;
+package de.jakob.lotm.util.playerMap;
 
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.visionary.prophecy.Prophecy;
@@ -17,9 +17,9 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.IntStream;
 
-import static de.jakob.lotm.util.BeyonderData.beyonderMap;
+import static de.jakob.lotm.util.BeyonderData.playerMap;
 
-public class BeyonderMap extends SavedData {
+public class PlayerMap extends SavedData {
     public static final String NBT_BEYONDER_MAP = "beyonder_map";
     public static final String NBT_BEYONDER_MAP_CLASS = "beyonder_map_class";
 
@@ -27,19 +27,19 @@ public class BeyonderMap extends SavedData {
 
     private ServerLevel server;
 
-    public static final SavedData.Factory<BeyonderMap> FACTORY = new SavedData.Factory<>(
-            BeyonderMap::new,
-            BeyonderMap::new,
+    public static final SavedData.Factory<PlayerMap> FACTORY = new SavedData.Factory<>(
+            PlayerMap::new,
+            PlayerMap::new,
             null
     );
 
-    public BeyonderMap() {
+    public PlayerMap() {
         super();
 
         map = new HashMap<>(300);
     }
 
-    public BeyonderMap(CompoundTag nbt, HolderLookup.Provider provider) {
+    public PlayerMap(CompoundTag nbt, HolderLookup.Provider provider) {
         this();
 
         if (nbt.contains(NBT_BEYONDER_MAP, Tag.TAG_COMPOUND)) {
@@ -51,17 +51,30 @@ public class BeyonderMap extends SavedData {
         }
     }
 
+    public void addProphecy(UUID entity, Prophecy prophecy){
+        var list = map.get(entity).prophecies();
+        list.add(prophecy);
+
+        map.put(entity, StoredData.builder.copyFrom(map.get(entity)).prophecies(list).build());
+
+        setDirty();
+    }
+
+    public void removeProphecy(UUID entity, Prophecy prophecy){
+        var list = map.get(entity).prophecies();
+        list.remove(prophecy);
+
+        map.put(entity, StoredData.builder.copyFrom(map.get(entity)).prophecies(list).build());
+
+        setDirty();
+    }
+
     public void addProphecy(LivingEntity entity, Prophecy prophecy){
         if(!(entity instanceof ServerPlayer)) return;
 
         if(!contains(entity)) put(entity);
 
-        var list = map.get(entity.getUUID()).prophecies();
-        list.add(prophecy);
-
-        map.put(entity.getUUID(), StoredData.builder.copyFrom(map.get(entity.getUUID())).prophecies(list).build());
-
-        setDirty();
+       addProphecy(entity.getUUID(), prophecy);
     }
 
     public void removeProphecy(LivingEntity entity, Prophecy prophecy){
@@ -72,12 +85,7 @@ public class BeyonderMap extends SavedData {
             return;
         }
 
-        var list = map.get(entity.getUUID()).prophecies();
-        list.remove(prophecy);
-
-        map.put(entity.getUUID(), StoredData.builder.copyFrom(map.get(entity.getUUID())).prophecies(list).build());
-
-        setDirty();
+        removeProphecy(entity.getUUID(), prophecy);
     }
 
     public void onPlayerUUIDChange(ServerPlayer player){
@@ -100,10 +108,11 @@ public class BeyonderMap extends SavedData {
         String pathway = BeyonderData.getPathway(entity);
         int sequence = BeyonderData.getSequence(entity);
 
+        //Need to store any data
         // Don't store if this is default/empty data
-        if(pathway.equals("none") || sequence == LOTMCraft.NON_BEYONDER_SEQ) {
-            return; // Don't overwrite existing data with empty data
-        }
+//        if(pathway.equals("none") || sequence == LOTMCraft.NON_BEYONDER_SEQ) {
+//            return; // Don't overwrite existing data with empty data
+//        }
 
         var data = map.get(entity.getUUID());
         boolean isNull = data == null;
@@ -196,7 +205,7 @@ public class BeyonderMap extends SavedData {
         if(!(entity instanceof ServerPlayer) ) return false;
         if(!contains(entity)) put(entity);
 
-        StoredData data = beyonderMap.get(entity).get();
+        StoredData data = playerMap.get(entity).get();
 
         var pathway = BeyonderData.getPathway(entity);
         var sequence = BeyonderData.getSequence(entity);
@@ -306,7 +315,7 @@ public class BeyonderMap extends SavedData {
         return compoundTag;
     }
 
-    public static BeyonderMap get(ServerLevel level) {
+    public static PlayerMap get(ServerLevel level) {
         LOTMCraft.LOGGER.info("Loading beyonderMap");
         return level.getServer().overworld().getDataStorage().computeIfAbsent(FACTORY, NBT_BEYONDER_MAP_CLASS);
     }
@@ -415,7 +424,7 @@ public class BeyonderMap extends SavedData {
     public void addStack(LivingEntity entity, int value, int sequence) {
         if (!contains(entity)) put(entity);
 
-        int current = beyonderMap.get(entity.getUUID()).get().charStack()[sequence];
+        int current = playerMap.get(entity.getUUID()).get().charStack()[sequence];
         setStack(entity, current + value, sequence);
     }
 
@@ -426,7 +435,7 @@ public class BeyonderMap extends SavedData {
     public void recordPathwaySwitch(LivingEntity entity, int sequence, String previousPathway) {
         if (!contains(entity)) put(entity);
 
-        var current = beyonderMap.get(entity.getUUID()).get();
+        var current = playerMap.get(entity.getUUID()).get();
         String[] history = Arrays.copyOf(current.pathwayHistory(), 10);
         history[sequence] = previousPathway;
 

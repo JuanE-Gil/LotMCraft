@@ -1,13 +1,11 @@
 package de.jakob.lotm.quest.impl;
 
-import de.jakob.lotm.attachments.ModAttachments;
-import de.jakob.lotm.attachments.QuestComponent;
 import de.jakob.lotm.potions.BeyonderPotion;
 import de.jakob.lotm.potions.PotionItemHandler;
 import de.jakob.lotm.quest.Quest;
 import de.jakob.lotm.quest.QuestManager;
 import de.jakob.lotm.util.BeyonderData;
-import de.jakob.lotm.util.beyonderMap.StoredData;
+import de.jakob.lotm.util.playerMap.StoredData;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
@@ -29,7 +27,7 @@ public class KillPlayerQuest extends Quest {
     public void startQuest(ServerPlayer player) {
         int questTakerSeq = BeyonderData.getSequence(player);
 
-        List<UUID> possibleTargets = BeyonderData.beyonderMap.entrySet().stream()
+        List<UUID> possibleTargets = BeyonderData.playerMap.entrySet().stream()
                 .filter(entry -> !entry.getKey().equals(player.getUUID()))
                 .filter(entry -> entry.getValue() != null)
                 .filter(entry -> {
@@ -52,7 +50,7 @@ public class KillPlayerQuest extends Quest {
         if (targetOnline != null) {
             player.sendSystemMessage(Component.literal("Target selected: " + targetOnline.getName().getString()));
         } else {
-            Optional<StoredData> data = BeyonderData.beyonderMap.get(targetUuid);
+            Optional<StoredData> data = BeyonderData.playerMap.get(targetUuid);
             String name = data.isPresent() ? data.get().trueName() : targetUuid.toString();
             player.sendSystemMessage(Component.literal("Target selected: " + name + " (offline)"));
         }
@@ -82,7 +80,7 @@ public class KillPlayerQuest extends Quest {
             if (targetOnline != null) {
                 rewardSequence = BeyonderData.getSequence(targetOnline);
             } else {
-                Optional<StoredData> data = BeyonderData.beyonderMap.get(targetUuid);
+                Optional<StoredData> data = BeyonderData.playerMap.get(targetUuid);
                 if (data.isPresent()) {
                     rewardSequence = data.get().sequence();
                 }
@@ -118,7 +116,7 @@ public class KillPlayerQuest extends Quest {
         if (targetOnline != null) {
             targetName = targetOnline.getName().getString();
         } else {
-            Optional<StoredData> data = BeyonderData.beyonderMap.get(targetUuid);
+            Optional<StoredData> data = BeyonderData.playerMap.get(targetUuid);
             targetName = data.map(StoredData::trueName).orElse(targetUuid.toString());
         }
 

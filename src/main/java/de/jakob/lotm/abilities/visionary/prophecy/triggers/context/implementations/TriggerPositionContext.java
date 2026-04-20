@@ -41,9 +41,12 @@ public class TriggerPositionContext extends TriggerContextBase {
             stream.next();
 
         try{
-            int x = Integer.parseInt(Objects.requireNonNull(stream.next()));
-            int y = Integer.parseInt(Objects.requireNonNull(stream.next()));
-            int z = Integer.parseInt(Objects.requireNonNull(stream.next()));
+
+            int x = Integer.parseInt(Objects.requireNonNull(stream.peek()));
+            stream.next();
+            int y = Integer.parseInt(Objects.requireNonNull(stream.peek()));
+            stream.next();
+            int z = Integer.parseInt(Objects.requireNonNull(stream.peek()));
 
             pos = new Vec3(x, y, z);
         }catch (NumberFormatException e){

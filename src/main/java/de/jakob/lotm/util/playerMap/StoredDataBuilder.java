@@ -1,14 +1,12 @@
-package de.jakob.lotm.util.beyonderMap;
+package de.jakob.lotm.util.playerMap;
 
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.visionary.prophecy.Prophecy;
 import net.minecraft.world.phys.Vec3;
-import org.checkerframework.checker.units.qual.C;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.LinkedList;
-import java.util.List;
 
 public class StoredDataBuilder {
     private String pathway;

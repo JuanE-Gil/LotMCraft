@@ -3,7 +3,6 @@ package de.jakob.lotm.abilities;
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.attachments.ControllingDataComponent;
 import de.jakob.lotm.attachments.ModAttachments;
-import de.jakob.lotm.effect.ModEffects;
 import de.jakob.lotm.gamerule.ModGameRules;
 import de.jakob.lotm.util.BeyonderData;
 import net.minecraft.core.Holder;
@@ -117,7 +116,7 @@ public abstract class PhysicalEnhancementsAbility extends PassiveAbilityItem {
         List<PhysicalEnhancement> currentEnhancements = getEnhancementsForSequence(sequenceLevel, entity);
 
         if(entity instanceof ServerPlayer player){
-            var dataOp = BeyonderData.beyonderMap.get(entity);
+            var dataOp = BeyonderData.playerMap.get(entity);
 
             if(dataOp.isPresent()) {
                 var data = dataOp.get();

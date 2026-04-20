@@ -20,7 +20,7 @@ import de.jakob.lotm.potions.BeyonderCharacteristicItemHandler;
 import de.jakob.lotm.potions.BeyonderPotion;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.ClientBeyonderCache;
-import de.jakob.lotm.util.beyonderMap.StoredData;
+import de.jakob.lotm.util.playerMap.StoredData;
 import de.jakob.lotm.attachments.SharedAbilitiesComponent;
 import de.jakob.lotm.attachments.TeamComponent;
 import de.jakob.lotm.util.helper.AbilityUtil;
@@ -46,7 +46,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import java.util.Objects;
 import java.util.Random;
 
-import static de.jakob.lotm.util.BeyonderData.beyonderMap;
+import static de.jakob.lotm.util.BeyonderData.playerMap;
 import static de.jakob.lotm.util.BeyonderData.getSequence;
 
 @EventBusSubscriber(modid = LOTMCraft.MOD_ID)
@@ -61,22 +61,22 @@ public class BeyonderEventHandler {
             // Sync beyonder data when player joins
             PacketHandler.syncBeyonderDataToPlayer(serverPlayer);
 
-            beyonderMap.onPlayerUUIDChange(serverPlayer);
+            playerMap.onPlayerUUIDChange(serverPlayer);
 
-            if (!beyonderMap.contains(serverPlayer)) {
-                beyonderMap.put(serverPlayer);
+            if (!playerMap.contains(serverPlayer)) {
+                playerMap.put(serverPlayer);
             } else {
-                StoredData data = beyonderMap.get(serverPlayer).get();
+                StoredData data = playerMap.get(serverPlayer).get();
 
                 // Only restore from map if player has NO beyonder data (data loss scenario)
                 // Or when marked to do so by server admin
                 if (!BeyonderData.isBeyonder(serverPlayer) || data.modified()) {
                     BeyonderData.setBeyonder(serverPlayer, data.pathway(), data.sequence());
-                    beyonderMap.markModified(serverPlayer, false);
+                    playerMap.markModified(serverPlayer, false);
 
-                } else if (beyonderMap.isDiffPathSeq(serverPlayer)) {
+                } else if (playerMap.isDiffPathSeq(serverPlayer)) {
                     // If they have data but it differs, update the map to match NBT (NBT is source of truth)
-                    beyonderMap.put(serverPlayer);
+                    playerMap.put(serverPlayer);
                 }
             }
 
@@ -236,9 +236,9 @@ public class BeyonderEventHandler {
                 : BeyonderData.getSequence(player);
         player.getPersistentData().remove("sacrifice_drop_sequence");
 
-        if(beyonderMap.get(player).isEmpty()) return;
+        if(playerMap.get(player).isEmpty()) return;
 
-        var data = beyonderMap.get(player).get();
+        var data = playerMap.get(player).get();
 
         BeyonderCharacteristicItem charItem = BeyonderCharacteristicItemHandler
                 .selectCharacteristicOfPathwayAndSequence(BeyonderData.getPathway(player), dropSequence);
@@ -271,13 +271,13 @@ public class BeyonderEventHandler {
             }
 
             if (!BeyonderData.isBeyonder(player)) return;
-            if(beyonderMap.get(player).isEmpty()) return;
+            if(playerMap.get(player).isEmpty()) return;
             if (!player.level().getGameRules().getBoolean(ModGameRules.REGRESS_SEQUENCE_ON_DEATH)){
                 BeyonderData.recalculateCharStackModifiers(player);
                 return;
             }
 
-            StoredData data = beyonderMap.get(player).get();
+            StoredData data = playerMap.get(player).get();
             StoredData regressed = data.regressSeq(false);
 
             SacrificeRevertComponent revert = player.getData(ModAttachments.SACRIFICE_REVERT_COMPONENT);
@@ -289,9 +289,9 @@ public class BeyonderEventHandler {
                 revert.clear();
                 // Regress from the original sequence, not the temporary sacrificed one
                 StoredData dataAtOriginalSeq = StoredData.builder.copyFrom(data).sequence(originalSeq).build();
-                beyonderMap.put(player, dataAtOriginalSeq.regressSeq());
+                playerMap.put(player, dataAtOriginalSeq.regressSeq());
             } else {
-                beyonderMap.put(player, regressed);
+                playerMap.put(player, regressed);
             }
             BeyonderData.setDigestionProgress(player, 1.0f);
 
@@ -342,7 +342,7 @@ public class BeyonderEventHandler {
 
                 if (item instanceof PotionIngredient obj) {
                     for (var path : obj.getPathways()) {
-                        if (!BeyonderData.beyonderMap.check(path, obj.getSequence())) {
+                        if (!BeyonderData.playerMap.check(path, obj.getSequence())) {
                             slot.set(ItemStack.EMPTY);
                             break;
                         }
@@ -350,14 +350,14 @@ public class BeyonderEventHandler {
                 }
 
                 else if (item instanceof BeyonderPotion potion) {
-                    if (!BeyonderData.beyonderMap.check(
+                    if (!BeyonderData.playerMap.check(
                             potion.getPathway(), potion.getSequence())) {
                         slot.set(ItemStack.EMPTY);
                     }
                 }
 
                 else if (item instanceof BeyonderCharacteristicItem cha) {
-                    if (!BeyonderData.beyonderMap.check(
+                    if (!BeyonderData.playerMap.check(
                             cha.getPathway(), cha.getSequence())) {
                         slot.set(ItemStack.EMPTY);
                     }
@@ -368,7 +368,7 @@ public class BeyonderEventHandler {
 
                     boolean valid = true, allowed = true, noNegativesAllowed = true;
                     if(data != null) {
-                        valid = beyonderMap.check(data.pathway(), data.sequence());
+                        valid = playerMap.check(data.pathway(), data.sequence());
                         allowed = player.level().getGameRules().getBoolean(ModGameRules.ALLOW_ARTIFACTS);
 
                         noNegativesAllowed = !player.level().getGameRules().getBoolean(ModGameRules.
@@ -458,9 +458,9 @@ public class BeyonderEventHandler {
                 BeyonderData.setCharStack(victim, BeyonderData.getCurrentCharStack(victim) - 1, getSequence(victim), true);
             } else {
                 // No stack — desequence the victim, using regressSeq so domain-switched players restore to their previous pathway
-                if (victim instanceof ServerPlayer sp && BeyonderData.beyonderMap.get(sp).isPresent()) {
-                    StoredData regressed = BeyonderData.beyonderMap.get(sp).get().regressSeq();
-                    BeyonderData.beyonderMap.put(sp, regressed);
+                if (victim instanceof ServerPlayer sp && BeyonderData.playerMap.get(sp).isPresent()) {
+                    StoredData regressed = BeyonderData.playerMap.get(sp).get().regressSeq();
+                    BeyonderData.playerMap.put(sp, regressed);
                     BeyonderData.setBeyonder(victim, regressed.pathway(), regressed.sequence());
                 } else {
                     BeyonderData.setBeyonder(victim, BeyonderData.getPathway(victim), victimSeq + 1);
