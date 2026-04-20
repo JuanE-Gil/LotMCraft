@@ -18,6 +18,7 @@ import de.jakob.lotm.util.ClientBeyonderCache;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.marionettes.MarionetteComponent;
 import de.jakob.lotm.util.helper.marionettes.MarionetteUtils;
+import de.jakob.lotm.util.shapeShifting.PlayerSkinData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -36,7 +37,6 @@ import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -82,6 +82,8 @@ public class BeyonderNPCEntity extends PathfinderMob {
             SynchedEntityData.defineId(BeyonderNPCEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<String> QUEST_ID =
             SynchedEntityData.defineId(BeyonderNPCEntity.class, EntityDataSerializers.STRING);
+    private static final EntityDataAccessor<Optional<UUID>> TARGET_PLAYER_UUID =
+            SynchedEntityData.defineId(BeyonderNPCEntity.class, EntityDataSerializers.OPTIONAL_UUID);
 
     // ========================= Instance Fields =========================
     private String pathway = "none";
@@ -194,6 +196,7 @@ public class BeyonderNPCEntity extends PathfinderMob {
         builder.define(QUEST_ID, "");
         builder.define(IS_PUPPET_WARRIOR, false);
         builder.define(MAX_LIFETIME_IF_IS_PUPPET, DEFAULT_PUPPET_LIFETIME);
+        builder.define(TARGET_PLAYER_UUID, Optional.empty());
     }
 
     @Override
@@ -265,6 +268,9 @@ public class BeyonderNPCEntity extends PathfinderMob {
         compound.putString("QuestId", getQuestId());
         compound.putBoolean("IsPuppetWarrior", isPuppetWarrior());
         compound.putInt("MaxLifetimeIfPuppet", getMaxLifetimeIfPuppet());
+        if (getTargetPlayerUUID().isPresent()) {
+            compound.putUUID("TargetPlayerUUID", getTargetPlayerUUID().get());
+        }
     }
 
     @Override
@@ -296,6 +302,10 @@ public class BeyonderNPCEntity extends PathfinderMob {
                 this.entityData.set(PATHWAY, this.pathway);
                 this.entityData.set(SEQUENCE, this.sequence);
             }
+        }
+
+        if (compound.contains("TargetPlayerUUID")) {
+            setTargetPlayerUUID(compound.getUUID("TargetPlayerUUID"));
         }
 
         if (!getPathway().isEmpty()) {
@@ -543,7 +553,7 @@ public class BeyonderNPCEntity extends PathfinderMob {
     // ========================= Loot and Drops =========================
     @Override
     protected void dropCustomDeathLoot(@NotNull ServerLevel level, @NonNull DamageSource damageSource, boolean recentlyHit) {
-        if (!BeyonderData.beyonderMap.check(pathway, sequence)) {
+        if (!BeyonderData.playerMap.check(pathway, sequence)) {
             super.dropCustomDeathLoot(level, damageSource, recentlyHit);
             return;
         }
@@ -577,7 +587,7 @@ public class BeyonderNPCEntity extends PathfinderMob {
 
     @Override
     protected void dropFromLootTable(DamageSource damageSource, boolean attackedRecently) {
-        if (!BeyonderData.beyonderMap.check(pathway, sequence)) {
+        if (!BeyonderData.playerMap.check(pathway, sequence)) {
             return;
         }
         super.dropFromLootTable(damageSource, attackedRecently);
@@ -630,9 +640,26 @@ public class BeyonderNPCEntity extends PathfinderMob {
     }
 
     public ResourceLocation getSkinTexture() {
+        if (getTargetPlayerUUID().isPresent()) {
+            ResourceLocation cached = PlayerSkinData.getSkinTexture(getTargetPlayerUUID().get());
+            if (cached != null) {
+                return cached;
+            }
+            if (this.level().isClientSide) {
+                PlayerSkinData.fetchAndCacheSkin(getTargetPlayerUUID().get());
+            }
+        }
         String skinName = getSkinName();
         return ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID,
                 "textures/entity/npc/" + skinName + ".png");
+    }
+
+    public void setTargetPlayerUUID(UUID uuid) {
+        this.entityData.set(TARGET_PLAYER_UUID, Optional.ofNullable(uuid));
+    }
+
+    public Optional<UUID> getTargetPlayerUUID() {
+        return this.entityData.get(TARGET_PLAYER_UUID);
     }
 
     public String getPathway() {
@@ -700,5 +727,24 @@ public class BeyonderNPCEntity extends PathfinderMob {
         NOT_ATTACKING,      // Entity has no target
         HOSTILE_BEHAVIOR,   // Entity is hostile and actively seeking targets
         RETALIATION         // Entity is neutral but fighting back after being attacked
+    }
+
+    // ========================= Despawn =========================
+
+    @Override
+    public boolean removeWhenFarAway(double distanceToClosestPlayer) {
+        MarionetteComponent component = this.getData(ModAttachments.MARIONETTE_COMPONENT.get());
+        if (component.isMarionette()) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public void checkDespawn() {
+        MarionetteComponent component = this.getData(ModAttachments.MARIONETTE_COMPONENT.get());
+        if (!component.isMarionette()) {
+            super.checkDespawn();
+        }
     }
 }

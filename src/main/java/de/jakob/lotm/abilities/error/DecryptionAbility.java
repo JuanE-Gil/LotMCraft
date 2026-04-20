@@ -1,8 +1,10 @@
 package de.jakob.lotm.abilities.error;
 
 import de.jakob.lotm.abilities.core.ToggleAbility;
+import de.jakob.lotm.abilities.visionary.PsychologicalInvisibilityAbility;
 import de.jakob.lotm.network.PacketHandler;
 import de.jakob.lotm.network.packets.toClient.SyncDecryptionLookedAtEntitiesAbilityPacket;
+import de.jakob.lotm.util.ClientBeyonderCache;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -22,6 +24,7 @@ public class DecryptionAbility extends ToggleAbility {
 
         canBeUsedByNPC = false;
         canBeReplicated = false;
+        autoClear = false;
     }
 
     @Override
@@ -43,6 +46,14 @@ public class DecryptionAbility extends ToggleAbility {
 
         LivingEntity lookedAt = AbilityUtil.getTargetEntity(entity, 40*(int) Math.max(multiplier(entity)/4,1), 1.2f);
 
+        if(lookedAt != null) {
+            if (PsychologicalInvisibilityAbility.invisiblePlayers.containsKey(lookedAt.getUUID())) {
+                if (AbilityUtil.getSeqWithArt(entity, this) >=
+                        PsychologicalInvisibilityAbility.invisiblePlayers.get(lookedAt.getUUID()))
+                    return;
+            }
+        }
+
         PacketHandler.sendToPlayer(player, new SyncDecryptionLookedAtEntitiesAbilityPacket(true, lookedAt == null ? -1 : lookedAt.getId()));
 
         entity.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 20 * 17, 1, false, false, false));
@@ -57,6 +68,7 @@ public class DecryptionAbility extends ToggleAbility {
             return;
         }
 
+        clearArtifactScaling(entity);
     }
 
     @Override

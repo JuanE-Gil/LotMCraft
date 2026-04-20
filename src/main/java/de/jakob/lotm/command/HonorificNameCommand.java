@@ -8,7 +8,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.datafixers.util.Pair;
 import de.jakob.lotm.events.HonorificNamesEventHandler;
 import de.jakob.lotm.util.BeyonderData;
-import de.jakob.lotm.util.beyonderMap.HonorificName;
+import de.jakob.lotm.util.playerMap.HonorificName;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -185,12 +185,12 @@ public class HonorificNameCommand {
 
                     var player = source.getPlayer();
 
-                    if(!BeyonderData.beyonderMap.contains(player)){
+                    if(!BeyonderData.playerMap.contains(player)){
                         source.sendFailure(Component.literal("You must be beyonder!"));
                         return 0;
                     }
 
-                    var data = BeyonderData.beyonderMap.get(player).get();
+                    var data = BeyonderData.playerMap.get(player).get();
 
                     if(data.sequence() > 3){
                         source.sendFailure(Component.literal("You must be sequence 3 or higher!"));

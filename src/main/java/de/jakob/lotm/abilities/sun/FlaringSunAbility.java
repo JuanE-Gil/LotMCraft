@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class FlaringSunAbility extends Ability {
     public FlaringSunAbility(String id) {
-        super(id, 8, "purification", "burning", "light_source", "light_strong", "light_weak");
+        super(id, 8, "purification", "purification_holy", "burning", "light_source", "light_strong", "light_weak");
         postsUsedAbilityEventManually = true;
         interactionRadius = 14;
         canBeCopied = false;

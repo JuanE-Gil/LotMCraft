@@ -167,15 +167,12 @@ public class MeteorEntity extends Entity {
         this.setPos(newPos);
     }
 
-    Vec3 lastPos;
-
     public int getLifeTicks() {
         return lifeTicks;
     }
 
     @Override
     public void tick() {
-        // Petrification Logic -- run before super.tick() to stop movement completely
         if(getTags().contains("petrified")) {
             petrifiedTicks++;
             if(petrifiedTicks >= 20 * 5) {
@@ -203,7 +200,7 @@ public class MeteorEntity extends Entity {
 
         moveTo(position().add(direction.normalize().scale(getSpeed())));
 
-        if(position().distanceTo(targetPos.subtract(0, 1, 0)) < .5 || (lastPos != null && position().distanceTo(targetPos.subtract(0, 1, 0)) > lastPos.distanceTo(targetPos.subtract(0, 1, 0))) || !level().getBlockState(BlockPos.containing(position())).isAir()) {
+        if(!level().getBlockState(BlockPos.containing(position())).isAir()) {
             AbilityUtil.damageNearbyEntities(serverLevel, getCaster() instanceof LivingEntity l ? l : null, getRadius(), getDamage(), position(), true, false);
             EffectManager.playEffect(EffectManager.Effect.EXPLOSION, position().x, position().y, position().z, serverLevel);
             PerformantExplosion.create(serverLevel, getCaster(), position(), getExplosionSize() * 1.5f, isGriefing(), isGriefing() ? Explosion.BlockInteraction.DESTROY_WITH_DECAY : Explosion.BlockInteraction.KEEP);
@@ -237,8 +234,6 @@ public class MeteorEntity extends Entity {
 
             discard();
         }
-
-        lastPos = position();
     }
     
     @Override

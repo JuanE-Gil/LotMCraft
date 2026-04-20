@@ -7,6 +7,10 @@ import de.jakob.lotm.abilities.abyss.passives.WordImmunityAbility;
 import de.jakob.lotm.abilities.darkness.passives.DarknessRevivalAbility;
 import de.jakob.lotm.abilities.darkness.passives.NocturnalityAbility;
 import de.jakob.lotm.abilities.darkness.passives.PhysicalEnhancementsDarknessAbility;
+import de.jakob.lotm.abilities.death.passives.PhysicalEnhancementsDeathAbility;
+import de.jakob.lotm.abilities.death.passives.ReincarnationAbility;
+import de.jakob.lotm.abilities.death.passives.SolarSensitivityAbility;
+import de.jakob.lotm.abilities.death.passives.UndeadIgnoranceAbility;
 import de.jakob.lotm.abilities.demoness.passives.BloodLossAbility;
 import de.jakob.lotm.abilities.demoness.passives.FeatherFallAbility;
 import de.jakob.lotm.abilities.demoness.passives.MirrorRevivalAbility;
@@ -16,6 +20,7 @@ import de.jakob.lotm.abilities.door.passives.SpiritWorldAwarenessAbility;
 import de.jakob.lotm.abilities.door.passives.VoidImmunityAbility;
 import de.jakob.lotm.abilities.error.passives.PassiveTheftAbility;
 import de.jakob.lotm.abilities.error.passives.PhysicalEnhancementsErrorAbility;
+import de.jakob.lotm.abilities.fool.passives.MiracleOfResurrectionAbility;
 import de.jakob.lotm.abilities.fool.passives.PaperDaggersAbility;
 import de.jakob.lotm.abilities.fool.passives.PhysicalEnhancementsFoolAbility;
 import de.jakob.lotm.abilities.fool.passives.PuppeteeringEnhancementsAbility;
@@ -72,6 +77,7 @@ public class PassiveAbilityHandler {
 
     public static final DeferredItem<Item> PAPER_DAGGERS = ITEMS.registerItem("paper_dagger_ability", PaperDaggersAbility::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
     public static final DeferredItem<Item> PUPPETEERING_ENHANCEMENTS = ITEMS.registerItem("puppeteering_enhancements_ability", PuppeteeringEnhancementsAbility::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
+    public static final DeferredItem<Item> MIRACLE_OF_RESURRECTION = ITEMS.registerItem("miracle_of_resurrection_ability", MiracleOfResurrectionAbility::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
 
     public static final DeferredItem<Item> NOCTURNALITY = ITEMS.registerItem("nocturnality_ability", NocturnalityAbility::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
     public static final DeferredItem<Item> DARKNESS_REVIVAL = ITEMS.registerItem("darkness_revival_ability", DarknessRevivalAbility::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
@@ -83,6 +89,11 @@ public class PassiveAbilityHandler {
     public static final DeferredItem<Item> MIRROR_REVIVAL = ITEMS.registerItem("mirror_revival_ability", MirrorRevivalAbility::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
 
     public static final DeferredItem<Item> RIPTIDE = ITEMS.registerItem("riptide_ability", RiptideAbility::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
+
+    public static final DeferredItem<Item> PHYSICAL_ENHANCEMENTS_DEATH = ITEMS.registerItem("physical_enhancements_death_ability", PhysicalEnhancementsDeathAbility::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
+    public static final DeferredItem<Item> UNDEAD_IGNORANCE = ITEMS.registerItem("undead_ignorance_ability", UndeadIgnoranceAbility::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
+    public static final DeferredItem<Item> SOLAR_SENSITIVITY = ITEMS.registerItem("solar_sensitivity_ability", SolarSensitivityAbility::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
+    public static final DeferredItem<Item> REINCARNATION = ITEMS.registerItem("reincarnation_ability", ReincarnationAbility::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
     
     public static final DeferredItem<Item> VIRTUAL_AVATAR = ITEMS.registerItem("virtual_avatar_ability", VirtualAvatarAbility::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
     public static final DeferredItem<Item> META_AWARENESS = ITEMS.registerItem("meta_awareness_ability", MetaAwarenessAbility::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));

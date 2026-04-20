@@ -223,7 +223,6 @@ public class ModEvents {
     public static void onRegisterCommands(RegisterCommandsEvent event) {
         BeyonderCommand.register(event.getDispatcher());
         LuckCheckCommand.register(event.getDispatcher());
-        SkinChangeCommand.register(event.getDispatcher());
         AllyRequestCommands.register(event.getDispatcher());
         AllyCommand.register(event.getDispatcher());
         SanityCommand.register(event.getDispatcher());

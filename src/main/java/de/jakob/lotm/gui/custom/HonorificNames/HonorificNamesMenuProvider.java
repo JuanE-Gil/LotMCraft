@@ -1,7 +1,7 @@
 package de.jakob.lotm.gui.custom.HonorificNames;
 
-import de.jakob.lotm.util.beyonderMap.HonorificName;
-import de.jakob.lotm.util.beyonderMap.PendingPrayer;
+import de.jakob.lotm.util.playerMap.HonorificName;
+import de.jakob.lotm.util.playerMap.PendingPrayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;

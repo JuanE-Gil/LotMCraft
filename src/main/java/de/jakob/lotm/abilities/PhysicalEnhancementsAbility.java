@@ -3,7 +3,6 @@ package de.jakob.lotm.abilities;
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.attachments.ControllingDataComponent;
 import de.jakob.lotm.attachments.ModAttachments;
-import de.jakob.lotm.effect.ModEffects;
 import de.jakob.lotm.gamerule.ModGameRules;
 import de.jakob.lotm.util.BeyonderData;
 import net.minecraft.core.Holder;
@@ -23,6 +22,7 @@ import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
+import net.neoforged.neoforge.event.entity.living.LivingHealEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 
 import java.util.*;
@@ -45,7 +45,16 @@ public abstract class PhysicalEnhancementsAbility extends PassiveAbilityItem {
     private static final Map<UUID, Map<EnhancementType, Integer>> entityEnhancements = new ConcurrentHashMap<>();
     private static final Map<UUID, Map<String, TemporaryEnhancement>> temporaryEnhancements = new ConcurrentHashMap<>();
     private static final Map<UUID, Map<String, EnhancementBoost>> enhancementBoosts = new ConcurrentHashMap<>();
-    private static final Map<UUID, Long> reducedRegen = new ConcurrentHashMap<>();
+    public static final Map<UUID, Long> reducedRegen = new ConcurrentHashMap<>();
+
+    /** Suppresses passive regen for the given entity for the specified duration in milliseconds. */
+    public static void suppressRegen(LivingEntity entity, long durationMs) {
+        long expiry = System.currentTimeMillis() + durationMs;
+        if (!reducedRegen.containsKey(entity.getUUID()) || reducedRegen.get(entity.getUUID()) < expiry) {
+            reducedRegen.put(entity.getUUID(), expiry);
+        }
+        entity.removeEffect(MobEffects.REGENERATION);
+    }
 
     // FIX 2: Track the last known sequence level per entity so that attribute modifiers
     // (health, speed, strength, etc.) are only removed/re-added when the sequence actually
@@ -117,13 +126,13 @@ public abstract class PhysicalEnhancementsAbility extends PassiveAbilityItem {
         List<PhysicalEnhancement> currentEnhancements = getEnhancementsForSequence(sequenceLevel, entity);
 
         if(entity instanceof ServerPlayer player){
-            var dataOp = BeyonderData.beyonderMap.get(entity);
+            var dataOp = BeyonderData.playerMap.get(entity);
 
             if(dataOp.isPresent()) {
                 var data = dataOp.get();
 
                 ControllingDataComponent controllingData = player.getData(ModAttachments.CONTROLLING_DATA);
-                if (Arrays.stream(data.charStack()).anyMatch(i -> i > 0) && controllingData.getTargetUUID() == null) {
+                if (Arrays.stream(data.charStack()).anyMatch(i -> i > 0) && controllingData.getTargetUUID() == null && !controllingData.isControlling()) {
 
                     if (sequenceLevel < 9) {
                         currentEnhancements = currentEnhancements.stream()
@@ -579,6 +588,18 @@ public abstract class PhysicalEnhancementsAbility extends PassiveAbilityItem {
                     event.setAmount(event.getAmount() * damageMultiplier);
                 }
             }
+        }
+
+        @SubscribeEvent
+        public static void onLivingHeal(LivingHealEvent event) {
+            UUID uuid = event.getEntity().getUUID();
+            Long expiry = reducedRegen.get(uuid);
+            if (expiry == null) return;
+            if (System.currentTimeMillis() >= expiry) {
+                reducedRegen.remove(uuid);
+                return;
+            }
+            event.setCanceled(true);
         }
 
         @SubscribeEvent

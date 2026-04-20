@@ -113,7 +113,7 @@ public abstract class Ability {
 
         // Use ability client and server sided
         onAbilityUse(serverLevel, newUser);
-        PacketHandler.sendToAllPlayersInSameLevel(new UseAbilityPacket(getId(), newUser.getId()), serverLevel);
+        if(entity instanceof ServerPlayer player) PacketHandler.sendToPlayer(player, new UseAbilityPacket(getId(), newUser.getId()));
 
         if(this.autoClear){
             clearArtifactScaling(entity);
@@ -121,9 +121,6 @@ public abstract class Ability {
 
         // Track ability use for Recording/Replicating detection
         AbilityUseTracker.trackUse(newUser, this, newUser.position(), serverLevel);
-
-        if(entity instanceof ServerPlayer player)
-            LOTMCraft.LOGGER.info("{} used {} on {}", player.getName().toString(), this.id, player.position());
 
         if(!postsUsedAbilityEventManually && !(this instanceof ToggleAbility)) {
             NeoForge.EVENT_BUS.post(new AbilityUsedEvent(serverLevel, newUser.position(), newUser, this, interactionFlags, interactionRadius, interactionCacheTicks));
@@ -169,6 +166,14 @@ public abstract class Ability {
 
         // Check current pathway
         if(getRequirements().containsKey(pathway) && getRequirements().get(pathway) >= sequence) {
+            int reqSeq = getRequirements().get(pathway);
+            // Switched pathway players only access seq 9-5 abilities once they have a char stack at seq 4 or stronger
+            if (BeyonderData.hasSwitchedPathway(entity) && reqSeq > 4) {
+                int[] stacks = BeyonderData.getCharStacks(entity);
+                boolean hasStack = false;
+                for (int i = 1; i <= 4; i++) { if (stacks[i] > 0) { hasStack = true; break; } }
+                if (!hasStack) return false;
+            }
             return true;
         }
 

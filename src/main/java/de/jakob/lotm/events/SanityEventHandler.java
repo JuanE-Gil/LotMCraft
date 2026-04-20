@@ -34,7 +34,19 @@ public class SanityEventHandler {
 
         SanityComponent sanityComp = entity.getData(ModAttachments.SANITY_COMPONENT);
 
-        float sanityIncrease = (BeyonderData.isBeyonder(entity) && BeyonderData.getSequence(entity) <= 2) || sanityComp.getSanity() < .2 ? -0.00025f : 0.0025f;
+        boolean isBeyonder = BeyonderData.isBeyonder(entity);
+        boolean isHighSequence = isBeyonder && BeyonderData.getSequence(entity) <= 2;
+        boolean hasSwitched = BeyonderData.hasSwitchedPathway(entity);
+        boolean hasUndigestedStack = isBeyonder
+                && entity instanceof Player digestionPlayer
+                && BeyonderData.getCurrentCharStack(entity) > 0
+                && BeyonderData.getDigestionProgress(digestionPlayer) < 1.0f;
+
+        boolean shouldDrain = isHighSequence || sanityComp.getSanity() < .2f || hasUndigestedStack || hasSwitched;
+        float sanityIncrease = shouldDrain ? 0 : 0.0025f;
+        if (isHighSequence || sanityComp.getSanity() < .2f) sanityIncrease -= 0.00025f;
+        if (hasUndigestedStack) sanityIncrease -= 0.00025f;
+        if (hasSwitched) sanityIncrease -= 0.00025f;
         sanityComp.increaseSanityAndSync(sanityIncrease, entity);
 
         float sanity = sanityComp.getSanity();

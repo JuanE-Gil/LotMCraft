@@ -1,6 +1,7 @@
 package de.jakob.lotm.artifacts;
 
 import de.jakob.lotm.LOTMCraft;
+import de.jakob.lotm.abilities.death.UndyingSealAbility;
 import de.jakob.lotm.data.ModDataComponents;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -22,6 +23,11 @@ public class SealedArtifactEffectHandler {
         
         // Only process on server side
         if (player.level().isClientSide()) {
+            return;
+        }
+
+        // Undying Seal — suppress all negative effects while active
+        if (UndyingSealAbility.isSealed(player.getUUID(), player.level().getGameTime())) {
             return;
         }
 

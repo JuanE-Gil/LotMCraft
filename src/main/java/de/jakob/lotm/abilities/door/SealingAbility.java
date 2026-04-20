@@ -33,7 +33,7 @@ import java.util.UUID;
 
 public class SealingAbility extends Ability {
     public SealingAbility(String id) {
-        super(id, 8, "sealing");
+        super(id, 16, "sealing");
         canBeCopied = false;
         interactionRadius = 5;
         interactionCacheTicks = 20 * 14;

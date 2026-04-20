@@ -284,7 +284,8 @@ public class SpaceConcealmentAbility extends SelectableAbility {
                                         level,
                                         facingDirection,
                                         blockCenter,
-                                        20 * 30
+                                        20 * 30,
+                                        10
                                 );
 
                                 level.addFreshEntity(door);
@@ -297,7 +298,8 @@ public class SpaceConcealmentAbility extends SelectableAbility {
                                         level,
                                         oppositeDirection,
                                         blockCenter,
-                                        20 * 30
+                                        20 * 30,
+                                        10
                                 );
 
                                 level.addFreshEntity(oppositeDoor);

@@ -58,18 +58,6 @@ public class SleepInducementAbility extends Ability {
 
         // Add sleep effect
         target.addEffect(new MobEffectInstance(ModEffects.ASLEEP, 20 * 12, 1, false, false, false));
-
-        // Animate particle line from caster to target
-        for(int i = 0; i < 4; i++) {
-            Vec3 startPos = VectorUtil.getRelativePosition(entity.getEyePosition().add(entity.getLookAngle().normalize()), entity.getLookAngle().normalize(),  .5, random.nextDouble(-4, 4), random.nextDouble(-1, 1));
-            Vec3 targetLoc = target.getEyePosition();
-
-            final float step = .5f;
-            final float length = (float) startPos.distanceTo(targetLoc);
-            final int duration = (int) Math.ceil(length / step) + 20 * 3;
-
-            animateParticleLine(new Location(startPos, level), targetLoc, 6, duration);
-        }
     }
 
     private final DustParticleOptions dust = new DustParticleOptions(

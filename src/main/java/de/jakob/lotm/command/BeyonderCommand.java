@@ -6,7 +6,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.SetBeyonderAuditLog;
-import de.jakob.lotm.util.beyonderMap.StoredData;
+import de.jakob.lotm.util.playerMap.StoredData;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -75,7 +75,7 @@ public class BeyonderCommand {
             BeyonderData.setBeyonder(target, pathway, sequence, false, true, true, true);
 
             if(target instanceof Player player) {
-                var optional = BeyonderData.beyonderMap.get(player);
+                var optional = BeyonderData.playerMap.get(player);
 
                 if(optional.isPresent()) {
                     StoredData data = optional.get();

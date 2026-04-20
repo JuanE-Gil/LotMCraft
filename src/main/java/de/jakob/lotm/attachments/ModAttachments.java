@@ -255,6 +255,29 @@ public class ModAttachments {
                             .build()
             );
 
+    public static final Supplier<AttachmentType<HistoricalVoidComponent>> HISTORICAL_VOID_COMPONENT =
+            ATTACHMENT_TYPES.register("historical_void_component", () ->
+                    AttachmentType.serializable(HistoricalVoidComponent::new)
+                            .copyOnDeath()
+                            .build()
+            );
+
+    public static final Supplier<AttachmentType<MiracleOfResurrectionComponent>> MIRACLE_OF_RESURRECTION =
+            ATTACHMENT_TYPES.register("miracle_of_resurrection", () ->
+                    AttachmentType.builder(MiracleOfResurrectionComponent::new)
+                            .serialize(MiracleOfResurrectionComponent.SERIALIZER)
+                            .copyOnDeath()
+                            .build()
+            );
+
+    public static final Supplier<AttachmentType<ShapeShiftComponent>> SHAPE_SHIFT =
+            ATTACHMENT_TYPES.register("shape_shift", () ->
+                    AttachmentType.builder(ShapeShiftComponent::new)
+                            .serialize(ShapeShiftComponent.SERIALIZER)
+                            .copyOnDeath()
+                            .build()
+            );
+
     public static void register(IEventBus eventBus) {
         ATTACHMENT_TYPES.register(eventBus);
     }

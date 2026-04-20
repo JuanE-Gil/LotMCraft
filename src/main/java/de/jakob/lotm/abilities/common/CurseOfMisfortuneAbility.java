@@ -1,6 +1,5 @@
 package de.jakob.lotm.abilities.common;
 
-import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.abilities.core.AbilityUsedEvent;
 import de.jakob.lotm.attachments.LuckComponent;
@@ -82,7 +81,6 @@ public class CurseOfMisfortuneAbility extends Ability {
         float multiplier = multiplier(entity);
         int amplifier = (int) Math.min(Math.round(multiplier * 6.25f * (1.0 - resistance)) * 120, 6500);
 
-        LOTMCraft.LOGGER.info("mult: {}, amp: {}, res: {}", multiplier, amplifier, resistance);
         if (amplifier <= 0) {
             return; // Full resistance – curse has no meaningful effect
         }

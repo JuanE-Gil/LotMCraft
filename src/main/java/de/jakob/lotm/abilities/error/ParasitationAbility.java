@@ -414,7 +414,7 @@ public class ParasitationAbility extends SelectableAbility {
 
         //BLEGGHHHHH change this (REMEMBERS TO DO THAT!!)
         ControllingDataComponent data = player.getData(ModAttachments.CONTROLLING_DATA);
-        if (data.getTargetUUID() == null) {
+        if (!data.isControlling()) {
             // Ended externally — clean up without calling reset again
             controllingMap.remove(player.getUUID());
             controllingTimer.remove(player.getUUID());

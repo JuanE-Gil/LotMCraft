@@ -184,7 +184,7 @@ public class NightmareAbility extends SelectableAbility {
         Location loc = new Location(targetEntity.position(), level);
         ParticleUtil.createParticleSpirals(dustVerySmall, loc, 1.2, 1.2, 2.5, .5, 8, 20 * 20, 11, 8);
 
-        ServerScheduler.scheduleForDuration(0, 2, 20 * 20, () -> {
+        ServerScheduler.scheduleForDuration(0, 2, 20 * 20* (int)(Math.max(multiplier(entity)/2,1)), () -> {
             if(entity.level().isClientSide)
                 return;
             loc.setPosition(targetEntity.position());
@@ -404,7 +404,7 @@ public class NightmareAbility extends SelectableAbility {
 
         // Capture the sphere BEFORE modifying it so we can restore it later
         if (storedRegions.containsKey(casterUuid)) {
-            storedRegions.get(casterUuid).captureSphere(centerPos, radius);
+            storedRegions.get(casterUuid).captureSphere(level, centerPos, radius);
         }
 
         // Iterate through all positions in a cube around the center

@@ -37,6 +37,16 @@ import java.util.*;
 public class DivinationUtil {
     public static final Map<UUID, Map<String, AbilityPower>> PLAYER_ABILITY_MAP = new HashMap<>();
 
+    public static class AbilityPower {
+        int power;
+        long expiryTime;
+
+        AbilityPower(int power, long expiryTime) {
+            this.power = power;
+            this.expiryTime = expiryTime;
+        }
+    }
+
     public static int getDivinationPower(ServerPlayer serverPlayer) {
         int divinationPower = 0;
         String pathway = BeyonderData.getPathway(serverPlayer);
@@ -52,6 +62,8 @@ public class DivinationUtil {
 
         if (sequence <= 1) divinationPower += getSequenceOneDivinationPower(pathway);
 
+        if (sequence <= 0) divinationPower += getSequenceZeroDivinationPower(pathway);
+
         divinationPower += getDivinationItemInInventory(serverPlayer);
         divinationPower += getDivinationItemInHand(serverPlayer);
 
@@ -61,7 +73,7 @@ public class DivinationUtil {
 
     private static int getLowerSequenceDivinationPower(String pathway) {
         return switch (pathway) {
-            case "fool" -> 2;
+            case "fool" -> 1;
             case "wheel_of_fortune" -> 2;
             case "darkness" -> 1;
             default -> 0;
@@ -73,7 +85,7 @@ public class DivinationUtil {
             case "fool" -> 3;
             case "wheel_of_fortune" -> 2;
             case "darkness" -> 2;
-            case "door" -> 3;
+            case "door" -> 4;
             case "demoness" -> 2;
             default -> 1;
         };
@@ -84,14 +96,17 @@ public class DivinationUtil {
             case "fool" -> 4;
             case "wheel_of_fortune" -> 4;
             case "darkness" -> 3;
+            case "error" -> 4;
+            case "door" -> 4;
             default -> 2;
         };
     }
 
     private static int getSequenceTwoDivinationPower(String pathway) {
         return switch (pathway) {
-            case "fool" -> 5;
+            case "fool" -> 4;
             case "wheel_of_fortune" -> 5;
+            case "door" -> 4;
             default -> 3;
         };
     }
@@ -104,6 +119,14 @@ public class DivinationUtil {
         };
     }
 
+    private static int getSequenceZeroDivinationPower(String pathway) {
+        return switch (pathway) {
+            case "fool" -> 11;
+            case "door" -> 11;
+            case "wheel_of_fortune" -> 11;
+            default -> 10;
+        };
+    }
 
     public static int getConcealmentPower(ServerPlayer serverPlayer) {
         int concealmentPower = 0;
@@ -119,6 +142,12 @@ public class DivinationUtil {
         if (sequence <= 2) concealmentPower += getSequenceTwoConcealmentPower(pathway);
 
         if (sequence <= 1) concealmentPower += getSequenceOneConcealmentPower(pathway);
+
+        if (sequence <= 0) concealmentPower += getSequenceZeroConcealmentPower(pathway);
+
+        if (serverPlayer.isCreative() || serverPlayer.isSpectator()) {
+            concealmentPower += 200;
+        }
 
         concealmentPower += getConcealmentItemInInventory(serverPlayer);
         concealmentPower += getConcealmentAbilities(serverPlayer);
@@ -138,7 +167,6 @@ public class DivinationUtil {
 
     private static int getMidSequenceConcealmentPower(String pathway) {
         return switch (pathway) {
-            case "fool" -> 2;
             case "door" -> 2;
             case "error" -> 2;
             case "darkness" -> 2;
@@ -177,7 +205,14 @@ public class DivinationUtil {
         return 6;
     }
 
-    
+    private static int getSequenceZeroConcealmentPower(String pathway) {
+//        return switch (pathway) {
+//            default -> 6;
+//        };
+        return 12;
+    }
+
+
     // get divination items in inventory
     private static int getDivinationItemInInventory(ServerPlayer serverPlayer) {
         int addedValue = 0;
@@ -198,10 +233,10 @@ public class DivinationUtil {
 
     private static int getDivinationItemInHand(ServerPlayer serverPlayer){
         int addedValue = 0;
-        if (serverPlayer.getItemInHand(InteractionHand.MAIN_HAND).is(ModItems.CANE) ||serverPlayer.getItemInHand(InteractionHand.OFF_HAND).is(ModItems.CANE)) {
+        if (serverPlayer.getMainHandItem().is(ModItems.CANE) || serverPlayer.getOffhandItem().is(ModItems.CANE)) {
             addedValue += 2;
         }
-        if (serverPlayer.getItemInHand(InteractionHand.MAIN_HAND).is(ModItems.CRYSTAL_BALL) ||serverPlayer.getItemInHand(InteractionHand.OFF_HAND).is(ModItems.CRYSTAL_BALL)) {
+        if (serverPlayer.getMainHandItem().is(ModItems.CRYSTAL_BALL) || serverPlayer.getOffhandItem().is(ModItems.CRYSTAL_BALL)) {
             addedValue += 3;
         }
         return addedValue;
@@ -216,7 +251,7 @@ public class DivinationUtil {
             addedValue += 99;
         }
         if (activeAbilities.stream().anyMatch(ability -> ability instanceof FogOfWarAbility)) {
-            addedValue += 6;
+            addedValue += 8;
         }
         if ((InvisibilityAbility.invisiblePlayers.contains(serverPlayer.getUUID())) || (ShadowConcealmentAbility.invisiblePlayers.contains(serverPlayer.getUUID()))) {
             addedValue += 2;
@@ -347,15 +382,4 @@ public class DivinationUtil {
             entity.removeEffect(ModEffects.CONCEALMENT);
         }
     }
-
-    public static class AbilityPower {
-        int power;
-        long expiryTime;
-
-        AbilityPower(int power, long expiryTime) {
-            this.power = power;
-            this.expiryTime = expiryTime;
-        }
-    }
-
 }

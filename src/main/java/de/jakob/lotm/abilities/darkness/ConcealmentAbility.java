@@ -116,17 +116,13 @@ public class ConcealmentAbility extends SelectableAbility {
             return;
         }
 
-        // Get current position
         BlockPos currentPos = entity.blockPosition();
         double x = entity.getX();
         double z = entity.getZ();
         int startY = currentPos.getY();
 
-        // Find safe Y position in target dimension
-        // When returning to overworld, prefer searching upward to find surface
         BlockPos safePos = findSafePosition(targetLevel, x, startY, z, isInConcealedWorld);
 
-        // Teleport the player
         serverPlayer.teleportTo(targetLevel,
                 safePos.getX() + 0.5,
                 safePos.getY(),
@@ -138,19 +134,13 @@ public class ConcealmentAbility extends SelectableAbility {
         this.clearArtifactScaling(entity);
     }
 
-    /**
-     * Finds a safe position to teleport to - solid ground beneath, air above
-     * @param searchUpFirst if true, searches upward first (useful when returning to overworld surface)
-     */
     private BlockPos findSafePosition(ServerLevel level, double x, int startY, double z, boolean searchUpFirst) {
         int blockX = (int) Math.floor(x);
         int blockZ = (int) Math.floor(z);
 
-        // Start searching from the given Y position
         int searchY = Math.max(level.getMinBuildHeight(), Math.min(level.getMaxBuildHeight() - 3, startY));
 
         if (searchUpFirst) {
-            // First search upward (to find surface when returning to overworld)
             for (int y = searchY; y < level.getMaxBuildHeight() - 2; y++) {
                 BlockPos checkPos = new BlockPos(blockX, y, blockZ);
                 BlockPos belowPos = checkPos.below();
@@ -161,7 +151,6 @@ public class ConcealmentAbility extends SelectableAbility {
                 }
             }
 
-            // If nothing found above, try searching down
             for (int y = searchY - 1; y >= level.getMinBuildHeight() + 1; y--) {
                 BlockPos checkPos = new BlockPos(blockX, y, blockZ);
                 BlockPos belowPos = checkPos.below();
@@ -172,7 +161,6 @@ public class ConcealmentAbility extends SelectableAbility {
                 }
             }
         } else {
-            // Original behavior: search downward first
             for (int y = searchY; y >= level.getMinBuildHeight() + 1; y--) {
                 BlockPos checkPos = new BlockPos(blockX, y, blockZ);
                 BlockPos belowPos = checkPos.below();
@@ -183,7 +171,6 @@ public class ConcealmentAbility extends SelectableAbility {
                 }
             }
 
-            // If no ground found below, search upward
             for (int y = searchY + 1; y < level.getMaxBuildHeight() - 2; y++) {
                 BlockPos checkPos = new BlockPos(blockX, y, blockZ);
                 BlockPos belowPos = checkPos.below();
@@ -195,13 +182,9 @@ public class ConcealmentAbility extends SelectableAbility {
             }
         }
 
-        // Fallback: generate or find the highest solid block
         return findHighestSafePosition(level, blockX, blockZ);
     }
 
-    /**
-     * Check if a position is safe: solid ground below, air at position and above
-     */
     private boolean isSafePosition(ServerLevel level, BlockPos pos, BlockPos below, BlockPos above) {
         BlockState belowState = level.getBlockState(below);
         BlockState currentState = level.getBlockState(pos);
@@ -218,9 +201,6 @@ public class ConcealmentAbility extends SelectableAbility {
         return hasSolidGround && hasSpace;
     }
 
-    /**
-     * Find the highest safe position at given X, Z coordinates
-     */
     private BlockPos findHighestSafePosition(ServerLevel level, int x, int z) {
         // Search from top down for the first solid block
         for (int y = level.getMaxBuildHeight() - 3; y >= level.getMinBuildHeight(); y--) {
@@ -239,7 +219,6 @@ public class ConcealmentAbility extends SelectableAbility {
             }
         }
 
-        // Ultimate fallback: place at Y=65 (above sea level in concealment world)
         return new BlockPos(x, 65, z);
     }
 
@@ -248,22 +227,18 @@ public class ConcealmentAbility extends SelectableAbility {
             return;
         }
 
-        // Check if we're currently in the concealment world
         boolean isInConcealmentWorld = serverLevel.dimension().equals(ModDimensions.CONCEALMENT_WORLD_DIMENSION_KEY);
 
-        // Determine source and destination levels based on current dimension
         ServerLevel destinationLevel;
 
         if (isInConcealmentWorld) {
-            // If in concealment world, move blocks back to overworld
             destinationLevel = serverLevel.getServer().getLevel(Level.OVERWORLD);
         } else {
-            // If in overworld (or other dimension), move blocks to concealment world
             destinationLevel = serverLevel.getServer().getLevel(ModDimensions.CONCEALMENT_WORLD_DIMENSION_KEY);
         }
 
         if(destinationLevel == null) {
-            return; // Exit early if destination world doesn't exist
+            return;
         }
 
         EffectManager.playEffect(EffectManager.Effect.CONCEALMENT, entity.getX(), entity.getY(), entity.getZ(), serverLevel, entity);
@@ -280,7 +255,6 @@ public class ConcealmentAbility extends SelectableAbility {
 
                     if(processedBlocks.contains(blockPos)) return;
 
-                    // Get the block state before removing it
                     BlockState blockState = serverLevel.getBlockState(blockPos);
 
                     if(blockState.getDestroySpeed(serverLevel, blockPos) < 0) {
@@ -288,15 +262,13 @@ public class ConcealmentAbility extends SelectableAbility {
                         return;
                     }
 
-                    if(blockState.isAir()) { // Skip air blocks when returning to overworld
+                    if(blockState.isAir()) {
                         processedBlocks.add(blockPos);
                         return;
                     }
 
-                    // Set the block in the destination world
                     destinationLevel.setBlockAndUpdate(blockPos, blockState);
 
-                    // Remove the block from the source world
                     serverLevel.setBlockAndUpdate(blockPos, Blocks.AIR.defaultBlockState());
 
                     processedBlocks.add(blockPos);
@@ -308,9 +280,10 @@ public class ConcealmentAbility extends SelectableAbility {
 
                 if(AbilityUtil.isTargetSignificantlyStronger(entitySeq, BeyonderData.getSequence(targetEntity))) return;
 
+                if(targetEntity.getPersistentData().contains("recently_concealed") && targetEntity.getPersistentData().getBoolean("recently_concealed")) return;
+
                 Vec3 originalPos = targetEntity.position();
 
-                // Teleport the entity to the concealment world
                 BlockPos safePos = findSafePosition(destinationLevel, targetEntity.getX(), targetEntity.blockPosition().getY(), targetEntity.getZ(), false);
 
                 TemporaryChunkLoader.forceChunksTemporarily(destinationLevel, safePos.getX(), safePos.getZ(), 10, 20 * 10);
@@ -323,6 +296,8 @@ public class ConcealmentAbility extends SelectableAbility {
                         targetEntity.getYRot(),
                         targetEntity.getXRot()
                 );
+
+                targetEntity.getPersistentData().putBoolean("recently_concealed", true);
 
                 LivingEntity teleportedEntity = (LivingEntity) destinationLevel.getEntity(targetEntity.getUUID());
 
@@ -346,6 +321,11 @@ public class ConcealmentAbility extends SelectableAbility {
                             teleportedEntity.getYRot(),
                             teleportedEntity.getXRot()
                     );
+                });
+
+                ServerScheduler.scheduleDelayed(returnTime + 20 * 8, () -> {
+                    if (teleportedEntity.getPersistentData().contains("recently_concealed"))
+                        teleportedEntity.getPersistentData().putBoolean("recently_concealed", false);
                 });
             });
 
@@ -404,7 +384,6 @@ public class ConcealmentAbility extends SelectableAbility {
         Location loc = new Location(targetEntity.position(), targetEntity.level());
 
         int finalDuration = duration;
-
 
         ServerScheduler.scheduleForDuration(0, 5,duration, () -> {
             targetEntity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, 10, false, false, false));

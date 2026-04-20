@@ -133,7 +133,7 @@ public class UniquenessEntity extends Entity {
         UniquenessComponent component = player.getData(ModAttachments.UNIQUENESS_COMPONENT);
         component.setHasUniqueness(true);
         component.setUniquenessPathway(pathway);
-        BeyonderData.beyonderMap.setUniqueness(player, pathway);
+        BeyonderData.playerMap.setUniqueness(player, pathway);
 
         int color = BeyonderData.pathwayInfos.containsKey(pathway)
                 ? BeyonderData.pathwayInfos.get(pathway).color()
@@ -187,7 +187,7 @@ public class UniquenessEntity extends Entity {
             }
         }
 
-        if(BeyonderData.beyonderMap.anyPlayerHoldsUniqueness(pathway)) {
+        if(BeyonderData.playerMap.anyPlayerHoldsUniqueness(pathway)) {
             return true;
         }
 

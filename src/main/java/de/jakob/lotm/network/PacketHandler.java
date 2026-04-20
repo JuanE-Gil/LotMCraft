@@ -4,7 +4,6 @@ import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.network.packets.toClient.*;
 import de.jakob.lotm.network.packets.toServer.*;
 import de.jakob.lotm.util.BeyonderData;
-import de.jakob.lotm.util.beyonderMap.StoredData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerLevel;
@@ -15,10 +14,6 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
-
-import java.util.Optional;
-
-import static de.jakob.lotm.util.BeyonderData.beyonderMap;
 
 public class PacketHandler {
 
@@ -286,6 +281,12 @@ public class PacketHandler {
         );
 
         registrar.playToClient(
+                SyncEyeOfDeathAbilityPacket.TYPE,
+                SyncEyeOfDeathAbilityPacket.STREAM_CODEC,
+                SyncEyeOfDeathAbilityPacket::handle
+        );
+
+        registrar.playToClient(
                 RingEffectPacket.TYPE,
                 RingEffectPacket.STREAM_CODEC,
                 RingEffectPacket::handle
@@ -300,12 +301,6 @@ public class PacketHandler {
                 SyncGriefingStatePacket.TYPE,
                 SyncGriefingStatePacket.STREAM_CODEC,
                 SyncGriefingStatePacket::handle
-        );
-
-        registrar.playToClient(
-                SkinDataPacket.TYPE,
-                SkinDataPacket.STREAM_CODEC,
-                SkinDataPacket::handle
         );
 
         registrar.playToClient(
@@ -394,15 +389,33 @@ public class PacketHandler {
         );
 
         registrar.playToClient(
+                OpenBiomeDivinationScreenPacket.TYPE,
+                OpenBiomeDivinationScreenPacket.STREAM_CODEC,
+                OpenBiomeDivinationScreenPacket::handle
+        );
+
+        registrar.playToClient(
                 OpenShapeShiftingScreenPacket.TYPE,
                 OpenShapeShiftingScreenPacket.STREAM_CODEC,
                 OpenShapeShiftingScreenPacket::handle
         );
 
         registrar.playToClient(
+                OpenHistoricalVoidBorrowingScreenPacket.TYPE,
+                OpenHistoricalVoidBorrowingScreenPacket.STREAM_CODEC,
+                OpenHistoricalVoidBorrowingScreenPacket::handle
+        );
+
+        registrar.playToClient(
                 SyncPlayerTeleportationPlayerNamesPacket.TYPE,
                 SyncPlayerTeleportationPlayerNamesPacket.STREAM_CODEC,
                 SyncPlayerTeleportationPlayerNamesPacket::handle
+        );
+
+        registrar.playToClient(
+                SyncPsychologicalInvisibilityPacket.TYPE,
+                SyncPsychologicalInvisibilityPacket.STREAM_CODEC,
+                SyncPsychologicalInvisibilityPacket::handle
         );
 
         registrar.playToClient(
@@ -430,6 +443,12 @@ public class PacketHandler {
         );
 
         registrar.playToClient(
+                PlayAnimationPacket.TYPE,
+                PlayAnimationPacket.STREAM_CODEC,
+                PlayAnimationPacket::handle
+        );
+
+        registrar.playToClient(
                 SyncOriginalBodyOwnerPacket.TYPE,
                 SyncOriginalBodyOwnerPacket.STREAM_CODEC,
                 SyncOriginalBodyOwnerPacket::handle
@@ -440,7 +459,13 @@ public class PacketHandler {
                 SyncSkillScalingPacket.STREAM_CODEC,
                 SyncSkillScalingPacket::handle
         );
-
+      
+        registrar.playToClient(
+                SyncSpiritChannelingPacket.TYPE,
+                SyncSpiritChannelingPacket.STREAM_CODEC,
+                SyncSpiritChannelingPacket::handle
+        );
+      
         registrar.playToClient(
                 SyncUniquenessPacket.TYPE,
                 SyncUniquenessPacket.STREAM_CODEC,
@@ -625,26 +650,10 @@ public class PacketHandler {
         );
 
         registrar.playToServer(
-                SkinChangePacket.TYPE,
-                SkinChangePacket.STREAM_CODEC,
-                SkinChangePacket::handle
-        );
-
-        registrar.playToServer(
-                SkinRestorePacket.TYPE,
-                SkinRestorePacket.STREAM_CODEC,
-                SkinRestorePacket::handle
-        );
-
-        registrar.playToServer(
                 InventoryOpenedPacket.TYPE,
                 InventoryOpenedPacket.STREAM_CODEC,
                 InventoryOpenedPacket::handle);
 
-        registrar.playToServer(
-                OpenMessagePacket.TYPE,
-                OpenMessagePacket.STREAM_CODEC,
-                OpenMessagePacket::handle);
 
         registrar.playToServer(
                 OpenHonorificNamesMenuPacket.TYPE,
@@ -662,11 +671,6 @@ public class PacketHandler {
                 SetHonorificNamePacket::handle);
 
         registrar.playToServer(
-                OpenMessagesMenuPacket.TYPE,
-                OpenMessagesMenuPacket.STREAM_CODEC,
-                OpenMessagesMenuPacket::handle);
-
-        registrar.playToServer(
                 PlayerDivinationSelectedPacket.TYPE,
                 PlayerDivinationSelectedPacket.STREAM_CODEC,
                 PlayerDivinationSelectedPacket::handle);
@@ -675,6 +679,16 @@ public class PacketHandler {
                 StructureDivinationSelectedPacket.TYPE,
                 StructureDivinationSelectedPacket.STREAM_CODEC,
                 StructureDivinationSelectedPacket::handle);
+
+        registrar.playToServer(
+                BiomeDivinationSelectedPacket.TYPE,
+                BiomeDivinationSelectedPacket.STREAM_CODEC,
+                BiomeDivinationSelectedPacket::handle);
+
+        registrar.playToServer(
+                HistoricalVoidBorrowingSelectedPacket.TYPE,
+                HistoricalVoidBorrowingSelectedPacket.STREAM_CODEC,
+                HistoricalVoidBorrowingSelectedPacket::handle);
 
         registrar.playToServer(
                 ShapeShiftingSelectedPacket.TYPE,
@@ -718,11 +732,11 @@ public class PacketHandler {
         float spirituality = BeyonderData.getSpirituality(player);
         boolean griefingEnabled = BeyonderData.isGriefingEnabled(player);
         float digestionProgress = BeyonderData.getDigestionProgress(player);
-        int charStackCount = BeyonderData.getCurrentCharStack(player);
+        int[] charStacks = BeyonderData.getCharStacks(player);
 
         String[] history = BeyonderData.getPathwayHistory(player);
 
-        SyncBeyonderDataPacket packet = new SyncBeyonderDataPacket(pathway, sequence, spirituality, griefingEnabled, digestionProgress, history, charStackCount);
+        SyncBeyonderDataPacket packet = new SyncBeyonderDataPacket(pathway, sequence, spirituality, griefingEnabled, digestionProgress, history, charStacks);
         sendToPlayer(player, packet);
     }
 
@@ -746,11 +760,6 @@ public class PacketHandler {
     public static void sendToTrackingAndSelf(Entity entity, CustomPacketPayload payload) {
         if (!(entity.level() instanceof ServerLevel)) return;
         PacketDistributor.sendToPlayersTrackingEntityAndSelf(entity, payload);
-    }
-
-    public static void syncSkinDataToAllPlayers(String playerName, String skinTexture, String skinSignature) {
-        SkinDataPacket packet = new SkinDataPacket(playerName, skinTexture, skinSignature);
-        sendToAllPlayers(packet);
     }
 
     public static void sendToAllPlayers(CustomPacketPayload payload) {
@@ -778,9 +787,9 @@ public class PacketHandler {
         float spirituality = BeyonderData.getSpirituality(targetPlayer);
         boolean griefingEnabled = BeyonderData.isGriefingEnabled(targetPlayer);
         float digestionProgress = BeyonderData.getDigestionProgress(targetPlayer);
-        int charStackCount = BeyonderData.getCurrentCharStack(targetPlayer);
+        int[] charStacks = BeyonderData.getCharStacks(targetPlayer);
 
-        SyncBeyonderDataPacket packet = new SyncBeyonderDataPacket(pathway, sequence, spirituality, griefingEnabled, digestionProgress, new String[10], charStackCount);
+        SyncBeyonderDataPacket packet = new SyncBeyonderDataPacket(pathway, sequence, spirituality, griefingEnabled, digestionProgress, new String[10], charStacks);
 
         targetPlayer.getServer().getPlayerList().getPlayers().forEach(player -> {
             sendToPlayer(player, packet);

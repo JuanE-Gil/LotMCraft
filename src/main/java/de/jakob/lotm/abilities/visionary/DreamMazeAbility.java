@@ -6,6 +6,7 @@ import de.jakob.lotm.attachments.DreamMazeData;
 import de.jakob.lotm.dimension.DreamMazeEventHandler;
 import de.jakob.lotm.dimension.ModDimensions;
 import de.jakob.lotm.effect.ModEffects;
+import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.ParticleUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -103,7 +104,7 @@ public class DreamMazeAbility extends SelectableAbility {
 
         DreamMazeData data = DreamMazeData.get(serverLevel.getServer());
 
-        List<LivingEntity> nearby = de.jakob.lotm.util.helper.AbilityUtil.getNearbyEntities(
+        List<LivingEntity> nearby = AbilityUtil.getNearbyEntities(
                 entity, serverLevel, entity.position(), SURROUNDING_RADIUS, false, true);
 
         for (LivingEntity target : nearby) {

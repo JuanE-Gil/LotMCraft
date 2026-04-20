@@ -86,7 +86,7 @@ public class VirtualPersonaAbility extends SelectableAbility {
         SanityComponent sanity = entity.getData(ModAttachments.SANITY_COMPONENT);
         int current = sanity.getVirtualPersonaStacks();
 
-        if (current >= 10) {
+        if (current >= getMaxPersonasPerSeq(BeyonderData.getSequence(entity))) {
             AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.virtual_persona.max_stacks").withColor(0xFFffad33));
             return;
         }
@@ -108,6 +108,16 @@ public class VirtualPersonaAbility extends SelectableAbility {
         AbilityUtil.sendActionBar(entity,
                 Component.translatable("ability.lotmcraft.virtual_persona.stacks",
                         sanity.getVirtualPersonaStacks()).withColor(0xFFe3ffff));
+    }
+
+    public static int getMaxPersonasPerSeq(int seq){
+        return switch (seq){
+            case 4, 3 -> 10;
+            case 2, 1 -> 20;
+            case 0 -> 30;
+            default -> 5;
+        };
+
     }
 
 
