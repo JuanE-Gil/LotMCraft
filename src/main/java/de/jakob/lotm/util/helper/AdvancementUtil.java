@@ -65,7 +65,7 @@ public class AdvancementUtil {
 
         if (entity instanceof Player player && player.isCreative()) {
             boolean switchingPathway = isBeyonder(entity) && !getPathway(entity).equals(pathway);
-            setBeyonder(entity, pathway, sequence, false, switchingPathway, true);
+            //setBeyonder(entity, pathway, sequence, false, switchingPathway, true);
             if (switchingPathway && entity instanceof ServerPlayer serverPlayer) {
                 AbilityWheelHelper.removeUnusableAbilities(serverPlayer);
             }

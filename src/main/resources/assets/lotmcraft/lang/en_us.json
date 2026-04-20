@@ -860,6 +860,10 @@
   "ability.lotmcraft.order_proxy.law_combat": "Order Law: Combat",
   "ability.lotmcraft.order_proxy.law_losing_control": "Order Law: Losing Control",
 
+  "lotmcraft.ancient_court_of_judgment_ability": "Ancient Court of Judgment",
+  "lotmcraft.ancient_court_of_judgment_ability.description": "Manifest the Ancient Court of Judgment. Every 10 seconds a random prohibition is declared within the court, binding all who stand inside.",
+
+
   "lotm.ability.cogitation.tick": "Cogitating",
 
   "item.lotmcraft.ability_not_implemented": "Abilities for this Sequence are not yet implemented",

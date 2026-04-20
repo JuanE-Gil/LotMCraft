@@ -100,7 +100,8 @@ public class EffectManager {
         ARTIFACT_EXPLOSION(29),
         BLOOD_INFERNO(30),
         PROHIBITION(31),
-        IMPRISON(32);
+        IMPRISON(32),
+        ANCIENT_COURT(33);
 
         private final int index;
 
