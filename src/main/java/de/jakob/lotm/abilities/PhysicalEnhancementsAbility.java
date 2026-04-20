@@ -132,7 +132,7 @@ public abstract class PhysicalEnhancementsAbility extends PassiveAbilityItem {
                 var data = dataOp.get();
 
                 ControllingDataComponent controllingData = player.getData(ModAttachments.CONTROLLING_DATA);
-                if (Arrays.stream(data.charStack()).anyMatch(i -> i > 0) && controllingData.getTargetUUID() == null) {
+                if (Arrays.stream(data.charStack()).anyMatch(i -> i > 0) && controllingData.getTargetUUID() == null && !controllingData.isControlling()) {
 
                     if (sequenceLevel < 9) {
                         currentEnhancements = currentEnhancements.stream()

@@ -2,6 +2,7 @@ package de.jakob.lotm.util.helper;
 
 import com.zigythebird.playeranimcore.math.Vec3f;
 import de.jakob.lotm.LOTMCraft;
+import de.jakob.lotm.attachments.*;
 import de.jakob.lotm.attachments.ControllingDataComponent;
 import de.jakob.lotm.attachments.FogComponent;
 import de.jakob.lotm.attachments.ModAttachments;
@@ -64,11 +65,15 @@ public class AdvancementUtil {
 
         if (entity instanceof Player player && player.isCreative()) {
             setBeyonder(entity, pathway, sequence);
+            if (pathway.equals("fool") && sequence <= 2){
+                MiracleOfResurrectionComponent data = entity.getData(ModAttachments.MIRACLE_OF_RESURRECTION);
+                data.setResurrectionAttempts(4);
+            }
             return;
         }
 
         ControllingDataComponent data = entity.getData(ModAttachments.CONTROLLING_DATA);
-        if (data.getTargetUUID() != null) {
+        if (data.isControlling()) {
             entity.hurt(ModDamageTypes.source(entity.level(), ModDamageTypes.LOOSING_CONTROL), Float.MAX_VALUE);
             return;
         }
@@ -94,14 +99,10 @@ public class AdvancementUtil {
 
         if (prevSequence < sequence) return;
 
-        if (prevSequence == sequence) {
-            advanceSameSequence(entity, pathway, sequence);
-            return;
-        }
-
         float digestionProgress = entity instanceof Player p ? BeyonderData.getDigestionProgress(p) : 0f;
         int difference = Math.abs(prevSequence - sequence);
         double failureChance = calculateFailureChance(difference, digestionProgress, sanity);
+        if (BeyonderData.hasSwitchedPathway(entity)) failureChance = Math.min(1.0, failureChance + 0.1);
 
         executeAdvancement(entity, pathway, sequence, failureChance, null);
     }
@@ -121,31 +122,6 @@ public class AdvancementUtil {
                 : null;
 
         executeAdvancement(entity, pathway, sequence, failureChance, onSuccess);
-    }
-
-    private static void advanceSameSequence(LivingEntity entity, String pathway, int sequence) {
-        if (!(entity instanceof Player player)) return;
-        if (!playerMap.check(pathway, sequence)) return;
-
-        boolean fullyDigested = getDigestionProgress(player) == 1.0f;
-        int charStackCount = BeyonderData.getCurrentCharStack(player);
-        double failureChance = (fullyDigested && sequence == 1 && charStackCount < 2) ? 0.0 : 1.0;
-
-        int duration = calculateAdvancementDuration(sequence);
-        StartAdvanceSequencePathwayEvent event = postAdvancementEvent(entity, sequence, pathway, failureChance, duration);
-
-        scheduleAdvancementEffects(entity, event.getPathway(), event.getDuration(), event.getSequence());
-
-        if (event.getFailureChance() >= 1.0) {
-            scheduleFailure(entity, event.getDuration());
-        }
-
-        ServerScheduler.scheduleDelayed(event.getDuration(), () -> {
-            if (!activeAdvancements.containsKey(entity.getUUID())) return;
-            activeAdvancements.remove(entity.getUUID());
-            addCharStack(player, sequence);
-            sendThirdPersonPacket(entity);
-        });
     }
 
     // Fires the event, schedules effects, then schedules failure-death or success-setBeyonder.
@@ -173,6 +149,10 @@ public class AdvancementUtil {
             if (onSuccessPreSet != null) onSuccessPreSet.run();
             setBeyonder(entity, finalPathway, finalSequence);
             sendThirdPersonPacket(entity);
+            if (finalPathway.equals("fool") && finalSequence <= 2){
+                MiracleOfResurrectionComponent data = entity.getData(ModAttachments.MIRACLE_OF_RESURRECTION);
+                data.setResurrectionAttempts(4);
+            }
         });
     }
 

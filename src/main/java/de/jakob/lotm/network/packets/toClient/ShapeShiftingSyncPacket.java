@@ -1,12 +1,9 @@
 package de.jakob.lotm.network.packets.toClient;
 
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.minecraft.MinecraftSessionService;
-import com.mojang.authlib.yggdrasil.ProfileResult;
 import de.jakob.lotm.LOTMCraft;
-import de.jakob.lotm.util.shapeShifting.DimensionsRefresher;
+import de.jakob.lotm.attachments.ModAttachments;
+import de.jakob.lotm.attachments.ShapeShiftComponent;
 import de.jakob.lotm.util.shapeShifting.PlayerSkinData;
-import de.jakob.lotm.util.shapeShifting.TransformData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -48,20 +45,17 @@ public record ShapeShiftingSyncPacket(UUID playerId, String shapeString) impleme
             Minecraft mc = Minecraft.getInstance();
             if (mc.level == null) return;
 
-            // update client player's transformation (ITS ABSOLUTELY NEEDED... MAN)
+            // update client player's transformation
             Player player = mc.level.getPlayerByUUID(packet.playerId);
-            if (player instanceof TransformData data) {
-                data.setCurrentShape(packet.shapeString);
-            }
+            ShapeShiftComponent data = player.getData(ModAttachments.SHAPE_SHIFT);
+            data.setShape(packet.shapeString);
+
             // update client player dimension
-            if (player instanceof DimensionsRefresher refresher) {
-                refresher.shape_refreshDimensions();
-            }
+            player.refreshDimensions();
 
             // get skin if transforming into another player
-            String shape = packet.shapeString;
-            if (shape != null && shape.startsWith("player:")) {
-                String[] parts = shape.split(":");
+            if (packet.shapeString.startsWith("player:")) {
+                String[] parts = packet.shapeString.split(":");
                 if (parts.length >= 3) {
                     try {
                         UUID targetUUID = UUID.fromString(parts[2]);

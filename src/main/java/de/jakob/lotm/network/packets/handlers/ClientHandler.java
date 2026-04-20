@@ -12,9 +12,7 @@ import de.jakob.lotm.entity.custom.ability_entities.OriginalBodyEntity;
 import de.jakob.lotm.gui.custom.CoordinateInput.CoordinateInputScreen;
 import de.jakob.lotm.gui.custom.Introspect.IntrospectScreen;
 import de.jakob.lotm.gui.custom.Quest.QuestAcceptanceScreen;
-import de.jakob.lotm.gui.custom.SelectionGui.PlayerSelectionGui;
-import de.jakob.lotm.gui.custom.SelectionGui.ShapeShiftingSelectionGui;
-import de.jakob.lotm.gui.custom.SelectionGui.StructureSelectionGui;
+import de.jakob.lotm.gui.custom.SelectionGui.*;
 import de.jakob.lotm.network.packets.toClient.*;
 import de.jakob.lotm.quest.Quest;
 import de.jakob.lotm.quest.QuestRegistry;
@@ -462,8 +460,16 @@ public class ClientHandler {
         Minecraft.getInstance().setScreen(new StructureSelectionGui(packet.structureIds()));
     }
 
-    public static void handleShapeShiftingScreenPacket(OpenShapeShiftingScreenPacket payload) {
-        Minecraft.getInstance().setScreen(new ShapeShiftingSelectionGui(payload.entityTypes()));
+    public static void handleBiomeDivinationScreenPacket(OpenBiomeDivinationScreenPacket packet) {
+        Minecraft.getInstance().setScreen(new BiomeSelectionGui(packet.biomeIds()));
+    }
+
+    public static void handleShapeShiftingScreenPacket(OpenShapeShiftingScreenPacket packet) {
+        Minecraft.getInstance().setScreen(new ShapeShiftingSelectionGui(packet.entityTypes()));
+    }
+
+    public static void handleHistoricalVoidBorrowingScreenPacket(OpenHistoricalVoidBorrowingScreenPacket packet) {
+        Minecraft.getInstance().setScreen(new HistoricalVoidBorrowingSelectionGui(packet.options()));
     }
 
     public static void handleOriginalBodyOwnerSyncPacket(SyncOriginalBodyOwnerPacket packet) {
@@ -544,6 +550,12 @@ public class ClientHandler {
         de.jakob.lotm.util.ClientSpiritCache.setSpiritTypeOrdinal(packet.spiritType());
     }
 
+    public static void handleSyncIntrospectMenuPacket(SyncIntrospectMenuPacket packet, UUID playerUUID) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.screen instanceof IntrospectScreen screen) {
+            screen.updateMenuData(packet.sequence(), packet.pathway(), ClientBeyonderCache.getDigestionProgress(playerUUID), packet.sanity());
+        }
+    }
     public static void handleApotheosisPacket(SyncApotheosisPacket packet) {
         ClientLevel level = Minecraft.getInstance().level;
         if (level == null) return;

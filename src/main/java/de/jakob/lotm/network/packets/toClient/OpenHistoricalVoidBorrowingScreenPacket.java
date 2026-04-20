@@ -11,15 +11,15 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.List;
 
-public record OpenStructureDivinationScreenPacket(List<String> structureIds) implements CustomPacketPayload {
-    public static final Type<OpenStructureDivinationScreenPacket> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "open_structure_divination_screen"));
+public record OpenHistoricalVoidBorrowingScreenPacket(List<String> options) implements CustomPacketPayload {
+    public static final Type<OpenHistoricalVoidBorrowingScreenPacket> TYPE =
+            new Type<>(ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "open_historical_void_borrowing_screen"));
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, OpenStructureDivinationScreenPacket> STREAM_CODEC =
+    public static final StreamCodec<RegistryFriendlyByteBuf, OpenHistoricalVoidBorrowingScreenPacket> STREAM_CODEC =
             StreamCodec.composite(
                     ByteBufCodecs.collection(java.util.ArrayList::new, ByteBufCodecs.STRING_UTF8),
-                    OpenStructureDivinationScreenPacket::structureIds,
-                    OpenStructureDivinationScreenPacket::new
+                    OpenHistoricalVoidBorrowingScreenPacket::options,
+                    OpenHistoricalVoidBorrowingScreenPacket::new
             );
 
     @Override
@@ -27,10 +27,10 @@ public record OpenStructureDivinationScreenPacket(List<String> structureIds) imp
         return TYPE;
     }
 
-    public static void handle(OpenStructureDivinationScreenPacket packet, IPayloadContext context) {
+    public static void handle(OpenHistoricalVoidBorrowingScreenPacket packet, IPayloadContext context) {
         context.enqueueWork(() -> {
             if (context.flow().getReceptionSide().isClient()) {
-                ClientHandler.handleStructureDivinationScreenPacket(packet);
+                ClientHandler.handleHistoricalVoidBorrowingScreenPacket(packet);
             }
         });
     }

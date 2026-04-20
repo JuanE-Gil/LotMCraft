@@ -22,6 +22,7 @@ public abstract class  TriggerBase {
     public static final String CONTEXT = "context";
     public static final String ACTION_TYPE = "action_type";
     public static final String CONTEXT_TYPE = "context_type";
+    public static final String TIMESTAMP = "timestamp";
 
     protected final ActionBase action;
     protected final TriggerContextBase context;
@@ -47,6 +48,16 @@ public abstract class  TriggerBase {
     public UUID getTarget(){
         return context.getTargetId();
     }
+
+    public int getActionRequiredSeq(){
+        return action.getRequiredSeq();
+    }
+
+    public ActionsEnum getActionType(){
+        return action.getType();
+    }
+
+    public abstract int getRequiredSeq();
 
     public abstract boolean checkTrigger(Level level, LivingEntity entity);
 

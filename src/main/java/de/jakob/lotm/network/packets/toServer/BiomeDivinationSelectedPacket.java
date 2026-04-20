@@ -3,7 +3,6 @@ package de.jakob.lotm.network.packets.toServer;
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.util.BeyonderData;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -17,16 +16,15 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.concurrent.CompletableFuture;
 
-public record StructureDivinationSelectedPacket(String structureId) implements CustomPacketPayload {
+public record BiomeDivinationSelectedPacket(String biomeId) implements CustomPacketPayload {
+    public static final Type<BiomeDivinationSelectedPacket> TYPE =
+            new Type<>(ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "biome_divination_selected"));
 
-    public static final Type<StructureDivinationSelectedPacket> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "structure_divination_selected"));
-
-    public static final StreamCodec<RegistryFriendlyByteBuf, StructureDivinationSelectedPacket> STREAM_CODEC =
+    public static final StreamCodec<RegistryFriendlyByteBuf, BiomeDivinationSelectedPacket> STREAM_CODEC =
             StreamCodec.composite(
                     ByteBufCodecs.STRING_UTF8,
-                    StructureDivinationSelectedPacket::structureId,
-                    StructureDivinationSelectedPacket::new
+                    BiomeDivinationSelectedPacket::biomeId,
+                    BiomeDivinationSelectedPacket::new
             );
 
     @Override
@@ -34,14 +32,14 @@ public record StructureDivinationSelectedPacket(String structureId) implements C
         return TYPE;
     }
 
-    public static void handle(StructureDivinationSelectedPacket packet, IPayloadContext context) {
+    public static void handle(BiomeDivinationSelectedPacket packet, IPayloadContext context) {
         if (!(context.player() instanceof ServerPlayer player)) return;
 
         ServerLevel level = player.serverLevel();
-        ResourceLocation structureKey = ResourceLocation.tryParse(packet.structureId());
+        ResourceLocation biomeKey = ResourceLocation.tryParse(packet.biomeId());
 
-        if (structureKey == null) {
-            player.sendSystemMessage(Component.literal("§cInvalid structure id"));
+        if (biomeKey == null) {
+            player.sendSystemMessage(Component.literal("§cInvalid biome id"));
             return;
         }
 
@@ -58,46 +56,44 @@ public record StructureDivinationSelectedPacket(String structureId) implements C
         };
 
         CompletableFuture.runAsync(() -> {
-            var structureRegistry = level.registryAccess().registryOrThrow(Registries.STRUCTURE);
-            var structureHolder = structureRegistry.getHolder(structureKey).orElse(null);
+            var biomeRegistry = level.registryAccess().registryOrThrow(Registries.BIOME);
+            var biomeHolder = biomeRegistry.getHolder(biomeKey).orElse(null);
 
-            if (structureHolder == null) return;
+            if (biomeHolder == null) return;
 
-            var result = level.getChunkSource()
-                    .getGenerator()
-                    .findNearestMapStructure(
-                            level,
-                            HolderSet.direct(structureHolder),
-                            player.blockPosition(),
-                            maxDistance,
-                            false
-                    );
+            var result = level.findClosestBiome3d(
+                    holder -> holder.equals(biomeHolder),
+                    player.blockPosition(),
+                    maxDistance,
+                    64,
+                    64
+            );
 
             context.enqueueWork(() -> {
                 if (result == null) {
-                    player.sendSystemMessage(Component.literal("§cNo structure nearby in 5000 blocks"));
+                    player.sendSystemMessage(Component.literal("§cNo such biome nearby in the sensed area"));
                     return;
                 }
 
-                BlockPos structurePos = result.getFirst();
+                BlockPos biomePos = result.getFirst();
                 BlockPos playerPos = player.blockPosition();
 
-                int dx = structurePos.getX() - playerPos.getX();
-                int dz = structurePos.getZ() - playerPos.getZ();
+                int dx = biomePos.getX() - playerPos.getX();
+                int dz = biomePos.getZ() - playerPos.getZ();
                 int distance = (int) Math.sqrt(dx * dx + dz * dz);
 
                 String direction = getDirection(dx, dz);
-                String structureName = packet.structureId();
+                String biomeName = packet.biomeId();
 
-                int colonIndex = structureName.indexOf(':');
+                int colonIndex = biomeName.indexOf(':');
                 if (colonIndex != -1) {
-                    structureName = structureName.substring(colonIndex + 1);
+                    biomeName = biomeName.substring(colonIndex + 1);
                 }
-                structureName = structureName.replace('_', ' ');
+                biomeName = biomeName.replace('_', ' ');
 
                 player.sendSystemMessage(Component.literal(String.format(
                         "§5You sense §d%s§5 to the §d%s§5, about §d%d blocks §5away...",
-                        structureName,
+                        biomeName,
                         direction,
                         distance
                 )));
@@ -106,7 +102,7 @@ public record StructureDivinationSelectedPacket(String structureId) implements C
     }
 
     private static String getDirection(int dx, int dz) {
-        if (dx == 0 && dz == 0) return "directly below/above";
+        if (dx == 0 && dz == 0) return "here";
 
         double angle = Math.toDegrees(Math.atan2(dz, dx));
         if (angle < 0) angle += 360;

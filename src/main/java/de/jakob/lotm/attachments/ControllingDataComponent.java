@@ -8,6 +8,8 @@ import net.neoforged.neoforge.attachment.IAttachmentSerializer;
 import java.util.UUID;
 
 public class ControllingDataComponent {
+    private boolean isControlling = false;
+    private boolean isControlled = false;
     private UUID ownerUUID = null;
     private String ownerName = null;
     private UUID bodyUUID = null;
@@ -17,16 +19,29 @@ public class ControllingDataComponent {
 
     public ControllingDataComponent() {}
 
+    public boolean isControlling() {
+        return isControlling;
+    }
+
+    public void setControlling(boolean isControlling) {
+        this.isControlling = isControlling;
+    }
+
+    public boolean isControlled() {
+        return isControlled;
+    }
+
+    public void setIsControlled(boolean isControlled) {
+        this.isControlled = isControlled;
+    }
+
+
     public UUID getOwnerUUID() {
         return ownerUUID;
     }
 
     public void setOwnerUUID(UUID controllerUUID) {
         this.ownerUUID = controllerUUID;
-    }
-
-    public void removeOwnerUUID() {
-        this.ownerUUID = null;
     }
 
 
@@ -38,10 +53,6 @@ public class ControllingDataComponent {
         this.ownerName = controllerUUID;
     }
 
-    public void removeOwnerName() {
-        this.ownerName = null;
-    }
-
 
     public UUID getBodyUUID() {
         return bodyUUID;
@@ -49,10 +60,6 @@ public class ControllingDataComponent {
 
     public void setBodyUUID(UUID controllerUUID) {
         this.bodyUUID = controllerUUID;
-    }
-
-    public void removeBodyUUID() {
-        this.bodyUUID = null;
     }
 
 
@@ -64,10 +71,6 @@ public class ControllingDataComponent {
         this.targetUUID = controllerUUID;
     }
 
-    public void removeTargetUUID() {
-        this.targetUUID = null;
-    }
-
 
     public CompoundTag getTargetEntity() {
         return targetEntity;
@@ -75,10 +78,6 @@ public class ControllingDataComponent {
 
     public void setTargetEntity(CompoundTag controllerUUID) {
         this.targetEntity = controllerUUID;
-    }
-
-    public void removeTargetEntity() {
-        this.targetEntity = null;
     }
 
 
@@ -90,34 +89,34 @@ public class ControllingDataComponent {
         this.bodyEntity = controllerUUID;
     }
 
-    public void removeBodyEntity() {
-        this.bodyEntity = null;
-    }
-
 
     public static final IAttachmentSerializer<CompoundTag, ControllingDataComponent> SERIALIZER =
             new IAttachmentSerializer<>() {
                 @Override
                 public ControllingDataComponent read(IAttachmentHolder holder, CompoundTag tag, HolderLookup.Provider lookup) {
                     ControllingDataComponent component = new ControllingDataComponent();
+                    if (tag.getBoolean("isControlling")) component.isControlling = tag.getBoolean("isControlling");
+                    if (tag.getBoolean("isControlled")) component.isControlled = tag.getBoolean("isControlled");
                     if (tag.hasUUID("ownerUUID")) component.ownerUUID = tag.getUUID("ownerUUID");
-                    if (tag.hasUUID("ownerName")) component.ownerName = tag.getString("ownerName");
+                    if (tag.contains("ownerName")) component.ownerName = tag.getString("ownerName");
                     if (tag.hasUUID("bodyUUID")) component.bodyUUID = tag.getUUID("bodyUUID");
                     if (tag.hasUUID("targetUUID")) component.targetUUID = tag.getUUID("targetUUID");
-                    if (tag.hasUUID("targetEntity")) component.targetEntity = tag.getCompound("targetEntity");
-                    if (tag.hasUUID("bodyEntity")) component.bodyEntity = tag.getCompound("bodyEntity");
+                    if (tag.contains("targetEntity")) component.targetEntity = tag.getCompound("targetEntity");
+                    if (tag.contains("bodyEntity")) component.bodyEntity = tag.getCompound("bodyEntity");
                     return component;
                 }
 
                 @Override
                 public CompoundTag write(ControllingDataComponent component, HolderLookup.Provider lookup) {
                     CompoundTag tag = new CompoundTag();
-                    if (component.ownerUUID != null) tag.putUUID("ownerUUID", component.ownerUUID);
-                    if (component.ownerName != null) tag.putString("ownerName", component.ownerName);
-                    if (component.bodyUUID != null) tag.putUUID("bodyUUID", component.bodyUUID);
-                    if (component.targetUUID != null) tag.putUUID("targetUUID", component.targetUUID);
-                    if (component.targetEntity != null) tag.put("targetEntity", component.targetEntity);
-                    if (component.bodyEntity != null) tag.put("bodyEntity", component.bodyEntity);
+                    tag.putBoolean("isControlling", component.isControlling);
+                    tag.putBoolean("isControlled", component.isControlled);
+                    if (component.getOwnerUUID() != null) tag.putUUID("ownerUUID", component.getOwnerUUID()); else tag.remove("ownerUUID");
+                    if (component.getOwnerName() != null) tag.putString("ownerName", component.getOwnerName()); else tag.remove("ownerName");
+                    if (component.getBodyUUID() != null) tag.putUUID("bodyUUID", component.getBodyUUID()); else tag.remove("bodyUUID");
+                    if (component.getTargetUUID() != null) tag.putUUID("targetUUID", component.getTargetUUID()); else tag.remove("targetUUID");
+                    if (component.getTargetEntity() != null) tag.put("targetEntity", component.getTargetEntity()); else tag.remove("targetEntity");
+                    if (component.getBodyEntity() != null) tag.put("bodyEntity", component.getBodyEntity()); else tag.remove("bodyEntity");
                     return tag;
                 }
             };

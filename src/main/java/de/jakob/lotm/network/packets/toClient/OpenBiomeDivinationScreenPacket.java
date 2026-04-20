@@ -11,15 +11,15 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.List;
 
-public record OpenStructureDivinationScreenPacket(List<String> structureIds) implements CustomPacketPayload {
-    public static final Type<OpenStructureDivinationScreenPacket> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "open_structure_divination_screen"));
+public record OpenBiomeDivinationScreenPacket(List<String> biomeIds) implements CustomPacketPayload {
+    public static final Type<OpenBiomeDivinationScreenPacket> TYPE =
+            new Type<>(ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "open_biome_divination_screen"));
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, OpenStructureDivinationScreenPacket> STREAM_CODEC =
+    public static final StreamCodec<RegistryFriendlyByteBuf, OpenBiomeDivinationScreenPacket> STREAM_CODEC =
             StreamCodec.composite(
                     ByteBufCodecs.collection(java.util.ArrayList::new, ByteBufCodecs.STRING_UTF8),
-                    OpenStructureDivinationScreenPacket::structureIds,
-                    OpenStructureDivinationScreenPacket::new
+                    OpenBiomeDivinationScreenPacket::biomeIds,
+                    OpenBiomeDivinationScreenPacket::new
             );
 
     @Override
@@ -27,10 +27,10 @@ public record OpenStructureDivinationScreenPacket(List<String> structureIds) imp
         return TYPE;
     }
 
-    public static void handle(OpenStructureDivinationScreenPacket packet, IPayloadContext context) {
+    public static void handle(OpenBiomeDivinationScreenPacket packet, IPayloadContext context) {
         context.enqueueWork(() -> {
             if (context.flow().getReceptionSide().isClient()) {
-                ClientHandler.handleStructureDivinationScreenPacket(packet);
+                ClientHandler.handleBiomeDivinationScreenPacket(packet);
             }
         });
     }
