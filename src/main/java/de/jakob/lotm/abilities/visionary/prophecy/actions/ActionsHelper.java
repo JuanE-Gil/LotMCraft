@@ -27,7 +27,7 @@ public class ActionsHelper {
         };
     }
 
-    public static @Nullable ActionBase deduceActionWithContext(String str){
+    public static @Nullable ActionBase deduceActionWithContext(String str, int casterSeq){
         TokenStream stream = new TokenStream(str);
 
         stream.next();
@@ -49,7 +49,10 @@ public class ActionsHelper {
         var context = ActionContextBase.create(contextType, id);
         context.fillFromStream(stream);
 
-        return ActionBase.create(actionType, context);
+        var action = ActionBase.create(actionType, context);
+        if(action.getRequiredSeq() < casterSeq) return null;
+
+        return action;
     }
 
     private static TokenStream moveToThen(TokenStream stream){

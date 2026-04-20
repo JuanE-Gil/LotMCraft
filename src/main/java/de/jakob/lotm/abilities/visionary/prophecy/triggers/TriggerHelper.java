@@ -5,9 +5,13 @@ import de.jakob.lotm.abilities.visionary.prophecy.TokenStream;
 import de.jakob.lotm.abilities.visionary.prophecy.actions.ActionsHelper;
 import de.jakob.lotm.abilities.visionary.prophecy.triggers.context.TriggerContextBase;
 import de.jakob.lotm.abilities.visionary.prophecy.triggers.context.TriggerContextEnum;
+import de.jakob.lotm.artifacts.SealedArtifactItem;
 import de.jakob.lotm.util.BeyonderData;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
+import org.checkerframework.checker.units.qual.N;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -27,12 +31,29 @@ public class TriggerHelper {
         };
     }
 
-    public static @Nullable TriggerBase deduceWithContext(String str, int casterSeq){
+    public static @Nullable Integer getDistanceToTarget(LivingEntity caster, UUID targetId){
+        if(!(caster instanceof ServerPlayer player)) return null;
+
+        var targetEntity = caster.level().getPlayerByUUID(targetId);
+
+        if(targetEntity == null) return null;
+
+        return (int) caster.distanceTo(targetEntity);
+    }
+
+    public static @Nullable UUID getUUIDFromNick(String str){
         TokenStream stream = new TokenStream(str);
 
         stream.next();
 
-        LOTMCraft.LOGGER.info("INSIDE OF TR: nick: {}", stream.peek());
+        String nick = stream.peek();
+        return BeyonderData.playerMap.getKeyByName(nick);
+    }
+
+    public static @Nullable TriggerBase deduceWithContext(String str, int casterSeq, LivingEntity caster){
+        TokenStream stream = new TokenStream(str);
+
+        stream.next();
 
         String nick = stream.peek();
         UUID id = BeyonderData.playerMap.getKeyByName(nick);
@@ -46,23 +67,39 @@ public class TriggerHelper {
         stream.next();
         var type = getType(Objects.requireNonNull(stream.peek()));
 
-        LOTMCraft.LOGGER.info("INSIDE OF TR: type str: {}, type: {}", stream.peek(), type);
         if(type == null) return null;
 
         var contextType = getContextType(type);
         if(contextType == null) return null;
 
-        LOTMCraft.LOGGER.info("INSIDE OF TR: stream: {}", stream.toString());
-
         var context = TriggerContextBase.create(contextType, id);
         context.fillFromStream(stream);
 
-
-        LOTMCraft.LOGGER.info("INSIDE OF TR: deduce action");
-        var action = ActionsHelper.deduceActionWithContext(str);
+        var action = ActionsHelper.deduceActionWithContext(str, casterSeq);
         if(action == null) return null;
 
-        return TriggerBase.create(type, action, context);
+        var trigger = TriggerBase.create(type, action, context);
+
+        if(trigger.getRequiredSeq() < casterSeq) return null;
+
+        int amount = data.prophecies().stream().filter(obj -> obj.casterId().equals(caster.getUUID())).toList().size();
+        int amountPerSeq = getAmountPerSeq(casterSeq);
+
+        if(amount + 1 > amountPerSeq) return null;
+
+        return trigger;
+    }
+
+    public static int getAmountPerSeq(int seq){
+        return switch (seq){
+            case 7 -> 5;
+            case 6,5 -> 10;
+            case 4,3 -> 15;
+            case 2 -> 25;
+            case 1 -> 40;
+            case 0 -> 80;
+            default -> 1;
+        };
     }
 
     public static Item getItemFromString(String input) {

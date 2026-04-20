@@ -62,6 +62,11 @@ public class DropItemAction extends ActionBase {
         return ActionsEnum.DROP_ITEM;
     }
 
+    @Override
+    public int getRequiredSeq() {
+        return 7;
+    }
+
     public static DropItemAction load(CompoundTag tag, HolderLookup.Provider provider) {
         return new DropItemAction(ActionContextBase.load(ActionContextEnum.POSITION, tag, provider));
     }

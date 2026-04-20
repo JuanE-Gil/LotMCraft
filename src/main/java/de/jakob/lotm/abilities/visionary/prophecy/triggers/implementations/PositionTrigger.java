@@ -26,6 +26,11 @@ public class PositionTrigger extends TriggerBase {
     }
 
     @Override
+    public int getRequiredSeq() {
+        return 7;
+    }
+
+    @Override
     public boolean checkTrigger(Level level, LivingEntity entity) {
         if (!(context instanceof TriggerPositionContext)) return true;
 

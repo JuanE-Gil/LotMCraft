@@ -1,20 +1,23 @@
 package de.jakob.lotm.abilities.visionary;
 
 import de.jakob.lotm.abilities.core.SelectableAbility;
+import de.jakob.lotm.abilities.visionary.prophecy.Prophecy;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.effect.ModEffects;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.RingEffectManager;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import org.checkerframework.checker.units.qual.C;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class PlacateAbility extends SelectableAbility {
     public PlacateAbility(String id) {
@@ -38,7 +41,12 @@ public class PlacateAbility extends SelectableAbility {
 
     @Override
     public String[] getAbilityNames() {
-        return new String[]{"ability.lotmcraft.placate.self", "ability.lotmcraft.placate.others"};
+        return new String[]{
+                "ability.lotmcraft.placate.self",
+                "ability.lotmcraft.placate.others",
+                "ability.lotmcraft.placate.check_cue",
+                "ability.lotmcraft.placate.remove_cue"
+        };
     }
 
     @Override
@@ -48,6 +56,113 @@ public class PlacateAbility extends SelectableAbility {
         switch (abilityIndex) {
             case 0 -> placateYourself(level, entity);
             case 1 -> placateOthers(level, entity);
+            case 2 -> checkCue(level, entity);
+            case 3 -> removeCue(level, entity);
+        }
+    }
+
+    private void removeCue(Level level, LivingEntity entity){
+        if(level.isClientSide)
+            return;
+        if (!(entity instanceof ServerPlayer player)) return;
+
+        var target = AbilityUtil.getTargetEntity(entity, 40, 1f, true, true);
+
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+
+        var targetPlayer = AbilityUtil.getTargetEntity(entity, 40,
+                1f, true, true) == null ?
+                entity :  AbilityUtil.getTargetEntity(
+                        entity, 40, 1f, true, true);
+        if(!(targetPlayer instanceof ServerPlayer)) targetPlayer = entity;
+
+        List<Prophecy> all = new LinkedList<>(
+                BeyonderData.playerMap.get(targetPlayer).get().prophecies()
+        );
+
+        List<Prophecy> matching = all.stream()
+                .filter(obj -> {
+                    int seq = BeyonderData.playerMap.get(obj.casterId()).get().sequence();
+                    return entitySeq <= obj.trigger().getRequiredSeq()
+                            && entitySeq <= obj.trigger().getActionRequiredSeq()
+                            && entitySeq <= seq;
+                })
+                .toList();
+
+        if (matching.isEmpty()) {
+            AbilityUtil.sendActionBar(entity,
+                    Component.translatable("ability.lotmcraft.placate.check_cue.not_detected"));
+            return;
+        }
+
+        int amount = getCuesRemovedPerSeq(entitySeq);
+
+        for (int i = 0; i < amount; i++) {
+            if(all.isEmpty()) break;;
+
+            Prophecy toRemove = matching.get(i);
+            all.remove(toRemove);
+        }
+
+        BeyonderData.playerMap.setProphecies(targetPlayer.getUUID(), all);
+
+    }
+
+    private static int getCuesRemovedPerSeq(int seq){
+        return switch (seq){
+            case 7 -> 1;
+            case 6 -> 2;
+            case 5 -> 3;
+            case 4,3 -> 10;
+            case 2 -> 20;
+            case 1 -> 30;
+            case 0 -> 60;
+            default -> 0;
+        };
+    }
+
+    private void checkCue(Level level, LivingEntity entity){
+        if(level.isClientSide)
+            return;
+        if (!(entity instanceof ServerPlayer player)) return;
+
+        var target = AbilityUtil.getTargetEntity(entity, 40, 1f, true, true);
+
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+        List<Prophecy> list;
+        if(target != null && target instanceof ServerPlayer targetPlayer){
+            list = BeyonderData.playerMap.get(targetPlayer).get().prophecies().stream().filter(obj -> {
+                int seq = BeyonderData.playerMap.get(obj.casterId()).get().sequence();
+                if(entitySeq <= obj.trigger().getRequiredSeq() && entitySeq <= obj.trigger().getActionRequiredSeq()){
+                    return entitySeq <= seq;
+                }
+
+                return false;
+            }).toList();
+        }
+        else{
+            list = BeyonderData.playerMap.get(entity).get().prophecies().stream().filter(obj -> {
+                int seq = BeyonderData.playerMap.get(obj.casterId()).get().sequence();
+                if(entitySeq <= obj.trigger().getRequiredSeq() && entitySeq <= obj.trigger().getActionRequiredSeq()){
+                    if(entitySeq <= seq)
+                        return true;
+                }
+
+                return false;
+            }).toList();
+        }
+
+        if(list.isEmpty()){
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.placate.check_cue.not_detected"));
+            return;
+        }
+
+        for (var obj : list){
+            player.sendSystemMessage(Component.literal(
+                    "Trigger: " + obj.trigger().getType()
+                    + ", action: " + obj.trigger().getActionType()
+                    + " set by " + BeyonderData.playerMap.get(obj.casterId()).get().trueName()
+            ));
         }
     }
 
@@ -66,13 +181,11 @@ public class PlacateAbility extends SelectableAbility {
         if(level.isClientSide)
             return;
 
-
         level.playSound(null, entity.position().x, entity.position().y, entity.position().z, SoundEvents.BEACON_ACTIVATE, SoundSource.BLOCKS, 1, 1);
 
         level.playSound(null, entity.position().x, entity.position().y, entity.position().z, SoundEvents.BEACON_ACTIVATE, SoundSource.BLOCKS, 1, 1);
 
         placateEntity(entity, entity);
-
     }
 
     private void placateEntity(LivingEntity caster, LivingEntity entity) {

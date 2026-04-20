@@ -213,6 +213,7 @@ public class AbilityHandler {
         // VISIONARY PATHWAY
         abilities.add(new SpectatingAbility("spectating_ability"));
         abilities.add(new TelepathyAbility("telepathy_ability"));
+        abilities.add(new PsychologicalCueAbility("psychological_cue_ability"));
         abilities.add(new FrenzyAbility("frenzy_ability"));
         abilities.add(new AweAbility("awe_ability"));
         abilities.add(new PlacateAbility("placate_ability"));
