@@ -14,20 +14,14 @@ import de.jakob.lotm.gamerule.ModGameRules;
 import de.jakob.lotm.item.ModItems;
 import de.jakob.lotm.network.PacketHandler;
 import de.jakob.lotm.network.packets.toClient.SyncGriefingGamerulePacket;
-import de.jakob.lotm.network.packets.toClient.SyncSacrificeDurationPacket;
 import de.jakob.lotm.potions.BeyonderCharacteristicItemHandler;
 import de.jakob.lotm.potions.PotionRecipeItemHandler;
 import de.jakob.lotm.util.BeyonderData;
-import de.jakob.lotm.util.beyonderMap.BeyonderMap;
-import de.jakob.lotm.util.beyonderMap.StoredData;
 import de.jakob.lotm.attachments.AllyComponent;
 import de.jakob.lotm.util.helper.AllyUtil;
 import de.jakob.lotm.util.helper.ExplodingFallingBlockHelper;
 import de.jakob.lotm.util.helper.ParticleUtil;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.components.spectator.SpectatorGui;
-import net.minecraft.client.gui.spectator.SpectatorMenuItem;
-import net.minecraft.client.gui.spectator.SpectatorMenuListener;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
@@ -40,15 +34,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.EntityTeleportEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import org.joml.Vector3f;
 
-import java.util.Optional;
 import java.util.Random;
 
 @EventBusSubscriber(modid = LOTMCraft.MOD_ID)
@@ -73,7 +64,7 @@ public class PlayerEvents {
             }
 
             if(BeyonderData.isBeyonder(player))
-                BeyonderData.beyonderMap.addLastPosition(player);
+                BeyonderData.playerMap.addLastPosition(player);
 
             // Revert sacrifice upgrade if active when logging out
             SacrificeRevertComponent revert = player.getData(ModAttachments.SACRIFICE_REVERT_COMPONENT);

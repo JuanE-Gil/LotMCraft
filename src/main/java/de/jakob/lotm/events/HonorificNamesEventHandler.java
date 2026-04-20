@@ -4,7 +4,7 @@ import com.mojang.datafixers.util.Pair;
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.util.BeyonderData;
-import de.jakob.lotm.util.beyonderMap.PendingPrayer;
+import de.jakob.lotm.util.playerMap.PendingPrayer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
@@ -95,7 +95,7 @@ public class HonorificNamesEventHandler {
                 && input.get(playerUUID).size() >= 3
                 && isHonorificNameLastLine(rawMessage)){
 
-            var targetUUID = BeyonderData.beyonderMap.findCandidate(input.get(playerUUID));
+            var targetUUID = BeyonderData.playerMap.findCandidate(input.get(playerUUID));
 
             if(targetUUID == null){
                 input.remove(playerUUID);
@@ -180,14 +180,14 @@ public class HonorificNamesEventHandler {
     }
 
     public static boolean isHonorificNameFirstLine(String str) {
-        return BeyonderData.beyonderMap.containsHonorificNameWithFirstLine(str);
+        return BeyonderData.playerMap.containsHonorificNameWithFirstLine(str);
     }
 
     public static boolean isHonorificNameLastLine(String str) {
-        return BeyonderData.beyonderMap.containsHonorificNameWithLastLine(str);
+        return BeyonderData.playerMap.containsHonorificNameWithLastLine(str);
     }
 
     public static boolean isHonorificNamePart(String str) {
-        return BeyonderData.beyonderMap.containsHonorificNameWithLine(str);
+        return BeyonderData.playerMap.containsHonorificNameWithLine(str);
     }
 }

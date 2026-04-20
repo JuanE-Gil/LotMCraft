@@ -1,4 +1,4 @@
-package de.jakob.lotm.util.beyonderMap;
+package de.jakob.lotm.util.playerMap;
 
 import net.minecraft.network.FriendlyByteBuf;
 

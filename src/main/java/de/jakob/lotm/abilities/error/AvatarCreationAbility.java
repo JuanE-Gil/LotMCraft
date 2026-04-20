@@ -6,7 +6,6 @@ import de.jakob.lotm.entity.ModEntities;
 import de.jakob.lotm.entity.custom.AvatarEntity;
 import de.jakob.lotm.util.BeyonderData;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 
@@ -46,7 +45,7 @@ public class AvatarCreationAbility extends Ability {
             return;
         }
 
-        int[] stacks = BeyonderData.getCharStacks(entity);
+        var stacks = BeyonderData.playerMap.get(entity).get().charStack();
         int sequence = LOTMCraft.NON_BEYONDER_SEQ;
         int entitySeq = BeyonderData.getSequence(entity);
 
@@ -64,6 +63,6 @@ public class AvatarCreationAbility extends Ability {
         level.addFreshEntity(avatar);
 
         if(sequence != LOTMCraft.NON_BEYONDER_SEQ)
-            BeyonderData.setCharStack(entity, stacks[sequence] - 1, sequence, true);
+            BeyonderData.setCharStack(entity, sequence, stacks[sequence] - 1, true);
     }
 }

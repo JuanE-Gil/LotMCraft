@@ -73,8 +73,5 @@ public class NightmareSpectatorAbility extends Ability {
 
         // Decrease Sanity
         target.getData(ModAttachments.SANITY_COMPONENT).decreaseSanityWithSequenceDifference((float) (0.165f * (multiplier(entity)/2)), target, AbilityUtil.getSeqWithArt(entity, this), BeyonderData.getSequence(target));
-
-        // Particles
-        ParticleUtil.spawnParticles(serverLevel, dust, target.position().add(0, target.getEyeHeight() / 2, 0), 200, .35, target.getEyeHeight() / 2, .35, 0);
     }
 }

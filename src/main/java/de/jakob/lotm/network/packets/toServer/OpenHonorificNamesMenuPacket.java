@@ -4,8 +4,8 @@ import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.events.HonorificNamesEventHandler;
 import de.jakob.lotm.gui.custom.HonorificNames.HonorificNamesMenuProvider;
 import de.jakob.lotm.util.BeyonderData;
-import de.jakob.lotm.util.beyonderMap.HonorificName;
-import de.jakob.lotm.util.beyonderMap.PendingPrayer;
+import de.jakob.lotm.util.playerMap.HonorificName;
+import de.jakob.lotm.util.playerMap.PendingPrayer;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -37,7 +37,7 @@ public record OpenHonorificNamesMenuPacket() implements CustomPacketPayload {
             if (context.flow().getReceptionSide().isServer()) {
                 ServerPlayer player = (ServerPlayer) context.player();
 
-                var dataOpt = BeyonderData.beyonderMap.get(player);
+                var dataOpt = BeyonderData.playerMap.get(player);
                 var honorificName = dataOpt.isPresent() ? dataOpt.get().honorificName()
                         : HonorificName.EMPTY;
                 String pathway = BeyonderData.getPathway(player);

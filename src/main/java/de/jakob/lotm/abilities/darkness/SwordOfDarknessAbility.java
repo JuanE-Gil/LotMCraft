@@ -1,12 +1,8 @@
 package de.jakob.lotm.abilities.darkness;
 
 import com.google.common.util.concurrent.AtomicDouble;
-import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.Ability;
-import de.jakob.lotm.abilities.core.ToggleAbility;
 import de.jakob.lotm.abilities.core.interaction.InteractionHandler;
-import de.jakob.lotm.abilities.sun.HolyOathAbility;
-import de.jakob.lotm.attachments.DisabledAbilitiesComponent;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.attachments.SanityComponent;
 import de.jakob.lotm.damage.ModDamageTypes;
@@ -126,6 +122,6 @@ public class SwordOfDarknessAbility extends Ability {
 
     @Override
     protected float getSpiritualityCost() {
-        return 760;
+        return 1000;
     }
 }

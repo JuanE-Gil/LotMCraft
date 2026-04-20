@@ -23,7 +23,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class MisfortuneGiftingAbility extends Ability {
     public MisfortuneGiftingAbility(String id) {
-        super(id, 2);
+        super(id, 5);
         canBeCopied = false;
     }
 
@@ -63,6 +63,6 @@ public class MisfortuneGiftingAbility extends Ability {
         double resistance = AbilityUtil.getSequenceResistanceFactor(entitySeq, targetSeq);
         int amplifier =(int) Math.min(Math.round(multiplier(entity) * 3.125f * (1.0 - resistance)) * 120, 6500);;
         LuckComponent luckComponent = target.getData(ModAttachments.LUCK_COMPONENT.get());
-        luckComponent.addLuckWithMin(-amplifier, (int) (-amplifier * 1.25f));
+        luckComponent.addLuckWithMax(amplifier, -amplifier);
     }
 }

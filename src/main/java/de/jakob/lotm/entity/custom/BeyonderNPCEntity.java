@@ -36,7 +36,6 @@ import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -543,7 +542,7 @@ public class BeyonderNPCEntity extends PathfinderMob {
     // ========================= Loot and Drops =========================
     @Override
     protected void dropCustomDeathLoot(@NotNull ServerLevel level, @NonNull DamageSource damageSource, boolean recentlyHit) {
-        if (!BeyonderData.beyonderMap.check(pathway, sequence)) {
+        if (!BeyonderData.playerMap.check(pathway, sequence)) {
             super.dropCustomDeathLoot(level, damageSource, recentlyHit);
             return;
         }
@@ -577,7 +576,7 @@ public class BeyonderNPCEntity extends PathfinderMob {
 
     @Override
     protected void dropFromLootTable(DamageSource damageSource, boolean attackedRecently) {
-        if (!BeyonderData.beyonderMap.check(pathway, sequence)) {
+        if (!BeyonderData.playerMap.check(pathway, sequence)) {
             return;
         }
         super.dropFromLootTable(damageSource, attackedRecently);

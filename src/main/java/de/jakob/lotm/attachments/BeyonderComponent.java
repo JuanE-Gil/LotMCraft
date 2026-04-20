@@ -13,7 +13,7 @@ public class BeyonderComponent implements INBTSerializable<CompoundTag> {
     private int sequence = 10;
     private String pathway = "none";
     private String[] pathwayHistory = new String[10];
-    private int[] characteristicStack = new int[10];
+    private int[] characteristicStack = new int[11];
     private float spirituality = 0;
     private float digestionProgress = 0;
     private boolean isGriefingEnabled = true;

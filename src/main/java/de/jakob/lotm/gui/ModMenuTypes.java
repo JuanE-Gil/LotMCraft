@@ -7,7 +7,6 @@ import de.jakob.lotm.gui.custom.AbilityWheel.AbilityWheelMenu;
 import de.jakob.lotm.gui.custom.BrewingCauldron.BrewingCauldronMenu;
 import de.jakob.lotm.gui.custom.CopiedAbilityWheel.CopiedAbilityWheelMenu;
 import de.jakob.lotm.gui.custom.Introspect.IntrospectMenu;
-import de.jakob.lotm.gui.custom.Messages.MessagesMenu;
 import de.jakob.lotm.gui.custom.Recipe.RecipeMenu;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.inventory.MenuType;
@@ -32,10 +31,6 @@ public class ModMenuTypes {
     public static final DeferredHolder<MenuType<?>, MenuType<BrewingCauldronMenu>> BREWING_CAULDRON_MENU =
             MENU_TYPES.register("brewing_cauldron_menu", () ->
                 IMenuTypeExtension.create(BrewingCauldronMenu::new));
-
-    public static final DeferredHolder<MenuType<?>, MenuType<MessagesMenu>> MESSAGES_MENU =
-            MENU_TYPES.register("messages_menu", () ->
-                    IMenuTypeExtension.create(MessagesMenu::new));
 
     public static final DeferredHolder<MenuType<?>, MenuType<HonorificNamesMenu>> HONORIFIC_NAMES_MENU =
             MENU_TYPES.register("honorific_names_menu", () ->

@@ -40,7 +40,7 @@ public record InventoryOpenedPacket() implements CustomPacketPayload {
 
                 if (item instanceof PotionIngredient obj) {
                     for (var path : obj.getPathways()) {
-                        if (!BeyonderData.beyonderMap.check(path, obj.getSequence())) {
+                        if (!BeyonderData.playerMap.check(path, obj.getSequence())) {
                             inv.setItem(i, ItemStack.EMPTY);
                             break;
                         }
@@ -48,14 +48,14 @@ public record InventoryOpenedPacket() implements CustomPacketPayload {
                 }
 
                 else if (item instanceof BeyonderPotion potion) {
-                    if (!BeyonderData.beyonderMap.check(
+                    if (!BeyonderData.playerMap.check(
                             potion.getPathway(), potion.getSequence())) {
                         inv.setItem(i, ItemStack.EMPTY);
                     }
                 }
 
                 else if (item instanceof BeyonderCharacteristicItem cha) {
-                    if (!BeyonderData.beyonderMap.check(
+                    if (!BeyonderData.playerMap.check(
                             cha.getPathway(), cha.getSequence())) {
                         inv.setItem(i, ItemStack.EMPTY);
                     }

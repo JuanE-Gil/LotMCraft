@@ -5,7 +5,6 @@ import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.attachments.ControllingDataComponent;
 import de.jakob.lotm.attachments.FogComponent;
 import de.jakob.lotm.attachments.ModAttachments;
-import de.jakob.lotm.attachments.SanityComponent;
 import de.jakob.lotm.damage.ModDamageTypes;
 import de.jakob.lotm.events.custom.StartAdvanceSequencePathwayEvent;
 import de.jakob.lotm.network.PacketHandler;
@@ -13,7 +12,6 @@ import de.jakob.lotm.network.packets.toClient.ChangePlayerPerspectivePacket;
 import de.jakob.lotm.potions.BeyonderPotion;
 import de.jakob.lotm.potions.PotionItemHandler;
 import de.jakob.lotm.util.BeyonderData;
-import de.jakob.lotm.util.beyonderMap.StoredData;
 import de.jakob.lotm.util.scheduling.ServerScheduler;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -61,7 +59,7 @@ public class AdvancementUtil {
     }
 
     public static void advance(LivingEntity entity, String pathway, int sequence) {
-        if(beyonderMap == null) return;
+        if(playerMap == null) return;
 
         if (entity instanceof Player player && player.isCreative()) {
             setBeyonder(entity, pathway, sequence);
@@ -118,7 +116,7 @@ public class AdvancementUtil {
         double failureChance = isSameDomainSwitch ? 0.0 : 1.0;
 
         Runnable onSuccess = isSameDomainSwitch
-                ? () -> beyonderMap.recordPathwaySwitch(entity, prevSequence, prevPathway)
+                ? () -> playerMap.recordPathwaySwitch(entity, prevSequence, prevPathway)
                 : null;
 
         executeAdvancement(entity, pathway, sequence, failureChance, onSuccess);
@@ -126,7 +124,7 @@ public class AdvancementUtil {
 
     private static void advanceSameSequence(LivingEntity entity, String pathway, int sequence) {
         if (!(entity instanceof Player player)) return;
-        if (!beyonderMap.check(pathway, sequence)) return;
+        if (!playerMap.check(pathway, sequence)) return;
 
         boolean fullyDigested = getDigestionProgress(player) == 1.0f;
         int charStackCount = BeyonderData.getCurrentCharStack(player);
