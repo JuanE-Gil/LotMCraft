@@ -106,7 +106,6 @@ public class HudProgressBarsRenderer {
         if (!ClientBeyonderCache.isBeyonder(mc.player.getUUID())) return;
 
         float sanity = mc.player.getData(ModAttachments.SANITY_COMPONENT.get()).getSanity();
-        if(sanity > .9) return;
 
         int barWidth = 14;
         int barHeight = 120;
