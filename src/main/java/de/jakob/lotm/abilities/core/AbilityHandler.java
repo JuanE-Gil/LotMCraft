@@ -97,7 +97,6 @@ public class AbilityHandler {
         abilities.add(new ThunderclapAbility("thunderclap_ability"));
         abilities.add(new LightningBranchAbility("lightning_branch_ability"));
         abilities.add(new CalamityCreationAbility("calamity_creation_ability"));
-        //abilities.add(new MythicalCreatureFormTyrantAbility("mythical_creature_tyrant_ability"));
         abilities.add(new EnergyTransformationAbility("energy_transformation_ability"));
         abilities.add(new HeavenlyPunishmentAbility("heavenly_punishment_ability"));
         abilities.add(new ElectromagneticTornadoAbility("electromagnetic_tornado_ability"));
@@ -193,6 +192,7 @@ public class AbilityHandler {
         abilities.add(new RecordingAbility("recording_ability"));
         abilities.add(new BlinkAbility("blink_ability"));
         abilities.add(new TravelersDoorAbility("travelers_door_ability"));
+        abilities.add(new InvisibleHandAbility("invisible_hand_ability"));
         abilities.add(new SpaceConcealmentAbility("space_concealment_ability"));
         abilities.add(new ExileAbility("exile_ability"));
         abilities.add(new DoorSubstitutionAbility("door_substitution_ability"));
@@ -206,7 +206,6 @@ public class AbilityHandler {
         abilities.add(new AreaMiniaturizationAbility("area_miniaturization_ability"));
         abilities.add(new SpaceDistortionAbility("space_distortion_ability"));
         abilities.add(new PocketDimensionAbility("pocket_dimension_ability"));
-        //abilities.add(new MythicalCreatureFormDoorAbility("mythical_creature_door_ability"));
         abilities.add(new SpaceTimeStormAbility("space_time_storm_ability"));
         abilities.add(new BlackHoleAbility("black_hole_ability"));
         abilities.add(new PlayerTeleportationAbility("player_teleportation_ability"));

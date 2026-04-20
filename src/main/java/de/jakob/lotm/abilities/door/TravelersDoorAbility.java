@@ -5,10 +5,14 @@ import de.jakob.lotm.entity.ModEntities;
 import de.jakob.lotm.entity.custom.ability_entities.door_pathway.TravelersDoorEntity;
 import de.jakob.lotm.network.PacketHandler;
 import de.jakob.lotm.network.packets.toClient.OpenCoordinateScreenTravelersDoorPacket;
+import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.TeleportationUtil;
 import de.jakob.lotm.util.helper.AbilityUtil;
+import de.jakob.lotm.util.helper.ParticleUtil;
 import de.jakob.lotm.util.scheduling.ServerScheduler;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -17,6 +21,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,13 +46,12 @@ public class TravelersDoorAbility extends SelectableAbility {
 
     @Override
     protected float getSpiritualityCost() {
-        return 70;
+        return 0;
     }
 
     @Override
     protected String[] getAbilityNames() {
-        return new String[] {"ability.lotmcraft.travelers_door.coordinates",
-                "ability.lotmcraft.travelers_door.spirit_world"};
+        return new String[] {"ability.lotmcraft.travelers_door.coordinates", "ability.lotmcraft.travelers_door.spirit_world"};
     }
 
     @Override
@@ -77,6 +81,13 @@ public class TravelersDoorAbility extends SelectableAbility {
     }
 
     private void createSpiritWorldDoor(ServerLevel serverLevel, ServerPlayer player, Vec3 targetLoc) {
+        if(BeyonderData.getSpirituality(player) < 70) {
+            spawnFailureParticles(serverLevel, targetLoc);
+            return;
+        }
+
+        BeyonderData.reduceSpirituality(player, 70);
+
         TravelersDoorEntity door = new TravelersDoorEntity(ModEntities.TRAVELERS_DOOR.get(), serverLevel, player.getLookAngle().normalize().scale(-1), targetLoc, 2);
         serverLevel.addFreshEntity(door);
         serverLevel.playSound(null, BlockPos.containing(targetLoc), SoundEvents.ENDER_CHEST_OPEN, SoundSource.BLOCKS, 1, 1);
@@ -108,6 +119,13 @@ public class TravelersDoorAbility extends SelectableAbility {
 
                 travelersDoorUsers.remove(player.getUUID());
 
+                int spiritualityCost = gteCostForDistance(player.position(), validatedPos);
+                if(BeyonderData.getSpirituality(player) < spiritualityCost) {
+                    spawnFailureParticles(serverLevel, targetLoc);
+                    return;
+                }
+                BeyonderData.reduceSpirituality(player, spiritualityCost);
+
                 TravelersDoorEntity door = new TravelersDoorEntity(ModEntities.TRAVELERS_DOOR.get(), serverLevel, player.getLookAngle().normalize().scale(-1), targetLoc, pos.getX(), pos.getY(), pos.getZ());
                 serverLevel.addFreshEntity(door);
                 serverLevel.playSound(null, BlockPos.containing(targetLoc), SoundEvents.ENDER_CHEST_OPEN, SoundSource.BLOCKS, 1, 1);
@@ -126,5 +144,32 @@ public class TravelersDoorAbility extends SelectableAbility {
                 travelersDoorUsers.remove(player.getUUID());
             }
         }, serverLevel);
+    }
+
+    private int gteCostForDistance(Vec3 position, Vec3 validatedPos) {
+        double distance = position.distanceTo(validatedPos);
+        if(distance < 50) {
+            return 30;
+        }
+        else if(distance < 150) {
+            return 50;
+        }
+        else if(distance < 300) {
+            return 70;
+        }
+        else if(distance < 500) {
+            return 90;
+        }
+        else {
+            return 10 * (int) (distance / 500) + 90;
+        }
+    }
+
+    private void spawnFailureParticles(ServerLevel level, Vec3 pos) {
+        ParticleUtil.spawnParticles(level, ParticleTypes.END_ROD, pos, 35, .4, .1);
+        ParticleUtil.spawnParticles(level, new DustParticleOptions(
+                new Vector3f(99 / 255f, 255 / 255f, 250 / 255f),
+                1
+        ), pos, 35, .4, .1);
     }
 }

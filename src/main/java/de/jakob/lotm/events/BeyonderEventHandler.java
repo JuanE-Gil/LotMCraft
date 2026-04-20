@@ -56,9 +56,6 @@ public class BeyonderEventHandler {
             // Convert legacy nbt tags to component data to preserve data through code changes, then remove legacy tags
             convertLegacyNBT(serverPlayer);
 
-            // Sync beyonder data when player joins
-            PacketHandler.syncBeyonderDataToPlayer(serverPlayer);
-
             beyonderMap.onPlayerUUIDChange(serverPlayer);
 
             if (!beyonderMap.contains(serverPlayer)) {
@@ -81,6 +78,8 @@ public class BeyonderEventHandler {
             serverPlayer.addEffect(new MobEffectInstance(ModEffects.CONCEALMENT, 20 * 5, 99));
             BeyonderData.recalculateCharStackModifiers(serverPlayer);
             serverPlayer.getData(ModAttachments.LUCK_COMPONENT.get()).setLuck(0);
+
+            PacketHandler.syncBeyonderDataToPlayer(serverPlayer);
         }
     }
 

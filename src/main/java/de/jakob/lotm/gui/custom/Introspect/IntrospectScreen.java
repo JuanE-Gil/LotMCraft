@@ -80,7 +80,7 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
     private static final int ABILITY_WHEEL_HEIGHT = 80;
     private static final int ABILITY_BAR_HEIGHT = 60;
     private static final int ABILITY_ICON_SIZE = 16;
-    private static final int ABILITY_WHEEL_MAX = 14;
+    private static final int ABILITY_WHEEL_MAX = 24;
     private static final int ABILITY_BAR_MAX = 6;
     private static final int SHARED_POOL_HEIGHT = 50;   // top: all shared abilities + add/remove
     private static final int SHARED_WHEEL_HEIGHT = 60;  // bottom: personal shared wheel slots
