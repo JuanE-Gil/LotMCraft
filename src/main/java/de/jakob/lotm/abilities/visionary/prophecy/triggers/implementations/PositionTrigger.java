@@ -34,7 +34,6 @@ public class PositionTrigger extends TriggerBase {
     public boolean checkTrigger(Level level, LivingEntity entity) {
         if (!(context instanceof TriggerPositionContext)) return true;
 
-
         Vec3 pos = entity.position();
         Vec3 target = ((TriggerPositionContext) context).pos;
 
