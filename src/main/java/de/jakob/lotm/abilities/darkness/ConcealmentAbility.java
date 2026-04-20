@@ -375,19 +375,20 @@ public class ConcealmentAbility extends SelectableAbility {
             return;
         }
         thoughtconcealedEntities.add(targetEntity.getUUID());
-
         float multiplier_target = multiplier(targetEntity);
-        int duration = 20 * 10*(int) Math.max(multiplier/2,1)/  (int) Math.max(multiplier_target/4,1);
+        int duration = 0;
 
         int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
         int targetEntitySeq = BeyonderData.getSequence(targetEntity);
-
-        if(AbilityUtil.isTargetSignificantlyStronger(entitySeq, targetEntitySeq)) {
-            duration = 80*(int) Math.max(multiplier/2,1);
-        }
-        if(AbilityUtil.isTargetSignificantlyWeaker(entitySeq, targetEntitySeq)) {
+        if(entitySeq < targetEntitySeq) {
             duration = 20 * 25*(int) Math.max(multiplier/2,1);
-        }
+        }else if (entitySeq > targetEntitySeq){
+            if (!BeyonderData.getPathway(targetEntity).equals("darkness")){
+                duration = 80*(int) Math.max(multiplier/2,1);
+            };
+        }else{
+            duration = 20 * 10*(int) Math.max(multiplier/2,1)/  (int) Math.max(multiplier_target/4,1);
+        };
 
         if(!BeyonderData.isBeyonder(targetEntity) || targetEntitySeq > entitySeq-1 ) {
             if(targetEntity instanceof Mob) {

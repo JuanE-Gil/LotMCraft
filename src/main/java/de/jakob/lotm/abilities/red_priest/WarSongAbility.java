@@ -20,7 +20,7 @@ import java.util.Map;
 
 public class WarSongAbility extends Ability {
     public WarSongAbility(String id) {
-        super(id, 40, "morale_boost");
+        super(id, 70, "morale_boost");
         interactionRadius = 20;
         interactionCacheTicks = 20 * 30;
         canBeCopied = false;
@@ -55,8 +55,8 @@ public class WarSongAbility extends Ability {
         int speedLevel = speed == null ? 1 : speed.getAmplifier() + 2;
         BeyonderData.addModifier(entity, "war_song", 1.5f);
 
-        entity.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 20 * 30, strengthLevel, false, false, false));
-        entity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 20 * 30, speedLevel, false, false, false));
+        entity.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 20 * 30*(int) Math.max(multiplier(entity)/4,1), strengthLevel, false, false, false));
+        entity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 20 * 30*(int) Math.max(multiplier(entity)/4,1), speedLevel, false, false, false));
 
         ServerScheduler.scheduleForDuration(0,  2, 20 * 30, () -> {
             if(entity.level().isClientSide)
@@ -64,6 +64,6 @@ public class WarSongAbility extends Ability {
             loc.setPosition(entity.position());
             loc.setLevel(entity.level());
         }, (ServerLevel) level);
-        ServerScheduler.scheduleDelayed(20 * 30, () -> BeyonderData.removeModifier(entity, "war_song"));
+        ServerScheduler.scheduleDelayed(20 * 30*(int) Math.max(multiplier(entity)/4,1), () -> BeyonderData.removeModifier(entity, "war_song"));
     }
 }

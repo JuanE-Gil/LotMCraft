@@ -245,17 +245,23 @@ public class MidnightPoemAbility extends SelectableAbility {
         {
             float multiplier_target = multiplier(e);
             float multiplier = multiplier(entity);
-            int duration =  20*10*(int)Math.max(multiplier(entity)/2,1)/ (int) Math.max(multiplier_target/2,1);
+            int duration =  0;
 
             int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
             int targetEntitySeq = BeyonderData.getSequence(e);
 
-            if(AbilityUtil.isTargetSignificantlyStronger(entitySeq, targetEntitySeq)) {
-                duration = 35*(int) Math.max(multiplier/2,1);
-            }
-            if(AbilityUtil.isTargetSignificantlyWeaker(entitySeq, targetEntitySeq)) {
+
+            if(entitySeq < targetEntitySeq) {
                 duration = 20 * 35*(int) Math.max(multiplier/2,1)  / (int) Math.max(multiplier_target/2,1);
-            }
+            }else if (entitySeq > targetEntitySeq){
+                if (!BeyonderData.getPathway(e).equals("darkness")){
+                    duration = 35*(int) Math.max(multiplier/2,1);
+                };
+            }else{
+                duration = 20*10*(int)Math.max(multiplier(entity)/2,1)/ (int) Math.max(multiplier_target/2,1);
+            };
+
+
 
             double reduction = -2*(int)Math.max(multiplier(entity)/4,1);
             BeyonderData.addModifierWithTimeLimit(e, "poem_multiplier_reduction", reduction, duration);
@@ -292,17 +298,22 @@ public class MidnightPoemAbility extends SelectableAbility {
             boolean purified = InteractionHandler.isInteractionPossible(currentLoc, "purification", seq);
             float multiplier = multiplier(entity);
             float multiplier_target = multiplier(e);
-            int duration =  20*6*(int)Math.max(multiplier(entity)/2,1) / (int) Math.max(multiplier_target/2,1);
+            int duration =  0;
 
             int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
             int targetEntitySeq = BeyonderData.getSequence(e);
-
-            if(AbilityUtil.isTargetSignificantlyStronger(entitySeq, targetEntitySeq)) {
-                duration = 35*(int) Math.max(multiplier/2,1);
-            }
-            if(AbilityUtil.isTargetSignificantlyWeaker(entitySeq, targetEntitySeq)) {
+            if(entitySeq < targetEntitySeq) {
                 duration = 20 * 20*(int) Math.max(multiplier/2,1) / (int) Math.max(multiplier_target/2,1);
-            }
+            }else if (entitySeq > targetEntitySeq){
+                if (!BeyonderData.getPathway(e).equals("darkness")){
+                    duration = 35*(int) Math.max(multiplier/2,1);
+                };
+            }else{
+                duration = 20*6*(int)Math.max(multiplier(entity)/2,1) / (int) Math.max(multiplier_target/2,1);
+            };
+
+
+
             if(!BeyonderData.isBeyonder(e) || targetEntitySeq > entitySeq-1 ) {
                 if(e instanceof Mob) {
                     ((Mob) e).setNoAi(true);

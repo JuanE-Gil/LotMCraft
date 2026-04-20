@@ -79,7 +79,7 @@ public class BlackFlameAbility extends SelectableAbility {
         ParticleUtil.spawnParticles((ServerLevel) level, ModParticles.BLACK_FLAME.get(), targetPos.subtract(0, .75, 0), 700, .3, 1.3, .3, .01);
         ParticleUtil.spawnParticles((ServerLevel) level, dust, targetPos.subtract(0, .75, 0), 190, .3, 1.3, .3, .02);
 
-        AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 2.5, DamageLookup.lookupDamage(7, .7) *(int) Math.max(multiplier(entity)/3,1), targetPos, true, false, true, 0, 20 * 2, ModDamageTypes.source(level, ModDamageTypes.DEMONESS_GENERIC, entity));
+        AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 2.5, DamageLookup.lookupDamage(7, .7) *(int) Math.max(multiplier(entity)/4,1), targetPos, true, false, true, 0, 20 * 2, ModDamageTypes.source(level, ModDamageTypes.DEMONESS_GENERIC, entity));
 
         BlockState block = level.getBlockState(BlockPos.containing(targetPos));
         if(block.isAir()) {
@@ -105,7 +105,7 @@ public class BlackFlameAbility extends SelectableAbility {
             Vec3 currentPos = startPos.add(0, ySubtraction, 0);
             double radius = i.get() < .71 ? i.get() : i.get() * 2;
             ParticleUtil.spawnCircleParticles((ServerLevel) level, ModParticles.BLACK_FLAME.get(), currentPos, radius, (int) (radius * 27));
-            AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, radius - .3, radius, DamageLookup.lookupDamage(7, .8) *(int) Math.max(multiplier(entity)/3,1), startPos.subtract(0, 1, 0), true, false, true, 0, 20 * 5, ModDamageTypes.source(level, ModDamageTypes.DEMONESS_GENERIC, entity));
+            AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, radius - .3, radius, DamageLookup.lookupDamage(7, .8) *(int) Math.max(multiplier(entity)/4,1), startPos.subtract(0, 1, 0), true, false, true, 0, 20 * 5, ModDamageTypes.source(level, ModDamageTypes.DEMONESS_GENERIC, entity));
             i.set(i.get() + .1);
         }, null, (ServerLevel) level, () -> AbilityUtil.getTimeInArea(entity, new Location(entity.position(), level)));
 
@@ -135,7 +135,7 @@ public class BlackFlameAbility extends SelectableAbility {
                     (ServerLevel) level,
                     entity,
                     2.5f,
-                    DamageLookup.lookupDamage(7, 1.1)*(int) Math.max(multiplier(entity)/3,1),
+                    DamageLookup.lookupDamage(7, 1.1)*(int) Math.max(multiplier(entity)/4,1),
                     pos,
                     true,
                     false,

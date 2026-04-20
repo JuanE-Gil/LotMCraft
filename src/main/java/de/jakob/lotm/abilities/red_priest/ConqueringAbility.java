@@ -20,7 +20,7 @@ import java.util.Map;
 
 public class ConqueringAbility extends Ability {
     public ConqueringAbility(String id) {
-        super(id, 1.5f, "morale_boost");
+        super(id, 40, "morale_boost");
         canBeCopied = false;
         canBeReplicated = false;
     }
@@ -32,7 +32,7 @@ public class ConqueringAbility extends Ability {
 
     @Override
     protected float getSpiritualityCost() {
-        return 1900;
+        return 8000;
     }
 
     @Override
@@ -50,12 +50,16 @@ public class ConqueringAbility extends Ability {
 
         int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
 
-        double radius = entitySeq == 0 ? 10 : 3.75;
+        double radius = 4*(int) Math.max(multiplier(entity)/4,1);
 
         AbilityUtil.getNearbyEntities(entity, (ServerLevel) level, entity.position(), radius, false).forEach(e -> {
-            if(AbilityUtil.getSequenceDifference(entitySeq, BeyonderData.getSequence(e)) > entitySeq) {
-                e.addEffect(new MobEffectInstance(ModEffects.CONQUERED, 20 * 60 * 5, 7));
-            }
+            if(entitySeq < BeyonderData.getSequence(e)) {
+                e.addEffect(new MobEffectInstance(ModEffects.CONQUERED, 20 * 30 *(int) Math.max(multiplier(entity)/4,1), 18));
+            }else if (entitySeq > BeyonderData.getSequence(e)){
+                e.addEffect(new MobEffectInstance(ModEffects.CONQUERED, 20, 1));
+            }else{
+                e.addEffect(new MobEffectInstance(ModEffects.CONQUERED, 35*(int) Math.max(multiplier(entity)/4,1)/(int) Math.max(multiplier(e)/4,1), 2));
+            };
         });
     }
 }

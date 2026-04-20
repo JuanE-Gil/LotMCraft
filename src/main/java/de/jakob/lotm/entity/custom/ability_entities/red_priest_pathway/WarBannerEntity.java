@@ -1,5 +1,7 @@
 package de.jakob.lotm.entity.custom.ability_entities.red_priest_pathway;
 
+import de.jakob.lotm.attachments.ModAttachments;
+import de.jakob.lotm.attachments.SanityComponent;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.data.Location;
 import de.jakob.lotm.util.helper.AbilityUtil;
@@ -112,7 +114,8 @@ public class WarBannerEntity extends Entity {
                         BeyonderData.removeModifier(e, "war_song");
                     }
                 });
-
+                SanityComponent sanityComponent = e.getData(ModAttachments.SANITY_COMPONENT);
+                sanityComponent.increaseSanityAndSync(0.0006f, e);
                 e.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 20, 7, false, false, false));
                 e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 20, 7, false, false, false));
                 return;
@@ -125,9 +128,10 @@ public class WarBannerEntity extends Entity {
                     BeyonderData.removeModifier(e, "war_song");
                 }
             });
-
-            e.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 20, 4, false, false, false));
-            e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, 4, false, false, false));
+            if(!isAlly) {
+                e.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 20, 4, false, false, false));
+                e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, 4, false, false, false));
+            };
         });
     }
 

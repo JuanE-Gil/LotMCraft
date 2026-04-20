@@ -74,7 +74,7 @@ public class WeatherManipulationAbility extends SelectableAbility {
         boolean griefing = BeyonderData.isGriefingEnabled(entity);
 
         List<BlockPos> snowSphereBlocks = griefing
-                ? AbilityUtil.getBlocksInSphereRadius(serverLevel, startPos, 60, true, false, false)
+                ? AbilityUtil.getBlocksInSphereRadius(serverLevel, startPos, 45*(int) Math.max(multiplier(entity)/4,1), true, false, false)
                 : Collections.emptyList();
 
         List<BlockPos> snowLayerPositions = snowSphereBlocks.stream()
@@ -89,15 +89,15 @@ public class WeatherManipulationAbility extends SelectableAbility {
 
         double multiplier = multiplier(entity);
 
-        ServerScheduler.scheduleForDuration(0, 4, 20 * 30, () -> {
+        ServerScheduler.scheduleForDuration(0, 4, 20 * 15*(int) Math.max(multiplier(entity)/4,1), () -> {
             // Damage and Effects
-            AbilityUtil.damageNearbyEntities(serverLevel, entity, 60, DamageLookup.lookupDps(2, .5, 4, 30) * (float) multiplier, startPos, true, false);
-            AbilityUtil.addPotionEffectToNearbyEntities(serverLevel, entity, 60, startPos,
-                    new MobEffectInstance(MobEffects.WEAKNESS, 20 * 5, 1, false, false, false),
-                    new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20 * 5, 7, false, false, false));
+            AbilityUtil.damageNearbyEntities(serverLevel, entity, 45*(int) Math.max(multiplier(entity)/4,1), DamageLookup.lookupDps(2, .5, 4, 30) *(int) Math.max(multiplier(entity)/4,1), startPos, true, false);
+            AbilityUtil.addPotionEffectToNearbyEntities(serverLevel, entity, 45*(int) Math.max(multiplier(entity)/4,1), startPos,
+                    new MobEffectInstance(MobEffects.WEAKNESS, 20 * 5*(int) Math.max(multiplier(entity)/4,1), 1, false, false, false),
+                    new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20 * 5*(int) Math.max(multiplier(entity)/4,1), 7, false, false, false));
 
             // Particles and shader
-            for(Player player : AbilityUtil.getNearbyEntities(null, serverLevel, startPos, 60, true)
+            for(Player player : AbilityUtil.getNearbyEntities(null, serverLevel, startPos, 45*(int) Math.max(multiplier(entity)/4,1), true)
                     .stream()
                     .filter(e -> e instanceof Player)
                     .map(e -> (Player)e)
@@ -150,7 +150,7 @@ public class WeatherManipulationAbility extends SelectableAbility {
         NeoForge.EVENT_BUS.post(new AbilityUsedEvent(serverLevel, startPos, entity, this, new String[]{"drought"}, 90, 20 * 30));
 
         List<BlockPos> sphereBlocks = griefing
-                ? AbilityUtil.getBlocksInSphereRadius(serverLevel, startPos, 65, true, false, false)
+                ? AbilityUtil.getBlocksInSphereRadius(serverLevel, startPos, 45*(int) Math.max(multiplier(entity)/4,1), true, false, false)
                 : Collections.emptyList();
 
         List<BlockPos> firePositions = sphereBlocks.stream()
@@ -165,15 +165,15 @@ public class WeatherManipulationAbility extends SelectableAbility {
 
         double multiplier = multiplier(entity);
 
-        ServerScheduler.scheduleForDuration(0, 4, 20 * 30, () -> {
+        ServerScheduler.scheduleForDuration(0, 4, 20 * 30*(int) Math.max(multiplier(entity)/4,1), () -> {
             // Damage and Effects
-            AbilityUtil.damageNearbyEntities(serverLevel, entity, 90, DamageLookup.lookupDps(2, .5, 4, 30) * (float) multiplier, startPos, true, false, 20 * 10);
-            AbilityUtil.addPotionEffectToNearbyEntities(serverLevel, entity, 90, startPos,
-                    new MobEffectInstance(MobEffects.WEAKNESS, 20 * 5, 1, false, false, false),
-                    new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20 * 5, 4, false, false, false));
+            AbilityUtil.damageNearbyEntities(serverLevel, entity, 45*(int) Math.max(multiplier(entity)/4,1), DamageLookup.lookupDps(2, .5, 4, 30) *(int) Math.max(multiplier(entity)/4,1), startPos, true, false, 20 * 10);
+            AbilityUtil.addPotionEffectToNearbyEntities(serverLevel, entity, 45*(int) Math.max(multiplier(entity)/4,1), startPos,
+                    new MobEffectInstance(MobEffects.WEAKNESS, 20 * 5*(int) Math.max(multiplier(entity)/4,1), 1, false, false, false),
+                    new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20 * 5*(int) Math.max(multiplier(entity)/4,1), 4, false, false, false));
 
             // Particles and shader
-            for(Player player : AbilityUtil.getNearbyEntities(null, serverLevel, startPos, 90, true)
+            for(Player player : AbilityUtil.getNearbyEntities(null, serverLevel, startPos, 45*(int) Math.max(multiplier(entity)/4,1), true)
                     .stream()
                     .filter(e -> e instanceof Player)
                     .map(e -> (Player)e)
@@ -228,7 +228,7 @@ public class WeatherManipulationAbility extends SelectableAbility {
 
         Vec3 pos = AbilityUtil.getTargetLocation(entity, 12, 2);
 
-        TornadoEntity tornado = target == null ? new TornadoEntity(ModEntities.TORNADO.get(), serverLevel, .15f, (float) DamageLookup.lookupDamage(2, .35) * (float) multiplier(entity), entity) : new TornadoEntity(ModEntities.TORNADO.get(), serverLevel, .15f, 32.5f * (float) multiplier(entity), entity, target);
+        TornadoEntity tornado = target == null ? new TornadoEntity(ModEntities.TORNADO.get(), serverLevel, .15f, (float) DamageLookup.lookupDamage(2, .35) *(int) Math.max(multiplier(entity)/4,1), entity) : new TornadoEntity(ModEntities.TORNADO.get(), serverLevel, .15f, 32.5f *(int) Math.max(multiplier(entity)/4,1), entity, target);
         tornado.setPos(pos);
         serverLevel.addFreshEntity(tornado);
 

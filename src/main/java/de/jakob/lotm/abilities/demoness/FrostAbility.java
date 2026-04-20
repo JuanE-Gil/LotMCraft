@@ -89,7 +89,7 @@ public class FrostAbility extends SelectableAbility {
 
             ParticleUtil.spawnParticles((ServerLevel) level, ParticleTypes.SNOWFLAKE, startPos, 70, radius.get(), 0.3, radius.get(), 0);
 
-            AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, radius.get() - .4, radius.get() + .4, DamageLookup.lookupDamage(7, .8) *(int) Math.max(multiplier(entity)/3,1), startPos, true, false, true, 0, 0, ModDamageTypes.source(level, ModDamageTypes.DEMONESS_GENERIC, entity));
+            AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, radius.get() - .4, radius.get() + .4, DamageLookup.lookupDamage(7, .8) *(int) Math.max(multiplier(entity)/4,1), startPos, true, false, true, 0, 0, ModDamageTypes.source(level, ModDamageTypes.DEMONESS_GENERIC, entity));
             AbilityUtil.addPotionEffectToNearbyEntities((ServerLevel) level, entity, radius.get(), startPos, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20 * 5, 10, false, false, false));
 
             if(BeyonderData.isGriefingEnabled(entity)) {
@@ -134,9 +134,9 @@ public class FrostAbility extends SelectableAbility {
 
         level.playSound(null, startPos.x, startPos.y, startPos.z, Blocks.ICE.getSoundType(Blocks.ICE.defaultBlockState(), level, BlockPos.containing(startPos.x, startPos.y, startPos.z), null).getBreakSound(), entity.getSoundSource(), 1.0f, 1.0f);
 
-        FrostSpearProjectileEntity spear = new FrostSpearProjectileEntity(level, entity, DamageLookup.lookupDamage(7, .8) *(int) Math.max(multiplier(entity)/3,1), BeyonderData.isGriefingEnabled(entity));
+        FrostSpearProjectileEntity spear = new FrostSpearProjectileEntity(level, entity, DamageLookup.lookupDamage(7, .8) *(int) Math.max(multiplier(entity)/4,1), BeyonderData.isGriefingEnabled(entity));
         spear.setPos(startPos.x, startPos.y, startPos.z); // Set initial position
-        spear.shoot(direction.x, direction.y, direction.z, 1.6f, 0);
+        spear.shoot(direction.x, direction.y, direction.z, 2f*(int) Math.max(multiplier(entity)/4,1), 0);
         level.addFreshEntity(spear);
     }
 
@@ -160,7 +160,7 @@ public class FrostAbility extends SelectableAbility {
 
             Vec3 pos = currentPos.get();
 
-            if(AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 2.5f, DamageLookup.lookupDamage(7, .75) *(int) Math.max(multiplier(entity)/3,1), pos, true, false, true, 0, ModDamageTypes.source(level, ModDamageTypes.DEMONESS_GENERIC, entity))) {
+            if(AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 2.5f, DamageLookup.lookupDamage(7, .75) *(int) Math.max(multiplier(entity)/4,1), pos, true, false, true, 0, ModDamageTypes.source(level, ModDamageTypes.DEMONESS_GENERIC, entity))) {
                 hasHit.set(true);
                 AbilityUtil.addPotionEffectToNearbyEntities((ServerLevel) level, entity, 2.5f, pos, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20 * 3, 5, false, false, false));
                 return;

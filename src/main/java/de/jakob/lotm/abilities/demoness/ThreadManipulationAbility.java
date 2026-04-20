@@ -134,7 +134,7 @@ public class ThreadManipulationAbility extends SelectableAbility {
 
             Vec3 pos = currentPos.get();
 
-            if(AbilityUtil.damageNearbyEntities(level, entity, 2.5f, DamageLookup.lookupDamage(6, .5) *(int) Math.max(multiplier(entity)/2,1), pos, true, false, true,0)) {
+            if(AbilityUtil.damageNearbyEntities(level, entity, 2.5f, DamageLookup.lookupDamage(6, .5) *(int) Math.max(multiplier(entity)/4,1), pos, true, false, true,0)) {
                 hasHit.set(true);
                 AbilityUtil.addPotionEffectToNearbyEntities(level, entity, 2.5, pos, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20 * 8, 4, false, false, false));
                 return;

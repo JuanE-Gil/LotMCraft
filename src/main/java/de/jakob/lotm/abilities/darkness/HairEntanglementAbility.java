@@ -79,22 +79,22 @@ public class HairEntanglementAbility extends Ability {
             }
             return;
         }
-        int targetEntitySeq = BeyonderData.getSequence(targetEntity);
-        float multiplier_target = multiplier(targetEntity);
         pacifiedEntities.add(targetEntity.getUUID());
-        int duration = 20 * 30*(int) Math.max(multiplier/4,1)/  (int) Math.max(multiplier_target/4,1);
+        int duration = 0;
 
         int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
         int targetSeq = BeyonderData.getSequence(targetEntity);
         Location eLoc = new Location(targetEntity.position(), (ServerLevel) level);
-        if(AbilityUtil.isTargetSignificantlyStronger(entitySeq, targetSeq)) {
-            duration = 35*(int) Math.max(multiplier/4,1);
-        }
-        if(AbilityUtil.isTargetSignificantlyWeaker(entitySeq, targetSeq)) {
+        if(entitySeq < targetSeq) {
             duration = 20 * 60*(int) Math.max(multiplier/4,1);
-        }
-
-        if(targetEntitySeq > entitySeq-1 ) {
+        }else if (entitySeq > targetSeq){
+            if (!BeyonderData.getPathway(targetEntity).equals("darkness")){
+                duration = 35*(int) Math.max(multiplier/4,1);
+            };
+        }else{
+            duration = 20 * 30*(int) Math.max(multiplier/4,1)/  (int) Math.max(multiplier(targetEntity)/4,1);
+        };
+        if(targetSeq > entitySeq-1 ) {
             if(targetEntity instanceof Mob) {
                 ((Mob) targetEntity).setNoAi(true);
                 ServerScheduler.scheduleDelayed(duration, () -> ((Mob) targetEntity).setNoAi(false));
@@ -105,7 +105,7 @@ public class HairEntanglementAbility extends Ability {
                 double reduction = -4*(int)Math.max(multiplier(entity)/4,1);
                 BeyonderData.addModifierWithTimeLimit(targetEntity, "hair_entanglement_multiplier_reduction", reduction, durationmorale);
             }
-            LOTMCraft.LOGGER.info("multiplier{}", (multiplier(entity)));
+            //LOTMCraft.LOGGER.info("multiplier {}", (multiplier(entity)));
         }
 
         Location loc = new Location(targetEntity.position(), targetEntity.level());
