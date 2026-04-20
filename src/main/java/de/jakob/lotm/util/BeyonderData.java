@@ -556,6 +556,48 @@ public class BeyonderData {
         return entity.getData(ModAttachments.BEYONDER_COMPONENT).getCharacteristicStack();
     }
 
+    public static void setSpirituality(LivingEntity entity, float spirituality) {
+        if(!(entity instanceof Player player))
+            return;
+
+        player.getData(ModAttachments.BEYONDER_COMPONENT).setSpirituality(spirituality);
+
+        // Sync to client if this is server-side
+        if (!player.level().isClientSide() && player instanceof ServerPlayer serverPlayer) {
+            PacketHandler.syncBeyonderDataToPlayer(serverPlayer);
+        }
+    }
+
+    public static void setPathway(LivingEntity entity, String pathway) {
+        if(entity instanceof Player player) {
+            player.getData(ModAttachments.BEYONDER_COMPONENT).setPathway(pathway);
+            if(playerMap.get(entity).isPresent()) {
+                StoredData data = playerMap.get(entity).get();
+                playerMap.put(player, StoredData.builder.copyFrom(data).pathway(pathway).build());
+            }
+
+            // Sync to client if this is server-side
+            if (!player.level().isClientSide() && player instanceof ServerPlayer serverPlayer) {
+                PacketHandler.syncBeyonderDataToPlayer(serverPlayer);
+            }
+        }
+    }
+
+    public static void setSequence(LivingEntity entity, int sequence) {
+        if(entity instanceof Player player) {
+            player.getData(ModAttachments.BEYONDER_COMPONENT).setSequence(sequence);
+            if(playerMap.get(entity).isPresent()) {
+                StoredData data = playerMap.get(entity).get();
+                playerMap.put(player, StoredData.builder.copyFrom(data).sequence(sequence).build());
+            }
+
+            // Sync to client if this is server-side
+            if (!player.level().isClientSide() && player instanceof ServerPlayer serverPlayer) {
+                PacketHandler.syncBeyonderDataToPlayer(serverPlayer);
+            }
+        }
+    }
+
     public static int getCurrentCharStack(LivingEntity entity) {
         if(entity.level().isClientSide) {
             return ClientBeyonderCache.getCharStack(entity.getUUID());

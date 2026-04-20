@@ -836,7 +836,7 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
 
     public static void historicalVoidBorrowSpirituality(ServerPlayer player, ServerLevel level) {
         if (getHistoricalBorrowingCount(player) <= getMaxHistoricalBorrowingCount(player)) {
-            if (BeyonderData.getSpirituality(player) < BeyonderData.getMaxSpirituality(BeyonderData.getSequence(player))) {
+            if (BeyonderData.getSpirituality(player) < BeyonderData.getMaxSpirituality(BeyonderData.getPathway(player), BeyonderData.getSequence(player))) {
                 // save current spirituality
                 long borrowTime = level.getGameTime() + getMaxHistoricalBorrowingDurationTicks(player);
                 CompoundTag tag = new CompoundTag();
@@ -845,7 +845,7 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
                 incrementHistoricalBorrowingCount(player, borrowTime, SummonType.SPIRITUALITY, player.getUUID(), tag);
 
                 // set spirituality to max
-                BeyonderData.setSpirituality(player, BeyonderData.getMaxSpirituality(BeyonderData.getSequence(player)));
+                BeyonderData.setSpirituality(player, BeyonderData.getMaxSpirituality(BeyonderData.getPathway(player), BeyonderData.getSequence(player)));
             }
         }
     }
