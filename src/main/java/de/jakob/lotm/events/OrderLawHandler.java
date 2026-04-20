@@ -64,7 +64,7 @@ public class OrderLawHandler {
         if (event.getNewDamage() >= currentHealth) {
             event.setNewDamage(currentHealth - 1f);
             if (entity instanceof ServerPlayer sp) {
-                sp.sendSystemMessage(Component.literal("[Order Prohibition] Dying is Prohibited here.")
+                sp.sendSystemMessage(Component.translatable("lotmcraft.order_law.dying_prohibited")
                         .withStyle(ChatFormatting.GOLD));
             }
         }
@@ -117,7 +117,7 @@ public class OrderLawHandler {
                 if (direction.lengthSqr() < 0.001) direction = new Vec3(1, 0, 0);
                 player.setDeltaMovement(direction.scale(1.5));
                 player.hurtMarked = true;
-                player.sendSystemMessage(Component.literal("[Order Prohibition] Demigods are Prohibited here.")
+                player.sendSystemMessage(Component.translatable("lotmcraft.order_law.demigods_prohibited")
                         .withStyle(ChatFormatting.RED));
             }
         }
@@ -141,7 +141,7 @@ public class OrderLawHandler {
         WorldJudgmentHandler.escalate(attacker);
 
         if (attacker instanceof ServerPlayer sp) {
-            sp.sendSystemMessage(Component.literal("[Order Law] Combat is against the Law here.")
+            sp.sendSystemMessage(Component.translatable("lotmcraft.order_law.combat")
                     .withStyle(ChatFormatting.RED));
         }
     }
@@ -163,7 +163,7 @@ public class OrderLawHandler {
                     if (!player.hasEffect(ModEffects.LOOSING_CONTROL)) return;
                     applyPunishment(player);
                     WorldJudgmentHandler.escalate(player);
-                    player.sendSystemMessage(Component.literal("[Order Law] Losing Control is against the Law here.")
+                    player.sendSystemMessage(Component.translatable("lotmcraft.order_law.losing_control")
                             .withStyle(ChatFormatting.RED));
                 });
             }

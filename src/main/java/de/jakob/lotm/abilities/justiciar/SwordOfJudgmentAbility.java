@@ -53,7 +53,7 @@ public class SwordOfJudgmentAbility extends Ability {
 
         if (random.nextDouble() >= successChance) {
             if (entity instanceof ServerPlayer sp) {
-                sp.sendSystemMessage(Component.literal("Your Judgment was Deflected.")
+                sp.sendSystemMessage(Component.translatable("ability.lotmcraft.sword_of_judgment.deflected")
                         .withStyle(ChatFormatting.RED));
             }
             return;
@@ -68,7 +68,7 @@ public class SwordOfJudgmentAbility extends Ability {
         JudgmentSwordEntity sword = new JudgmentSwordEntity(serverLevel, spawnPos, damage, entity, target, this);
         serverLevel.addFreshEntity(sword);
 
-        Component message = Component.literal("[Sword of Judgment] has been delivered upon ")
+        Component message = Component.translatable("ability.lotmcraft.sword_of_judgment.delivered_prefix")
                 .withStyle(ChatFormatting.GOLD)
                 .append(Component.literal(target.getDisplayName().getString())
                         .withStyle(ChatFormatting.WHITE));

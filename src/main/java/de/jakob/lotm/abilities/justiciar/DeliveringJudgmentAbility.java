@@ -62,14 +62,14 @@ public class DeliveringJudgmentAbility extends Ability {
         EffectManager.playEffect(EffectManager.Effect.WAYPOINT, target.getX(), target.getY(), target.getZ(), serverLevel);
 
         if (entity instanceof ServerPlayer sp) {
-            sp.sendSystemMessage(Component.literal("[Delivering Judgment] You have arrived.")
+            sp.sendSystemMessage(Component.translatable("ability.lotmcraft.delivering_judgment.arrived")
                     .withStyle(ChatFormatting.GOLD));
         }
     }
 
     private void sendFizzle(LivingEntity entity) {
         if (entity instanceof ServerPlayer sp) {
-            sp.sendSystemMessage(Component.literal("No target has resisted your Laws.")
+            sp.sendSystemMessage(Component.translatable("ability.lotmcraft.delivering_judgment.no_target")
                     .withStyle(ChatFormatting.RED));
         }
     }

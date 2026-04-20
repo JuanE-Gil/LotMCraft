@@ -78,7 +78,7 @@ public class ExileOfBalanceAbility extends Ability {
         int total = casterScore + enemyScore;
         if (total == 0 || Math.abs(casterScore - enemyScore) <= total * 0.10) {
             if (entity instanceof net.minecraft.server.level.ServerPlayer sp) {
-                sp.sendSystemMessage(Component.literal("The sides are already balanced.")
+                sp.sendSystemMessage(Component.translatable("ability.lotmcraft.exile_of_balance.already_balanced")
                         .withStyle(ChatFormatting.RED));
             }
             return;
@@ -108,14 +108,16 @@ public class ExileOfBalanceAbility extends Ability {
 
             int durationSeconds = durationTicks / 20;
             if (target instanceof net.minecraft.server.level.ServerPlayer sp) {
-                sp.sendSystemMessage(Component.literal("[Exile of Balance] You have been removed from this battle for " + durationSeconds + " seconds.")
-                        .withStyle(ChatFormatting.GOLD));
+                sp.sendSystemMessage(Component.translatable("ability.lotmcraft.exile_of_balance.removed_prefix")
+                        .withStyle(ChatFormatting.GOLD)
+                        .append(Component.literal(String.valueOf(durationSeconds)).withStyle(ChatFormatting.WHITE))
+                        .append(Component.translatable("ability.lotmcraft.exile_of_balance.removed_suffix").withStyle(ChatFormatting.GOLD)));
             }
         }
 
         if (exiledCount == 0) {
             if (entity instanceof net.minecraft.server.level.ServerPlayer sp) {
-                sp.sendSystemMessage(Component.literal("The sides are already balanced.")
+                sp.sendSystemMessage(Component.translatable("ability.lotmcraft.exile_of_balance.already_balanced")
                         .withStyle(ChatFormatting.RED));
             }
             return;
@@ -127,7 +129,7 @@ public class ExileOfBalanceAbility extends Ability {
         RingEffectManager.createRingForAll(center, (float) ZONE_RADIUS, 40,
                 0.75f, 0.85f, 1.0f, 0.8f, 2f, 4f, serverLevel);
 
-        Component message = Component.literal("[Exile of Balance] has been declared")
+        Component message = Component.translatable("ability.lotmcraft.exile_of_balance.declared")
                 .withStyle(ChatFormatting.GOLD);
         serverLevel.getServer().getPlayerList().getPlayers().forEach(p -> {
             if (p.level().equals(serverLevel) && p.distanceTo(entity) <= ZONE_RADIUS) {

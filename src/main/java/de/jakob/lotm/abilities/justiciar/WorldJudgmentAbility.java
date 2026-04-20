@@ -48,12 +48,12 @@ public class WorldJudgmentAbility extends Ability {
             WorldJudgmentHandler.JUDGMENT_TIER.remove(targetUUID);
 
             if (entity instanceof ServerPlayer sp) {
-                sp.sendSystemMessage(Component.literal("[World Judgment] Judgment has been released.")
+                sp.sendSystemMessage(Component.translatable("ability.lotmcraft.world_judgment.released")
                         .withStyle(ChatFormatting.GOLD));
             }
             LivingEntity target = serverLevel.getEntity(targetUUID) instanceof LivingEntity le ? le : null;
             if (target instanceof ServerPlayer tsp) {
-                tsp.sendSystemMessage(Component.literal("[World Judgment] You have been released from World Judgment.")
+                tsp.sendSystemMessage(Component.translatable("ability.lotmcraft.world_judgment.target_released")
                         .withStyle(ChatFormatting.GOLD));
             }
             return;
@@ -62,7 +62,7 @@ public class WorldJudgmentAbility extends Ability {
         // First cast: designate target
         LivingEntity target = AbilityUtil.getTargetEntity(entity, 30, 5);
         if (target == null || target == entity) {
-            AbilityUtil.sendActionBar(entity, Component.literal("No target found.").withColor(color));
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.world_judgment.no_target").withColor(color));
             return;
         }
 
@@ -70,11 +70,13 @@ public class WorldJudgmentAbility extends Ability {
         WorldJudgmentHandler.JUDGMENT_TIER.put(target.getUUID(), 0);
 
         if (entity instanceof ServerPlayer sp) {
-            sp.sendSystemMessage(Component.literal("[World Judgment] " + target.getName().getString()
-                    + " is now under World Judgment.").withStyle(ChatFormatting.GOLD));
+            sp.sendSystemMessage(Component.translatable("ability.lotmcraft.world_judgment.designated_prefix")
+                    .withStyle(ChatFormatting.GOLD)
+                    .append(Component.literal(target.getName().getString()).withStyle(ChatFormatting.WHITE))
+                    .append(Component.translatable("ability.lotmcraft.world_judgment.designated_suffix").withStyle(ChatFormatting.GOLD)));
         }
         if (target instanceof ServerPlayer tsp) {
-            tsp.sendSystemMessage(Component.literal("[World Judgment] You have been placed under World Judgment. Obey the Laws.")
+            tsp.sendSystemMessage(Component.translatable("ability.lotmcraft.world_judgment.target_designated")
                     .withStyle(ChatFormatting.DARK_RED));
         }
     }

@@ -74,7 +74,7 @@ public class JusticeLanguageAbility extends SelectableAbility {
         target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 600, 1, false, false));
 
         if (caster instanceof ServerPlayer sp) {
-            sp.sendSystemMessage(Component.literal("Maintain Secrecy has been established").withStyle(ChatFormatting.GOLD));
+            sp.sendSystemMessage(Component.translatable("ability.lotmcraft.justice_language.secrecy_established").withStyle(ChatFormatting.GOLD));
         }
 
         NeoForge.EVENT_BUS.post(new AbilityUsedEvent(serverLevel, caster.position(), caster, this, interactionFlags, 20, 20 * 2));
@@ -91,7 +91,7 @@ public class JusticeLanguageAbility extends SelectableAbility {
 
         if (random.nextDouble() < failChance) {
             if (caster instanceof ServerPlayer sp) {
-                sp.sendSystemMessage(Component.literal("Your Verdict has Failed").withStyle(ChatFormatting.RED));
+                sp.sendSystemMessage(Component.translatable("ability.lotmcraft.justice_language.verdict_failed").withStyle(ChatFormatting.RED));
             }
             return;
         }
@@ -100,7 +100,8 @@ public class JusticeLanguageAbility extends SelectableAbility {
 
         String targetName = target.getDisplayName().getString();
         if (caster instanceof ServerPlayer sp) {
-            sp.sendSystemMessage(Component.literal("[" + targetName + "] has been declared Dead")
+            sp.sendSystemMessage(Component.translatable("ability.lotmcraft.justice_language.death_declared",
+                    Component.literal(targetName).withStyle(ChatFormatting.WHITE))
                     .withStyle(ChatFormatting.DARK_RED));
         }
 
@@ -111,7 +112,7 @@ public class JusticeLanguageAbility extends SelectableAbility {
         FLOG_ACTIVE.add(caster.getUUID());
 
         if (caster instanceof ServerPlayer sp) {
-            sp.sendSystemMessage(Component.literal("Flog is prepared your next attack will deal bleeding")
+            sp.sendSystemMessage(Component.translatable("ability.lotmcraft.justice_language.flog_prepared")
                     .withStyle(ChatFormatting.GOLD));
         }
 

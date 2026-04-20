@@ -41,7 +41,7 @@ public class ExecutionAbility extends Ability {
         // 70% fail chance
         if (random.nextDouble() < 0.7) {
             if (caster instanceof ServerPlayer player) {
-                player.sendSystemMessage(Component.literal("[Execution] Your Verdict has Failed.")
+                player.sendSystemMessage(Component.translatable("ability.lotmcraft.execution.verdict_failed")
                         .withStyle(ChatFormatting.RED));
             }
             return;
@@ -50,7 +50,7 @@ public class ExecutionAbility extends Ability {
         LivingEntity target = AbilityUtil.getTargetEntity(caster, 20, 1.5f);
         if (target == null) {
             if (caster instanceof ServerPlayer player) {
-                player.sendSystemMessage(Component.literal("[Execution] No valid target.")
+                player.sendSystemMessage(Component.translatable("ability.lotmcraft.execution.no_target")
                         .withStyle(ChatFormatting.RED));
             }
             return;

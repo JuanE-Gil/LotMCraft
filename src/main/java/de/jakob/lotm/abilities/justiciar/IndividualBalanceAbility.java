@@ -50,7 +50,7 @@ public class IndividualBalanceAbility extends Ability {
 
         if (!BeyonderData.isBeyonder(target)) {
             if (entity instanceof net.minecraft.server.level.ServerPlayer sp) {
-                sp.sendSystemMessage(Component.literal("Target is not a Beyonder.")
+                sp.sendSystemMessage(Component.translatable("ability.lotmcraft.individual_balance.not_beyonder")
                         .withStyle(ChatFormatting.RED));
             }
             return;
@@ -64,7 +64,7 @@ public class IndividualBalanceAbility extends Ability {
         RingEffectManager.createRingForAll(target.position(), 3f, 40,
                 1.0f, 0.96f, 0.72f, 0.85f, 1.5f, 4f, serverLevel);
 
-        Component broadcast = Component.literal("[Individual Balance] has been applied to ")
+        Component broadcast = Component.translatable("ability.lotmcraft.individual_balance.applied_prefix")
                 .withStyle(ChatFormatting.GOLD)
                 .append(Component.literal(target.getDisplayName().getString())
                         .withStyle(ChatFormatting.WHITE));
@@ -75,7 +75,7 @@ public class IndividualBalanceAbility extends Ability {
         });
 
         if (target instanceof net.minecraft.server.level.ServerPlayer sp) {
-            sp.sendSystemMessage(Component.literal("[Individual Balance] Your higher-rank abilities have been sealed for 1 minute.")
+            sp.sendSystemMessage(Component.translatable("ability.lotmcraft.individual_balance.sealed")
                     .withStyle(ChatFormatting.RED));
         }
 

@@ -62,7 +62,7 @@ public class PunishmentAbility extends Ability {
         if (CASTER_TO_TARGET.containsKey(casterUUID)) {
             cancelPunishment(casterUUID, serverLevel);
             if (entity instanceof ServerPlayer player) {
-                player.sendSystemMessage(Component.literal("[Punishment] Punishment cancelled.").withStyle(ChatFormatting.YELLOW));
+                player.sendSystemMessage(Component.translatable("ability.lotmcraft.punishment.cancelled").withStyle(ChatFormatting.YELLOW));
             }
             return;
         }
@@ -70,7 +70,7 @@ public class PunishmentAbility extends Ability {
         LivingEntity target = AbilityUtil.getTargetEntity(entity, 20, 1.5f);
         if (target == null) {
             if (entity instanceof ServerPlayer player) {
-                player.sendSystemMessage(Component.literal("[Punishment] No valid target.").withStyle(ChatFormatting.RED));
+                player.sendSystemMessage(Component.translatable("ability.lotmcraft.punishment.no_target").withStyle(ChatFormatting.RED));
             }
             return;
         }
@@ -84,10 +84,10 @@ public class PunishmentAbility extends Ability {
         entity.addEffect(new MobEffectInstance(MobEffects.GLOWING, DURATION, 0, false, false));
 
         if (entity instanceof ServerPlayer player) {
-            player.sendSystemMessage(Component.literal("[Punishment] You have marked ")
+            player.sendSystemMessage(Component.translatable("ability.lotmcraft.punishment.marked_prefix")
                     .withStyle(ChatFormatting.GOLD)
                     .append(Component.literal(target.getDisplayName().getString()).withStyle(ChatFormatting.WHITE))
-                    .append(Component.literal(" for Punishment.").withStyle(ChatFormatting.GOLD)));
+                    .append(Component.translatable("ability.lotmcraft.punishment.marked_suffix").withStyle(ChatFormatting.GOLD)));
         }
 
         NeoForge.EVENT_BUS.post(new AbilityUsedEvent(serverLevel, entity.position(), entity, this, interactionFlags, interactionRadius, 20 * 2));
@@ -116,7 +116,9 @@ public class PunishmentAbility extends Ability {
         ServerPlayer casterPlayer = serverLevel.getServer().getPlayerList().getPlayer(casterUUID);
         if (casterPlayer != null) {
             applyRandomBuff(casterPlayer);
-            casterPlayer.sendSystemMessage(Component.literal("[Punishment] " + reason).withStyle(ChatFormatting.GOLD));
+            casterPlayer.sendSystemMessage(Component.translatable("ability.lotmcraft.punishment.triggered_prefix")
+                    .withStyle(ChatFormatting.GOLD)
+                    .append(Component.translatable(reason).withStyle(ChatFormatting.WHITE)));
         }
 
         applyRandomDebuff(target);
@@ -171,7 +173,7 @@ public class PunishmentAbility extends Ability {
         event.setNewDamage(0f);
         livingAttacker.hurt(serverLevel.damageSources().magic(), amount);
 
-        triggerPunishment(hurtUUID, livingAttacker, serverLevel, "Attacking a Disciplinary Paladin.");
+        triggerPunishment(hurtUUID, livingAttacker, serverLevel, "ability.lotmcraft.punishment.reason_attacking");
     }
 
     // ── Condition 2: Large area ability / restriction attempt ─────────────────
@@ -191,7 +193,7 @@ public class PunishmentAbility extends Ability {
 
         // Condition: large area ability (radius >= 30) used near caster
         if (event.getInteractionRadius() >= 30 && casterPlayer.distanceTo(user) <= 60) {
-            triggerPunishment(casterUUID, user, serverLevel, "Large area ability used.");
+            triggerPunishment(casterUUID, user, serverLevel, "ability.lotmcraft.punishment.reason_large_area");
             return;
         }
 
@@ -199,7 +201,7 @@ public class PunishmentAbility extends Ability {
         List<String> flags = event.getInteractionFlags();
         if ((flags.contains("imprison") || flags.contains("confinement"))
                 && casterPlayer.distanceTo(user) <= event.getInteractionRadius()) {
-            triggerPunishment(casterUUID, user, serverLevel, "Attempted restriction.");
+            triggerPunishment(casterUUID, user, serverLevel, "ability.lotmcraft.punishment.reason_restriction");
         }
     }
 
@@ -217,7 +219,7 @@ public class PunishmentAbility extends Ability {
         UUID casterUUID = TARGET_TO_CASTER.get(killerUUID);
         if (casterUUID == null) return;
 
-        triggerPunishment(casterUUID, livingKiller, serverLevel, "A kill was committed.");
+        triggerPunishment(casterUUID, livingKiller, serverLevel, "ability.lotmcraft.punishment.reason_kill");
     }
 
     // ── Condition 4: Arson — target places fire ───────────────────────────────
@@ -237,6 +239,6 @@ public class PunishmentAbility extends Ability {
         UUID casterUUID = TARGET_TO_CASTER.get(placerUUID);
         if (casterUUID == null) return;
 
-        triggerPunishment(casterUUID, livingPlacer, serverLevel, "Arson committed.");
+        triggerPunishment(casterUUID, livingPlacer, serverLevel, "ability.lotmcraft.punishment.reason_arson");
     }
 }

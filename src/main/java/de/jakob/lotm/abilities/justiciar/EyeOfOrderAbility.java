@@ -96,7 +96,7 @@ public class EyeOfOrderAbility extends Ability {
             BeyonderData.reduceSpirituality(zone.owner, 3);
 
             if (BeyonderData.getSpirituality(zone.owner) <= 0) {
-                AbilityUtil.sendActionBar(zone.owner, Component.literal("Your spirituality is exhausted."));
+                AbilityUtil.sendActionBar(zone.owner, Component.translatable("ability.lotmcraft.eye_of_order.exhausted"));
                 cleanupGlow(zone);
                 zone.deactivate();
                 ACTIVE_ZONES.remove(zone);

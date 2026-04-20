@@ -2,6 +2,7 @@ package de.jakob.lotm.abilities.justiciar;
 
 import de.jakob.lotm.abilities.core.AbilityUsedEvent;
 import de.jakob.lotm.abilities.core.Ability;
+import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.RingEffectManager;
 import de.jakob.lotm.util.scheduling.ServerScheduler;
@@ -13,7 +14,10 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.NeoForge;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class BalancingAbility extends Ability {
@@ -50,18 +54,30 @@ public class BalancingAbility extends Ability {
         ACTIVE_ZONES.add(zone);
 
         final Vec3 center = zone.center;
+        final double TARGET_MULTIPLIER = 2.625;
+        final String MODIFIER_ID = "balancing_zone_" + zone.ownerId;
+
         ServerScheduler.scheduleForDuration(0, 5, ZONE_DURATION, () -> {
             if (!zone.isActive()) return;
-            AbilityUtil.getNearbyEntities(null, serverLevel, center, (int) ZONE_RADIUS).forEach(e ->
-                    new ArrayList<>(e.getActiveEffects()).forEach(eff -> e.removeEffect(eff.getEffect()))
-            );
-        }, () -> ACTIVE_ZONES.remove(zone), serverLevel);
+            AbilityUtil.getNearbyEntities(null, serverLevel, center, (int) ZONE_RADIUS).forEach(e -> {
+                if (!BeyonderData.isBeyonder(e)) return;
+                double base = BeyonderData.getMultiplierForSequence(BeyonderData.getSequence(e));
+                double needed = TARGET_MULTIPLIER / base;
+                BeyonderData.removeModifier(e, MODIFIER_ID);
+                BeyonderData.addModifier(e, MODIFIER_ID, needed);
+            });
+        }, () -> {
+            // On expiry, remove the modifier from anyone still in range
+            AbilityUtil.getNearbyEntities(null, serverLevel, center, (int) ZONE_RADIUS)
+                    .forEach(e -> BeyonderData.removeModifier(e, MODIFIER_ID));
+            ACTIVE_ZONES.remove(zone);
+        }, serverLevel);
 
         // Single ring that expands to the 60-block boundary and stays visible for the full zone duration
         RingEffectManager.createRingForAll(center, (float) ZONE_RADIUS, ZONE_DURATION,
                 0.95f, 0.95f, 1.0f, 0.6f, 2f, 5f, 100f, false, false, serverLevel);
 
-        Component message = Component.literal("[Balance] has been declared")
+        Component message = Component.translatable("ability.lotmcraft.balancing.declared")
                 .withStyle(ChatFormatting.GOLD);
         serverLevel.getServer().getPlayerList().getPlayers().forEach(p -> {
             if (p.level().equals(serverLevel) && p.distanceTo(entity) <= ZONE_RADIUS) {

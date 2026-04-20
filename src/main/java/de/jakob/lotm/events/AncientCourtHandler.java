@@ -39,8 +39,7 @@ public class AncientCourtHandler {
 
     private static void sendMessage(LivingEntity entity, String prohibition) {
         if (entity instanceof ServerPlayer sp) {
-            sp.sendSystemMessage(Component.literal(
-                    "[Ancient Court of Judgment] " + prohibition + " is Prohibited here.")
+            sp.sendSystemMessage(Component.translatable("lotmcraft.ancient_court.prohibited", prohibition)
                     .withStyle(ChatFormatting.GOLD));
         }
     }

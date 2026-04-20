@@ -88,7 +88,7 @@ public class LawAbility extends SelectableAbility {
         entity.getData(ModAttachments.MULTIPLIER_MODIFIER_COMPONENT)
                 .addMultiplierForTime("law_weaken", 0.25f, WEAKEN_DURATION);
 
-        broadcastToNearby(serverLevel, entity, "[Law] Weaken Mysticism, Enhance Reality is declared.");
+        broadcastToNearby(serverLevel, entity, Component.translatable("ability.lotmcraft.law.weaken_declared").withStyle(ChatFormatting.GOLD));
     }
 
     // ── Weaken Reality, Enhance Mysticism ────────────────────────────────────
@@ -104,14 +104,14 @@ public class LawAbility extends SelectableAbility {
         entity.getData(ModAttachments.MULTIPLIER_MODIFIER_COMPONENT)
                 .addMultiplierForTime("law_enhance", 2.5f, ENHANCE_DURATION);
 
-        broadcastToNearby(serverLevel, entity, "[Law] Weaken Reality, Enhance Mysticism is declared.");
+        broadcastToNearby(serverLevel, entity, Component.translatable("ability.lotmcraft.law.enhance_declared").withStyle(ChatFormatting.GOLD));
     }
 
     // ── Solace ────────────────────────────────────────────────────────────────
 
     private void solace(ServerLevel serverLevel, LivingEntity caster) {
         // Broadcast the solemn declaration
-        broadcastToNearby(serverLevel, caster, "All the dead will receive their eternal peace.");
+        broadcastToNearby(serverLevel, caster, Component.translatable("ability.lotmcraft.law.solace_declared").withStyle(ChatFormatting.GOLD));
 
         List<LivingEntity> nearby = AbilityUtil.getNearbyEntities(caster, serverLevel, caster.position(), 40);
         for (LivingEntity e : nearby) {
@@ -135,7 +135,7 @@ public class LawAbility extends SelectableAbility {
         LivingEntity target = AbilityUtil.getTargetEntity(caster, 20, 1.5f);
         if (target == null) {
             if (caster instanceof ServerPlayer player) {
-                player.sendSystemMessage(Component.literal("[Law of Sealing] No valid target.").withStyle(ChatFormatting.RED));
+                player.sendSystemMessage(Component.translatable("ability.lotmcraft.law.sealing_no_target").withStyle(ChatFormatting.RED));
             }
             return;
         }
@@ -143,7 +143,7 @@ public class LawAbility extends SelectableAbility {
         String abilityId = LAST_USED_ABILITY.get(target.getUUID());
         if (abilityId == null) {
             if (caster instanceof ServerPlayer player) {
-                player.sendSystemMessage(Component.literal("[Law of Sealing] No recent ability found to seal.").withStyle(ChatFormatting.RED));
+                player.sendSystemMessage(Component.translatable("ability.lotmcraft.law.sealing_no_ability").withStyle(ChatFormatting.RED));
             }
             return;
         }
@@ -156,25 +156,24 @@ public class LawAbility extends SelectableAbility {
         if (sealed != null) abilityName = sealed.getName().getString();
 
         if (caster instanceof ServerPlayer player) {
-            player.sendSystemMessage(Component.literal("[Law of Sealing] ")
+            player.sendSystemMessage(Component.translatable("ability.lotmcraft.law.sealing_broadcast_prefix")
                     .withStyle(ChatFormatting.GOLD)
                     .append(Component.literal(target.getDisplayName().getString()).withStyle(ChatFormatting.WHITE))
-                    .append(Component.literal("'s ").withStyle(ChatFormatting.GOLD))
+                    .append(Component.translatable("ability.lotmcraft.law.sealing_broadcast_middle").withStyle(ChatFormatting.GOLD))
                     .append(Component.literal(abilityName).withStyle(ChatFormatting.YELLOW))
-                    .append(Component.literal(" has been sealed for 30 seconds.").withStyle(ChatFormatting.GOLD)));
+                    .append(Component.translatable("ability.lotmcraft.law.sealing_broadcast_suffix").withStyle(ChatFormatting.GOLD)));
         }
         if (target instanceof ServerPlayer targetPlayer) {
-            targetPlayer.sendSystemMessage(Component.literal("[Law of Sealing] Your ability ")
+            targetPlayer.sendSystemMessage(Component.translatable("ability.lotmcraft.law.sealing_target_prefix")
                     .withStyle(ChatFormatting.RED)
                     .append(Component.literal(abilityName).withStyle(ChatFormatting.YELLOW))
-                    .append(Component.literal(" has been sealed.").withStyle(ChatFormatting.RED)));
+                    .append(Component.translatable("ability.lotmcraft.law.sealing_target_suffix").withStyle(ChatFormatting.RED)));
         }
     }
 
     // ── Utility ───────────────────────────────────────────────────────────────
 
-    private static void broadcastToNearby(ServerLevel level, LivingEntity source, String message) {
-        Component msg = Component.literal(message).withStyle(ChatFormatting.GOLD);
+    private static void broadcastToNearby(ServerLevel level, LivingEntity source, Component msg) {
         level.getServer().getPlayerList().getPlayers().forEach(p -> {
             if (p.level().equals(level) && p.distanceTo(source) <= 40) {
                 p.sendSystemMessage(msg);

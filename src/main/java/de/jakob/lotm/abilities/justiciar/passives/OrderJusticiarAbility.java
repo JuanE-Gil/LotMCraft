@@ -3,6 +3,7 @@ package de.jakob.lotm.abilities.justiciar.passives;
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.PassiveAbilityHandler;
 import de.jakob.lotm.abilities.PassiveAbilityItem;
+import de.jakob.lotm.util.BeyonderData;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -42,15 +43,15 @@ public class OrderJusticiarAbility extends PassiveAbilityItem {
         if (!(event.getEntity() instanceof Player victim)) return;
         if (!(killer.level() instanceof ServerLevel serverLevel)) return;
 
-        Component message = Component.literal("[Order] ")
+        Component message = Component.translatable("ability.lotmcraft.order_justiciar.murder_prefix")
                 .withStyle(ChatFormatting.GOLD)
                 .append(Component.literal(killer.getDisplayName().getString())
                         .withStyle(ChatFormatting.WHITE))
-                .append(Component.literal(" has slain ")
+                .append(Component.translatable("ability.lotmcraft.order_justiciar.murder_middle")
                         .withStyle(ChatFormatting.GRAY))
                 .append(Component.literal(victim.getDisplayName().getString())
                         .withStyle(ChatFormatting.WHITE))
-                .append(Component.literal(" nearby.")
+                .append(Component.translatable("ability.lotmcraft.order_justiciar.murder_suffix")
                         .withStyle(ChatFormatting.GRAY));
 
         OrderJusticiarAbility orderAbility = (OrderJusticiarAbility) PassiveAbilityHandler.ORDER_JUSTICIAR.get();
@@ -59,7 +60,9 @@ public class OrderJusticiarAbility extends PassiveAbilityItem {
         for (ServerPlayer observer : allPlayers) {
             if (!observer.level().equals(serverLevel)) continue;
             if (!orderAbility.shouldApplyTo(observer)) continue;
-            if (observer.distanceTo(killer) > 40.0) continue;
+            double m = BeyonderData.getMultiplier(observer);
+            double detectionRadius = 40.0 * m * m * m;
+            if (observer.distanceTo(killer) > detectionRadius) continue;
 
             observer.sendSystemMessage(message);
         }

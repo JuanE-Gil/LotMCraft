@@ -43,11 +43,11 @@ public class WorldJudgmentHandler {
     private static void applyTier(LivingEntity entity, ServerLevel serverLevel, int tier) {
         if (tier == 1) {
             entity.hurt(serverLevel.damageSources().magic(), 15f);
-            notify(entity, "Tier 1 — Heavy damage.");
+            notify(entity, Component.translatable("lotmcraft.world_judgment.tier_1"));
         } else if (tier == 2) {
             entity.hurt(serverLevel.damageSources().magic(), 15f);
             entity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20 * 10, 3, false, true));
-            notify(entity, "Tier 2 — Heavy damage and Slowing.");
+            notify(entity, Component.translatable("lotmcraft.world_judgment.tier_2"));
         } else if (tier == 3) {
             entity.hurt(serverLevel.damageSources().magic(), 15f);
             entity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20 * 10, 3, false, true));
@@ -57,23 +57,23 @@ public class WorldJudgmentHandler {
                     .map(MobEffectInstance::getEffect)
                     .toList();
             toRemove.forEach(entity::removeEffect);
-            notify(entity, "Tier 3 — Heavy damage, Slowing, and all buffs stripped.");
+            notify(entity, Component.translatable("lotmcraft.world_judgment.tier_3"));
         } else if (tier == 4) {
             entity.hurt(serverLevel.damageSources().magic(), 15f);
             // Paralysis: extreme slowness + levitation prevents all movement
             entity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20 * 10, 127, false, true));
             entity.addEffect(new MobEffectInstance(MobEffects.LEVITATION, 20 * 10, 0, false, true));
-            notify(entity, "Tier 4 — Heavy damage and Paralysis.");
+            notify(entity, Component.translatable("lotmcraft.world_judgment.tier_4"));
         } else {
             // Tier 5+: death
             entity.hurt(serverLevel.damageSources().magic(), Float.MAX_VALUE);
-            notify(entity, "Tier 5 — Death by World Judgment.");
+            notify(entity, Component.translatable("lotmcraft.world_judgment.tier_5"));
         }
     }
 
-    private static void notify(LivingEntity entity, String msg) {
+    private static void notify(LivingEntity entity, Component msg) {
         if (entity instanceof ServerPlayer sp) {
-            sp.sendSystemMessage(Component.literal("[World Judgment] " + msg).withStyle(ChatFormatting.DARK_RED));
+            sp.sendSystemMessage(msg.copy().withStyle(ChatFormatting.DARK_RED));
         }
     }
 

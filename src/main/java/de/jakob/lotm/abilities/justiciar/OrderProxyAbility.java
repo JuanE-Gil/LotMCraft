@@ -99,12 +99,13 @@ public class OrderProxyAbility extends SelectableAbility {
         BeyonderData.addModifierWithTimeLimit(entity, "order_sacrifice_boost", 3.0, 15000L);
 
         broadcastToNearby(serverLevel, entity,
-                "[Order Sacrifice] " + entity.getDisplayName().getString() + " has reached the level of a Half Great Old One!",
-                ChatFormatting.DARK_RED);
+                Component.translatable("ability.lotmcraft.order_proxy.sacrifice_level_prefix")
+                        .withStyle(ChatFormatting.DARK_RED)
+                        .append(Component.literal(entity.getDisplayName().getString()).withStyle(ChatFormatting.WHITE))
+                        .append(Component.translatable("ability.lotmcraft.order_proxy.sacrifice_level_suffix").withStyle(ChatFormatting.DARK_RED)));
 
         if (entity instanceof ServerPlayer sp) {
-            sp.sendSystemMessage(Component.literal(
-                    "[Order Sacrifice] 15 seconds of absolute power. The price will be paid.")
+            sp.sendSystemMessage(Component.translatable("ability.lotmcraft.order_proxy.sacrifice_notification")
                     .withStyle(ChatFormatting.GOLD));
         }
 
@@ -131,8 +132,7 @@ public class OrderProxyAbility extends SelectableAbility {
         if (existing != null) {
             PERMANENT_PROHIBITION_ZONES.remove(existing);
             if (entity instanceof ServerPlayer sp) {
-                sp.sendSystemMessage(Component.literal(
-                        "[Order Prohibition] [" + type.displayName + "] prohibition lifted.")
+                sp.sendSystemMessage(Component.translatable("ability.lotmcraft.order_proxy.prohibition_lifted", type.displayName)
                         .withStyle(ChatFormatting.YELLOW));
             }
             return;
@@ -140,8 +140,7 @@ public class OrderProxyAbility extends SelectableAbility {
 
         if (PERMANENT_PROHIBITION_ZONES.size() >= MAX_PROHIBITION_ZONES) {
             if (entity instanceof ServerPlayer sp) {
-                sp.sendSystemMessage(Component.literal(
-                        "[Order Prohibition] Cannot go above limit (3 permanent prohibitions).")
+                sp.sendSystemMessage(Component.translatable("ability.lotmcraft.order_proxy.prohibition_limit")
                         .withStyle(ChatFormatting.RED));
             }
             return;
@@ -154,8 +153,8 @@ public class OrderProxyAbility extends SelectableAbility {
         EffectManager.playEffect(EffectManager.Effect.PROHIBITION, px, py, pz, serverLevel);
 
         broadcastToNearby(serverLevel, entity,
-                "[Order Prohibition] [" + type.displayName + "] is Permanently Prohibited here.",
-                ChatFormatting.GOLD);
+                Component.translatable("ability.lotmcraft.order_proxy.prohibition_permanent", type.displayName)
+                        .withStyle(ChatFormatting.GOLD));
     }
 
     // ── Order Law ─────────────────────────────────────────────────────────────
@@ -170,8 +169,7 @@ public class OrderProxyAbility extends SelectableAbility {
         if (existing != null) {
             PERMANENT_LAW_ZONES.remove(existing);
             if (entity instanceof ServerPlayer sp) {
-                sp.sendSystemMessage(Component.literal(
-                        "[Order Law] [" + type.displayName + "] law lifted.")
+                sp.sendSystemMessage(Component.translatable("ability.lotmcraft.order_proxy.law_lifted", type.displayName)
                         .withStyle(ChatFormatting.YELLOW));
             }
             return;
@@ -179,8 +177,7 @@ public class OrderProxyAbility extends SelectableAbility {
 
         if (PERMANENT_LAW_ZONES.size() >= MAX_LAW_ZONES) {
             if (entity instanceof ServerPlayer sp) {
-                sp.sendSystemMessage(Component.literal(
-                        "[Order Law] Cannot go above limit (2 permanent laws).")
+                sp.sendSystemMessage(Component.translatable("ability.lotmcraft.order_proxy.law_limit")
                         .withStyle(ChatFormatting.RED));
             }
             return;
@@ -190,8 +187,8 @@ public class OrderProxyAbility extends SelectableAbility {
         PERMANENT_LAW_ZONES.add(zone);
 
         broadcastToNearby(serverLevel, entity,
-                "[Order Law] [" + type.displayName + "] is now Law here.",
-                ChatFormatting.GOLD);
+                Component.translatable("ability.lotmcraft.order_proxy.law_active", type.displayName)
+                        .withStyle(ChatFormatting.GOLD));
     }
 
     // ── Damage Immunity Event ─────────────────────────────────────────────────
@@ -213,8 +210,7 @@ public class OrderProxyAbility extends SelectableAbility {
 
     // ── Utility ───────────────────────────────────────────────────────────────
 
-    private static void broadcastToNearby(ServerLevel level, LivingEntity source, String message, ChatFormatting color) {
-        Component msg = Component.literal(message).withStyle(color);
+    private static void broadcastToNearby(ServerLevel level, LivingEntity source, Component msg) {
         level.getServer().getPlayerList().getPlayers().forEach(p -> {
             if (p.level().equals(level) && p.distanceTo(source) <= PROHIBITION_RADIUS) {
                 p.sendSystemMessage(msg);

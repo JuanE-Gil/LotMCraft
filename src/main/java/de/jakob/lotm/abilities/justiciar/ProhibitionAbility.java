@@ -79,7 +79,7 @@ public class ProhibitionAbility extends SelectableAbility {
         if (resistor.isPresent()) {
             FAIL_COUNT_BY_ENTITY.merge(resistor.get().getUUID(), 1, Integer::sum);
             if (entity instanceof net.minecraft.server.level.ServerPlayer sp) {
-                sp.sendSystemMessage(Component.literal("Your Verdict has Failed").withStyle(ChatFormatting.RED));
+                sp.sendSystemMessage(Component.translatable("ability.lotmcraft.prohibition.verdict_failed").withStyle(ChatFormatting.RED));
             }
             return;
         }
@@ -112,7 +112,7 @@ public class ProhibitionAbility extends SelectableAbility {
         }, null, serverLevel);
 
         String typeName = type.displayName;
-        Component message = Component.literal("[" + typeName + "] is Prohibited here")
+        Component message = Component.translatable("ability.lotmcraft.prohibition.zone_prohibited", typeName)
                 .withStyle(ChatFormatting.GOLD);
 
         serverLevel.getServer().getPlayerList().getPlayers().forEach(p -> {
