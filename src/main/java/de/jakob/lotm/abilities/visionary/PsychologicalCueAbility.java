@@ -9,6 +9,7 @@ import de.jakob.lotm.effect.ModEffects;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
@@ -43,6 +44,12 @@ public class PsychologicalCueAbility extends ToggleAbility {
 
     @Override
     public void start(Level level, LivingEntity entity) {
+        if(level.isClientSide) return;
+
+        if(StoryWritingAbility.writingMap.containsKey(entity.getUUID())){
+            cancel((ServerLevel) level, entity);
+        }
+
         map.put(entity.getUUID(), AbilityUtil.getSeqWithArt(entity, this));
     }
 

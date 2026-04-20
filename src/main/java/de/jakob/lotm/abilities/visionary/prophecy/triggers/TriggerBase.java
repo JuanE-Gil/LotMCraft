@@ -49,6 +49,14 @@ public abstract class  TriggerBase {
         return context.getTargetId();
     }
 
+    public int getActionRequiredSeq(){
+        return action.getRequiredSeq();
+    }
+
+    public ActionsEnum getActionType(){
+        return action.getType();
+    }
+
     public abstract int getRequiredSeq();
 
     public abstract boolean checkTrigger(Level level, LivingEntity entity);

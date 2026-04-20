@@ -687,6 +687,8 @@
   "lotmcraft.placate_ability.description": "Placate someone to stop them from loosing control",
   "ability.lotmcraft.placate.self": "Placate Self",
   "ability.lotmcraft.placate.others": "Placate Others",
+  "ability.lotmcraft.placate.check_cue": "Check Cue",
+  "ability.lotmcraft.placate.remove_cue": "Remove Cue",
   "lotmcraft.psychological_invisibility_ability": "Psychological Invisibility",
   "lotmcraft.psychological_invisibility_ability.description": "Make yourself invisibility to a person's mind",
   "lotmcraft.battle_hypnosis_ability": "Battle Hypnosis",

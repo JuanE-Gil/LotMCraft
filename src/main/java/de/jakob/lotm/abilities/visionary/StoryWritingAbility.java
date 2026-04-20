@@ -7,6 +7,7 @@ import de.jakob.lotm.abilities.visionary.prophecy.triggers.TriggerHelper;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
@@ -42,6 +43,10 @@ public class StoryWritingAbility extends ToggleAbility {
     @Override
     public void start(Level level, LivingEntity entity) {
         if(level.isClientSide) return;
+
+        if(PsychologicalCueAbility.map.containsKey(entity.getUUID())){
+            cancel((ServerLevel) level, entity);
+        }
 
         writingMap.put(entity.getUUID(), AbilityUtil.getSeqWithArt(entity, this));
     }

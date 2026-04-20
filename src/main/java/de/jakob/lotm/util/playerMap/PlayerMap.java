@@ -72,6 +72,12 @@ public class PlayerMap extends SavedData {
         setDirty();
     }
 
+    public void setProphecies(UUID entity, List<Prophecy> list){
+        map.put(entity, StoredData.builder.copyFrom(map.get(entity)).prophecies((LinkedList<Prophecy>) list).build());
+
+        setDirty();
+    }
+
     public void addProphecy(UUID entity, Prophecy prophecy){
         var list = map.get(entity).prophecies();
         list.add(prophecy);
