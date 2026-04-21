@@ -50,7 +50,7 @@ public class GolemCreationAbility extends Ability {
         }
         AttributeInstance attackDamage = golem.getAttribute(Attributes.ATTACK_DAMAGE);
         if (attackDamage != null) {
-            attackDamage.setBaseValue(40.0*(int)Math.max(multiplier(entity)/4,1));
+            attackDamage.setBaseValue(80.0*(int)Math.max(multiplier(entity)/2,1));
         }
 
         golem.setHealth(200.0F*(int)Math.max(multiplier(entity)/4,1));

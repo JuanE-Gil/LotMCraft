@@ -107,7 +107,7 @@ public class WarBannerEntity extends Entity {
             boolean isAlly = !isCaster && casterEntity instanceof LivingEntity livingCaster && !AbilityUtil.mayTarget(livingCaster, e);
 
             if(isCaster || isAlly) {
-                BeyonderData.addModifier(e, "war_song", 1.5f);
+                BeyonderData.addModifier(e, "war_song", 1.05f);
 
                 ServerScheduler.scheduleDelayed(20, () -> {
                     if(e.level() != level() || e.isDeadOrDying() || e.distanceTo(this) > getRadius()) {

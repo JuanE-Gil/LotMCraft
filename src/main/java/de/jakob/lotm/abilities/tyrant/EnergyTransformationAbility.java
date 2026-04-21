@@ -22,7 +22,7 @@ public class EnergyTransformationAbility extends ToggleAbility {
 
     @Override
     public float getSpiritualityCost() {
-        return 16;
+        return 120;
     }
 
     @Override

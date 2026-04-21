@@ -3,6 +3,8 @@ package de.jakob.lotm.abilities.tyrant;
 import de.jakob.lotm.abilities.core.SelectableAbility;
 import de.jakob.lotm.abilities.core.interaction.InteractionHandler;
 import de.jakob.lotm.entity.custom.ability_entities.tyrant_pathway.WindBladeEntity;
+import de.jakob.lotm.network.PacketHandler;
+import de.jakob.lotm.network.packets.toServer.AbilitySelectionPacket;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.data.Location;
 import de.jakob.lotm.util.helper.AbilityUtil;
@@ -25,7 +27,7 @@ public class WindManipulationAbility extends SelectableAbility {
     private final HashSet<UUID> isFlying = new HashSet<>();
 
     public WindManipulationAbility(String id) {
-        super(id, .8f);
+        super(id, 1.5f);
     }
 
     @Override
@@ -43,8 +45,8 @@ public class WindManipulationAbility extends SelectableAbility {
         return new String[]{
                 "ability.lotmcraft.wind_manipulation.wind_blade",
                 "ability.lotmcraft.wind_manipulation.binding",
-                "ability.lotmcraft.wind_manipulation.flight",
-                "ability.lotmcraft.wind_manipulation.boost"
+                "ability.lotmcraft.wind_manipulation.boost",
+                "ability.lotmcraft.wind_manipulation.flight"
         };
     }
 
@@ -57,10 +59,62 @@ public class WindManipulationAbility extends SelectableAbility {
         switch (abilityIndex) {
             case 0 -> windBlade(level, entity);
             case 1 -> binding(level, entity);
-            case 2 -> flight(level, entity);
-            case 3 -> boost(level, entity);
+            case 2 -> boost(level, entity);
+            case 3 -> flight(level, entity);
         }
     }
+
+
+    @Override
+    public void nextAbility(LivingEntity entity){
+        if(getAbilityNames().length == 0)
+            return;
+
+        if(!selectedAbilities.containsKey(entity.getUUID())) {
+            selectedAbilities.put(entity.getUUID(), 0);
+        }
+
+        int selectedAbility = selectedAbilities.get(entity.getUUID());
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+
+        selectedAbility++;
+        if(selectedAbility >= getAbilityNames().length) {
+            selectedAbility = 0;
+        }
+
+        if((entitySeq > 4 && selectedAbility >= 3)){
+            selectedAbility = 0;
+        }
+
+        selectedAbilities.put(entity.getUUID(), selectedAbility);
+        PacketHandler.sendToServer(new AbilitySelectionPacket(getId(), selectedAbility));
+    }
+
+    @Override
+    public void previousAbility(LivingEntity entity){
+        if(getAbilityNames().length == 0)
+            return;
+
+        if(!selectedAbilities.containsKey(entity.getUUID())) {
+            selectedAbilities.put(entity.getUUID(), 0);
+        }
+
+        int selectedAbility = selectedAbilities.get(entity.getUUID());
+        selectedAbility--;
+        if(selectedAbility <= -1) {
+            selectedAbility = getAbilityNames().length - 1;
+        }
+
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+
+        if((entitySeq > 4 && selectedAbility >= 3)){
+            selectedAbility = 0;
+        }
+
+        selectedAbilities.put(entity.getUUID(), selectedAbility);
+        PacketHandler.sendToServer(new AbilitySelectionPacket(getId(), selectedAbility));
+    }
+
 
     private void flight(Level level, LivingEntity entity) {
         if(level.isClientSide)
@@ -96,7 +150,7 @@ public class WindManipulationAbility extends SelectableAbility {
                 return;
             }
 
-            BeyonderData.reduceSpirituality(player, 3);
+            BeyonderData.reduceSpirituality(player, 25);
 
             if(player.isShiftKeyDown())
                 player.setDeltaMovement(new Vec3(0, 0, 0));
@@ -123,7 +177,7 @@ public class WindManipulationAbility extends SelectableAbility {
         Location loc = new Location(targetPos, level);
 
         int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
-        ServerScheduler.scheduleForDuration(0, 1, 20 * 13, () -> {
+        ServerScheduler.scheduleForDuration(0, 1, 20 * 13* (int) Math.max(multiplier(entity)/4,1), () -> {
             for(LivingEntity e : AbilityUtil.getNearbyEntities(entity, (ServerLevel) level, targetPos, 2.5)) {
                 // Blink Escape - only the bound entity can free itself
                 if(InteractionHandler.isInteractionPossibleForEntity(loc, "blink_escape", entitySeq, e)) {
@@ -152,7 +206,7 @@ public class WindManipulationAbility extends SelectableAbility {
         ParticleUtil.spawnParticles((ServerLevel) level, ParticleTypes.CLOUD, entity.position(), 45, .5, .25);
 
         Vec3 dir = entity.getLookAngle().normalize();
-        dir = dir.multiply(2, 3, 2);
+        dir = dir.multiply(2* (int) Math.max(multiplier(entity)/4,1), 3* (int) Math.max(multiplier(entity)/4,1), 2* (int) Math.max(multiplier(entity)/4,1));
         entity.setDeltaMovement(dir);
 
         entity.hurtMarked = true;
@@ -169,9 +223,9 @@ public class WindManipulationAbility extends SelectableAbility {
 
         level.playSound(null, startPos.x, startPos.y, startPos.z, SoundEvents.BREEZE_WIND_CHARGE_BURST, entity.getSoundSource(), 1.0f, 1.0f);
 
-        WindBladeEntity blade = new WindBladeEntity(level, entity, DamageLookup.lookupDamage(6, .75) * multiplier(entity), BeyonderData.isGriefingEnabled(entity));
+        WindBladeEntity blade = new WindBladeEntity(level, entity, DamageLookup.lookupDamage(6, .75) * (int) Math.max(multiplier(entity)/4,1), BeyonderData.isGriefingEnabled(entity));
         blade.setPos(startPos.x, startPos.y, startPos.z); // Set initial position
-        blade.shoot(direction.x, direction.y, direction.z, 1.2f, 0);
+        blade.shoot(direction.x, direction.y, direction.z, 2.4f* (int) Math.max(multiplier(entity)/4,1), 0);
         level.addFreshEntity(blade);
     }
 }

@@ -100,8 +100,8 @@ public class FlameAuthorityAbility extends SelectableAbility {
         serverLevel.playSound(null, startPos.x, startPos.y, startPos.z, SoundEvents.BLAZE_SHOOT, entity.getSoundSource(), 10.0f, 1.0f);
         serverLevel.playSound(null, startPos.x, startPos.y, startPos.z, SoundEvents.BLAZE_SHOOT, entity.getSoundSource(), 10.0f, 1.0f);
 
-        SpearOfDestructionProjectileEntity spear = new SpearOfDestructionProjectileEntity(serverLevel, entity, DamageLookup.lookupDamage(1, 0.6) *(int) Math.max(multiplier(entity)/4,1), BeyonderData.isGriefingEnabled(entity));
-        //LOTMCraft.LOGGER.info("damage {} multiplier {}",DamageLookup.lookupDamage(1, 0.4),(int) Math.max(multiplier(entity)/4,1));
+        SpearOfDestructionProjectileEntity spear = new SpearOfDestructionProjectileEntity(serverLevel, entity, DamageLookup.lookupDamage(1, 0.8) *(int) Math.max(multiplier(entity)/4,1), BeyonderData.isGriefingEnabled(entity));
+        LOTMCraft.LOGGER.info("damage {} multiplier {}",DamageLookup.lookupDamage(1, 0.8),multiplier(entity));
         spear.setPos(startPos.x, startPos.y, startPos.z);
         spear.shoot(direction.x, direction.y, direction.z, 3f*(int) Math.max(multiplier(entity)/4,1), 0);
         serverLevel.addFreshEntity(spear);

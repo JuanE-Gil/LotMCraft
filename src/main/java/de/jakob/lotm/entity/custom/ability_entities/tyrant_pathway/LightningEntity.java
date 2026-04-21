@@ -50,7 +50,7 @@ public class LightningEntity extends Entity {
     private float currentDistance = 0f;
     private final List<Vec3> lightningPoints = new ArrayList<>();
     private final int updateInterval = 1; // Ticks between path updates
-    private float step = 4;
+    private float step = 16;
     private int color = 0x11A8DD;
     private boolean griefing;
     private float explosionPower;
@@ -80,7 +80,7 @@ public class LightningEntity extends Entity {
         this.explosionPower = explosionPower;
         this.griefing = griefing;
         this.currentDistance = 1.0f; // Start with some initial distance
-        this.step = 4f;
+        this.step = 16f;
         this.color = color;
         setPos(start.x, start.y, start.z);
 
@@ -93,7 +93,7 @@ public class LightningEntity extends Entity {
             entityData.set(DIR_Y, (float) -1);
             entityData.set(DIR_Z, (float) 0);
             entityData.set(MAX_DISTANCE, maxDistance);
-            entityData.set(STEP, 4f);
+            entityData.set(STEP, 16f);
             entityData.set(COLOR, color);
 
             for(int i = 0; i < branches; i++) {

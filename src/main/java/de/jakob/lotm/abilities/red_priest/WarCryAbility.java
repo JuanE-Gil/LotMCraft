@@ -57,7 +57,7 @@ public class WarCryAbility extends Ability {
             e.setDeltaMovement(knockBack);
         });
 
-        BeyonderData.addModifier(entity, "war_cry", 1.5f);
+        BeyonderData.addModifier(entity, "war_cry", 1.05f);
         entity.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 20 * 12*(int) Math.max(multiplier(entity)/4,1), 3, false, false, false));
         entity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 20 * 12*(int) Math.max(multiplier(entity)/4,1), 4, false, false, false));
         entity.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 20 * 12*(int) Math.max(multiplier(entity)/4,1), 1, false, false, false));

@@ -71,21 +71,40 @@ public class FlameMasteryAbility extends SelectableAbility {
     private final DustParticleOptions dust = new DustParticleOptions(new Vector3f(1.0f, .95f, .95f), 2.0f);
 
     private void flameTransformation(ServerLevel level, LivingEntity entity) {
-        level.playSound(null, entity.blockPosition(), SoundEvents.BLAZE_SHOOT, entity.getSoundSource(), 1.0f, 1.0f);
-        if(transformedEntities.contains(entity.getUUID())) {
-            transformedEntities.remove(entity.getUUID());
+        level.playSound(null, entity.blockPosition(), net.minecraft.sounds.SoundEvents.BLAZE_SHOOT, entity.getSoundSource(), 1.0f, 1.0f);
+
+        UUID entityId = entity.getUUID();
+
+        if(transformedEntities.contains(entityId)) {
+            transformedEntities.remove(entityId);
             return;
         }
 
-        transformedEntities.add(entity.getUUID());
+        transformedEntities.add(entityId);
         AtomicBoolean shouldStop = new AtomicBoolean(false);
+
         ServerScheduler.scheduleUntil(level, () -> {
-            if(!transformedEntities.contains(entity.getUUID())) {
+            de.jakob.lotm.util.BeyonderData.reduceSpirituality(entity, 25);
+
+            if (de.jakob.lotm.util.BeyonderData.getSpirituality(entity) <= 0) {
+                if (entity instanceof net.minecraft.server.level.ServerPlayer player) {
+                    player.connection.send(new net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket(
+                            net.minecraft.network.chat.Component.literal("Your spirituality is exhausted.").withColor(0xFF422a2a)
+                    ));
+                }
+                transformedEntities.remove(entityId);
                 shouldStop.set(true);
                 return;
             }
-            ParticleUtil.spawnParticles(level, ParticleTypes.FLAME, entity.getEyePosition(), 60, 1.2, .05);
-            ParticleUtil.spawnParticles(level, dust, entity.getEyePosition(), 30, 1.2, .05);
+
+            if(!transformedEntities.contains(entityId)) {
+                shouldStop.set(true);
+                return;
+            }
+
+            de.jakob.lotm.util.helper.ParticleUtil.spawnParticles(level, net.minecraft.core.particles.ParticleTypes.FLAME, entity.getEyePosition(), 60, 1.2, .05);
+            de.jakob.lotm.util.helper.ParticleUtil.spawnParticles(level, dust, entity.getEyePosition(), 30, 1.2, .05);
+
             if(!entity.isShiftKeyDown())
                 entity.setDeltaMovement(entity.getLookAngle().normalize());
             else

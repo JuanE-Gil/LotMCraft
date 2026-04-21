@@ -23,7 +23,7 @@ public class LightningBranchAbility extends Ability {
 
     @Override
     public float getSpiritualityCost() {
-        return 450;
+        return 900;
     }
 
     @Override
@@ -34,7 +34,7 @@ public class LightningBranchAbility extends Ability {
         Vec3 dir = entity.getLookAngle().normalize();
         Vec3 startPos = entity.position().add(dir).add(0, 1.5, 0);
 
-        LightningBranchEntity branch = new LightningBranchEntity(level, entity, startPos, dir, 30, DamageLookup.lookupDamage(3, .5) * multiplier(entity)/2f);
+        LightningBranchEntity branch = new LightningBranchEntity(level, entity, startPos, dir, 30, DamageLookup.lookupDamage(3, .3) * (int) Math.max(multiplier(entity)/4,1));
         level.addFreshEntity(branch);
     }
 }
