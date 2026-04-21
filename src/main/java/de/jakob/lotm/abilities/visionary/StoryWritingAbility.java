@@ -66,7 +66,7 @@ public class StoryWritingAbility extends ToggleAbility {
 
     @Override
     protected float getSpiritualityCost() {
-        return 150;
+        return 50;
     }
 
     @SubscribeEvent

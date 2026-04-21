@@ -455,7 +455,7 @@ public class ClientHandler {
     }
 
     public static void handlePlayerDivinationScreenPacket(OpenPlayerDivinationScreenPacket packet) {
-        Minecraft.getInstance().setScreen(new PlayerSelectionGui(packet.players()));
+        Minecraft.getInstance().setScreen(new PlayerSelectionGui(packet.players(), packet.types()));
     }
 
     public static void handleStructureDivinationScreenPacket(OpenStructureDivinationScreenPacket packet) {

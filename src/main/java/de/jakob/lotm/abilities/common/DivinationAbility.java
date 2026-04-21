@@ -10,6 +10,7 @@ import de.jakob.lotm.network.packets.toClient.OpenPlayerDivinationScreenPacket;
 import de.jakob.lotm.network.packets.toClient.OpenStructureDivinationScreenPacket;
 import de.jakob.lotm.network.packets.toClient.SyncDangerPremonitionAbilityPacket;
 import de.jakob.lotm.util.BeyonderData;
+import de.jakob.lotm.util.PlayerSelectionWorkType;
 import de.jakob.lotm.util.data.PlayerInfo;
 import de.jakob.lotm.util.scheduling.ClientScheduler;
 import de.jakob.lotm.util.scheduling.ServerScheduler;
@@ -190,7 +191,7 @@ public class DivinationAbility extends SelectableAbility {
 
         PacketDistributor.sendToPlayer(
                 player,
-                new OpenPlayerDivinationScreenPacket(players)
+                new OpenPlayerDivinationScreenPacket(players, PlayerSelectionWorkType.DIVINATION)
         );
     }
 

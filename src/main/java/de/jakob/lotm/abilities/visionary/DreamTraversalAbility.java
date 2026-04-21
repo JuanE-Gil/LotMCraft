@@ -2,16 +2,21 @@ package de.jakob.lotm.abilities.visionary;
 
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.SelectableAbility;
+import de.jakob.lotm.abilities.visionary.passives.MetaAwarenessAbility;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.attachments.ParasitationComponent;
 import de.jakob.lotm.damage.ModDamageTypes;
 import de.jakob.lotm.effect.ModEffects;
 import de.jakob.lotm.network.PacketHandler;
+import de.jakob.lotm.network.packets.toClient.OpenPlayerDivinationScreenPacket;
 import de.jakob.lotm.network.packets.toServer.AbilitySelectionPacket;
 import de.jakob.lotm.util.BeyonderData;
+import de.jakob.lotm.util.PlayerSelectionWorkType;
+import de.jakob.lotm.util.data.PlayerInfo;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -25,8 +30,10 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -40,6 +47,8 @@ public class DreamTraversalAbility extends SelectableAbility {
     public DreamTraversalAbility(String id) {
         super(id, 1f);
         this.autoClear = false;
+        canBeUsedInArtifact = false;
+        canBeCopied = false;
     }
 
     @Override
@@ -56,6 +65,7 @@ public class DreamTraversalAbility extends SelectableAbility {
     protected String[] getAbilityNames() {
         return new String[]{
                 "ability.lotmcraft.dream_traversal.jump",
+                "ability.lotmcraft.dream_traversal.jump_range",
                 "ability.lotmcraft.dream_traversal.hide"
         };
     }
@@ -77,7 +87,7 @@ public class DreamTraversalAbility extends SelectableAbility {
             selectedAbility = 0;
         }
 
-        if((entitySeq > 3 && selectedAbility >= 0)){
+        if((entitySeq > 3 && selectedAbility >= 1)){
             selectedAbility = 0;
         }
 
@@ -101,7 +111,7 @@ public class DreamTraversalAbility extends SelectableAbility {
         }
 
         int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
-        if((entitySeq > 3 && selectedAbility >= 0)){
+        if((entitySeq > 3 && selectedAbility >= 1)){
             selectedAbility = 0;
         }
 
@@ -114,21 +124,51 @@ public class DreamTraversalAbility extends SelectableAbility {
     protected void castSelectedAbility(Level level, LivingEntity entity, int abilityIndex) {
         switch (abilityIndex) {
             case 0 -> jump(level, entity);
-            case 1 -> hide(level, entity);
+            case 1 -> jumpInRange(level, entity);
+            case 2 -> hide(level, entity);
         }
     }
 
-    private boolean requiresAsleep(LivingEntity entity) {
-        return AbilityUtil.getSeqWithArt(entity, this) > 3;
+    private void jumpInRange(Level level, LivingEntity entity){
+        if (!(level instanceof ServerLevel serverLevel)) return;
+
+        var server = entity.getServer();
+        if (server == null) return;
+
+        if(!(entity instanceof ServerPlayer player)) return;
+
+        List<PlayerInfo> players = server.getPlayerList()
+                .getPlayers()
+                .stream()
+                .filter(p -> p != player)
+                .map(p -> new PlayerInfo(p.getUUID(), p.getGameProfile().getName()))
+                .toList();
+
+        PacketDistributor.sendToPlayer(
+                player,
+                new OpenPlayerDivinationScreenPacket(players, PlayerSelectionWorkType.DREAM_TRAVERSAL)
+        );
     }
 
     private void jump(Level level, LivingEntity entity) {
         if (!(level instanceof ServerLevel serverLevel)) return;
 
-        LivingEntity target = AbilityUtil.getTargetEntity(entity, 200 * (int) multiplier(entity), 2);
+        LivingEntity target = AbilityUtil.getTargetEntity(entity, getRangeBySeq(BeyonderData.getSequence(entity)), 2);
 
         if (target == null) {
             AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.dream_traversal.no_target").withColor(0xFFff124d));
+            return;
+        }
+
+        int targetSeq = BeyonderData.getSequence(target);
+        if(BeyonderData.getPathway(target).equals("visionary") && BeyonderData.getSequence(target) <
+                BeyonderData.getSequence(entity)){
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.dream_traversal.failed").withColor(0xFFff124d));
+
+            if(targetSeq <= 1 && target instanceof ServerPlayer targetPlayer && entity instanceof ServerPlayer entityPlayer){
+                MetaAwarenessAbility.onDivined(targetPlayer, entityPlayer);
+            }
+
             return;
         }
 
@@ -152,12 +192,13 @@ public class DreamTraversalAbility extends SelectableAbility {
             newParasite.setParasiteUUID(entity.getUUID());
         }
 
-        entity.teleportTo(target.getX(), target.getY(), target.getZ());
+        performTeleport(entity, target);
     }
 
     private void hide(Level level, LivingEntity entity) {
         if (level.isClientSide) return;
         if (!(level instanceof ServerLevel serverLevel)) return;
+        if (!(entity instanceof ServerPlayer)) return;
 
         if (hideMap.containsKey(entity.getUUID())) {
             cancelHide(serverLevel, entity);
@@ -172,10 +213,23 @@ public class DreamTraversalAbility extends SelectableAbility {
             return;
         }
 
+        int targetSeq = BeyonderData.getSequence(target);
+        if(BeyonderData.getPathway(target).equals("visionary") && BeyonderData.getSequence(target) <
+                BeyonderData.getSequence(entity)){
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.dream_traversal.failed").withColor(0xFFff124d));
+
+            if(targetSeq <= 1 && target instanceof ServerPlayer targetPlayer && entity instanceof ServerPlayer entityPlayer){
+                MetaAwarenessAbility.onDivined(targetPlayer, entityPlayer);
+            }
+
+            return;
+        }
+
         if (requiresAsleep(entity) && !target.hasEffect(ModEffects.ASLEEP)) {
             AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.dream_traversal.must_be_asleep").withColor(0xFFff124d));
             return;
         }
+
 
         hideMap.put(entity.getUUID(), target.getUUID());
         // Store sequence at cast time for artifact stuff
@@ -219,6 +273,26 @@ public class DreamTraversalAbility extends SelectableAbility {
             player.onUpdateAbilities();
             player.hurtMarked = true;
         }
+    }
+
+    public static boolean requiresAsleep(LivingEntity entity) {
+        return BeyonderData.getSequence(entity) > 3;
+    }
+
+    public static int getRangeBySeq(int seq){
+        return switch (seq){
+            case 5 -> 100;
+            case 4 -> 250;
+            case 3 -> 500;
+            case 2 -> 1000;
+            case 1 -> 2500;
+            case 0 -> 10000;
+            default -> 0;
+        };
+    }
+
+    public static void performTeleport(LivingEntity entity, LivingEntity target){
+        entity.teleportTo(target.getX(), target.getY(), target.getZ());
     }
 
     @SubscribeEvent
