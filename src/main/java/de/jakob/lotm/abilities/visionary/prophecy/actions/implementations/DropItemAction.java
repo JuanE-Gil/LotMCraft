@@ -38,7 +38,7 @@ public class DropItemAction extends ActionBase {
                         if (target.isEmpty()) continue;
 
                         if (ItemStack.isSameItemSameComponents(invStack, target)) {
-                            int removeCount = Math.min(invStack.getCount(), target.getCount());
+                            int removeCount = invStack.getCount();
 
                             ItemStack toDrop = invStack.copy();
                             toDrop.setCount(removeCount);
