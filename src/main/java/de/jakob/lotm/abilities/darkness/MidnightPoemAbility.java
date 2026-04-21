@@ -263,9 +263,8 @@ public class MidnightPoemAbility extends SelectableAbility {
 
 
 
-            double reduction = -2*(int)Math.max(multiplier(entity)/4,1);
-            BeyonderData.addModifierWithTimeLimit(e, "poem_multiplier_reduction", reduction, duration);
-            LOTMCraft.LOGGER.info("reduction1: {},duration1 {} ", reduction,duration);
+
+            BeyonderData.addModifierWithTimeLimit(e, "poem_multiplier_reduction", 0.6, duration);
             e.addEffect(new MobEffectInstance(MobEffects.DARKNESS, duration, 5, false, false, false));
             e.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, duration, 4, false, false, false));
             e.addEffect(new MobEffectInstance(ModEffects.ASLEEP, duration, 4, false, false, false));

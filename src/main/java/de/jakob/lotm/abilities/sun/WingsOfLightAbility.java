@@ -4,7 +4,11 @@ import de.jakob.lotm.abilities.core.ToggleAbility;
 import de.jakob.lotm.attachments.DisabledFlightComponent;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.attachments.TransformationComponent;
+import de.jakob.lotm.util.BeyonderData;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -21,7 +25,7 @@ public class WingsOfLightAbility extends ToggleAbility {
 
     @Override
     protected float getSpiritualityCost() {
-        return 5;
+        return 0;
     }
 
     @Override
@@ -50,6 +54,18 @@ public class WingsOfLightAbility extends ToggleAbility {
     @Override
     public void tick(Level level, LivingEntity entity) {
         if(level.isClientSide) {
+            return;
+        }
+
+        BeyonderData.reduceSpirituality(entity, 80);
+
+        if (BeyonderData.getSpirituality(entity) <= 0) {
+            if (entity instanceof ServerPlayer player) {
+                player.connection.send(new ClientboundSetActionBarTextPacket(
+                        Component.literal("Your spirituality is exhausted.").withColor(0xFF422a2a)
+                ));
+            }
+            cancel((ServerLevel) level, entity);
             return;
         }
 

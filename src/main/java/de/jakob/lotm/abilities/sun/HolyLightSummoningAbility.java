@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class HolyLightSummoningAbility extends Ability {
     public HolyLightSummoningAbility(String id) {
-        super(id, .9f, "purification", "light_source", "light_weak");
+        super(id, 1.5f, "purification", "light_source", "light_weak");
         postsUsedAbilityEventManually = true;
         interactionRadius = 3.5;
     }
@@ -43,7 +43,7 @@ public class HolyLightSummoningAbility extends Ability {
 
     @Override
     protected float getSpiritualityCost() {
-        return 32;
+        return 64;
     }
 
     final int radius = 40;
@@ -79,9 +79,9 @@ public class HolyLightSummoningAbility extends Ability {
                 lights.add(blockPos);
             }
 
-            AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 5f, DamageLookup.lookupDamage(7, .8) * multiplier, pos, true, false, false, 10, ModDamageTypes.source(level, ModDamageTypes.PURIFICATION, entity));
+            AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 5f* (int) Math.max(multiplier(entity)/4,1), DamageLookup.lookupDamage(7, .8) * (int) Math.max(multiplier(entity)/4,1), pos, true, false, false, 10, ModDamageTypes.source(level, ModDamageTypes.PURIFICATION, entity));
 
-            currentPos.set(pos.subtract(0, 1, 0));
+            currentPos.set(pos.subtract(0, 2.5, 0));
         }, null, (ServerLevel) level, () -> AbilityUtil.getTimeInArea(entity, new Location(entity.position(), level)));
 
         ServerScheduler.scheduleDelayed(22, () -> {

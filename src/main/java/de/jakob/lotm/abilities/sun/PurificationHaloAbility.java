@@ -4,6 +4,7 @@ import com.google.common.util.concurrent.AtomicDouble;
 import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.damage.ModDamageTypes;
 import de.jakob.lotm.util.helper.AbilityUtil;
+import de.jakob.lotm.util.helper.DamageLookup;
 import de.jakob.lotm.util.helper.RingEffectManager;
 import de.jakob.lotm.util.scheduling.ServerScheduler;
 import net.minecraft.server.level.ServerLevel;
@@ -16,7 +17,7 @@ import java.util.Map;
 
 public class PurificationHaloAbility extends Ability {
     public PurificationHaloAbility(String id) {
-        super(id, 3, "purification", "light_weak");
+        super(id, 9, "purification", "light_weak");
         interactionRadius = 10;
 
     }
@@ -28,7 +29,7 @@ public class PurificationHaloAbility extends Ability {
 
     @Override
     protected float getSpiritualityCost() {
-        return 40;
+        return 120;
     }
 
     @Override
@@ -42,7 +43,7 @@ public class PurificationHaloAbility extends Ability {
         AtomicDouble radius = new AtomicDouble(.5);
         double multiplier = multiplier(entity);
         ServerScheduler.scheduleForDuration(0, 2, 20 * 5, () -> {
-            AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, radius.get() - .25, radius.get() + .25,15 * multiplier, entity.position(), true, false, true, 0, ModDamageTypes.source(level, ModDamageTypes.PURIFICATION, entity));
+            AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, radius.get() - .25, radius.get() + .25, DamageLookup.lookupDamage(5, .8) * (int) Math.max(multiplier(entity)/4,1), entity.position(), true, false, true, 0, ModDamageTypes.source(level, ModDamageTypes.PURIFICATION, entity));
             radius.addAndGet(.25f);
         });
     }

@@ -3,6 +3,7 @@ package de.jakob.lotm.abilities.sun;
 import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.util.data.Location;
 import de.jakob.lotm.util.helper.AbilityUtil;
+import de.jakob.lotm.util.helper.DamageLookup;
 import de.jakob.lotm.util.helper.ParticleUtil;
 import de.jakob.lotm.util.helper.VectorUtil;
 import de.jakob.lotm.util.scheduling.ServerScheduler;
@@ -24,7 +25,7 @@ import java.util.Map;
 
 public class WallOfLightAbility extends Ability {
     public WallOfLightAbility(String id) {
-        super(id, 5);
+        super(id, 15);
         canBeCopied = false;
     }
 
@@ -46,7 +47,7 @@ public class WallOfLightAbility extends Ability {
         if(level.isClientSide)
             return;
 
-        Vec3 targetPos = AbilityUtil.getTargetLocation(entity, 12, 1.4f);
+        Vec3 targetPos = AbilityUtil.getTargetLocation(entity, 12* (int) Math.max(multiplier(entity)/4,1), 1.4f);
 
         Vec3 perpendicular = VectorUtil.getPerpendicularVector(entity.getLookAngle()).normalize();
 
@@ -65,12 +66,12 @@ public class WallOfLightAbility extends Ability {
             }
         }
 
-        ServerScheduler.scheduleForDuration(0, 7, 20 * 20, () -> {
+        ServerScheduler.scheduleForDuration(0, 7, 20 * 15* (int) Math.max(multiplier(entity)/4,1), () -> {
             for(BlockPos pos : blocks) {
                 if(random.nextBoolean())
                     ParticleUtil.spawnParticles((ServerLevel) level, random.nextBoolean() ? dust : ParticleTypes.END_ROD, pos.getCenter(), 1, 0.5, 0.02);
 
-                AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 1.2f, 16 * multiplier(entity), pos.getCenter(), true, false, false, 15);
+                AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 1.2f, DamageLookup.lookupDamage(3, .35) * (int) Math.max(multiplier(entity)/4,1), pos.getCenter(), true, false, false, 15);
 
                 for(LivingEntity target : AbilityUtil.getNearbyEntities(entity, (ServerLevel) level, pos.getCenter(), 1f)) {
                     Vec3 knockback = target.position().subtract(pos.getCenter()).normalize().add(0, .2, 0).scale(1.4f);

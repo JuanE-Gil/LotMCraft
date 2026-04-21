@@ -121,7 +121,6 @@ public class WaterMasteryAbility extends SelectableAbility {
         activeWaterWalls.add(wallData);
 
         int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
-        double multiplier = multiplier(entity);
 
         ServerScheduler.scheduleForDuration(0, 7, 20 * 30* (int) Math.max(multiplier(entity)/4,1), () -> {
             if(random.nextInt(10) == 0)

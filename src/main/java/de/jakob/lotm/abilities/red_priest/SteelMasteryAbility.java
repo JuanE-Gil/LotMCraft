@@ -127,7 +127,7 @@ public class SteelMasteryAbility extends SelectableAbility {
         ServerScheduler.scheduleUntil(level, () -> {
             int seq = BeyonderData.getSequence(entity);
             int effectlevel =  seq<=2? 1: 0;
-            if (seq<=2) {BeyonderData.reduceSpirituality(entity, 40);} else{
+            if (seq<=2) {BeyonderData.reduceSpirituality(entity, 32);} else{
             BeyonderData.reduceSpirituality(entity, 16);};
 
             if(BeyonderData.getSpirituality(entity) <= 0) {

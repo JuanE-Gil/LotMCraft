@@ -99,8 +99,7 @@ public class SwordOfDarknessAbility extends Ability {
                             Location eLoc = new Location(e.position(), serverLevel);
                             boolean hasMorale = InteractionHandler.isInteractionPossibleForEntity(eLoc, "morale_boost", seq, e);
                             int duration = hasMorale? 20*2:20*4;
-                            double reduction = -8*(int)Math.max(multiplier/4,1);
-                            BeyonderData.addModifierWithTimeLimit(e, "sword_of_darkness_multiplier_reduction", reduction, duration);
+                            BeyonderData.addModifierWithTimeLimit(e, "sword_of_darkness_multiplier_reduction", 0.3, duration);
                         };
                     });
                     if(BeyonderData.isGriefingEnabled(entity)) {

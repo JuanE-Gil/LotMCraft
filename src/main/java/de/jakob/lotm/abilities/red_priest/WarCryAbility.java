@@ -57,10 +57,10 @@ public class WarCryAbility extends Ability {
             e.setDeltaMovement(knockBack);
         });
 
-        BeyonderData.addModifier(entity, "war_cry", 1.05f);
+        BeyonderData.addModifierWithTimeLimit(entity, "war_cry", 1.05f, 20L *30*(int) Math.max(multiplier(entity)/4,1));
         entity.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 20 * 12*(int) Math.max(multiplier(entity)/4,1), 3, false, false, false));
         entity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 20 * 12*(int) Math.max(multiplier(entity)/4,1), 4, false, false, false));
-        entity.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 20 * 12*(int) Math.max(multiplier(entity)/4,1), 1, false, false, false));
+        //entity.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 20 * 12*(int) Math.max(multiplier(entity)/4,1), 1, false, false, false));
 
         ParticleUtil.spawnParticles((ServerLevel) level, ParticleTypes.CLOUD, startPos.add(0, 1, 0), 600, .75, .75, .75, .15);
         ParticleUtil.spawnParticles((ServerLevel) level, ParticleTypes.CLOUD, startPos, 600, 7, .2, 7, .005);
