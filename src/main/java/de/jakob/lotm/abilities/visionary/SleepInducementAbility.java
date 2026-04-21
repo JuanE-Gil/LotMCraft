@@ -1,6 +1,7 @@
 package de.jakob.lotm.abilities.visionary;
 
 import de.jakob.lotm.abilities.core.Ability;
+import de.jakob.lotm.abilities.visionary.passives.MetaAwarenessAbility;
 import de.jakob.lotm.effect.ModEffects;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.data.Location;
@@ -53,8 +54,17 @@ public class SleepInducementAbility extends Ability {
             return;
         }
 
-        if(AbilityUtil.getSeqWithArt(entity, this) > BeyonderData.getSequence(target))
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+        int targetSeq = BeyonderData.getSequence(target);
+        if(BeyonderData.getPathway(target).equals("visionary") && targetSeq < entitySeq){
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.dream_traversal.failed").withColor(0xFFff124d));
+
+            if(targetSeq <= 1 && target instanceof ServerPlayer targetPlayer && entity instanceof ServerPlayer entityPlayer){
+                MetaAwarenessAbility.onDivined(targetPlayer, entityPlayer);
+            }
+
             return;
+        }
 
         // Add sleep effect
         target.addEffect(new MobEffectInstance(ModEffects.ASLEEP, 20 * 12, 1, false, false, false));

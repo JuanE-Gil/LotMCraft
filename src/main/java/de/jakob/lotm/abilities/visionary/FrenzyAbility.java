@@ -1,6 +1,7 @@
 package de.jakob.lotm.abilities.visionary;
 
 import de.jakob.lotm.abilities.core.Ability;
+import de.jakob.lotm.abilities.visionary.passives.MetaAwarenessAbility;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.damage.ModDamageTypes;
 import de.jakob.lotm.effect.ModEffects;
@@ -61,9 +62,14 @@ public class FrenzyAbility extends Ability {
         int amplifier = getAmplifier(entity, target);
 
         int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+        int targetSeq = BeyonderData.getSequence(target);
+        if(BeyonderData.getPathway(target).equals("visionary") && targetSeq < entitySeq){
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.dream_traversal.failed").withColor(0xFFff124d));
 
-        if(BeyonderData.getPathway(target).equals("visionary") && BeyonderData.getSequence(target) < entitySeq){
-            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.frenzy.failed").withColor(0xFFff124d));
+            if(targetSeq <= 1 && target instanceof ServerPlayer targetPlayer && entity instanceof ServerPlayer entityPlayer){
+                MetaAwarenessAbility.onDivined(targetPlayer, entityPlayer);
+            }
+
             return;
         }
 

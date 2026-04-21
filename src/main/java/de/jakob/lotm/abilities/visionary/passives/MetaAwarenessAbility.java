@@ -23,7 +23,7 @@ import java.util.UUID;
 @EventBusSubscriber(modid = LOTMCraft.MOD_ID)
 public class MetaAwarenessAbility extends PassiveAbilityItem {
     private static final Map<UUID, Long> COOLDOWNS = new HashMap<>();
-    private static final long COOLDOWN_MS = 1000; // 1s cooldown
+    private static final long COOLDOWN_MS = 5000; // 5s cooldown
 
     public MetaAwarenessAbility(Item.Properties properties) {
         super(properties);

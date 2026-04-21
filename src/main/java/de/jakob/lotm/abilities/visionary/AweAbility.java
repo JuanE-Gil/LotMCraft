@@ -2,6 +2,7 @@ package de.jakob.lotm.abilities.visionary;
 
 import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.abilities.core.interaction.InteractionHandler;
+import de.jakob.lotm.abilities.visionary.passives.MetaAwarenessAbility;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.data.Location;
 import de.jakob.lotm.util.helper.AbilityUtil;
@@ -12,6 +13,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -58,6 +60,10 @@ public class AweAbility extends Ability {
         AbilityUtil.getNearbyEntities(entity, (ServerLevel) level, entity.position(), 25).forEach(e -> {
             if(BeyonderData.getPathway(e).equals("visionary") && BeyonderData.getSequence(e) < entitySeq){
                 AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.frenzy.failed").withColor(0xFFff124d));
+
+                if(BeyonderData.getSequence(e) <= 1 && e instanceof ServerPlayer targetPlayer && entity instanceof ServerPlayer entityPlayer){
+                    MetaAwarenessAbility.onDivined(targetPlayer, entityPlayer);
+                }
             }
             else {
                 if (BeyonderData.isBeyonder(e)) {
