@@ -57,7 +57,7 @@ public class DoorToTheUnderworldAbility extends SelectableAbility {
             new DustParticleOptions(new Vector3f(0.05f, 0.0f, 0.15f), 2.0f);
 
     public DoorToTheUnderworldAbility(String id) {
-        super(id, 10f);
+        super(id, 10f, "death");
     }
 
     @Override

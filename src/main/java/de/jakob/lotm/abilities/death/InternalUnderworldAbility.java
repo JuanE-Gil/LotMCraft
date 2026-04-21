@@ -40,6 +40,9 @@ public class InternalUnderworldAbility extends SelectableAbility {
     private static final String STORED_SOULS_TAG = "InternalUnderworldSouls";
     private static final float CAPTURE_CHANCE = 0.5f;
 
+    private record ActiveSoul(LivingEntity entity, CompoundTag soulData) {}
+    private static final java.util.Map<UUID, List<ActiveSoul>> activeSouls = new java.util.concurrent.ConcurrentHashMap<>();
+
     /** Maximum souls that can be stored, by sequence level. */
     private static int getMaxSouls(int sequence) {
         return switch (sequence) {
@@ -77,7 +80,8 @@ public class InternalUnderworldAbility extends SelectableAbility {
     protected String[] getAbilityNames() {
         return new String[]{
                 "ability.lotmcraft.internal_underworld.summon",
-                "ability.lotmcraft.internal_underworld.summon_all"
+                "ability.lotmcraft.internal_underworld.summon_all",
+                "ability.lotmcraft.internal_underworld.retrieve"
         };
     }
 
@@ -91,6 +95,7 @@ public class InternalUnderworldAbility extends SelectableAbility {
         switch (selectedAbility) {
             case 0 -> summonSoul(serverLevel, player);
             case 1 -> summonAllSouls(serverLevel, player);
+            case 2 -> retrieveSouls(player);
         }
     }
 
@@ -254,6 +259,44 @@ public class InternalUnderworldAbility extends SelectableAbility {
     // Summon All — spawns every stored soul at once up to the sequence cap
     // -------------------------------------------------------------------------
 
+    public static void retrieveSoulsOnLogout(ServerPlayer player) {
+        List<ActiveSoul> souls = activeSouls.remove(player.getUUID());
+        if (souls == null) return;
+        for (ActiveSoul soul : souls) {
+            if (soul.entity().isAlive()) {
+                addStoredSoul(player, soul.soulData());
+                soul.entity().discard();
+            }
+        }
+    }
+
+    public static void despawnSoulsOnDeath(ServerPlayer player) {
+        List<ActiveSoul> souls = activeSouls.remove(player.getUUID());
+        if (souls == null) return;
+        for (ActiveSoul soul : souls) {
+            if (soul.entity().isAlive()) soul.entity().discard();
+        }
+    }
+
+    private void retrieveSouls(ServerPlayer player) {
+        List<ActiveSoul> souls = activeSouls.remove(player.getUUID());
+        if (souls == null || souls.isEmpty()) {
+            player.sendSystemMessage(Component.translatable("ability.lotmcraft.internal_underworld.no_active_souls")
+                    .withStyle(ChatFormatting.RED));
+            return;
+        }
+        int count = 0;
+        for (ActiveSoul soul : souls) {
+            if (soul.entity().isAlive()) {
+                addStoredSoul(player, soul.soulData());
+                soul.entity().discard();
+                count++;
+            }
+        }
+        player.sendSystemMessage(Component.translatable("ability.lotmcraft.internal_underworld.retrieved", count)
+                .withStyle(ChatFormatting.DARK_AQUA));
+    }
+
     private void summonAllSouls(ServerLevel level, ServerPlayer player) {
         List<CompoundTag> storedSouls = getStoredSouls(player);
 
@@ -361,6 +404,15 @@ public class InternalUnderworldAbility extends SelectableAbility {
 
             if (spawned && entity instanceof LivingEntity livingEntity) {
                 SubordinateUtils.turnEntityIntoSubordinate(livingEntity, player, false);
+
+                // Ally with all existing active souls of this player
+                List<ActiveSoul> existing = activeSouls.computeIfAbsent(player.getUUID(), k -> new ArrayList<>());
+                existing.removeIf(e -> !e.entity().isAlive());
+                for (ActiveSoul other : existing) {
+                    de.jakob.lotm.util.helper.AllyUtil.makeAllies(livingEntity, other.entity(), false);
+                }
+                existing.add(new ActiveSoul(livingEntity, soulData));
+
                 removeStoredSoul(player, soulData);
                 player.sendSystemMessage(Component.translatable("ability.lotmcraft.internal_underworld.summoned",
                         entity.getName().getString()).withStyle(ChatFormatting.DARK_AQUA));
