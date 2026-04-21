@@ -4,6 +4,37 @@
 
 ---
 
+
+### Mausoleum Domain
+**Sequence Requirement:** 1
+**Spirituality Cost:** 80
+**Cooldown:** 1.0 second
+*(Cannot be copied or replicated)*
+
+- **Cast Range:** 25 blocks
+- Teleports the caster and all nearby players into a sealed mausoleum dimension (`lotmcraft:mausoleum`).
+- One active session per caster — cannot be recast while a session is open.
+
+**Behavior inside the mausoleum:**
+- All block breaking and placing is prevented.
+- The room is continuously restored to its original snapshot every tick (prevents any permanent modification).
+- Players who escape the room bounds are clamped back inside every tick.
+- Players who disconnect during a session are queued for death on next login.
+
+**Spirituality Drain (every 20 ticks):**
+| Target | Drain |
+|--------|-------|
+| Caster | 550 per second |
+| Other players (Beyonders) | `0.5 + max(0, targetSeq − casterSeq) × 0.15` |
+
+**Ability Seal:** All abilities are blocked for anyone inside the mausoleum domain (`isInsideMausoleumDomain` check in `Ability.canUse`).
+
+**Session End Conditions:**
+- Caster's spirituality drops to 0.
+- Session ends → all members are teleported back to their original positions, dimensions, and motion.
+
+---
+
 ### Entropy *(sub-ability of Disorder)*
 **Sequence Requirement:** 2 *(accessible via Disorder Mode 6)*
 **Duration:** 60 seconds (1200 ticks)
@@ -323,36 +354,6 @@ Five selectable modes:
 
 ---
 
-### Mausoleum Domain
-**Sequence Requirement:** 1
-**Spirituality Cost:** 80
-**Cooldown:** 1.0 second
-*(Cannot be copied or replicated)*
-
-- **Cast Range:** 25 blocks
-- Teleports the caster and all nearby players into a sealed mausoleum dimension (`lotmcraft:mausoleum`).
-- One active session per caster — cannot be recast while a session is open.
-
-**Behavior inside the mausoleum:**
-- All block breaking and placing is prevented.
-- The room is continuously restored to its original snapshot every tick (prevents any permanent modification).
-- Players who escape the room bounds are clamped back inside every tick.
-- Players who disconnect during a session are queued for death on next login.
-
-**Spirituality Drain (every 20 ticks):**
-| Target | Drain |
-|--------|-------|
-| Caster | 550 per second |
-| Other players (Beyonders) | `0.5 + max(0, targetSeq − casterSeq) × 0.15` |
-
-**Ability Seal:** All abilities are blocked for anyone inside the mausoleum domain (`isInsideMausoleumDomain` check in `Ability.canUse`).
-
-**Session End Conditions:**
-- Caster's spirituality drops to 0.
-- Session ends → all members are teleported back to their original positions, dimensions, and motion.
-
----
-
 ### Briber
 **Sequence Requirement:** 7
 **Spirituality Cost:** 75
@@ -393,7 +394,6 @@ Three selectable modes, all lasting **100 ticks**:
 - Caster receives **Hero of the Village** (Level 0, 10 seconds).
 
 ---
-### Shit Got Murked
 ### Law Proficiency
 **Sequence Requirement:** 9 *(superseded by Weakness Detection at Sequence 6 and below)*
 **Spirituality Cost:** 1.5 per tick (toggle)
