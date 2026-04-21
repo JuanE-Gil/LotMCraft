@@ -127,23 +127,23 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
             for (int i = 1; i <= 4; i++) {
                 if (stacks[i] > 0) { hasCharStack = true; break; }
             }
+            java.util.LinkedHashSet<Ability> abilitySet = new java.util.LinkedHashSet<>();
             if (hasSwitched && !hasCharStack) {
-                availableAbilities.addAll(LOTMCraft.abilityHandler.getByPathwayAndSequenceOrderedBySequence(menu.getPathway(), menu.getSequence())
-                        .stream().filter(a -> a.getRequirements().getOrDefault(menu.getPathway(), -1) <= 4)
-                        .filter(a -> !a.getId().equals("cogitation_ability") && !a.getId().equals("ally_ability")).toList());
+                LOTMCraft.abilityHandler.getByPathwayAndSequenceOrderedBySequence(menu.getPathway(), menu.getSequence())
+                        .stream().filter(a -> a.getRequirements().getOrDefault(menu.getPathway(), -1) <= 4).forEach(abilitySet::add);
             } else {
-                availableAbilities.addAll(LOTMCraft.abilityHandler.getByPathwayAndSequenceOrderedBySequence(menu.getPathway(), menu.getSequence())
-                        .stream().filter(a -> !a.getId().equals("cogitation_ability") && !a.getId().equals("ally_ability")).toList());
+                abilitySet.addAll(LOTMCraft.abilityHandler.getByPathwayAndSequenceOrderedBySequence(menu.getPathway(), menu.getSequence()));
             }
 
             String[] pathwayHistory = ClientBeyonderCache.getPathwayHistory(minecraft.player.getUUID());
             for (int seq = menu.getSequence() + 1; seq <= 9; seq++) {
                 String historicalPathway = pathwayHistory[seq];
                 if (historicalPathway != null && !historicalPathway.isEmpty() && !historicalPathway.equals(menu.getPathway())) {
-                    availableAbilities.addAll(LOTMCraft.abilityHandler.getByPathwayAndSequenceOrderedBySequence(historicalPathway, seq));
+                    abilitySet.addAll(LOTMCraft.abilityHandler.getByPathwayAndSequenceOrderedBySequence(historicalPathway, seq));
                     break;
                 }
             }
+            availableAbilities.addAll(abilitySet);
         }
 
         availableAbilities.removeIf(Ability::getShouldBeHidden);
