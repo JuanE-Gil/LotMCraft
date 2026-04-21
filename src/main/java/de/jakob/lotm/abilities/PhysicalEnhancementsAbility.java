@@ -3,6 +3,7 @@ package de.jakob.lotm.abilities;
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.attachments.ControllingDataComponent;
 import de.jakob.lotm.attachments.ModAttachments;
+import de.jakob.lotm.effect.ModEffects;
 import de.jakob.lotm.gamerule.ModGameRules;
 import de.jakob.lotm.util.BeyonderData;
 import net.minecraft.core.Holder;
@@ -100,6 +101,7 @@ public abstract class PhysicalEnhancementsAbility extends PassiveAbilityItem {
         Map<String, TemporaryEnhancement> temps = temporaryEnhancements.get(uuid);
         Map<String, EnhancementBoost> boosts = enhancementBoosts.get(uuid);
 
+        applyConcealment(entity, enhancements, temps);
         applyNightVision(entity, enhancements, temps);
         applyConduit(entity, enhancements, temps);
         applyDolphinsGrace(entity, enhancements, temps);
@@ -183,6 +185,29 @@ public abstract class PhysicalEnhancementsAbility extends PassiveAbilityItem {
 
     // All apply* methods below now accept pre-fetched maps (FIX 3) instead of
     // looking them up from the ConcurrentHashMaps individually.
+
+    private void applyConcealment(LivingEntity entity,
+                                  Map<EnhancementType, Integer> enhancements,
+                                  Map<String, TemporaryEnhancement> temps) {
+        boolean hasConcealment = false;
+
+        if (enhancements != null && enhancements.containsKey(EnhancementType.CONCEALMENT)) {
+            hasConcealment = true;
+        }
+
+        if (!hasConcealment && temps != null) {
+            for (TemporaryEnhancement temp : temps.values()) {
+                if (temp.enhancement.getType() == EnhancementType.CONCEALMENT) {
+                    hasConcealment = true;
+                    break;
+                }
+            }
+        }
+
+        if (hasConcealment) {
+            entity.addEffect(new MobEffectInstance(ModEffects.CONCEALMENT, 300, 1, false, false, false));
+        }
+    }
 
     private void applyNightVision(LivingEntity entity,
                                   Map<EnhancementType, Integer> enhancements,
@@ -672,7 +697,8 @@ public abstract class PhysicalEnhancementsAbility extends PassiveAbilityItem {
         CONDUIT(null, null, 0),
         DOLPHINS_GRACE(null, null, 0),
         UNDERWATER_BREATHING(null, null, 0),
-        SATURATION(null, null, 0);
+        SATURATION(null, null, 0),
+        CONCEALMENT(null, null, 0);
 
         private final Holder<Attribute> attribute;
         private final AttributeModifier.Operation operation;

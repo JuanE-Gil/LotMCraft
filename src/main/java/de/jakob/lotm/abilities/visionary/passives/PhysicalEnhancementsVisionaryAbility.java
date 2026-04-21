@@ -75,7 +75,8 @@ public class PhysicalEnhancementsVisionaryAbility extends PhysicalEnhancementsAb
                     new PhysicalEnhancement(EnhancementType.SPEED, 4),
                     new PhysicalEnhancement(EnhancementType.HEALTH, 17),
                     new PhysicalEnhancement(EnhancementType.REGENERATION, 3),
-                    new PhysicalEnhancement(EnhancementType.FIRE_RESISTANCE, 3)
+                    new PhysicalEnhancement(EnhancementType.FIRE_RESISTANCE, 3),
+                    new PhysicalEnhancement(EnhancementType.CONCEALMENT, 1)
             );
 
             case 2 -> List.of(
@@ -84,7 +85,8 @@ public class PhysicalEnhancementsVisionaryAbility extends PhysicalEnhancementsAb
                     new PhysicalEnhancement(EnhancementType.SPEED, 5),
                     new PhysicalEnhancement(EnhancementType.HEALTH, 25),
                     new PhysicalEnhancement(EnhancementType.REGENERATION, 4),
-                    new PhysicalEnhancement(EnhancementType.FIRE_RESISTANCE, 3)
+                    new PhysicalEnhancement(EnhancementType.FIRE_RESISTANCE, 3),
+                    new PhysicalEnhancement(EnhancementType.CONCEALMENT, 1)
             );
 
             case 1 -> List.of(
@@ -93,7 +95,8 @@ public class PhysicalEnhancementsVisionaryAbility extends PhysicalEnhancementsAb
                     new PhysicalEnhancement(EnhancementType.SPEED, 5),
                     new PhysicalEnhancement(EnhancementType.HEALTH, 30),
                     new PhysicalEnhancement(EnhancementType.REGENERATION, 4),
-                    new PhysicalEnhancement(EnhancementType.FIRE_RESISTANCE, 4)
+                    new PhysicalEnhancement(EnhancementType.FIRE_RESISTANCE, 4),
+                    new PhysicalEnhancement(EnhancementType.CONCEALMENT, 1)
             );
 
             case 0 -> List.of(
@@ -102,7 +105,8 @@ public class PhysicalEnhancementsVisionaryAbility extends PhysicalEnhancementsAb
                     new PhysicalEnhancement(EnhancementType.SPEED, 5),
                     new PhysicalEnhancement(EnhancementType.HEALTH, 20),
                     new PhysicalEnhancement(EnhancementType.REGENERATION, 5),
-                    new PhysicalEnhancement(EnhancementType.FIRE_RESISTANCE, 5)
+                    new PhysicalEnhancement(EnhancementType.FIRE_RESISTANCE, 5),
+                    new PhysicalEnhancement(EnhancementType.CONCEALMENT, 1)
             );
 
             default -> List.of();

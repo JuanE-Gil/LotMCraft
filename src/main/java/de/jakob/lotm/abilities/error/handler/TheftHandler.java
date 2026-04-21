@@ -406,7 +406,7 @@ public class TheftHandler {
             case 4 -> 2;
             case 3 -> 3;
             case 2 -> 4;
-            case 1 -> 5;
+            case 1, 0 -> 5;
         };
     }
 
@@ -417,7 +417,7 @@ public class TheftHandler {
             case 4 -> 120;
             case 3 -> 240;
             case 2 -> 480;
-            case 1 -> 800;
+            case 1, 0 -> 800;
         };
     }
 
@@ -459,6 +459,7 @@ public class TheftHandler {
             case 5 -> 5;
             case 4, 3 -> 10;
             case 2, 1 -> 20;
+            case 0 -> 30;
         };
     }
 
