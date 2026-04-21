@@ -172,6 +172,7 @@ public class QuestManager {
 
     @SubscribeEvent
     public static void onLivingKilledByPlayer(LivingDeathEvent event) {
+        if (event.getEntity().getPersistentData().getBoolean("VoidSummoned")) return;
         if(!(event.getSource().getEntity() instanceof ServerPlayer player)) {
             return;
         }
@@ -187,6 +188,7 @@ public class QuestManager {
 
     @SubscribeEvent
     public static void onLivingDeathNearPlayer(LivingDeathEvent event) {
+        if (event.getEntity().getPersistentData().getBoolean("VoidSummoned")) return;
         List<Player> nearbyPlayers = event.getEntity().level().getEntitiesOfClass(Player.class, event.getEntity().getBoundingBox().inflate(100));
 
         for(Player player : nearbyPlayers) {

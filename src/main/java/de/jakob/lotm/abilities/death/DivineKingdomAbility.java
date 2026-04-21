@@ -48,11 +48,6 @@ public class DivineKingdomAbility extends Ability {
         level.playSound(null, caster.blockPosition(),
                 SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 3.0f, 0.5f);
 
-        if (caster instanceof ServerPlayer player) {
-            player.sendSystemMessage(Component.translatable("ability.lotmcraft.divine_kingdom.activated")
-                    .withStyle(ChatFormatting.WHITE));
-        }
-
         DeathDivineKingdomEntity domain = new DeathDivineKingdomEntity(
                 ModEntities.DEATH_DIVINE_KINGDOM.get(), level, caster);
         domain.setPos(caster.getX(), caster.getY(), caster.getZ());

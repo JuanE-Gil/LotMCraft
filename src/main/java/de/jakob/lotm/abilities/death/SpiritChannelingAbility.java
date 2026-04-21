@@ -205,7 +205,7 @@ public class SpiritChannelingAbility extends SelectableAbility {
 
     private void getSpirit(Level level, LivingEntity entity) {
         if (capturedSpirits.containsKey(entity.getUUID())) {
-            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.spirit_channeling.already_have").withColor(0xFF4444));
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.spirit_channeling.already_have").withColor(0xFF334f23));
             return;
         }
 
@@ -213,7 +213,7 @@ public class SpiritChannelingAbility extends SelectableAbility {
         int seq = de.jakob.lotm.util.BeyonderData.getSequence(entity);
         float successChance = (seq <= 6) ? 0.75f : 0.50f;
         if (random.nextFloat() >= successChance) {
-            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.spirit_channeling.failed").withColor(0xFF6600));
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.spirit_channeling.failed").withColor(0xFF334f23));
             return;
         }
 
@@ -227,7 +227,7 @@ public class SpiritChannelingAbility extends SelectableAbility {
         String nameKey = type == SpiritType.FROST_GHOST
                 ? "ability.lotmcraft.spirit_channeling.got_frost_ghost"
                 : "ability.lotmcraft.spirit_channeling.got_earth_spirit";
-        AbilityUtil.sendActionBar(entity, Component.translatable(nameKey).withColor(0x44FF44));
+        AbilityUtil.sendActionBar(entity, Component.translatable(nameKey).withColor(0xFF334f23));
     }
 
     private void releaseSpirit(Level level, LivingEntity entity) {
@@ -240,11 +240,12 @@ public class SpiritChannelingAbility extends SelectableAbility {
         }
 
         if (type == null) {
-            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.spirit_channeling.no_captured").withColor(0xFF4444));
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.spirit_channeling.no_captured").withColor(0xFF334f23));
             return;
         }
 
-        AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.spirit_channeling.released").withColor(0x44FF44));
+        String spiritNameKey = "ability.lotmcraft.spirit_channeling.spirit_name." + type.name().toLowerCase();
+        AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.spirit_channeling.released", Component.translatable(spiritNameKey)).withColor(0xFF334f23));
     }
 
     // -------------------------------------------------------------------------
@@ -280,7 +281,7 @@ public class SpiritChannelingAbility extends SelectableAbility {
         if (level.isClientSide) return;
 
         if (glacialAegisActive.contains(entity.getUUID())) {
-            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.spirit_channeling.aegis_already_active").withColor(0xAAAAAA));
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.spirit_channeling.aegis_already_active").withColor(0xFF334f23));
             return;
         }
 
@@ -297,7 +298,7 @@ public class SpiritChannelingAbility extends SelectableAbility {
             }
         }, () -> glacialAegisActive.remove(entity.getUUID()), (ServerLevel) level, () -> 1.0);
 
-        AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.spirit_channeling.aegis_active").withColor(0x88DDFF));
+        AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.spirit_channeling.aegis_active").withColor(0xFF334f23));
     }
 
     // -------------------------------------------------------------------------
@@ -309,7 +310,7 @@ public class SpiritChannelingAbility extends SelectableAbility {
 
         LivingEntity target = AbilityUtil.getTargetEntity(entity, 20, 1.5f);
         if (target == null) {
-            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.spirit_channeling.no_target").withColor(0xFF4444));
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.spirit_channeling.no_target").withColor(0xFF334f23));
             return;
         }
 
@@ -404,7 +405,7 @@ public class SpiritChannelingAbility extends SelectableAbility {
 
         LivingEntity target = AbilityUtil.getTargetEntity(entity, 25, 1.5f);
         if (target == null) {
-            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.spirit_channeling.no_target").withColor(0xFF4444));
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.spirit_channeling.no_target").withColor(0xFF334f23));
             return;
         }
 

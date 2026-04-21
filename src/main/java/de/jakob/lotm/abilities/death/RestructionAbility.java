@@ -123,7 +123,7 @@ public class RestructionAbility extends SelectableAbility {
     private void release(LivingEntity entity) {
         List<Mob> mobs = summonedMobs.remove(entity.getUUID());
         if (mobs == null || mobs.isEmpty()) {
-            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.restruction.none_summoned").withColor(0xFF4444));
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.restruction.none_summoned").withColor(0xFF334f23));
             return;
         }
 
@@ -131,7 +131,7 @@ public class RestructionAbility extends SelectableAbility {
             if (mob.isAlive()) mob.discard();
         }
 
-        AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.restruction.released").withColor(0x44FF44));
+        AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.restruction.released").withColor(0xFF334f23));
     }
 
     private Vec3 findSpawnPos(LivingEntity entity, ServerLevel level) {

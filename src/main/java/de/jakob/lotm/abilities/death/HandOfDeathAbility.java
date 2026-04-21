@@ -75,7 +75,7 @@ public class HandOfDeathAbility extends SelectableAbility {
     private void leftHand(ServerLevel level, LivingEntity caster) {
         LivingEntity target = AbilityUtil.getTargetEntity(caster, 30, 1.5f, true);
         if (target == null) {
-            sendMessage(caster, "ability.lotmcraft.hand_of_death.no_target", ChatFormatting.DARK_GRAY);
+            AbilityUtil.sendActionBar(caster, Component.translatable("ability.lotmcraft.hand_of_death.no_target").withColor(0xFF334f23));
             return;
         }
 
@@ -92,8 +92,8 @@ public class HandOfDeathAbility extends SelectableAbility {
                 WITHER_DURATION, EFFECT_AMPLIFIER, false, true, true));
         target.addEffect(new MobEffectInstance(MobEffects.BLINDNESS,
                 WITHER_DURATION, EFFECT_AMPLIFIER, false, true, true));
-
-        sendMessage(caster, "ability.lotmcraft.hand_of_death.left_applied", ChatFormatting.DARK_PURPLE);
+        
+        AbilityUtil.sendActionBar(caster, Component.translatable("ability.lotmcraft.hand_of_death.left_applied").withColor(0xFF334f23));
 
         // Capture sequence values now — target's sequence may change before deferred execution
         int casterSeq = BeyonderData.getSequence(caster);
@@ -123,7 +123,7 @@ public class HandOfDeathAbility extends SelectableAbility {
     private void rightHandSelf(ServerLevel level, LivingEntity caster) {
         float heal = caster.getMaxHealth() * 0.25f;
         caster.heal(heal);
-        sendMessage(caster, "ability.lotmcraft.hand_of_death.right_self_healed", ChatFormatting.DARK_GREEN);
+        AbilityUtil.sendActionBar(caster, Component.translatable("ability.lotmcraft.hand_of_death.right_self_healed").withColor(0xFF334f23));
     }
 
     // -------------------------------------------------------------------------
@@ -133,22 +133,12 @@ public class HandOfDeathAbility extends SelectableAbility {
     private void rightHandOthers(ServerLevel level, LivingEntity caster) {
         LivingEntity target = AbilityUtil.getTargetEntity(caster, 30, 1.5f, true);
         if (target == null) {
-            sendMessage(caster, "ability.lotmcraft.hand_of_death.no_target", ChatFormatting.DARK_GRAY);
+            AbilityUtil.sendActionBar(caster, Component.translatable("ability.lotmcraft.hand_of_death.no_target").withColor(0xFF334f23));
             return;
         }
 
         float heal = target.getMaxHealth() * 0.25f;
         target.heal(heal);
-        sendMessage(caster, "ability.lotmcraft.hand_of_death.right_others_healed", ChatFormatting.DARK_GREEN);
-    }
-
-    // -------------------------------------------------------------------------
-    // Utility
-    // -------------------------------------------------------------------------
-
-    private static void sendMessage(LivingEntity entity, String key, ChatFormatting color) {
-        if (entity instanceof ServerPlayer player) {
-            player.sendSystemMessage(Component.translatable(key).withStyle(color));
-        }
+        AbilityUtil.sendActionBar(caster, Component.translatable("ability.lotmcraft.hand_of_death.right_others_healed").withColor(0xFF334f23));
     }
 }

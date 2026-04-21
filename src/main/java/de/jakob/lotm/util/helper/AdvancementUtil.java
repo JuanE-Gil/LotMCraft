@@ -46,6 +46,7 @@ public class AdvancementUtil {
             new HashSet<>(Set.of("darkness", "death"))
     );
 
+
     @SubscribeEvent
     public static void onPlayerLeave(PlayerEvent.PlayerLoggedOutEvent event) {
         Player player = event.getEntity();
