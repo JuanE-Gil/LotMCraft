@@ -4,5 +4,6 @@ public enum ActionContextEnum {
     POSITION,
     ITEM,
     NUMBER,
-    EMPTY
+    EMPTY,
+    STRING
 }

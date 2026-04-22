@@ -1,10 +1,7 @@
 package de.jakob.lotm.abilities.visionary.prophecy.actions.context;
 
 import de.jakob.lotm.abilities.visionary.prophecy.TokenStream;
-import de.jakob.lotm.abilities.visionary.prophecy.actions.context.implementations.ActionEmptyContext;
-import de.jakob.lotm.abilities.visionary.prophecy.actions.context.implementations.ActionItemsContext;
-import de.jakob.lotm.abilities.visionary.prophecy.actions.context.implementations.ActionNumberContext;
-import de.jakob.lotm.abilities.visionary.prophecy.actions.context.implementations.ActionPositionContext;
+import de.jakob.lotm.abilities.visionary.prophecy.actions.context.implementations.*;
 import de.jakob.lotm.abilities.visionary.prophecy.actions.implementations.DropItemAction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -43,6 +40,7 @@ public abstract class ActionContextBase {
             case ITEM -> ActionItemsContext.load(tag, id, provider);
             case NUMBER -> ActionNumberContext.load(tag, id, provider);
             case EMPTY -> ActionEmptyContext.load(tag, id, provider);
+            case STRING -> ActionStringContext.load(tag, id, provider);
         };
     }
 
@@ -52,6 +50,7 @@ public abstract class ActionContextBase {
             case POSITION -> new ActionPositionContext(id);
             case NUMBER -> new ActionNumberContext(id);
             case EMPTY -> new ActionEmptyContext(id);
+            case STRING -> new ActionStringContext(id);
         };
     }
 }

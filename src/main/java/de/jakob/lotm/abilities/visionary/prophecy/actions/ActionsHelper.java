@@ -44,7 +44,11 @@ public class ActionsHelper {
 
         if(id == null) return null;
 
-        stream = moveToThen(stream);
+        return deduceActionWithContextSkipNick(stream, casterSeq, id);
+    }
+
+    public static @Nullable ActionBase deduceActionWithContextSkipNick(TokenStream stream, int casterSeq, UUID id){
+        stream = moveToThenOrAnd(stream);
         if(stream == null) return null;
 
         stream.next();
@@ -63,12 +67,12 @@ public class ActionsHelper {
         return action;
     }
 
-    private static TokenStream moveToThen(TokenStream stream){
-        if(stream.match("then")) return stream;
+    private static TokenStream moveToThenOrAnd(TokenStream stream){
+        if(stream.match("then") || stream.match("and")) return stream;
         else if (stream.isEmpty()) return null;
         else {
             stream.next();
-            return moveToThen(stream);
+            return moveToThenOrAnd(stream);
         }
     }
 

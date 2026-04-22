@@ -9,6 +9,7 @@ public enum ActionsEnum {
     DIGESTION,
     SANITY,
     HEALTH,
+    //DOUBLE
     ;
 
     public static ActionsEnum fromNBT(CompoundTag tag, String key) {

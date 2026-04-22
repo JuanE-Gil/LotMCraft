@@ -421,15 +421,18 @@ public class BeyonderEventHandler {
             boolean isDirect = !event.getSource().is(ModDamageTypes.PURIFICATION_INDIRECT);
 
             // seqDiff > 0 means attacker is stronger (lower seq number), < 0 means weaker
+
+            if(victimSeq <= 2) return;
+
             int seqDiff = victimSeq - attackerSeq;
 
             float digestionDrain;
             if (isDirect) {
                 // Base 0.3%, +0.1% per level attacker is stronger, -0.1% per level attacker is weaker, floor 0.1%
-                digestionDrain = Math.max(0.001f, 0.003f + seqDiff * 0.001f);
+                digestionDrain = Math.max(0.01f, 0.03f + seqDiff * 0.01f);
             } else {
                 // Base 0.05%, +0.01% per level attacker is stronger, -0.001% per level attacker is weaker, floor 0.01%
-                digestionDrain = Math.max(0.0001f, 0.0005f + seqDiff * 0.0001f);
+                digestionDrain = Math.max(0.001f, 0.005f + seqDiff * 0.001f);
             }
 
             float currentDigestion = BeyonderData.getDigestionProgress(victimPlayer);
