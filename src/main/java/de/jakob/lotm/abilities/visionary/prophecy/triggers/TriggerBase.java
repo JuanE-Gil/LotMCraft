@@ -8,6 +8,8 @@ import de.jakob.lotm.abilities.visionary.prophecy.actions.implementations.DropIt
 import de.jakob.lotm.abilities.visionary.prophecy.triggers.context.TriggerContextBase;
 import de.jakob.lotm.abilities.visionary.prophecy.triggers.context.TriggerContextEnum;
 import de.jakob.lotm.abilities.visionary.prophecy.triggers.context.implementations.TriggerPositionContext;
+import de.jakob.lotm.abilities.visionary.prophecy.triggers.implementations.HasItemTrigger;
+import de.jakob.lotm.abilities.visionary.prophecy.triggers.implementations.InstantTrigger;
 import de.jakob.lotm.abilities.visionary.prophecy.triggers.implementations.PositionTrigger;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -67,12 +69,16 @@ public abstract class  TriggerBase {
 
         return switch (type) {
             case POSITION -> PositionTrigger.load(tag, actionType, contextType, provider);
+            case PICK_UP -> HasItemTrigger.load(tag, actionType, contextType, provider);
+            case INSTANT -> InstantTrigger.load(tag, actionType, contextType, provider);
         };
     }
 
     public static TriggerBase create(TriggerEnum type, ActionBase action, TriggerContextBase context){
         return switch (type){
             case POSITION -> new PositionTrigger(action, context);
+            case PICK_UP -> new HasItemTrigger(action, context);
+            case INSTANT -> new InstantTrigger(action, context);
         };
     }
 }

@@ -4,7 +4,10 @@ import de.jakob.lotm.abilities.visionary.prophecy.actions.ActionsEnum;
 import net.minecraft.nbt.CompoundTag;
 
 public enum TriggerContextEnum {
-    POSITION;
+    POSITION,
+    ITEM,
+    EMPTY
+    ;
 
     public static TriggerContextEnum fromNBT(CompoundTag tag, String key) {
         String name = tag.getString(key);

@@ -5,6 +5,8 @@ import de.jakob.lotm.abilities.visionary.prophecy.actions.context.ActionContextB
 import de.jakob.lotm.abilities.visionary.prophecy.actions.context.ActionContextEnum;
 import de.jakob.lotm.abilities.visionary.prophecy.actions.context.implementations.ActionItemsContext;
 import de.jakob.lotm.abilities.visionary.prophecy.actions.context.implementations.ActionPositionContext;
+import de.jakob.lotm.abilities.visionary.prophecy.triggers.context.implementations.TriggerEmptyContext;
+import de.jakob.lotm.abilities.visionary.prophecy.triggers.context.implementations.TriggerItemsContext;
 import de.jakob.lotm.abilities.visionary.prophecy.triggers.context.implementations.TriggerPositionContext;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -44,12 +46,16 @@ public abstract class TriggerContextBase {
 
         return switch (type) {
             case POSITION -> TriggerPositionContext.load(tag, id, provider);
+            case ITEM -> TriggerItemsContext.load(tag, id, provider);
+            case EMPTY -> TriggerEmptyContext.load(tag, id, provider);
         };
     }
 
     public static TriggerContextBase create(TriggerContextEnum type, UUID id){
         return switch (type){
             case POSITION -> new TriggerPositionContext(id);
+            case ITEM -> new TriggerItemsContext(id);
+            case EMPTY -> new TriggerEmptyContext(id);
         };
     }
 }

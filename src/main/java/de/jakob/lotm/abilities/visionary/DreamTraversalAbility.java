@@ -21,6 +21,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
@@ -71,56 +72,6 @@ public class DreamTraversalAbility extends SelectableAbility {
     }
 
     @Override
-    public void nextAbility(LivingEntity entity){
-        if(getAbilityNames().length == 0)
-            return;
-
-        if(!selectedAbilities.containsKey(entity.getUUID())) {
-            selectedAbilities.put(entity.getUUID(), 0);
-        }
-
-        int selectedAbility = selectedAbilities.get(entity.getUUID());
-        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
-
-        selectedAbility++;
-        if(selectedAbility >= getAbilityNames().length) {
-            selectedAbility = 0;
-        }
-
-        if((entitySeq > 3 && selectedAbility >= 1)){
-            selectedAbility = 0;
-        }
-
-        selectedAbilities.put(entity.getUUID(), selectedAbility);
-        PacketHandler.sendToServer(new AbilitySelectionPacket(getId(), selectedAbility));
-    }
-
-    @Override
-    public void previousAbility(LivingEntity entity){
-        if(getAbilityNames().length == 0)
-            return;
-
-        if(!selectedAbilities.containsKey(entity.getUUID())) {
-            selectedAbilities.put(entity.getUUID(), 0);
-        }
-
-        int selectedAbility = selectedAbilities.get(entity.getUUID());
-        selectedAbility--;
-        if(selectedAbility <= -1) {
-            selectedAbility = getAbilityNames().length - 1;
-        }
-
-        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
-        if((entitySeq > 3 && selectedAbility >= 1)){
-            selectedAbility = 0;
-        }
-
-        selectedAbilities.put(entity.getUUID(), selectedAbility);
-        PacketHandler.sendToServer(new AbilitySelectionPacket(getId(), selectedAbility));
-    }
-
-
-    @Override
     protected void castSelectedAbility(Level level, LivingEntity entity, int abilityIndex) {
         switch (abilityIndex) {
             case 0 -> jump(level, entity);
@@ -166,7 +117,7 @@ public class DreamTraversalAbility extends SelectableAbility {
             AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.dream_traversal.failed").withColor(0xFFff124d));
 
             if(targetSeq <= 1 && target instanceof ServerPlayer targetPlayer && entity instanceof ServerPlayer entityPlayer){
-                MetaAwarenessAbility.onDivined(targetPlayer, entityPlayer);
+                MetaAwarenessAbility.onDivined(entityPlayer, targetPlayer);
             }
 
             return;
@@ -198,7 +149,7 @@ public class DreamTraversalAbility extends SelectableAbility {
     private void hide(Level level, LivingEntity entity) {
         if (level.isClientSide) return;
         if (!(level instanceof ServerLevel serverLevel)) return;
-        if (!(entity instanceof ServerPlayer)) return;
+        if (!(entity instanceof ServerPlayer player)) return;
 
         if (hideMap.containsKey(entity.getUUID())) {
             cancelHide(serverLevel, entity);
@@ -215,11 +166,11 @@ public class DreamTraversalAbility extends SelectableAbility {
 
         int targetSeq = BeyonderData.getSequence(target);
         if(BeyonderData.getPathway(target).equals("visionary") && BeyonderData.getSequence(target) <
-                BeyonderData.getSequence(entity)){
-            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.dream_traversal.failed").withColor(0xFFff124d));
+                BeyonderData.getSequence(player)){
+            AbilityUtil.sendActionBar(player, Component.translatable("ability.lotmcraft.dream_traversal.failed").withColor(0xFFff124d));
 
-            if(targetSeq <= 1 && target instanceof ServerPlayer targetPlayer && entity instanceof ServerPlayer entityPlayer){
-                MetaAwarenessAbility.onDivined(targetPlayer, entityPlayer);
+            if(targetSeq <= 1 && target instanceof ServerPlayer targetPlayer){
+                MetaAwarenessAbility.onDivined(player, targetPlayer);
             }
 
             return;
@@ -229,7 +180,6 @@ public class DreamTraversalAbility extends SelectableAbility {
             AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.dream_traversal.must_be_asleep").withColor(0xFFff124d));
             return;
         }
-
 
         hideMap.put(entity.getUUID(), target.getUUID());
         // Store sequence at cast time for artifact stuff
@@ -241,14 +191,12 @@ public class DreamTraversalAbility extends SelectableAbility {
 
         PsychologicalInvisibilityAbility.add(entity, AbilityUtil.getSeqWithArt(entity, this));
 
-        if (entity instanceof Player player) {
-            player.setBoundingBox(new AABB(
-                    player.getX(), player.getY(), player.getZ(),
-                    player.getX(), player.getY(), player.getZ()
-            ));
-            player.onUpdateAbilities();
-            player.hurtMarked = true;
-        }
+        player.setBoundingBox(new AABB(
+                player.getX(), player.getY(), player.getZ(),
+                player.getX(), player.getY(), player.getZ()
+        ));
+        player.onUpdateAbilities();
+        player.hurtMarked = true;
     }
 
     public static void cancelHide(ServerLevel serverLevel, LivingEntity entity) {
@@ -296,6 +244,22 @@ public class DreamTraversalAbility extends SelectableAbility {
     }
 
     @SubscribeEvent
+    public static void onDamage(LivingIncomingDamageEvent event) {
+        var entity = event.getEntity();
+        if(!(entity.level() instanceof ServerLevel level)) return;
+
+        if(isHiding(entity.getUUID())){
+            if(event.getSource().is(ModDamageTypes.LOOSING_CONTROL)){
+                cancelHide(level, entity);
+            }
+            else{
+                event.setAmount(0.0f);
+                event.setCanceled(true);
+            }
+        }
+    }
+
+    @SubscribeEvent
     public static void onRightClick(PlayerInteractEvent.RightClickItem event) {
         if(!(event.getLevel() instanceof ServerLevel level)) return;
 
@@ -325,9 +289,6 @@ public class DreamTraversalAbility extends SelectableAbility {
             return;
         }
 
-        entity.setInvisible(true);
-        entity.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 20, 0, false, false, false));
-
         Vec3 hostPos = host.position();
         Vec3 floatPos = hostPos.add(0, host.getBbHeight() + 0.3, 0);
         entity.teleportTo(floatPos.x, floatPos.y, floatPos.z);
@@ -339,6 +300,12 @@ public class DreamTraversalAbility extends SelectableAbility {
                     player.getX(), player.getY(), player.getZ()
             ));
             player.hurtMarked = true;
+        }
+
+        if(host instanceof Mob mob){
+            if(mob.getTarget() != null && mob.getTarget().equals(entity)){
+                mob.setTarget(null);
+            }
         }
     }
 

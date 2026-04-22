@@ -22,6 +22,8 @@ public class TriggerHelper {
     private static @Nullable TriggerEnum getType(String str){
         return switch (str){
             case "on" -> TriggerEnum.POSITION;
+            case "has" -> TriggerEnum.PICK_UP;
+            case "instant" -> TriggerEnum.INSTANT;
             default -> null;
         };
     }
@@ -29,6 +31,8 @@ public class TriggerHelper {
     private static TriggerContextEnum getContextType(TriggerEnum value){
         return switch (value){
             case TriggerEnum.POSITION -> TriggerContextEnum.POSITION;
+            case TriggerEnum.PICK_UP -> TriggerContextEnum.ITEM;
+            case TriggerEnum.INSTANT -> TriggerContextEnum.EMPTY;
         };
     }
 
@@ -65,7 +69,7 @@ public class TriggerHelper {
         if(casterSeq > data.sequence() && data.pathway().equals("visionary")){
             var target = caster.level().getPlayerByUUID(id);
             if(data.sequence() <= 1 && target != null){
-                MetaAwarenessAbility.onDivined((ServerPlayer) target, caster);
+                MetaAwarenessAbility.onDivined(caster, (ServerPlayer) target);
             }
 
             return null;

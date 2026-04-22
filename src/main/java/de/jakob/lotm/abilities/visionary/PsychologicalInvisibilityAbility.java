@@ -77,6 +77,7 @@ public class PsychologicalInvisibilityAbility extends ToggleAbility {
     @Override
     public void stop(Level level, LivingEntity entity) {
         remove(entity);
+        clearArtifactScaling(entity);
     }
 
     public static void add(LivingEntity entity, int seq) {
@@ -84,6 +85,7 @@ public class PsychologicalInvisibilityAbility extends ToggleAbility {
         hits.put(entity.getUUID(), 0);
 
         PacketHandler.sendToAllPlayers(new SyncPsychologicalInvisibilityPacket(invisiblePlayers));
+        entity.setInvisible(true);
     }
 
     public static void remove(LivingEntity entity) {
@@ -98,11 +100,11 @@ public class PsychologicalInvisibilityAbility extends ToggleAbility {
         return switch (seq) {
             case 6 -> 1;
             case 5 -> 2;
-            case 4 -> 4;
-            case 3 -> 5;
-            case 2 -> 10;
-            case 1 -> 11;
-            case 0 -> 22;
+            case 4 -> 10;
+            case 3 -> 15;
+            case 2 -> 25;
+            case 1 -> 40;
+            case 0 -> 80;
             default -> 1;
         };
     }
@@ -193,9 +195,22 @@ public class PsychologicalInvisibilityAbility extends ToggleAbility {
                 }
             }
 
-            player.setGlowingTag(false);
             player.setInvisible(true);
+            player.setGlowingTag(false);
             event.setCanceled(true);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onRenderPlayer(RenderPlayerEvent.Post event) {
+        Player player = event.getEntity();
+
+        if (invisiblePlayersClient.containsKey(player.getUUID())) {
+            var clientPlayer = Minecraft.getInstance().player;
+
+            if (clientPlayer == player) return;
+
+            player.setInvisible(false);
         }
     }
 

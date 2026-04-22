@@ -71,7 +71,7 @@ public class MetaAwarenessAbility extends PassiveAbilityItem {
     }
 
 
-    private static void triggerAutoPrayer(ServerPlayer sender, ServerPlayer target) {
+    public static void triggerAutoPrayer(ServerPlayer sender, ServerPlayer target) {
         // Cooldown check on the target (prevent spam if their name is said repeatedly)
         long now = System.currentTimeMillis();
         Long lastTrigger = COOLDOWNS.get(target.getUUID());

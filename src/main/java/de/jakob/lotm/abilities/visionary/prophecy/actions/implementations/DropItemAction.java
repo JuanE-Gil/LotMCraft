@@ -35,8 +35,7 @@ public class DropItemAction extends ActionBase {
                     if (invStack.isEmpty()) continue;
 
                     for (ItemStack target : itemsContext.stacksList) {
-                        if (target.isEmpty()) continue;
-
+                        
                         if (ItemStack.isSameItemSameComponents(invStack, target)) {
                             int removeCount = invStack.getCount();
 
@@ -46,10 +45,6 @@ public class DropItemAction extends ActionBase {
                             invStack.shrink(removeCount);
 
                             serverPlayer.drop(toDrop, false);
-
-                            target.shrink(removeCount);
-
-                            if (target.isEmpty()) break;
                         }
                     }
                 }

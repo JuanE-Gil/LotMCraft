@@ -58,7 +58,7 @@ public class MentalPlagueAbility extends Ability {
             AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.dream_traversal.failed").withColor(0xFFff124d));
 
             if(targetSeq <= 1 && target instanceof ServerPlayer targetPlayer && entity instanceof ServerPlayer entityPlayer){
-                MetaAwarenessAbility.onDivined(targetPlayer, entityPlayer);
+                MetaAwarenessAbility.onDivined(entityPlayer, targetPlayer);
             }
 
             return;

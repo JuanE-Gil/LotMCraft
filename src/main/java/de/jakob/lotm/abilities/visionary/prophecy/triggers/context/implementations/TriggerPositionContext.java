@@ -29,7 +29,6 @@ public class TriggerPositionContext extends TriggerContextBase {
         this.pos = null;
     }
 
-
     @Override
     public TriggerContextEnum getType() {
         return TriggerContextEnum.POSITION;
@@ -41,7 +40,6 @@ public class TriggerPositionContext extends TriggerContextBase {
             stream.next();
 
         try{
-
             int x = Integer.parseInt(Objects.requireNonNull(stream.peek()));
             stream.next();
             int y = Integer.parseInt(Objects.requireNonNull(stream.peek()));

@@ -121,7 +121,7 @@ public class DreamMazeAbility extends SelectableAbility {
                 AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.dream_traversal.failed").withColor(0xFFff124d));
 
                 if(targetSeq <= 1 && target instanceof ServerPlayer targetPlayer){
-                    MetaAwarenessAbility.onDivined(targetPlayer, caster);
+                    MetaAwarenessAbility.onDivined(caster, targetPlayer);
                 }
 
                 return;

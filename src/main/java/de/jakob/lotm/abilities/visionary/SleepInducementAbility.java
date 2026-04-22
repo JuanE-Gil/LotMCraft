@@ -1,8 +1,12 @@
 package de.jakob.lotm.abilities.visionary;
 
+import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.Ability;
+import de.jakob.lotm.abilities.core.SelectableAbility;
 import de.jakob.lotm.abilities.visionary.passives.MetaAwarenessAbility;
 import de.jakob.lotm.effect.ModEffects;
+import de.jakob.lotm.network.PacketHandler;
+import de.jakob.lotm.network.packets.toServer.AbilitySelectionPacket;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.data.Location;
 import de.jakob.lotm.util.helper.AbilityUtil;
@@ -23,7 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SleepInducementAbility extends Ability {
+public class SleepInducementAbility extends SelectableAbility {
     public SleepInducementAbility(String id) {
         super(id, 2);
     }
@@ -39,7 +43,42 @@ public class SleepInducementAbility extends Ability {
     }
 
     @Override
-    public void onAbilityUse(Level level, LivingEntity entity) {
+    protected String[] getAbilityNames() {
+        return new String[]{
+                "ability.lotmcraft.sleep_inducement_ability.single",
+                "ability.lotmcraft.sleep_inducement_ability.aoe"
+        };
+    }
+
+    @Override
+    protected void castSelectedAbility(Level level, LivingEntity entity, int selectedAbility) {
+        switch (selectedAbility){
+            case 0 -> single(level, entity);
+            case 1 -> aoe(level, entity);
+        }
+    }
+
+    private void aoe(Level level, LivingEntity entity){
+        if(!(level instanceof ServerLevel)) {
+            return;
+        }
+
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+        AbilityUtil.getNearbyEntities(entity, (ServerLevel) level, entity.position(), 10 * multiplier(entity)).forEach(e -> {
+            if(BeyonderData.getPathway(e).equals("visionary") && BeyonderData.getSequence(e) < entitySeq){
+                AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.frenzy.failed").withColor(0xFFff124d));
+
+                if(BeyonderData.getSequence(e) <= 1 && e instanceof ServerPlayer targetPlayer && entity instanceof ServerPlayer entityPlayer){
+                    MetaAwarenessAbility.onDivined(entityPlayer, targetPlayer);
+                }
+            }
+            else{
+               e.addEffect(new MobEffectInstance(ModEffects.ASLEEP, 20 * 12, 1, false, false, false));
+            }
+        });
+    }
+
+    private void single(Level level, LivingEntity entity){
         if(!(level instanceof ServerLevel)) {
             return;
         }
@@ -60,13 +99,12 @@ public class SleepInducementAbility extends Ability {
             AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.dream_traversal.failed").withColor(0xFFff124d));
 
             if(targetSeq <= 1 && target instanceof ServerPlayer targetPlayer && entity instanceof ServerPlayer entityPlayer){
-                MetaAwarenessAbility.onDivined(targetPlayer, entityPlayer);
+                MetaAwarenessAbility.onDivined(entityPlayer, targetPlayer);
             }
 
             return;
         }
 
-        // Add sleep effect
         target.addEffect(new MobEffectInstance(ModEffects.ASLEEP, 20 * 12, 1, false, false, false));
     }
 
@@ -93,5 +131,54 @@ public class SleepInducementAbility extends Ability {
                 }
             }
         }
+    }
+
+    @Override
+    public void nextAbility(LivingEntity entity){
+        if(getAbilityNames().length == 0)
+            return;
+
+        if(!selectedAbilities.containsKey(entity.getUUID())) {
+            selectedAbilities.put(entity.getUUID(), 0);
+        }
+
+        int selectedAbility = selectedAbilities.get(entity.getUUID());
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+
+        selectedAbility++;
+        if(selectedAbility >= getAbilityNames().length) {
+            selectedAbility = 0;
+        }
+
+        if((entitySeq > 3 && selectedAbility >= 0)){
+            selectedAbility = 0;
+        }
+
+        selectedAbilities.put(entity.getUUID(), selectedAbility);
+        PacketHandler.sendToServer(new AbilitySelectionPacket(getId(), selectedAbility));
+    }
+
+    @Override
+    public void previousAbility(LivingEntity entity){
+        if(getAbilityNames().length == 0)
+            return;
+
+        if(!selectedAbilities.containsKey(entity.getUUID())) {
+            selectedAbilities.put(entity.getUUID(), 0);
+        }
+
+        int selectedAbility = selectedAbilities.get(entity.getUUID());
+        selectedAbility--;
+        if(selectedAbility <= -1) {
+            selectedAbility = getAbilityNames().length - 1;
+        }
+
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+        if((entitySeq > 3 && selectedAbility >= 0)){
+            selectedAbility = 0;
+        }
+
+        selectedAbilities.put(entity.getUUID(), selectedAbility);
+        PacketHandler.sendToServer(new AbilitySelectionPacket(getId(), selectedAbility));
     }
 }

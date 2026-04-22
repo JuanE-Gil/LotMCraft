@@ -227,7 +227,6 @@ public class AbilityHandler {
         abilities.add(new VirtualPersonaAbility("virtual_persona_ability"));
         abilities.add(new ManipulationAbility("manipulation_ability"));
         abilities.add(new MentalPlagueAbility("mental_plague_ability"));
-        abilities.add(new MindInvasionAbility("mind_invasion_ability"));
         abilities.add(new DreamWeaveAbility("dream_weave_ability"));
         abilities.add(new DreamMazeAbility("dream_maze_ability"));
         abilities.add(new DisasterFantasiaAbility("disaster_fantasia_ability"));
