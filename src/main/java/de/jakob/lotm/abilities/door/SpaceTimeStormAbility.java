@@ -21,15 +21,15 @@ import java.util.Map;
 
 public class SpaceTimeStormAbility extends Ability {
     public SpaceTimeStormAbility(String id) {
-        super(id, 12, "explosion");
+        super(id, 18, "explosion", "destruction");
         canBeCopied = false;
-        interactionRadius = 35;
+        interactionRadius = 60;
         interactionCacheTicks = 20 * 12;
     }
 
     @Override
     public Map<String, Integer> getRequirements() {
-        return new HashMap<>(Map.of("door", 1));
+        return new HashMap<>(Map.of("door", 0));
     }
 
     @Override
@@ -48,9 +48,9 @@ public class SpaceTimeStormAbility extends Ability {
 
         EffectManager.playEffect(EffectManager.Effect.SPACE_FRAGMENTATION, center.x, center.y, center.z, serverLevel, entity);
 
-        List<BlockPos> blocks = AbilityUtil.getBlocksInSphereRadius(serverLevel, center, 35, true, true, false);
-        ServerScheduler.scheduleForDuration(0, 2, 20 * 12, () -> {
-            AbilityUtil.damageNearbyEntities(serverLevel, entity, 35, DamageLookup.lookupDps(1, .875, 2, 18) * (float) multiplier(entity), center, true, false);
+        List<BlockPos> blocks = AbilityUtil.getBlocksInSphereRadius(serverLevel, center, 65, true, true, false);
+        ServerScheduler.scheduleForDuration(0, 2, 20 * 18, () -> {
+            AbilityUtil.damageNearbyEntities(serverLevel, entity, 60, DamageLookup.lookupDps(1, .875, 2, 18) * (float) multiplier(entity), center, true, false);
 
             if(griefing) {
                 blocks.stream().filter(b -> random.nextInt(175) == 0 && !serverLevel.getBlockState(b).is(ModBlocks.VOID.get())).forEach(b -> serverLevel.setBlockAndUpdate(b, Blocks.AIR.defaultBlockState()));

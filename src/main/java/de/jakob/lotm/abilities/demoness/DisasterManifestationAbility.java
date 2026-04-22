@@ -115,7 +115,7 @@ public class DisasterManifestationAbility extends SelectableAbility {
 
         NeoForge.EVENT_BUS.post(new AbilityUsedEvent(serverLevel, targetLoc, entity, this, new String[]{"burning", "explosion"}, 18, 20 * 10));
 
-        MeteorEntity meteor = new MeteorEntity(serverLevel, 3.25f,  (float) DamageLookup.lookupDamage(2, 1) * (float) multiplier(entity), 6, entity, BeyonderData.isGriefingEnabled(entity), 18, 30);
+        MeteorEntity meteor = new MeteorEntity(serverLevel, 3.25f,  (float) DamageLookup.lookupDamage(2, 1) * (float) multiplier(entity), 4, entity, BeyonderData.isGriefingEnabled(entity), 18, 30);
         meteor.setPosition(targetLoc);
         serverLevel.addFreshEntity(meteor);
     }

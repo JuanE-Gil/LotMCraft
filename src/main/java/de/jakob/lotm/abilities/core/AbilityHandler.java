@@ -14,7 +14,6 @@ import de.jakob.lotm.abilities.sun.*;
 import de.jakob.lotm.abilities.tyrant.*;
 import de.jakob.lotm.abilities.visionary.*;
 import de.jakob.lotm.abilities.wheel_of_fortune.*;
-import de.jakob.lotm.abilities.death.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -197,7 +196,7 @@ public class AbilityHandler {
         abilities.add(new ExileAbility("exile_ability"));
         abilities.add(new DoorSubstitutionAbility("door_substitution_ability"));
         abilities.add(new WanderingAbility("wandering_ability"));
-        abilities.add(new ConceptualizationAbility("conceptualization_ability"));
+        abilities.add(new SymbolizationAbility("symbolization_ability"));
         abilities.add(new SealingAbility("sealing_ability"));
         abilities.add(new SpaceTearingAbility("space_tearing_ability"));
         abilities.add(new WaypointAbility("waypoint_ability"));
@@ -206,9 +205,11 @@ public class AbilityHandler {
         abilities.add(new AreaMiniaturizationAbility("area_miniaturization_ability"));
         abilities.add(new SpaceDistortionAbility("space_distortion_ability"));
         abilities.add(new PocketDimensionAbility("pocket_dimension_ability"));
-        abilities.add(new SpaceTimeStormAbility("space_time_storm_ability"));
         abilities.add(new BlackHoleAbility("black_hole_ability"));
         abilities.add(new PlayerTeleportationAbility("player_teleportation_ability"));
+        abilities.add(new SpaceTimeStormAbility("space_time_storm_ability"));
+        abilities.add(new ConceptualizationAbility("conceptualization_ability"));
+        abilities.add(new DoorAuthorityAbility("door_authority_ability"));
 
         // VISIONARY PATHWAY
         abilities.add(new SpectatingAbility("spectating_ability"));

@@ -41,7 +41,7 @@ public class BeyonderDataTickHandler {
 
 
     // In BeyonderDataTickHandler
-    private static final Map<UUID, Set<PassiveAbilityItem>> cachedAbilities = new HashMap<>();
+    private static final Map<UUID, Set<PassiveAbilityItem>> cachedAbilities = new ConcurrentHashMap<>();
 
     public static void invalidateCache(LivingEntity entity) {
         cachedAbilities.remove(entity.getUUID());
@@ -59,8 +59,6 @@ public class BeyonderDataTickHandler {
                             .stream()
                             .map(entry -> (PassiveAbilityItem) entry.get())
                             .toList();
-                    // addAll into a CopyOnWriteArraySet (or synchronizedSet)
-                    // so concurrent readers on the stream below are safe
                     passiveAbilities.addAll(items);
                 }
             }
@@ -126,7 +124,7 @@ public class BeyonderDataTickHandler {
                 invalidateCache(livingEntity); // also re-filter applicable abilities
             }
 
-            // Tick Passive Abilities, Toggle Abilities and onHold for currently selected Ability and tick luck
+            // Tick Passive Abilities, and onHold for currently selected Ability and tick luck
             if(entity.tickCount % 5 == 0) {
                 tickAbilities(livingEntity);
 
@@ -141,6 +139,15 @@ public class BeyonderDataTickHandler {
                     luckComponent.addLuckWithMin(-1, PassiveLuckAbility.getNormalLuckForEntity(livingEntity));
                 }
             }
+
+            // Tick Toggle Abilities
+            ToggleAbility.getActiveAbilitiesForEntity(livingEntity).forEach(toggleAbility -> {
+                if(entity.tickCount % toggleAbility.tickRate != 0) {
+                    return;
+                }
+                toggleAbility.prepareTick(livingEntity.level(), livingEntity);
+                PacketHandler.sendToTrackingAndSelf(livingEntity, new SyncToggleAbilityPacket(livingEntity.getId(), toggleAbility.getId(), SyncToggleAbilityPacket.Action.TICK.getValue()));
+            });
         }
     }
 
@@ -191,12 +198,6 @@ public class BeyonderDataTickHandler {
         // Passive Abilities
         getApplicableAbilities(entity).forEach(abilityItem -> {
             abilityItem.tick(entity.level(), entity);
-        });
-
-        // Tick Toggle Abilities
-        ToggleAbility.getActiveAbilitiesForEntity(entity).forEach(toggleAbility -> {
-            toggleAbility.prepareTick(entity.level(), entity);
-            PacketHandler.sendToTrackingAndSelf(entity, new SyncToggleAbilityPacket(entity.getId(), toggleAbility.getId(), SyncToggleAbilityPacket.Action.TICK.getValue()));
         });
 
         if(entity instanceof ServerPlayer player) {

@@ -33,7 +33,7 @@ import java.util.*;
 public class DemonicSpellsAbility extends SelectableAbility {
     private final DustParticleOptions greenDust = new DustParticleOptions(new Vector3f(0.2f, 0.8f, 0.2f), 1.2f);
     private final DustParticleOptions purpleDust = new DustParticleOptions(new Vector3f(0.6f, 0.2f, 0.8f), 1.2f);
-    private final DustParticleOptions redDust = new DustParticleOptions(new Vector3f(0.9f, 0.2f, 0.2f), 1.2f);
+    private final DustParticleOptions redDust = new DustParticleOptions(new Vector3f(0.9f, 0.2f, 0.2f), 3.2f);
 
     public DemonicSpellsAbility(String id) {
         super(id, 3f);
@@ -194,8 +194,8 @@ public class DemonicSpellsAbility extends SelectableAbility {
         ServerScheduler.scheduleForDuration(0, 5, 20 * 8, () -> {
             for (BlockPos pos : wallBlocks) {
                 if (level.getBlockState(pos).is(Blocks.BARRIER)) {
-                    ParticleUtil.spawnParticles(level, redDust, pos.getCenter(), 2, 0.2, 0.05);
-                    ParticleUtil.spawnParticles(level, ParticleTypes.FLAME, pos.getCenter(), 1, 0.3, 0.1);
+                    if(random.nextBoolean()) ParticleUtil.spawnParticles(level, redDust, pos.getCenter(), 1, 0.2, 0.05);
+                    else ParticleUtil.spawnParticles(level, ParticleTypes.FLAME, pos.getCenter(), 1, 0.3, 0.1);
                 }
             }
 
