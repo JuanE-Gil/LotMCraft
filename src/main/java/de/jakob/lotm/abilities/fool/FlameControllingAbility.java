@@ -34,7 +34,7 @@ public class FlameControllingAbility extends Ability {
 
     @Override
     public float getSpiritualityCost() {
-        return 20;
+        return 100;
     }
 
     @Override

@@ -30,7 +30,7 @@ public class TimeManipulationAbility extends SelectableAbility {
 
     @Override
     protected float getSpiritualityCost() {
-        return 1200;
+        return 10000f;
     }
 
     @Override

@@ -64,7 +64,7 @@ public class GraftingAbility extends SelectableAbility {
 
     @Override
     protected float getSpiritualityCost() {
-        return 1400;
+        return 10000;
     }
 
     @Override

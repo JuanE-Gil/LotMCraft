@@ -46,7 +46,7 @@ public class MundaneConceptualTheft extends SelectableAbility {
 
     @Override
     protected float getSpiritualityCost() {
-        return 50;
+        return 500;
     }
 
     @Override

@@ -47,7 +47,7 @@ public class MiracleCreationAbility extends SelectableAbility {
 
     @Override
     protected float getSpiritualityCost() {
-        return 1200;
+        return 7000;
     }
 
     @Override

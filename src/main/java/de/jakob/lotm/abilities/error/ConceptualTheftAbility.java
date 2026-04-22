@@ -39,7 +39,7 @@ public class ConceptualTheftAbility extends SelectableAbility {
 
     @Override
     protected float getSpiritualityCost() {
-        return 2000;
+        return 10000;
     }
 
     @Override

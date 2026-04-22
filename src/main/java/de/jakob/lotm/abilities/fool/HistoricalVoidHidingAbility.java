@@ -42,7 +42,7 @@ public class HistoricalVoidHidingAbility extends ToggleAbility {
 
     @Override
     public float getSpiritualityCost() {
-        return 25;
+        return 500;
     }
 
     @Override

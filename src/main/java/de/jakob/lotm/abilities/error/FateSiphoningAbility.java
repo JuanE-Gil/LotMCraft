@@ -49,7 +49,7 @@ public class FateSiphoningAbility extends Ability {
 
     @Override
     public float getSpiritualityCost() {
-        return 1000;
+        return 4000;
     }
 
     @Override

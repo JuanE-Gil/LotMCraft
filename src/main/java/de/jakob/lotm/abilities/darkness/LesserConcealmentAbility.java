@@ -20,6 +20,7 @@ import java.util.Map;
 public class LesserConcealmentAbility extends SelectableAbility {
     public LesserConcealmentAbility(String id) {
         super(id, 4f);
+        canBeShared = false;
     }
 
     @Override

@@ -47,7 +47,7 @@ public class DeceitAbility extends SelectableAbility {
 
     @Override
     protected float getSpiritualityCost() {
-        return 500;
+        return 4000;
     }
 
     @Override

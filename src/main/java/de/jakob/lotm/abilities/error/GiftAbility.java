@@ -52,7 +52,7 @@ public class GiftAbility extends SelectableAbility {
 
     @Override
     public float getSpiritualityCost() {
-        return 30;
+        return 60;
     }
 
     @Override

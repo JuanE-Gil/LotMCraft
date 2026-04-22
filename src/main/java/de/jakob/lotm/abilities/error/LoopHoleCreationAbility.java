@@ -51,7 +51,7 @@ public class LoopHoleCreationAbility extends Ability {
 
     @Override
     public float getSpiritualityCost() {
-        return 1200;
+        return 6000;
     }
 
     @Override

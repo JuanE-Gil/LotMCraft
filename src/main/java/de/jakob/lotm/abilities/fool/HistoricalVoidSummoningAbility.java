@@ -100,7 +100,7 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
 
     @Override
     protected float getSpiritualityCost() {
-        return 920;
+        return 5000;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package de.jakob.lotm.abilities.fool;
 
 import com.google.common.util.concurrent.AtomicDouble;
+import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.effect.ModEffects;
@@ -77,9 +78,9 @@ public class PuppeteeringAbility extends Ability {
 
         int baseTime = 20 * 120; // ~120 seconds (20 ticks = 1 second)
 
-        int manipulationTime;
+        int manipulationTime ;
 
-        if (difference == 0) {
+        if (difference == 0 || difference == 1) {
             // Same sequence - faster depending on how low the controller's sequence is
             if (sequence <= 2) {
                 manipulationTime = 20 * 60; // ~60s for seq 0-2
@@ -96,15 +97,15 @@ public class PuppeteeringAbility extends Ability {
                 if(targetSequence >= 3 && targetSequence <= 4)
                     manipulationTime = 20 * 10; // ~10s for seq 1-2 vs 3-4
                 else
-                    manipulationTime = 20 * 5; // 5s for seq 1-2 vs 5+
+                    manipulationTime = 20; // 5s for seq 1-2 vs 5+
             }
             else if ((sequence == 3 || sequence == 4) && targetSequence >= 5) {
                 manipulationTime = 20 * 25; // ~25s for seq 3-4 vs 5+
             }
             else {
                 // Default scaling: faster with bigger difference
-                int reduction = (-difference) * (10 * 20); // if fool's seq is higher difference will be negative
-                manipulationTime = Math.max(baseTime - reduction, 20 * 5); // minimum 5s
+                int reduction = (difference) * (10 * 20); // if fool's seq is higher difference will be negative
+                manipulationTime = Math.max(baseTime + reduction, 20 * 5); // minimum 5s
             }
         }
 
@@ -139,11 +140,10 @@ public class PuppeteeringAbility extends Ability {
             }
             return;
         }
-
-        int time = getManipulationTime(sequence);
+        int targetSequence = BeyonderData.getSequence(target);
+        int time = getManipulationTimeBySequenceAndSequenceDifference(sequence, targetSequence);
 
         if(BeyonderData.isBeyonder(target)) {
-            int targetSequence = BeyonderData.getSequence(target);
 
             if(targetSequence <= sequence) {
                 if(AbilityUtil.isTargetSignificantlyStronger(entity, target)) {
