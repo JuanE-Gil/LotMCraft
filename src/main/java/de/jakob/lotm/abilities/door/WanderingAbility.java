@@ -31,6 +31,7 @@ public class WanderingAbility extends Ability {
         canBeUsedByNPC = false;
         canBeCopied = false;
         canBeReplicated = false;
+        canBeShared = false;
     }
 
     @Override
@@ -40,7 +41,7 @@ public class WanderingAbility extends Ability {
 
     @Override
     public float getSpiritualityCost() {
-        return 200;
+        return 7000;
     }
 
     @Override

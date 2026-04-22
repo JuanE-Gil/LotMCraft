@@ -37,6 +37,7 @@ public class MiracleCreationAbility extends SelectableAbility {
     public MiracleCreationAbility(String id) {
         super(id, 5);
         canBeCopied = false;
+        canBeShared = false;
     }
 
     @Override

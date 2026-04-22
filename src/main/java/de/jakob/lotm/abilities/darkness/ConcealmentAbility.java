@@ -51,6 +51,7 @@ public class ConcealmentAbility extends SelectableAbility {
         canBeUsedInArtifact = false;
         autoClear = false;
         cannotBeStolen = true;
+        canBeShared = false;
     }
 
     @Override
@@ -60,7 +61,7 @@ public class ConcealmentAbility extends SelectableAbility {
 
     @Override
     protected float getSpiritualityCost() {
-        return 3000;
+        return 6000;
     }
 
     @Override

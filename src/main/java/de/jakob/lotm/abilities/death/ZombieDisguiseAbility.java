@@ -36,7 +36,7 @@ public class ZombieDisguiseAbility extends ToggleAbility {
         super(id);
         canBeCopied = false;
         canBeReplicated = false;
-        cannotBeStolen = true;
+        cannotBeStolen = false;
         canBeUsedInArtifact = false;
         canBeShared = false;
     }

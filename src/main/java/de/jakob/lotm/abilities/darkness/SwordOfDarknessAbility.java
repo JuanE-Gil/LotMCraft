@@ -37,6 +37,7 @@ public class SwordOfDarknessAbility extends Ability {
         super(id, 8, "darkness");
         this.canBeCopied = false;
         autoClear = false;
+        canBeShared = false;
     }
 
     @Override
@@ -121,6 +122,6 @@ public class SwordOfDarknessAbility extends Ability {
 
     @Override
     protected float getSpiritualityCost() {
-        return 1000;
+        return 3000;
     }
 }

@@ -39,6 +39,7 @@ public class CalamityCreationAbility extends SelectableAbility {
         super(id, 25);
         postsUsedAbilityEventManually = true;
         canBeCopied = false;
+        canBeShared = false;
     }
 
     @Override

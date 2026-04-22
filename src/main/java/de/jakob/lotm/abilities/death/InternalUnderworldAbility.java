@@ -38,7 +38,6 @@ import java.util.*;
 public class InternalUnderworldAbility extends SelectableAbility {
 
     private static final String STORED_SOULS_TAG = "InternalUnderworldSouls";
-    private static final float CAPTURE_CHANCE = 0.5f;
 
     private record ActiveSoul(LivingEntity entity, CompoundTag soulData) {}
     private static final java.util.Map<UUID, List<ActiveSoul>> activeSouls = new java.util.concurrent.ConcurrentHashMap<>();
@@ -129,8 +128,7 @@ public class InternalUnderworldAbility extends SelectableAbility {
                     .withStyle(ChatFormatting.DARK_RED));
             return;
         }
-
-        // 50% chance to capture
+        float CAPTURE_CHANCE = 0.6f - (playerSeq * 0.05f);
         if (player.getRandom().nextFloat() >= CAPTURE_CHANCE) {
             player.sendSystemMessage(Component.translatable("ability.lotmcraft.internal_underworld.escaped")
                     .withStyle(ChatFormatting.GRAY));

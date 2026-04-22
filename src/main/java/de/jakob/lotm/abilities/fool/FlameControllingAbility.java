@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class FlameControllingAbility extends Ability {
     public FlameControllingAbility(String id) {
-        super(id, 4.5f);
+        super(id, 1.5f);
     }
 
     @Override

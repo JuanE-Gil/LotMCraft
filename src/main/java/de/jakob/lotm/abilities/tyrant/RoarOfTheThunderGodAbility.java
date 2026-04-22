@@ -26,6 +26,7 @@ public class RoarOfTheThunderGodAbility extends Ability {
     public RoarOfTheThunderGodAbility(String id) {
         super(id, 20);
         canBeCopied = false;
+        canBeShared = false;
     }
 
     @Override

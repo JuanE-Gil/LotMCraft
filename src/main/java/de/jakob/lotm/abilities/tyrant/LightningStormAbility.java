@@ -23,6 +23,7 @@ public class LightningStormAbility extends Ability {
         canBeCopied = false;
         interactionRadius = 35;
         interactionCacheTicks = 20 * 17;
+        canBeShared = false;
     }
 
     @Override

@@ -38,7 +38,7 @@ public class WordOfSpiritAbility extends Ability {
 
         if (InteractionHandler.isInteractionPossibleStrictlyHigher(new Location(entity.position(), (net.minecraft.server.level.ServerLevel) level), "purification", BeyonderData.getSequence(entity), -1)) return;
 
-        LivingEntity target = AbilityUtil.getTargetEntity(entity, 25, 1.5f);
+        LivingEntity target = AbilityUtil.getTargetEntity(entity, 25*(int) Math.max(multiplier(entity)/4,1), 1.5f);
         if (target == null) {
             AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.word_of_spirit.no_target").withColor(0xFF334f23));
             return;
@@ -46,8 +46,7 @@ public class WordOfSpiritAbility extends Ability {
 
         int casterSeq = BeyonderData.getSequence(entity);
         int targetSeq = BeyonderData.getSequence(target);
-        // seqDiff < 0 means target is stronger; block if target is 2+ sequences stronger
-        if (targetSeq - casterSeq <= -2) {
+        if (targetSeq - casterSeq <= -1) {
             AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.word_of_spirit.too_strong").withColor(0xFF334f23));
             return;
         }

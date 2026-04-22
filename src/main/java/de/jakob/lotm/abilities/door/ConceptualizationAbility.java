@@ -22,11 +22,12 @@ public class ConceptualizationAbility extends ToggleAbility {
         canBeCopied = false;
         canBeReplicated = false;
         canBeUsedInArtifact = false;
+        canBeShared = false;
     }
 
     @Override
     public float getSpiritualityCost() {
-        return 2;
+        return 400;
     }
 
     @Override

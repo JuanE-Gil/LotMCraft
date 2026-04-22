@@ -44,6 +44,7 @@ public class IdentityConcealmentAbility extends SelectableAbility {
         canBeUsedInArtifact = false;
         autoClear = false;
         cannotBeStolen = true;
+        canBeShared = false;
     }
 
     @Override

@@ -36,6 +36,7 @@ public class HorrorAuraAbility extends Ability {
         postsUsedAbilityEventManually = true;
         interactionRadius = 20;
         interactionCacheTicks = 5;
+        canBeShared = false;
     }
 
     @Override
@@ -45,7 +46,7 @@ public class HorrorAuraAbility extends Ability {
 
     @Override
     public float getSpiritualityCost() {
-        return 1000;
+        return 2500;
     }
 
     @Override

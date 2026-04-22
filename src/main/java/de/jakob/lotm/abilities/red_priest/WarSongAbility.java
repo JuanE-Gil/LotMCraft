@@ -24,6 +24,7 @@ public class WarSongAbility extends Ability {
         interactionRadius = 20;
         interactionCacheTicks = 20 * 30;
         canBeCopied = false;
+        canBeShared = false;
     }
 
     @Override

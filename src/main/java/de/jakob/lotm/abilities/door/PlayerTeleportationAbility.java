@@ -29,11 +29,12 @@ public class PlayerTeleportationAbility extends SelectableAbility {
     public static final HashMap<UUID, String> namesForPlayer = new HashMap<>(); // Needs sync to client side
 
     public PlayerTeleportationAbility(String id) {
-        super(id, 2);
+        super(id, 20);
 
         canBeUsedByNPC = false;
         canBeCopied = false;
         canBeReplicated = false;
+        canBeShared = false;
     }
 
     @Override
@@ -43,7 +44,7 @@ public class PlayerTeleportationAbility extends SelectableAbility {
 
     @Override
     protected float getSpiritualityCost() {
-        return 1200;
+        return 30000;
     }
 
     @Override

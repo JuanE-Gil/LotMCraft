@@ -18,7 +18,7 @@ import java.util.Map;
 
 public class InvisibleHandAbility extends SelectableAbility {
     public InvisibleHandAbility(String id) {
-        super(id, 1f);
+        super(id, 1.5f);
     }
 
     @Override
@@ -28,7 +28,7 @@ public class InvisibleHandAbility extends SelectableAbility {
 
     @Override
     protected float getSpiritualityCost() {
-        return 70;
+        return 170;
     }
 
     @Override
@@ -41,9 +41,9 @@ public class InvisibleHandAbility extends SelectableAbility {
         if(level.isClientSide)
             return;
 
-        LivingEntity target = AbilityUtil.getTargetEntity(entity, 15, 3);
+        LivingEntity target = AbilityUtil.getTargetEntity(entity, 15*(int) Math.max(multiplier(entity)/4,1), 3);
         if(target == null) {
-            Vec3 failureParticleLoc = AbilityUtil.getTargetLocation(entity, 12, 3);
+            Vec3 failureParticleLoc = AbilityUtil.getTargetLocation(entity, 12*(int) Math.max(multiplier(entity)/4,1), 3);
             spawnFailureParticles((ServerLevel) level, failureParticleLoc);
             AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.invisible_hand.no_target").withColor(BeyonderData.pathwayInfos.get("door").color()));
             return;

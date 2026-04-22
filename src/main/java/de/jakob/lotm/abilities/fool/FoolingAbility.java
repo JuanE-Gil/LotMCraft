@@ -33,6 +33,7 @@ public class FoolingAbility extends Ability {
     public FoolingAbility(String id) {
         super(id, 30f); // 30 second cooldown
         hasOptimalDistance = false;
+        canBeShared = false;
     }
 
     @Override

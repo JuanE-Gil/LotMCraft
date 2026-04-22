@@ -42,7 +42,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class DeathDivineKingdomEntity extends Entity {
 
     public static final int RADIUS = 120;
-    public static final int DURATION_TICKS = 20 * 60 * 3; // 3 minutes
+    public static final int DURATION_TICKS = 20 * 60 * 2; // 2 minutes
 
     private static final int BASE_COUNTDOWN_SECONDS = 45;
     private static final int COUNTDOWN_REDUCTION_PER_SEQ = 5;

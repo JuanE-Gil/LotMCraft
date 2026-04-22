@@ -41,6 +41,7 @@ public class LoopHoleCreationAbility extends Ability {
         super(id, 16f);
         canBeCopied = false;
         autoClear = false;
+        canBeShared = false;
     }
 
     @Override

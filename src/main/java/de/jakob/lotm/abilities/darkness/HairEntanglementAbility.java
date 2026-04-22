@@ -49,7 +49,7 @@ public class HairEntanglementAbility extends Ability {
 
     @Override
     public float getSpiritualityCost() {
-        return 600;
+        return 1200;
     }
 
     @Override

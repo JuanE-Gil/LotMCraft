@@ -25,9 +25,10 @@ import java.util.Map;
 
 public class DistortionFieldAbility extends Ability {
     public DistortionFieldAbility(String id) {
-        super(id, 40);
+        super(id, 60);
         canBeCopied = false;
         autoClear = false;
+        canBeShared = false;
     }
 
     @Override
@@ -37,7 +38,7 @@ public class DistortionFieldAbility extends Ability {
 
     @Override
     public float getSpiritualityCost() {
-        return 1400;
+        return 7000;
     }
 
     private final DustParticleOptions dust = new DustParticleOptions(new Vector3f(56 / 255f, 19 / 255f, 102 / 255f), 5f);
@@ -67,7 +68,7 @@ public class DistortionFieldAbility extends Ability {
         distortionFieldEntity.setPos(startPos);
         serverLevel.addFreshEntity(distortionFieldEntity);
 
-        ServerScheduler.scheduleForDuration(0, 6, 20 * 30, () -> {
+        ServerScheduler.scheduleForDuration(0, 6, 20 * 20*(int) Math.max(multiplier(entity)/4,1), () -> {
             if(entity.level() != serverLevel) {
                 return;
             }
@@ -87,7 +88,7 @@ public class DistortionFieldAbility extends Ability {
             });
 
             // Replace area near caster with air
-            AbilityUtil.getBlocksInSphereRadius(serverLevel, entity.position(), 4.5, true).forEach(b -> {
+            AbilityUtil.getBlocksInSphereRadius(serverLevel, entity.position(), 4.5*(int) Math.max(multiplier(entity)/4,1), true).forEach(b -> {
                 if(serverLevel.getBlockState(b).getBlock() != Blocks.BARRIER) {
                     return;
                 }

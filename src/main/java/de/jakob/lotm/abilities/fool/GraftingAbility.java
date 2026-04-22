@@ -54,6 +54,7 @@ public class GraftingAbility extends SelectableAbility {
         canBeCopied = false;
         canBeUsedByNPC = false;
         canBeReplicated = false;
+        canBeShared = false;
     }
 
     @Override

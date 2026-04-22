@@ -31,6 +31,7 @@ public class PureWhiteLightAbility extends Ability {
         interactionRadius = 25;
         postsUsedAbilityEventManually = true;
         canBeCopied = false;
+        canBeShared = false;
     }
 
     @Override

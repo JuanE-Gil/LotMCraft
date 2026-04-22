@@ -33,6 +33,7 @@ public class TorrentialDownpourAbility extends Ability {
         postsUsedAbilityEventManually = true;
         interactionRadius = 25;
         interactionCacheTicks = 20 * 30;
+        canBeShared = false;
     }
 
     @Override

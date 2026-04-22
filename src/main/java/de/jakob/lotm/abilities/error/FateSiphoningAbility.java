@@ -39,6 +39,7 @@ public class FateSiphoningAbility extends Ability {
     public FateSiphoningAbility(String id) {
         super(id, 20);
         canBeCopied = false;
+        canBeShared = false;
     }
 
     @Override

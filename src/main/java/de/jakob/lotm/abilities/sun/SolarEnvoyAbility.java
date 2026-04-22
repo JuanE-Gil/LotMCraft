@@ -29,6 +29,7 @@ public class SolarEnvoyAbility extends ToggleAbility {
         canBeReplicated = false;
         canBeUsedInArtifact = false;
         autoClear = false;
+        canBeShared = false;
     }
 
     @Override

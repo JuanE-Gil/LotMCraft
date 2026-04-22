@@ -1,5 +1,6 @@
 package de.jakob.lotm.abilities.door;
 
+import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.SelectableAbility;
 import de.jakob.lotm.entity.ModEntities;
 import de.jakob.lotm.entity.custom.ability_entities.door_pathway.TravelersDoorEntity;
@@ -148,7 +149,7 @@ public class TravelersDoorAbility extends SelectableAbility {
 
     private int gteCostForDistance(Vec3 position, Vec3 validatedPos) {
         double distance = position.distanceTo(validatedPos);
-        if(distance < 50) {
+        /*if(distance < 50) {
             return 30;
         }
         else if(distance < 150) {
@@ -160,9 +161,10 @@ public class TravelersDoorAbility extends SelectableAbility {
         else if(distance < 500) {
             return 90;
         }
-        else {
-            return 10 * (int) (distance / 500) + 90;
-        }
+        else {*/
+        LOTMCraft.LOGGER.info("distance {}",distance);
+            return (int) distance;
+        //}
     }
 
     private void spawnFailureParticles(ServerLevel level, Vec3 pos) {

@@ -25,6 +25,7 @@ public class ApocalypseAbility extends Ability {
         autoClear = false;
         interactionRadius = 50;
         interactionCacheTicks = 110;
+        canBeShared = false;
     }
 
     @Override

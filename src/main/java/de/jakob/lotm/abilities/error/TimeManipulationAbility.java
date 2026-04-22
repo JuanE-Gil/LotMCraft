@@ -20,6 +20,7 @@ public class TimeManipulationAbility extends SelectableAbility {
         super(id, 17);
         canBeCopied = false;
         canBeReplicated = false;
+        canBeShared = false;
     }
 
     @Override

@@ -14,6 +14,7 @@ public class LightningBranchAbility extends Ability {
     public LightningBranchAbility(String id) {
         super(id, 5f);
         canBeCopied = false;
+        canBeShared = false;
     }
 
     @Override

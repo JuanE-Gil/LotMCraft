@@ -18,6 +18,7 @@ public class PuppetSoldierCreationAbility extends Ability {
         super(id, 20 * 60 * 2);
         canBeCopied = false;
         canBeReplicated = false;
+        canBeShared = false;
     }
 
     @Override

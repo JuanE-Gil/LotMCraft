@@ -23,6 +23,7 @@ public class ConqueringAbility extends Ability {
         super(id, 40, "morale_boost");
         canBeCopied = false;
         canBeReplicated = false;
+        canBeShared = false;
     }
 
     @Override

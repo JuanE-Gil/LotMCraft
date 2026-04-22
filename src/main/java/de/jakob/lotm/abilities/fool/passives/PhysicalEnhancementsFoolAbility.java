@@ -104,12 +104,12 @@ public class PhysicalEnhancementsFoolAbility extends PhysicalEnhancementsAbility
             );
 
             case 0 -> List.of(
-                    new PhysicalEnhancement(EnhancementType.STRENGTH, 5),
-                    new PhysicalEnhancement(EnhancementType.RESISTANCE, 18),
-                    new PhysicalEnhancement(EnhancementType.SPEED, 5),
-                    new PhysicalEnhancement(EnhancementType.HEALTH, 20),
-                    new PhysicalEnhancement(EnhancementType.REGENERATION, 5),
-                    new PhysicalEnhancement(EnhancementType.FIRE_RESISTANCE, 5)
+                    new PhysicalEnhancement(EnhancementType.STRENGTH, 6),
+                    new PhysicalEnhancement(EnhancementType.RESISTANCE, 15),
+                    new PhysicalEnhancement(EnhancementType.SPEED, 6),
+                    new PhysicalEnhancement(EnhancementType.HEALTH, 45),
+                    new PhysicalEnhancement(EnhancementType.REGENERATION, 6),
+                    new PhysicalEnhancement(EnhancementType.FIRE_RESISTANCE, 6)
             );
 
             default -> List.of();

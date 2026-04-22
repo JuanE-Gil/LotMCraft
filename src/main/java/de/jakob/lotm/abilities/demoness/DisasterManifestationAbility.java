@@ -35,6 +35,7 @@ public class DisasterManifestationAbility extends SelectableAbility {
         super(id, 20);
         this.canBeCopied = false;
         postsUsedAbilityEventManually = true;
+        canBeShared = false;
     }
 
     @Override

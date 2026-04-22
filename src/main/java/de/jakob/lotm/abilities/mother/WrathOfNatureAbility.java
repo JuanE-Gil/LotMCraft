@@ -27,6 +27,7 @@ public class WrathOfNatureAbility extends SelectableAbility {
         super(id, 3);
         canBeCopied = false;
         postsUsedAbilityEventManually = true;
+        canBeShared = false;
     }
 
     @Override

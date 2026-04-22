@@ -43,7 +43,7 @@ public class HandOfDeathAbility extends SelectableAbility {
 
     @Override
     protected float getSpiritualityCost() {
-        return 400;
+        return 2000;
     }
 
     @Override
@@ -73,7 +73,7 @@ public class HandOfDeathAbility extends SelectableAbility {
     // -------------------------------------------------------------------------
 
     private void leftHand(ServerLevel level, LivingEntity caster) {
-        LivingEntity target = AbilityUtil.getTargetEntity(caster, 30, 1.5f, true);
+        LivingEntity target = AbilityUtil.getTargetEntity(caster, 30* (int) Math.max(multiplier(caster)/4,1), 1.5f, true);
         if (target == null) {
             AbilityUtil.sendActionBar(caster, Component.translatable("ability.lotmcraft.hand_of_death.no_target").withColor(0xFF334f23));
             return;
@@ -103,14 +103,13 @@ public class HandOfDeathAbility extends SelectableAbility {
         float damageMultiplier = Math.max(0f, 0.25f + (seqDiff * 0.10f));
 
         // Schedule damage at the end of the 30 seconds
-        LivingEntity targetRef = target;
         UUID taskId = ServerScheduler.scheduleDelayed(WITHER_DURATION, () -> {
-            activeMarks.remove(targetRef.getUUID());
-            if (!targetRef.isAlive()) return;
+            activeMarks.remove(target.getUUID());
+            if (!target.isAlive()) return;
 
-            float damage = targetRef.getMaxHealth() * damageMultiplier;
-            PhysicalEnhancementsAbility.suppressRegen(targetRef, 10_000);
-            ModDamageTypes.trueDamage(targetRef, damage, level, caster);
+            float damage = target.getMaxHealth() * damageMultiplier;
+            //PhysicalEnhancementsAbility.suppressRegen(target, 10_000);
+            ModDamageTypes.trueDamage(target, damage, level, caster);
         }, level);
 
         activeMarks.put(target.getUUID(), taskId);
@@ -131,7 +130,7 @@ public class HandOfDeathAbility extends SelectableAbility {
     // -------------------------------------------------------------------------
 
     private void rightHandOthers(ServerLevel level, LivingEntity caster) {
-        LivingEntity target = AbilityUtil.getTargetEntity(caster, 30, 1.5f, true);
+        LivingEntity target = AbilityUtil.getTargetEntity(caster, 30* (int) Math.max(multiplier(caster)/4,1), 1.5f, true);
         if (target == null) {
             AbilityUtil.sendActionBar(caster, Component.translatable("ability.lotmcraft.hand_of_death.no_target").withColor(0xFF334f23));
             return;

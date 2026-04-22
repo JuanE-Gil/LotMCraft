@@ -29,6 +29,7 @@ public class WarCryAbility extends Ability {
         interactionRadius = 19;
         interactionCacheTicks = 20 * 12;
         canBeCopied = false;
+        canBeShared = false;
     }
 
     @Override

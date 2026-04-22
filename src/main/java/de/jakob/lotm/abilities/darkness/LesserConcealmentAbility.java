@@ -29,7 +29,7 @@ public class LesserConcealmentAbility extends SelectableAbility {
 
     @Override
     protected float getSpiritualityCost() {
-        return 1000;
+        return 1500;
     }
 
     @Override

@@ -26,6 +26,7 @@ public class StructuralCollapseAbility extends Ability {
         super(id, 15, "destruction");
         canBeCopied = false;
         interactionRadius = 35;
+        canBeShared = false;
     }
 
     @Override

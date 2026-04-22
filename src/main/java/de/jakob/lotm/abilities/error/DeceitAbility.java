@@ -33,10 +33,11 @@ public class DeceitAbility extends SelectableAbility {
     public static final HashMap<UUID, Integer> seqMap = new HashMap<>(50);
 
     public DeceitAbility(String id) {
-        super(id, 1);
+        super(id, 15);
         canBeCopied = false;
         autoClear = false;
         canBeUsedInArtifact = false;
+        canBeShared = false;
     }
 
     @Override

@@ -27,6 +27,7 @@ public class WallOfLightAbility extends Ability {
     public WallOfLightAbility(String id) {
         super(id, 15);
         canBeCopied = false;
+        canBeShared = false;
     }
 
     @Override

@@ -26,6 +26,7 @@ public class FogOfWarAbility extends ToggleAbility {
         super(id, "fog");
         canBeCopied = false;
         interactionRadius = 20;
+        canBeShared = false;
     }
 
     @Override

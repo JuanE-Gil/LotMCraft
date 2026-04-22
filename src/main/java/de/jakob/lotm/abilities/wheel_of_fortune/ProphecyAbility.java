@@ -39,6 +39,7 @@ public class ProphecyAbility extends SelectableAbility {
         super(id, 4);
         canBeCopied = false;
         canBeReplicated = false;
+        canBeShared = false;
     }
 
     @Override

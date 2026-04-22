@@ -17,6 +17,7 @@ public class AreaDesolationAbility extends Ability {
     public AreaDesolationAbility(String id) {
         super(id, 5);
         canBeCopied = false;
+        canBeShared = false;
     }
 
     @Override
