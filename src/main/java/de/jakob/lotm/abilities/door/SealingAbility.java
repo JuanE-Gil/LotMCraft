@@ -98,7 +98,10 @@ public class SealingAbility extends Ability {
         taskIdHolder[0] = ServerScheduler.scheduleForDuration(0, 4, 20 * 14, () -> {
             Location sealLoc = new Location(targetLoc, level);
 
-            if(InteractionHandler.isInteractionPossible(sealLoc, "explosion", entitySeq)) {
+            if(InteractionHandler.isInteractionPossible(sealLoc, "explosion", entitySeq) || InteractionHandler.isInteractionPossible(sealLoc, "sealing_malfunction", entitySeq)) {
+                ParticleUtil.spawnParticles((ServerLevel) level, ParticleTypes.END_ROD, targetLoc, 200, 2, .2);
+                ParticleUtil.spawnParticles((ServerLevel) level, ParticleTypes.PORTAL, targetLoc, 200, 2, .2);
+
                 sealedEntities.forEach(e -> {
                     e.removeEffect(MobEffects.MOVEMENT_SLOWDOWN);
                     if(BeyonderData.isBeyonder(e)) {
@@ -132,14 +135,12 @@ public class SealingAbility extends Ability {
                 e.hurtMarked = true;
                 ParticleUtil.spawnParticles((ServerLevel) level, ModParticles.STAR.get(), e.getEyePosition().subtract(0, .5, 0), 15, .4, .9, .4, .05);
             });
-        });
-
-        ServerScheduler.scheduleDelayed(20 * 14, () -> {
+        }, () -> {
             sealedEntities.forEach(e -> {
                 if(!(e instanceof Player) && !BeyonderData.isBeyonder(e) && e instanceof Mob mob) {
                     mob.setNoAi(false);
                 }
             });
-        });
+        }, (ServerLevel) level, () -> AbilityUtil.getTimeInArea(entity, new Location(targetLoc, level)));
     }
 }

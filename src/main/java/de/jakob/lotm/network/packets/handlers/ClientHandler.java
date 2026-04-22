@@ -500,6 +500,8 @@ public class ClientHandler {
             return;
         }
 
+        if(entity != Minecraft.getInstance().player) return;
+
         switch (packet.action()) {
             case 0 -> {
                 ActiveToggleAbilitiesRenderer.activeToggleAbilities.add(packet.abilityId());

@@ -33,6 +33,7 @@ import java.util.*;
 @EventBusSubscriber(modid = LOTMCraft.MOD_ID)
 public class SpellsAbility extends SelectableAbility {
     private final Set<UUID> isCastingWind = new HashSet<>();
+    private final Set<UUID> isCastingFog = new HashSet<>();
 
     public SpellsAbility(String id) {
         super(id, 1.25f);
@@ -114,10 +115,15 @@ public class SpellsAbility extends SelectableAbility {
         if(level.isClientSide)
             return;
 
+        if(isCastingFog.contains(entity.getUUID()))
+            return;
+
+        isCastingFog.add(entity.getUUID());
+
         Vec3 pos = entity.getEyePosition();
 
         ServerScheduler.scheduleForDuration(0, 2, 20 * 8, () -> {
-            ParticleUtil.spawnParticles((ServerLevel) level, ModParticles.FOG_OF_WAR.get(), pos, 50, 6.5, 4, 6.5, 0);
+            ParticleUtil.spawnParticles((ServerLevel) level, ModParticles.FOG_OF_WAR.get(), pos, 30, 6.5, 3, 6.5, 0);
 
             AbilityUtil.addPotionEffectToNearbyEntities(
                     (ServerLevel) level,
@@ -128,7 +134,7 @@ public class SpellsAbility extends SelectableAbility {
                     new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, 1, false, false)
             );
 
-        }, null, (ServerLevel) level, () -> AbilityUtil.getTimeInArea(entity, new Location(entity.position(), level)));
+        }, () -> isCastingFog.remove(entity.getUUID()), (ServerLevel) level, () -> AbilityUtil.getTimeInArea(entity, new Location(entity.position(), level)));
     }
 
     private void freeze(Level level, LivingEntity entity) {

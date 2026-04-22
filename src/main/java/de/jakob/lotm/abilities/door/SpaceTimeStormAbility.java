@@ -21,21 +21,21 @@ import java.util.Map;
 
 public class SpaceTimeStormAbility extends Ability {
     public SpaceTimeStormAbility(String id) {
-        super(id, 45, "explosion");
+        super(id, 60, "explosion", "destruction");
         canBeCopied = false;
-        interactionRadius = 35;
+        interactionRadius = 60;
         interactionCacheTicks = 20 * 12;
         canBeShared = false;
     }
 
     @Override
     public Map<String, Integer> getRequirements() {
-        return new HashMap<>(Map.of("door", 1));
+        return new HashMap<>(Map.of("door", 0));
     }
 
     @Override
     public float getSpiritualityCost() {
-        return 15000;
+        return 50000;
     }
 
     @Override
@@ -49,9 +49,9 @@ public class SpaceTimeStormAbility extends Ability {
 
         EffectManager.playEffect(EffectManager.Effect.SPACE_FRAGMENTATION, center.x, center.y, center.z, serverLevel, entity);
 
-        List<BlockPos> blocks = AbilityUtil.getBlocksInSphereRadius(serverLevel, center, 35*(int) Math.max(multiplier(entity)/4,1), true, true, false);
+        List<BlockPos> blocks = AbilityUtil.getBlocksInSphereRadius(serverLevel, center, 40*(int) Math.max(multiplier(entity)/4,1), true, true, false);
         ServerScheduler.scheduleForDuration(0, 2, 20 * 8*(int) Math.max(multiplier(entity)/4,1), () -> {
-            AbilityUtil.damageNearbyEntities(serverLevel, entity, 35*(int) Math.max(multiplier(entity)/4,1), DamageLookup.lookupDps(1, .875, 2, 18) *(int) Math.max(multiplier(entity)/4,1), center, true, false);
+            AbilityUtil.damageNearbyEntities(serverLevel, entity, 60*(int) Math.max(multiplier(entity)/4,1), DamageLookup.lookupDps(0, .875, 2, 18) *(int) Math.max(multiplier(entity)/4,1), center, true, false);
 
             if(griefing) {
                 blocks.stream().filter(b -> random.nextInt(175) == 0 && !serverLevel.getBlockState(b).is(ModBlocks.VOID.get())).forEach(b -> serverLevel.setBlockAndUpdate(b, Blocks.AIR.defaultBlockState()));

@@ -7,6 +7,7 @@ import de.jakob.lotm.abilities.core.ToggleAbility;
 import de.jakob.lotm.abilities.demoness.CharmAbility;
 import de.jakob.lotm.abilities.demoness.ThreadManipulationAbility;
 import de.jakob.lotm.abilities.tyrant.TorrentialDownpourAbility;
+import de.jakob.lotm.attachments.DoorAuthorityData;
 import de.jakob.lotm.effect.ModEffects;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.data.Location;
@@ -97,6 +98,17 @@ public class InteractionHandler {
     }
 
     public static boolean isInteractionPossible(Location location, String interactionFlag, int sequence, boolean requireSameOrHigherSequence) {
+        if(interactionFlag.equalsIgnoreCase("sealing_strengthening")) {
+            if(location.getLevel() instanceof ServerLevel level && DoorAuthorityData.get(level).isActive() && DoorAuthorityData.get(level).getEffectId().equalsIgnoreCase("strengthen")) {
+                return true;
+            }
+        }
+        if(interactionFlag.equalsIgnoreCase("sealing_malfunction")) {
+            if(location.getLevel() instanceof ServerLevel level && DoorAuthorityData.get(level).isActive() && DoorAuthorityData.get(level).getEffectId().equalsIgnoreCase("malfunction")) {
+                return true;
+            }
+        }
+
         return recentInteractions.stream()
                 .filter(interaction -> interaction.event.getInteractionFlags().contains(interactionFlag))
                 .filter(interaction -> location.isInSameLevel(interaction.event.getLevel()))

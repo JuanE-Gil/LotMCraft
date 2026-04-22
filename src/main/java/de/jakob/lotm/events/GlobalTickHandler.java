@@ -2,6 +2,8 @@ package de.jakob.lotm.events;
 
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.interaction.InteractionHandler;
+import de.jakob.lotm.attachments.DoorAuthorityData;
+import net.minecraft.server.level.ServerLevel;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
@@ -16,6 +18,11 @@ public class GlobalTickHandler {
         }
 
         InteractionHandler.cleanupInteractions();
+        DoorAuthorityData data = DoorAuthorityData.get((ServerLevel) event.getLevel());
+
+        if (data.isActive()) {
+            data.tick();
+        }
     }
 
 }

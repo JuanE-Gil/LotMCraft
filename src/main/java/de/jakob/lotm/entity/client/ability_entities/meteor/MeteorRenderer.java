@@ -98,11 +98,10 @@ public class MeteorRenderer extends EntityRenderer<MeteorEntity> {
 
         poseStack.pushPose();
 
-        poseStack.scale(entity.getSize(), entity.getSize(), entity.getSize());
-        poseStack.translate(0, -.6, 0);
+        poseStack.scale(entity.getSize() * 6.5f, entity.getSize() * 6.5f, entity.getSize() * 6.5f);
+        poseStack.translate(0, -1.2, 0);
 
         var vertexConsumer = buffer.getBuffer(this.model.renderType(this.getTextureLocation(entity)));
-        // Gray tint when petrified
         int modelColor = petrified ? 0xFF808080 : 0xFFFFFFFF;
         this.model.renderToBuffer(poseStack, vertexConsumer, packedLight, OverlayTexture.NO_OVERLAY, modelColor);
 
@@ -133,11 +132,11 @@ public class MeteorRenderer extends EntityRenderer<MeteorEntity> {
         while (data.particleAccumulator >= 0.25f) {
             data.particleAccumulator -= 0.25f;
 
-            for (int i = 0; i < 4; i++) {
+            for (int i = 0; i < 6; i++) {
                 Vec3 offset = new Vec3(
-                        (entity.level().random.nextFloat() - 0.5) * size * 0.7,
-                        (entity.level().random.nextFloat() - 0.5) * size * 0.7,
-                        (entity.level().random.nextFloat() - 0.5) * size * 0.7
+                        (entity.level().random.nextFloat() - 0.5) * size,
+                        (entity.level().random.nextFloat() - 0.5) * size,
+                        (entity.level().random.nextFloat() - 0.5) * size
                 );
                 Vec3 particleVel = motion.scale(-0.25).add(
                         (entity.level().random.nextFloat() - 0.5) * 0.08,
@@ -146,7 +145,7 @@ public class MeteorRenderer extends EntityRenderer<MeteorEntity> {
                 );
                 data.particles.add(new ParticleData(
                         entityPos.add(offset), particleVel,
-                        size * (0.4f + entity.level().random.nextFloat() * 0.30f),
+                        size * (0.4f + entity.level().random.nextFloat() * 0.6f),
                         20 + entity.level().random.nextInt(15), ParticleType.FIRE
                 ));
             }
@@ -164,7 +163,7 @@ public class MeteorRenderer extends EntityRenderer<MeteorEntity> {
                 );
                 data.particles.add(new ParticleData(
                         entityPos.add(offset), particleVel,
-                        size * (0.35f + entity.level().random.nextFloat() * 0.25f),
+                        size * (0.35f + entity.level().random.nextFloat() * 0.5f),
                         35 + entity.level().random.nextInt(25), ParticleType.SMOKE
                 ));
             }
@@ -178,7 +177,7 @@ public class MeteorRenderer extends EntityRenderer<MeteorEntity> {
                 Vec3 particleVel = motion.scale(-0.15);
                 data.particles.add(new ParticleData(
                         entityPos.add(offset), particleVel,
-                        size * (0.2f + entity.level().random.nextFloat() * 0.15f),
+                        size * (0.2f + entity.level().random.nextFloat() * 0.3f),
                         18 + entity.level().random.nextInt(12), ParticleType.TRAIL
                 ));
             }

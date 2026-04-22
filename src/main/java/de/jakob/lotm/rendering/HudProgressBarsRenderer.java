@@ -107,6 +107,8 @@ public class HudProgressBarsRenderer {
 
         float sanity = mc.player.getData(ModAttachments.SANITY_COMPONENT.get()).getSanity();
 
+        if(sanity > .85f) return; // Please leave it like this :'( -Jakob
+
         int barWidth = 14;
         int barHeight = 120;
         int screenWidth = guiGraphics.guiWidth();
