@@ -30,7 +30,21 @@ public class ActionPositionContext extends ActionContextBase {
 
     @Override
     public ActionContextBase fillFromStream(TokenStream stream) {
-        return null;
+        stream.next();
+
+        try{
+            int x = Integer.parseInt(Objects.requireNonNull(stream.peek()));
+            stream.next();
+            int y = Integer.parseInt(Objects.requireNonNull(stream.peek()));
+            stream.next();
+            int z = Integer.parseInt(Objects.requireNonNull(stream.peek()));
+
+            pos = new Vec3(x, y, z);
+        }catch (NumberFormatException e){
+            pos = Vec3.ZERO;
+        }
+
+        return this;
     }
 
     @Override

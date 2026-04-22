@@ -3,6 +3,7 @@ package de.jakob.lotm.abilities.visionary.prophecy.actions.implementations;
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.visionary.prophecy.actions.ActionBase;
 import de.jakob.lotm.abilities.visionary.prophecy.actions.ActionsEnum;
+import de.jakob.lotm.abilities.visionary.prophecy.actions.ActionsHelper;
 import de.jakob.lotm.abilities.visionary.prophecy.actions.context.ActionContextBase;
 import de.jakob.lotm.abilities.visionary.prophecy.actions.context.ActionContextEnum;
 import de.jakob.lotm.abilities.visionary.prophecy.actions.context.implementations.ActionItemsContext;
@@ -63,6 +64,6 @@ public class DropItemAction extends ActionBase {
     }
 
     public static DropItemAction load(CompoundTag tag, HolderLookup.Provider provider) {
-        return new DropItemAction(ActionContextBase.load(ActionContextEnum.POSITION, tag, provider));
+        return new DropItemAction(ActionContextBase.load(ActionsHelper.getContextType(ActionsEnum.DROP_ITEM), tag, provider));
     }
 }

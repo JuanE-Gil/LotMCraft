@@ -17,13 +17,21 @@ public class ActionsHelper {
     private static @Nullable ActionsEnum getType(String str){
         return switch (str){
             case "drop" -> ActionsEnum.DROP_ITEM;
+            case "teleport" -> ActionsEnum.TELEPORT;
+            case "digest" -> ActionsEnum.DIGESTION;
+            case "health" -> ActionsEnum.HEALTH;
+            case "sanity" -> ActionsEnum.SANITY;
             default -> null;
         };
     }
 
-    private static ActionContextEnum getContextType(ActionsEnum value){
+    public static ActionContextEnum getContextType(ActionsEnum value){
         return switch (value){
             case ActionsEnum.DROP_ITEM -> ActionContextEnum.ITEM;
+            case ActionsEnum.TELEPORT -> ActionContextEnum.POSITION;
+            case ActionsEnum.DIGESTION -> ActionContextEnum.NUMBER;
+            case ActionsEnum.HEALTH -> ActionContextEnum.NUMBER;
+            case ActionsEnum.SANITY -> ActionContextEnum.NUMBER;
         };
     }
 
@@ -68,7 +76,7 @@ public class ActionsHelper {
         ResourceLocation id = ResourceLocation.tryParse(input);
 
         if (id == null) {
-            return null; // invalid format
+            return null;
         }
 
         return BuiltInRegistries.ITEM.getOptional(id).orElse(null);

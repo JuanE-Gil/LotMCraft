@@ -7,6 +7,7 @@ import de.jakob.lotm.abilities.visionary.prophecy.actions.context.implementation
 import de.jakob.lotm.abilities.visionary.prophecy.actions.context.implementations.ActionPositionContext;
 import de.jakob.lotm.abilities.visionary.prophecy.triggers.context.implementations.TriggerEmptyContext;
 import de.jakob.lotm.abilities.visionary.prophecy.triggers.context.implementations.TriggerItemsContext;
+import de.jakob.lotm.abilities.visionary.prophecy.triggers.context.implementations.TriggerNumbersContext;
 import de.jakob.lotm.abilities.visionary.prophecy.triggers.context.implementations.TriggerPositionContext;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -48,6 +49,7 @@ public abstract class TriggerContextBase {
             case POSITION -> TriggerPositionContext.load(tag, id, provider);
             case ITEM -> TriggerItemsContext.load(tag, id, provider);
             case EMPTY -> TriggerEmptyContext.load(tag, id, provider);
+            case NUMBER -> TriggerNumbersContext.load(tag, id, provider);
         };
     }
 
@@ -56,6 +58,7 @@ public abstract class TriggerContextBase {
             case POSITION -> new TriggerPositionContext(id);
             case ITEM -> new TriggerItemsContext(id);
             case EMPTY -> new TriggerEmptyContext(id);
+            case NUMBER -> new TriggerNumbersContext(id);
         };
     }
 }

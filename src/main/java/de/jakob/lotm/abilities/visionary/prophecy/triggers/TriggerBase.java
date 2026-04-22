@@ -9,6 +9,7 @@ import de.jakob.lotm.abilities.visionary.prophecy.triggers.context.TriggerContex
 import de.jakob.lotm.abilities.visionary.prophecy.triggers.context.TriggerContextEnum;
 import de.jakob.lotm.abilities.visionary.prophecy.triggers.context.implementations.TriggerPositionContext;
 import de.jakob.lotm.abilities.visionary.prophecy.triggers.implementations.HasItemTrigger;
+import de.jakob.lotm.abilities.visionary.prophecy.triggers.implementations.HealthTrigger;
 import de.jakob.lotm.abilities.visionary.prophecy.triggers.implementations.InstantTrigger;
 import de.jakob.lotm.abilities.visionary.prophecy.triggers.implementations.PositionTrigger;
 import net.minecraft.core.HolderLookup;
@@ -71,6 +72,7 @@ public abstract class  TriggerBase {
             case POSITION -> PositionTrigger.load(tag, actionType, contextType, provider);
             case PICK_UP -> HasItemTrigger.load(tag, actionType, contextType, provider);
             case INSTANT -> InstantTrigger.load(tag, actionType, contextType, provider);
+            case HEALTH -> HealthTrigger.load(tag, actionType, contextType, provider);
         };
     }
 
@@ -79,6 +81,7 @@ public abstract class  TriggerBase {
             case POSITION -> new PositionTrigger(action, context);
             case PICK_UP -> new HasItemTrigger(action, context);
             case INSTANT -> new InstantTrigger(action, context);
+            case HEALTH -> new HealthTrigger(action, context);
         };
     }
 }

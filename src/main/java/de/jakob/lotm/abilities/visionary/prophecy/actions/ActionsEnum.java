@@ -4,7 +4,12 @@ import de.jakob.lotm.abilities.visionary.prophecy.actions.implementations.DropIt
 import net.minecraft.nbt.CompoundTag;
 
 public enum ActionsEnum {
-    DROP_ITEM;
+    DROP_ITEM,
+    TELEPORT,
+    DIGESTION,
+    SANITY,
+    HEALTH,
+    ;
 
     public static ActionsEnum fromNBT(CompoundTag tag, String key) {
         String name = tag.getString(key);

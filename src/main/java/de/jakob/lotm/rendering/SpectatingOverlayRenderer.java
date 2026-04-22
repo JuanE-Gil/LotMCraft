@@ -118,8 +118,6 @@ public class SpectatingOverlayRenderer {
         Font font = Minecraft.getInstance().font;
         int y = 15 + (font.lineHeight / 2);
 
-
-
         int outlineX = startingX - 10;
         int outlineY = 15;
         int outlineWidth = screenWidth - outlineX;

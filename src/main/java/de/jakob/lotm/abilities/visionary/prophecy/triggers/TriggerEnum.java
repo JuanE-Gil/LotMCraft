@@ -6,7 +6,8 @@ import net.minecraft.nbt.CompoundTag;
 public enum TriggerEnum {
     POSITION,
     PICK_UP,
-    INSTANT
+    INSTANT,
+    HEALTH
     ;
 
     public static TriggerEnum  fromNBT(CompoundTag tag, String key) {

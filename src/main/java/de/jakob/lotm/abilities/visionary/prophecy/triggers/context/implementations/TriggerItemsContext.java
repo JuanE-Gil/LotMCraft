@@ -37,7 +37,15 @@ public class TriggerItemsContext extends TriggerContextBase {
     @Override
     public TriggerContextBase fillFromStream(TokenStream stream) {
         while (!stream.isEmpty()) {
-            stacksList.add(new ItemStack(Objects.requireNonNull(ActionsHelper.getItemFromString(stream.peek()))));
+            if(stream.match("then")) break;
+
+            var stack = ActionsHelper.getItemFromString(stream.peek());
+            if (stack == null) {
+                stream.next();
+                continue;
+            }
+
+            stacksList.add(new ItemStack(stack));
             stream.next();
         }
 
