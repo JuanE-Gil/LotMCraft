@@ -471,6 +471,12 @@ public class PacketHandler {
                 SyncUniquenessPacket.STREAM_CODEC,
                 SyncUniquenessPacket::handle
         );
+
+        registrar.playToClient(
+                SyncControllingDataPacket.TYPE,
+                SyncControllingDataPacket.STREAM_CODEC,
+                SyncControllingDataPacket::handle
+        );
     }
 
     private static void registerServerPackets(PayloadRegistrar registrar) {

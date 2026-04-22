@@ -54,7 +54,7 @@ public class HudProgressBarsRenderer {
 
         // Check if current player has progress
         if ((ClientBeyonderCache.isBeyonder(mc.player.getUUID())) && !mc.options.hideGui) {
-            float progress = ClientBeyonderCache.getSpirituality(mc.player.getUUID()) / BeyonderData.getMaxSpirituality(ClientBeyonderCache.getPathway(mc.player.getUUID()), ClientBeyonderCache.getSequence(mc.player.getUUID()));
+            float progress = ClientBeyonderCache.getSpirituality(mc.player.getUUID()) / BeyonderData.getMaxSpirituality(ClientBeyonderCache.getPathway(mc.player.getUUID()), ClientBeyonderCache.getSequence(mc.player.getUUID()), mc.player);
 
             // Draw background
             guiGraphics.fill(barX, barY, barX + barWidth, barY + barHeight, backgroundColor);

@@ -1,7 +1,10 @@
 package de.jakob.lotm.attachments;
 
+import de.jakob.lotm.network.PacketHandler;
+import de.jakob.lotm.network.packets.toClient.SyncControllingDataPacket;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.attachment.IAttachmentHolder;
 import net.neoforged.neoforge.attachment.IAttachmentSerializer;
 
@@ -24,7 +27,13 @@ public class ControllingDataComponent {
     }
 
     public void setControlling(boolean isControlling) {
+        setControlling(isControlling, null);
+    }
+
+    public void setControlling(boolean isControlling, ServerPlayer player) {
         this.isControlling = isControlling;
+        syncData(player);
+
     }
 
     public boolean isControlled() {
@@ -40,8 +49,8 @@ public class ControllingDataComponent {
         return ownerUUID;
     }
 
-    public void setOwnerUUID(UUID controllerUUID) {
-        this.ownerUUID = controllerUUID;
+    public void setOwnerUUID(UUID ownerUUID) {
+        this.ownerUUID = ownerUUID;
     }
 
 
@@ -49,8 +58,8 @@ public class ControllingDataComponent {
         return ownerName;
     }
 
-    public void setOwnerName(String controllerUUID) {
-        this.ownerName = controllerUUID;
+    public void setOwnerName(String ownerName) {
+        this.ownerName = ownerName;
     }
 
 
@@ -58,8 +67,8 @@ public class ControllingDataComponent {
         return bodyUUID;
     }
 
-    public void setBodyUUID(UUID controllerUUID) {
-        this.bodyUUID = controllerUUID;
+    public void setBodyUUID(UUID bodyUUID) {
+        this.bodyUUID = bodyUUID;
     }
 
 
@@ -67,8 +76,8 @@ public class ControllingDataComponent {
         return targetUUID;
     }
 
-    public void setTargetUUID(UUID controllerUUID) {
-        this.targetUUID = controllerUUID;
+    public void setTargetUUID(UUID targetUUID) {
+        this.targetUUID = targetUUID;
     }
 
 
@@ -76,8 +85,8 @@ public class ControllingDataComponent {
         return targetEntity;
     }
 
-    public void setTargetEntity(CompoundTag controllerUUID) {
-        this.targetEntity = controllerUUID;
+    public void setTargetEntity(CompoundTag targetEntity) {
+        this.targetEntity = targetEntity;
     }
 
 
@@ -85,8 +94,20 @@ public class ControllingDataComponent {
         return bodyEntity;
     }
 
-    public void setBodyEntity(CompoundTag controllerUUID) {
-        this.bodyEntity = controllerUUID;
+    public void setBodyEntity(CompoundTag bodyEntity) {
+        setBodyEntity(bodyEntity, null);
+    }
+
+    public void setBodyEntity(CompoundTag bodyEntity, ServerPlayer player) {
+        this.bodyEntity = bodyEntity;
+        syncData(player);
+    }
+
+
+    public void syncData(ServerPlayer player) {
+        if (player != null) {
+            PacketHandler.sendToPlayer(player, new SyncControllingDataPacket(this.isControlling, this.bodyEntity, player.getId()));
+        }
     }
 
 

@@ -309,21 +309,21 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
         for(int i = 0; i < Math.min(markedEntities.size(), 53); i++) {
             CompoundTag entityData = markedEntities.get(i);
             ItemStack displayItem = createEntityDisplayItem(entityData);
+
             if (entityData.contains("EntityNBT")) {
                 CompoundTag entityNBT = entityData.getCompound("EntityNBT");
-                if (entityNBT.contains("NeoForgeData")) {
-                    CompoundTag nfd = entityNBT.getCompound("NeoForgeData");
-                    if (nfd.contains("beyonder_pathway")) {
-                        boolean isMarionette = Optional.of(entityNBT.getCompound("neoforge:attachments").getCompound("lotmcraft:marionette_component")).map(c -> c.getBoolean("isMarionette")).orElse(false);
-                        displayItem.set(
-                                DataComponents.LORE,
-                                new ItemLore(List.of(
-                                        Component.literal("-------------------").withStyle(style -> style.withColor(0xFFa742f5).withItalic(false)),
-                                        Component.translatable("lotm.pathway").append(Component.literal(": ")).append(Component.literal(BeyonderData.pathwayInfos.get(nfd.getString("beyonder_pathway")).getSequenceName(9))).withColor(0xa26fc9).withStyle(style -> style.withItalic(false)),
-                                        Component.translatable("lotm.sequence").append(Component.literal(": ")).append(Component.literal(nfd.getInt("beyonder_sequence") + "")).withColor(0xa26fc9).withStyle(style -> style.withItalic(false)),
-                                        Component.translatable("lotm.marionette").append(Component.literal(": ")).append(Component.literal(isMarionette + "")).withColor(0xa26fc9).withStyle(style -> style.withItalic(false))
-                                )));
-                    }
+                CompoundTag nfd = entityNBT.getCompound("neoforge:attachments").getCompound("lotmcraft:beyonder_component");
+
+                if (nfd.contains("pathway")) {
+                    boolean isMarionette = Optional.of(entityNBT.getCompound("neoforge:attachments").getCompound("lotmcraft:marionette_component")).map(c -> c.getBoolean("isMarionette")).orElse(false);
+                    displayItem.set(
+                            DataComponents.LORE,
+                            new ItemLore(List.of(
+                                    Component.literal("-------------------").withStyle(style -> style.withColor(0xFFa742f5).withItalic(false)),
+                                    Component.translatable("lotm.pathway").append(Component.literal(": ")).append(Component.literal(BeyonderData.pathwayInfos.get(nfd.getString("pathway")).getSequenceName(9))).withColor(0xa26fc9).withStyle(style -> style.withItalic(false)),
+                                    Component.translatable("lotm.sequence").append(Component.literal(": ")).append(Component.literal(nfd.getInt("sequence") + "")).withColor(0xa26fc9).withStyle(style -> style.withItalic(false)),
+                                    Component.translatable("lotm.marionette").append(Component.literal(": ")).append(Component.literal(isMarionette + "")).withColor(0xa26fc9).withStyle(style -> style.withItalic(false))
+                            )));
                 }
             }
             entityContainer.setItem(i + 1, displayItem);
@@ -414,8 +414,11 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
 
             // Special handling for BeyonderNPCEntity and players as well
             if(entityData.getBoolean("IsBeyonderNPC") || isPlayer) {
-                String pathway = !isPlayer ? entityData.getString("BeyonderPathway") : entityData.getCompound("EntityNBT").getCompound("NeoForgeData").getString("beyonder_pathway");
-                int sequence = !isPlayer ? entityData.getInt("BeyonderSequence") : entityData.getCompound("EntityNBT").getCompound("NeoForgeData").getInt("beyonder_sequence");
+                CompoundTag entityNBT = entityData.getCompound("EntityNBT");
+                CompoundTag nfd = entityNBT.getCompound("neoforge:attachments").getCompound("lotmcraft:beyonder_component");
+
+                String pathway = nfd.getString("pathway");
+                int sequence = nfd.getInt("sequence");
                 String skin = entityData.getString("BeyonderSkin");
                 boolean hostile = entityData.getBoolean("BeyonderHostile");
 
@@ -468,8 +471,6 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
 
                 // Remove UUID and custom initialization fields to avoid conflicts
                 entityNBT.remove("UUID");
-                entityNBT.remove("pathway");
-                entityNBT.remove("sequence");
                 entityNBT.remove("skin");
                 entityNBT.remove("hostile");
 
@@ -660,8 +661,6 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
         // Special handling for BeyonderNPCEntity
         if(closest instanceof BeyonderNPCEntity beyonderNPC) {
             entityData.putBoolean("IsBeyonderNPC", true);
-            entityData.putString("BeyonderPathway", beyonderNPC.getPathway());
-            entityData.putInt("BeyonderSequence", beyonderNPC.getSequence());
             entityData.putString("BeyonderSkin", beyonderNPC.getSkinName());
             entityData.putBoolean("BeyonderHostile", beyonderNPC.isHostile());
         } else {
@@ -922,26 +921,26 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
                 ItemStack displayItem = createEntityDisplayItem(entityData);
                 if (entityData.contains("EntityNBT")) {
                     CompoundTag entityNBT = entityData.getCompound("EntityNBT");
-                    if (entityNBT.contains("NeoForgeData")) {
-                        CompoundTag nfd = entityNBT.getCompound("NeoForgeData");
-                        if (nfd.contains("beyonder_pathway")) {
-                            if (entityData.contains("OriginalPlayerUUID")) {
-                                if (entityData.getUUID("OriginalPlayerUUID").equals(player.getUUID())) {
-                                    boolean isMarionette = Optional.of(entityNBT.getCompound("neoforge:attachments").getCompound("lotmcraft:marionette_component")).map(c -> c.getBoolean("isMarionette")).orElse(false);
-                                    displayItem.set(
-                                            DataComponents.LORE,
-                                            new ItemLore(List.of(
-                                                    Component.literal("-------------------").withStyle(style -> style.withColor(0xFFa742f5).withItalic(false)),
-                                                    Component.translatable("lotm.pathway").append(Component.literal(": ")).append(Component.literal(BeyonderData.pathwayInfos.get(nfd.getString("beyonder_pathway")).getSequenceName(9))).withColor(0xa26fc9).withStyle(style -> style.withItalic(false)),
-                                                    Component.translatable("lotm.sequence").append(Component.literal(": ")).append(Component.literal(nfd.getInt("beyonder_sequence") + "")).withColor(0xa26fc9).withStyle(style -> style.withItalic(false)),
-                                                    Component.translatable("lotm.marionette").append(Component.literal(": ")).append(Component.literal(isMarionette + "")).withColor(0xa26fc9).withStyle(style -> style.withItalic(false))
-                                            )));
-                                } else {
-                                    continue;
-                                }
+                    CompoundTag nfd = entityNBT.getCompound("neoforge:attachments").getCompound("lotmcraft:beyonder_component");
+
+                    if (nfd.contains("pathway")) {
+
+                        if (entityData.contains("OriginalPlayerUUID")) {
+                            if (entityData.getUUID("OriginalPlayerUUID").equals(player.getUUID()) && nfd.getInt("sequence") < 0) {
+                                boolean isMarionette = Optional.of(entityNBT.getCompound("neoforge:attachments").getCompound("lotmcraft:marionette_component")).map(c -> c.getBoolean("isMarionette")).orElse(false);
+                                displayItem.set(
+                                        DataComponents.LORE,
+                                        new ItemLore(List.of(
+                                                Component.literal("-------------------").withStyle(style -> style.withColor(0xFFa742f5).withItalic(false)),
+                                                Component.translatable("lotm.pathway").append(Component.literal(": ")).append(Component.literal(BeyonderData.pathwayInfos.get(nfd.getString("pathway")).getSequenceName(9))).withColor(0xa26fc9).withStyle(style -> style.withItalic(false)),
+                                                Component.translatable("lotm.sequence").append(Component.literal(": ")).append(Component.literal(nfd.getInt("sequence") + "")).withColor(0xa26fc9).withStyle(style -> style.withItalic(false)),
+                                                Component.translatable("lotm.marionette").append(Component.literal(": ")).append(Component.literal(isMarionette + "")).withColor(0xa26fc9).withStyle(style -> style.withItalic(false))
+                                        )));
                             } else {
                                 continue;
                             }
+                        } else {
+                            continue;
                         }
                     }
                 }
@@ -972,10 +971,10 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
                                     anotherTag.putFloat("sequence", BeyonderData.getSequence(player));
                                     anotherTag.putString("pathway", BeyonderData.getPathway(player));
 
-                                    incrementHistoricalBorrowingCount(player, borrowTime, SummonType.SEQUENCE, player.getUUID(), tag);
+                                    incrementHistoricalBorrowingCount(player, borrowTime, SummonType.SEQUENCE, player.getUUID(), anotherTag);
 
-                                    BeyonderData.setPathway(player, entityData.getCompound("EntityNBT").getCompound("NeoForgeData").getString("beyonder_pathway"));
-                                    BeyonderData.setSequence(player, entityData.getCompound("EntityNBT").getCompound("NeoForgeData").getInt("beyonder_sequence"));
+                                    BeyonderData.setPathway(player, entityData.getCompound("EntityNBT").getCompound("neoforge:attachments").getCompound("lotmcraft:beyonder_component").getString("pathway"));
+                                    BeyonderData.setSequence(player, entityData.getCompound("EntityNBT").getCompound("neoforge:attachments").getCompound("lotmcraft:beyonder_component").getInt("sequence"));
                                     player.closeContainer();
                                 }
                             }
@@ -1183,21 +1182,6 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
         }
         blocksToRemove.forEach(placedBlocks::remove);
     }
-
-//    // Periodic cleanup of invalid entities/items
-//    @SubscribeEvent
-//    public static void onServerTick(ServerTickEvent.Post event) {
-//        // Only run every 20 ticks (1 second)
-//        if(event.getServer().getTickCount() % 20 != 0) return;
-//
-//        // Clean up activeSummons for offline players
-//        Set<UUID> onlinePlayers = new HashSet<>();
-//        for(ServerPlayer player : event.getServer().getPlayerList().getPlayers()) {
-//            onlinePlayers.add(player.getUUID());
-//        }
-//
-//        activeSummons.keySet().removeIf(uuid -> !onlinePlayers.contains(uuid));
-//    }
 
     // scale max summoned items
     private static int getMaxSummoned(ServerPlayer serverPlayer){

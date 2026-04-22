@@ -47,10 +47,6 @@ import java.util.UUID;
 @EventBusSubscriber(modid = LOTMCraft.MOD_ID)
 public class ControllingUtil {
 
-    public static void possess(ServerPlayer player, LivingEntity target) {
-        possess(player, target, false);
-    }
-
     public static void possess(ServerPlayer player, LivingEntity target, boolean spawnOriginalBody) {
         // checks
         if (player == null) return;
@@ -71,7 +67,7 @@ public class ControllingUtil {
         data.setBodyUUID(originalBody.getUUID());
 
         data.setTargetUUID(target.getUUID());
-        data.setControlling(true);
+        data.setControlling(true, player);
 
         //copy the player and his position to original body
         copyEntities(player, originalBody);
@@ -101,7 +97,7 @@ public class ControllingUtil {
             // if the main body didn't spawn, pass an empty tag to return the player to his current location when resetting
             bodyTag.put("Pos", new ListTag());
         }
-        data.setBodyEntity(bodyTag);
+        data.setBodyEntity(bodyTag, player);
 
         if (spawnOriginalBody) {
             // add the main body to the allies
@@ -145,19 +141,19 @@ public class ControllingUtil {
         // returning the target before returning to main body
         if (targetTag != null) {
             // Patch the saved tag with the player's current Beyonder state so sequence regressions persist
-            CompoundTag playerPData = player.getPersistentData();
-            String currentPathway = playerPData.getString("beyonder_pathway");
-            int currentSequence = playerPData.getInt("beyonder_sequence");
+            String currentPathway = BeyonderData.getPathway(player);
+            int currentSequence = BeyonderData.getSequence(player);
             if (!currentPathway.isEmpty() && currentSequence >= 0) {
+                // idk why that is here, "Will" added it and idk why so i'll leave it here anyways
                 targetTag.putString("Pathway", currentPathway);
                 targetTag.putInt("Sequence", currentSequence);
+
                 // also patch NeoForgeData persistent data inside the tag
-                if (targetTag.contains("NeoForgeData")) {
-                    CompoundTag nfd = targetTag.getCompound("NeoForgeData");
-                    nfd.putString("beyonder_pathway", currentPathway);
-                    nfd.putInt("beyonder_sequence", currentSequence);
-                    nfd.putFloat("beyonder_spirituality", playerPData.getFloat("beyonder_spirituality"));
-                    nfd.putFloat("beyonder_digestion_progress", playerPData.getFloat("beyonder_digestion_progress"));
+                if (targetTag.contains("neoforge:attachments")) {
+                    CompoundTag nfd = targetTag.getCompound("neoforge:attachments").getCompound("lotmcraft:beyonder_component");
+                    nfd.putString("pathway", currentPathway);
+                    nfd.putInt("sequence", currentSequence);
+                    nfd.putFloat("digestionProgress", BeyonderData.getDigestionProgress(player));
                 }
             }
         }
@@ -269,8 +265,8 @@ public class ControllingUtil {
         ShapeShiftingUtil.resetShape(player);
 
         // clearing data
-        data.setBodyEntity(null);
-        data.setControlling(false);
+        data.setBodyEntity(null, player);
+        data.setControlling(false, player);
         if (resetData) {
             data.setOwnerUUID(null);
             data.setBodyUUID(null);
@@ -311,12 +307,14 @@ public class ControllingUtil {
         targetBarData.setAbilities(sourceBarData.getAbilities());
 
         if (BeyonderData.isBeyonder(source)) {
-            BeyonderData.setBeyonder(target, BeyonderData.getPathway(source), BeyonderData.getSequence(source));
+            BeyonderData.setSequence(target, BeyonderData.getSequence(source));
+            BeyonderData.setPathway(target, BeyonderData.getPathway(source));
+
+            BeyonderData.setBeyonder(target, BeyonderData.getPathway(source), BeyonderData.getSequence(source),false, false, true, false, false);
             if (source instanceof Player sourcePlayer && target instanceof Player targetPlayer) {
                 BeyonderData.digest(targetPlayer, BeyonderData.getDigestionProgress(sourcePlayer), false);
                 BeyonderData.setGriefingEnabled(targetPlayer, BeyonderData.isGriefingEnabled(sourcePlayer));
             }
-            BeyonderData.setSpirituality(target, BeyonderData.getSpirituality(source));
         } else {
             BeyonderData.clearBeyonderData(target);
         }
@@ -502,8 +500,7 @@ public class ControllingUtil {
                 }
 
                 // clean up data
-
-                playerData.setControlling(false);
+                playerData.setControlling(false, player);
                 playerData.setTargetEntity(null);
                 playerData.setOwnerUUID(null);
                 playerData.setBodyUUID(null);
@@ -530,7 +527,7 @@ public class ControllingUtil {
                     reset(serverPlayer, serverLevel, false);
                     // kill the target entity instead
                     serverLevel.getEntity(data.getTargetUUID()).hurt(event.getSource(), Float.MAX_VALUE);
-                    data.setControlling(false);
+                    data.setControlling(false, serverPlayer);
                     data.setTargetEntity(null);
                     data.setOwnerUUID(null);
                     data.setBodyUUID(null);
@@ -631,10 +628,12 @@ public class ControllingUtil {
                 // dont reset if main body doesn't exist
                 if (mainBodyEntity == null) return;
 
-                CompoundTag bodyData = data.getBodyEntity().getCompound("NeoForgeData");
+                CompoundTag bodyData = data.getBodyEntity().getCompound("neoforge:attachments").getCompound("lotmcraft:beyonder_component");
 
                 // get the seq of main body and not the current player
-                int sequence = bodyData.getInt("beyonder_sequence");
+                int sequence = bodyData.getInt("sequence");
+                if (sequence == 0) return;
+
                 int controllingDistance;
                 switch (sequence) {
                     case 5 -> controllingDistance = 500;

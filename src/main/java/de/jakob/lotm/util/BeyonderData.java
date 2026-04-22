@@ -150,10 +150,14 @@ public class BeyonderData {
     }
 
     public static void setBeyonder(LivingEntity entity, String pathway, int sequence) {
-        setBeyonder(entity, pathway, sequence, false, false, true, false);
+        setBeyonder(entity, pathway, sequence, false, false, true, false, true);
     }
 
     public static void setBeyonder(LivingEntity entity, String pathway, int sequence, boolean skipCheck, boolean clearPathwayHistory, boolean addToPathwayHistory, boolean clearCharStack) {
+        setBeyonder(entity, pathway, sequence, skipCheck, clearPathwayHistory, addToPathwayHistory, clearCharStack, true);
+    }
+
+    public static void setBeyonder(LivingEntity entity, String pathway, int sequence, boolean skipCheck, boolean clearPathwayHistory, boolean addToPathwayHistory, boolean clearCharStack, boolean resetSpirituality) {
         if(entity.level() instanceof ServerLevel serverLevel) {
             callPassiveEffectsOnRemoved(entity, serverLevel);
         }
@@ -182,7 +186,7 @@ public class BeyonderData {
         component.setSequence(sequence);
         if(clearCharStack) component.clearCharacteristicStack();
         else component.setCharacteristicStack(0, sequence);
-        component.setSpirituality(getMaxSpirituality(pathway, sequence));
+        if (resetSpirituality) component.setSpirituality(getMaxSpirituality(pathway, sequence));
         component.setDigestionProgress(0);
         component.setGriefingEnabled(griefing);
 
@@ -392,26 +396,8 @@ public class BeyonderData {
             return;
 
         float current = getSpirituality(player);
-        float newAmount = Math.min(getMaxSpirituality(getPathway(player), getSequence(player)), current + amount);
+        float newAmount = Math.min(getMaxSpirituality(getPathway(player), getSequence(player), player), current + amount);
         player.getData(ModAttachments.BEYONDER_COMPONENT).setSpirituality(newAmount);
-
-        float maxSpirituality = getMaxSpirituality(getPathway(player), getSequence(player));
-
-        // keep the spirituality the same for controlled puppets
-        ControllingDataComponent data = player.getData(ModAttachments.CONTROLLING_DATA);
-        if (data.isControlling()) {
-            CompoundTag bodyData = data.getBodyEntity().getCompound("NeoForgeData");
-            if (bodyData != null) {
-                newAmount = Math.min(getMaxSpirituality("fool", bodyData.getInt("beyonder_sequence")), current + amount);
-                player.getData(ModAttachments.BEYONDER_COMPONENT).setSpirituality(newAmount);
-
-                maxSpirituality = getMaxSpirituality("fool", bodyData.getInt("beyonder_sequence"));
-            }
-        }
-
-        if(maxSpirituality <= 0) {
-            return;
-        }
 
         // Sync to client if this is server-side
         if (!player.level().isClientSide() && player instanceof ServerPlayer serverPlayer) {
@@ -429,6 +415,17 @@ public class BeyonderData {
         if (!player.level().isClientSide() && player instanceof ServerPlayer serverPlayer) {
             PacketHandler.syncBeyonderDataToPlayer(serverPlayer);
         }
+    }
+
+    // for getting the spirituality of the main body instead, works on both client and server side
+    public static float getMaxSpirituality(String path, int seq, Player player){
+        ControllingDataComponent data = player.getData(ModAttachments.CONTROLLING_DATA);
+        if (data.isControlling()) {
+            CompoundTag bodyData = data.getBodyEntity().getCompound("neoforge:attachments").getCompound("lotmcraft:beyonder_component");
+            float sp = getMaxSpirituality(bodyData.getString("pathway"), bodyData.getInt("sequence"));
+            return sp;
+        }
+        return getMaxSpirituality(path, seq);
     }
 
     public static float getMaxSpirituality(String path, int seq){
