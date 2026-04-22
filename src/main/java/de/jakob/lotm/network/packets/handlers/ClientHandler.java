@@ -526,6 +526,15 @@ public class ClientHandler {
         }
     }
 
+    public static void handleControllingDataPacket(SyncControllingDataPacket packet) {
+        Entity entity = Minecraft.getInstance().level.getEntity(packet.entityId());
+        if(entity == null) {
+            return;
+        }
+        entity.getData(ModAttachments.CONTROLLING_DATA.get()).setControlling(packet.isControlling());
+        entity.getData(ModAttachments.CONTROLLING_DATA.get()).setBodyEntity(packet.bodyEntity());
+    }
+
     public static void syncKillCount(int killCount) {
         ClientSacrificeCache.setKillCount(killCount);
         if (Minecraft.getInstance().screen instanceof IntrospectScreen screen) {

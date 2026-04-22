@@ -1,6 +1,7 @@
 package de.jakob.lotm.abilities.core;
 
 import de.jakob.lotm.LOTMCraft;
+import de.jakob.lotm.abilities.error.ParasitationAbility;
 import de.jakob.lotm.attachments.AbilityCooldownComponent;
 import de.jakob.lotm.attachments.DisabledAbilitiesComponent;
 import de.jakob.lotm.attachments.ModAttachments;
@@ -209,7 +210,7 @@ public abstract class Ability {
 
         if(!(entity instanceof Player) && !canBeUsedByNPC) return false;
 
-        if(entity instanceof Player player && player.isSpectator()) return false;
+        if(entity instanceof Player player && player.isSpectator() && !ParasitationAbility.isConcealed(player.getUUID())) return false;
 
         DisabledAbilitiesComponent disabledComponent = entity.getData(ModAttachments.DISABLED_ABILITIES_COMPONENT);
         if((disabledComponent.isAbilityUsageDisabled() || disabledComponent.isSpecificAbilityDisabled(this.getId())) && !this.canAlwaysBeUsed) return false;
