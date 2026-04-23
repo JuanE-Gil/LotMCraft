@@ -12,7 +12,8 @@ public enum ActionsEnum {
     CALAMITY,
     STUN,
     SKILL,
-    CONFUSION
+    CONFUSION,
+    SEAL
     //DOUBLE
     ;
 

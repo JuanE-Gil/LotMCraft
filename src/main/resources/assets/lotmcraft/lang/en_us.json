@@ -766,6 +766,10 @@
   "ability.lotmcraft.story_writing.no_target": "No Target",
   "ability.lotmcraft.story_writing.failed": "Failed",
   "ability.lotmcraft.story_writing.target_unavailable": "Target Unavailable",
+  "lotmcraft.envision_position_ability":"Envision Position",
+  "lotmcraft.envision_position_ability.description": "Envision your location",
+  "ability.lotmcraft.envision_position_ability.on_sight": "On Sight",
+  "ability.lotmcraft.envision_position_ability.coordinates": "Coordinates",
 
 
   "lotmcraft.psyche_storm_ability": "Psyche Storm",

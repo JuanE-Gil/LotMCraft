@@ -179,6 +179,12 @@ public class PacketHandler {
         );
 
         registrar.playToClient(
+                OpenEnvisionLocationScreenPacket.TYPE,
+                OpenEnvisionLocationScreenPacket.STREAM_CODEC,
+                OpenEnvisionLocationScreenPacket::handle
+        );
+
+        registrar.playToClient(
                 DisplayShadowParticlesPacket.TYPE,
                 DisplayShadowParticlesPacket.STREAM_CODEC,
                 DisplayShadowParticlesPacket::handle

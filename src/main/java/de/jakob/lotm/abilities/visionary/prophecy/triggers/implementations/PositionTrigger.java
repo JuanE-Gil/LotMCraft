@@ -32,14 +32,14 @@ public class PositionTrigger extends TriggerBase {
 
     @Override
     public boolean checkTrigger(Level level, LivingEntity entity) {
-        if (!(context instanceof TriggerPositionContext)) return true;
+        if (!(context instanceof TriggerPositionContext position)) return true;
 
         Vec3 pos = entity.position();
-        Vec3 target = ((TriggerPositionContext) context).pos;
+        Vec3 target = position.pos;
 
         double dist = pos.distanceTo(target);
 
-        if (dist <= 5.0) {
+        if (dist <= position.range) {
             action.action(level, entity);
 
             return true;

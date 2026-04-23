@@ -16,11 +16,15 @@ import java.util.UUID;
 
 public class TriggerPositionContext extends TriggerContextBase {
     public Vec3 pos;
+    public int range;
+
+    public static String NBT_RANGE = "range";
 
     public TriggerPositionContext(UUID entityId, Vec3 pos) {
         super(entityId);
 
         this.pos = pos;
+        range = 5;
     }
 
     public TriggerPositionContext(UUID id){
@@ -45,11 +49,17 @@ public class TriggerPositionContext extends TriggerContextBase {
             int y = Integer.parseInt(Objects.requireNonNull(stream.peek()));
             stream.next();
             int z = Integer.parseInt(Objects.requireNonNull(stream.peek()));
+            stream.next();
 
             pos = new Vec3(x, y, z);
+
         }catch (NumberFormatException e){
             pos = Vec3.ZERO;
         }
+
+        try{
+            range = Integer.parseInt(Objects.requireNonNull(stream.peek()));
+        }catch (NumberFormatException ignored){}
 
         return this;
     }
@@ -61,14 +71,21 @@ public class TriggerPositionContext extends TriggerContextBase {
         tag.putDouble("x", pos.x);
         tag.putDouble("y", pos.y);
         tag.putDouble("z", pos.z);
+
+        tag.putInt(NBT_RANGE, range);
+
         return tag;
     }
 
     public static TriggerPositionContext load(CompoundTag tag, UUID id, HolderLookup.Provider provider) {
-        return new TriggerPositionContext(id, new Vec3(
+        var contex = new TriggerPositionContext(id, new Vec3(
                 tag.getDouble("x"),
                 tag.getDouble("y"),
-                tag.getDouble("z")
-        ));
+                tag.getDouble("z")));
+
+        contex.range = tag.getInt(NBT_RANGE);
+
+        return contex;
+
     }
 }

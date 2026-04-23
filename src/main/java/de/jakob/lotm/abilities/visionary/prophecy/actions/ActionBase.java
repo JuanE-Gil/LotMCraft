@@ -40,6 +40,7 @@ public abstract class ActionBase {
             case STUN -> StunAction.load(tag, provider);
             case SKILL -> UseSkillAction.load(tag, provider);
             case CONFUSION -> ConfusionAction.load(tag, provider);
+            case SEAL -> SealAction.load(tag, provider);
         };
     }
 
@@ -54,6 +55,7 @@ public abstract class ActionBase {
             case STUN -> new StunAction(context);
             case SKILL -> new UseSkillAction(context);
             case CONFUSION -> new ConfusionAction(context);
+            case SEAL -> new SealAction(context);
         };
     }
 }

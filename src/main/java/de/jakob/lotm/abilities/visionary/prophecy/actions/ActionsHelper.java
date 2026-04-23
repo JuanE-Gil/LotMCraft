@@ -3,6 +3,7 @@ package de.jakob.lotm.abilities.visionary.prophecy.actions;
 import de.jakob.lotm.abilities.visionary.prophecy.TokenStream;
 import de.jakob.lotm.abilities.visionary.prophecy.actions.context.ActionContextBase;
 import de.jakob.lotm.abilities.visionary.prophecy.actions.context.ActionContextEnum;
+import de.jakob.lotm.abilities.visionary.prophecy.actions.context.implementations.ActionStringContext;
 import de.jakob.lotm.util.BeyonderData;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -25,6 +26,7 @@ public class ActionsHelper {
             case "stun" -> ActionsEnum.STUN;
             case "skill" -> ActionsEnum.SKILL;
             case "confusion" -> ActionsEnum.CONFUSION;
+            case "seal" -> ActionsEnum.SEAL;
             default -> null;
         };
     }
@@ -40,6 +42,7 @@ public class ActionsHelper {
             case ActionsEnum.STUN -> ActionContextEnum.EMPTY;
             case ActionsEnum.SKILL -> ActionContextEnum.STRING;
             case ActionsEnum.CONFUSION -> ActionContextEnum.EMPTY;
+            case ActionsEnum.SEAL -> ActionContextEnum.EMPTY;
         };
     }
 
