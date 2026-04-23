@@ -1,5 +1,7 @@
 # Black Emperor Pathway Abilities
 
+> **Damage type:** All ability damage uses `mobAttack` — reduced by armor, Resistance, and Protection enchants. No ability deals true damage.
+
 ## Active Abilities
 
 ---
@@ -7,8 +9,8 @@
 
 ### Mausoleum Domain
 **Sequence Requirement:** 1
-**Spirituality Cost:** 80
-**Cooldown:** 1.0 second
+**Spirituality Cost:** 25% of max
+**Cooldown:** 120 second
 *(Cannot be copied or replicated)*
 
 - **Cast Range:** 25 blocks
@@ -42,28 +44,28 @@
 **Aura Radius:** 25 blocks
 
 **Scale Multiplier:** `1.0 + (2 − seq) × 0.25` (stronger at lower sequences)
-**Spirituality Drain per Pulse:** `0.75 + (stack × 0.35) + (seq_gap × 0.20)`
+**Spirituality Drain per Pulse:** `8%`
 
 **Pulse Outcomes (roll-based, scale increases with stack):**
 
 | Roll | Outcome | Effect |
 |------|---------|--------|
 | < 25 | Minor Entropy | Slowness + Blindness + Confusion |
-| 25–49 | Control Collapse | Losing Control (6 + stack levels) + Unluck (3 + stack levels) |
+| 25–49 | Control Collapse | Losing Control (6 + stack levels) |
 | 50–69 | Sensory Decay | Blindness + Confusion + Slowness III |
 | 70–85 | Entropy Drain | Blindness + Confusion + Slowness III + Losing Control |
 | 86–95 | Entropy Damage | 6% max HP + (stack × 1.25) direct damage |
-| 96+ | Annihilation | 12% max HP + (stack × 2.5) direct damage + Losing Control + Unluck |
+| 96+ | Annihilation | 12% max HP + (stack × 2.5) direct damage + Losing Control |
 
 ---
 
 ### Commanding Orders
 **Sequence Requirement:** 3
-**Spirituality Cost:** 3.0 per tick (toggle)
+**Spirituality Cost:** 10.0 per tick (toggle)
 *(Cannot be used by NPCs)*
 
 - **Range:** 25 blocks
-- **Chat Command Cooldown:** 2 seconds between uses
+- **Chat Command Cooldown:** 4.5 seconds between uses
 - While active, sending a chat message in the format `<TargetName> <command>` issues an order:
 
 | Command | Effects |
@@ -82,7 +84,7 @@
 
 ### Commanding Presence
 **Sequence Requirement:** 3
-**Spirituality Cost:** 3.0 per tick (toggle)
+**Spirituality Cost:** 4.0 per tick (toggle)
 *(Cannot be used by NPCs)*
 
 - Emits a passive aura affecting all nearby entities weaker than the caster.
@@ -114,57 +116,54 @@
 - **Boon (70–88% chance):** Random buff — Speed II, Jump Boost II, Strength II, Luck II, Absorption II, or Regeneration II + minor heal
 - **Neutral (92–98%):** Damage Resistance or Slow Falling
 - **Minor Bad (2–6%):** Blindness + Confusion
-- **Major Bad (0.2%):** Unluck II + Losing Control
+- **Major Bad (0.2%):** Losing Control
 
 **Target pulses** (outcome varies by sequence gap):
 | Outcome | Effect |
 |---------|--------|
 | Minor Disorder | Slowness (20–80t) + Blindness (40t) + Confusion (40–80t) |
-| Control Loss | Losing Control / Confusion / Weakness for 60–140t + Unluck |
+| Control Loss | Losing Control / Confusion / Weakness for 60–140t |
 | Seal | Slowness III + Weakness + ability seal for 80–140t |
-| Lightning Sweep | 4–8 lightning strikes in 12-block radius |
-| Tornado Burst | Summons a tornado at the target |
-| Meteor Strike | Summons a meteor at the target |
 
 ---
 
 ### Bestowment
 **Sequence Requirement:** 4
-**Spirituality Cost:** 45
-**Cooldown:** 4.0 seconds
+**Spirituality Cost:** 20% of max
+**Cooldown:** 45.0 seconds
 *(Cannot be copied or replicated)*
 
-- **Target Range:** 18 blocks
+- **Target Range:** 15 blocks
 - **Resistance:** ~40% at 1-sequence gap, 0% at 2+ gap
 
 Five selectable modes. Duration of each effect scales with caster sequence (stronger = longer):
 
 **Mode 0 — Money Focus**
-- **Duration:** 160–320 ticks (scales with sequence)
+- **Duration:** 20–40 seconds (scales with sequence)
 - Pulls the target toward the nearest ore within 192 blocks (iron, gold, diamond).
 - Mobs navigate to ore at 1.0 speed; players are lightly pulled every 5 ticks.
 - Message: *"Money... ore... treasure..."*
 
 **Mode 1 — Rash**
-- **Duration:** 160–300 ticks (scales with sequence)
+- **Duration:** 10–20 seconds (scales with sequence)
 - Applies **Confusion** (30t) + **Slowness II** (20t) every 8 ticks.
 - Causes chaotic movement nudges every tick.
-- Triggers a random ability cast every 8 ticks.
-- Pulses damage to the nearest entity within 12 blocks every 8 ticks.
+- Triggers a random ability cast every 7 seconds.
+- Pulses damage to the nearest entity within 10 blocks every 4 seconds.
 
 **Mode 2 — Sluggish**
-- **Duration:** 200–360 ticks (scales with sequence)
-- Applies **Slowness II** (40t) every 20 ticks.
-- Drains spirituality every 20 ticks.
+- **Duration:** 12–18 seconds (scales with sequence)
+- Applies **Slowness II** (40t) every 2 seconds.
+- Drains spirituality every 2.5 seconds.
 - Blocks all ability usage for the duration.
 
 **Mode 3 — Anxiety**
-- **Duration:** 140–200 ticks (scales with sequence)
+- **Duration:** 12–20 seconds (scales with sequence)
 - Applies **Losing Control** (Level 3 at Seq 4+) + Confusion (40t) + Weakness (40t) every 20 ticks.
 - Causes natural sanity loss.
 
 **Mode 4 — Will to Fight Seal**
-- **Duration:** 120–320 ticks (scales with sequence)
+- **Duration:** 10–18 seconds (scales with sequence)
 - Applies **Weakness II** + **Slowness II** for the full duration.
 - Seals all Beyonder abilities until the effect expires.
 
@@ -172,8 +171,8 @@ Five selectable modes. Duration of each effect scales with caster sequence (stro
 
 ### Exploit
 **Sequence Requirement:** 4
-**Spirituality Cost:** 15
-**Cooldown:** 4.0 seconds
+**Spirituality Cost:** 15% of max
+**Cooldown:** 5.0 seconds
 *(Cannot be copied or replicated; players only)*
 
 Three selectable modes:
@@ -182,8 +181,8 @@ Three selectable modes:
 - Enables sustained flight. Drains 0.03–0.08 spirituality per tick.
 - **Flight Speed by Sequence:**
   - Seq 2: 0.12
-  - Seq 3: 0.10
-  - Seq 4: 0.085
+  - Seq 3: 0.075
+  - Seq 4: 0.060
 - Deactivates when spirituality drops below 0.5.
 
 **Mode 1 — Jump Up** *(vertical launch)*
@@ -200,7 +199,7 @@ Three selectable modes:
 
 ### Magnify
 **Sequence Requirement:** 4
-**Spirituality Cost:** 60
+**Spirituality Cost:** 20% of max
 **Cooldown:** 20.0 seconds
 *(Cannot be copied or replicated)*
 
@@ -210,17 +209,17 @@ Three selectable modes:
 Four selectable modes:
 
 **Mode 0 — Magnify Self** *(self-cast)*
-- **Duration:** 240 ticks (12 seconds)
-- Grants: Speed IV, Jump Boost IV, Strength VI, Damage Resistance IV, Regeneration III, Absorption IV, Haste III.
+- **Duration:** 12 seconds
+- Grants: Speed III, Jump Boost III, Strength III, Damage Resistance II, Regeneration III, Absorption II, Haste III.
 
 **Mode 1 — Magnify Weather**
 - **Raining/thundering:** Triggers a weakened Lightning Storm at the target location.
 - **Clear weather:** Spawns a Tornado at the target location.
 
 **Mode 2 — Magnify Grab**
-- **Duration:** 80 ticks (4 seconds)
-- Pulls the target toward the caster at variable speed (1.1–2.6 based on distance).
-- On arrival (within 2.1 blocks): Slowness VII (30t) + Weakness II (30t) + Blindness (30t) + Confusion (30t).
+- **Duration:** 4 seconds
+- Pulls the target toward the caster at variable speed (1.35–3.2 based on distance).
+- On arrival (within 2.1 blocks): Slowness VI (30t) + Weakness II (30t) + Blindness (30t) + Confusion (30t).
 
 **Mode 3 — Magnify Execution**
 - Deals damage scaled by sequence gap (`target_seq − caster_seq`):
@@ -228,9 +227,9 @@ Four selectable modes:
 | Sequence Gap | Damage |
 |-------------|--------|
 | +2 or more (weaker) | target current HP + 20 (execution) |
-| +1 (slightly weaker) | 65% of target max HP |
-| 0 (equal) | 50% of target max HP |
-| −1 (slightly stronger) | 25% of target max HP |
+| +1 (slightly weaker) | 30% of target max HP |
+| 0 (equal) | 20% of target max HP |
+| −1 (slightly stronger) | 10% of target max HP |
 | −2 or more (stronger) | 0% (no damage) |
 
 ---
@@ -364,21 +363,21 @@ Five selectable modes:
 - **Requirement:** Must hold an item in the off-hand (transferred to target on cast).
 - **Resistance:** ~50% at 1-sequence gap, 0% at 2+ gap
 
-Three selectable modes, all lasting **100 ticks**:
+Three selectable modes:
 
-**Mode 0 — Weaken**
-- **Slowness II** (100t) + **Weakness** (100t).
+**Mode 0 — Weaken** *(30 seconds)*
+- **Slowness II** (600t) + **Weakness** (600t).
 - Target's armor reduced by 20%; outgoing damage reduced by 20%.
 
-**Mode 1 — Arrogance**
+**Mode 1 — Arrogance** *(30 seconds)*
 - **Confusion** (40t) every 20 ticks.
-- Mobs lose target and navigation; random movement nudges every 4 ticks.
+- Mobs lose target and navigation; random movement nudges every 20 ticks.
 - **20% chance per incoming hit** to completely dodge the damage.
 - Triggers a random ability cast every 20 ticks.
 
-**Mode 2 — Charm**
+**Mode 2 — Charm** *(10 seconds)*
 - **Slowness III** (20t) every 10 ticks.
-- Mobs lose target and navigation; random movement nudges every 4 ticks.
+- Mobs lose target and navigation; random movement nudges every 10 ticks.
 - Charmed target deals **0 damage** to the caster.
 
 ---

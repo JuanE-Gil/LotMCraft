@@ -3,8 +3,6 @@ package de.jakob.lotm.abilities.black_emperor;
 import de.jakob.lotm.attachments.DisabledAbilitiesComponent;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.effect.ModEffects;
-import de.jakob.lotm.abilities.wheel_of_fortune.calamities.Meteor;
-import de.jakob.lotm.abilities.wheel_of_fortune.calamities.Tornado;
 import de.jakob.lotm.particle.ModParticles;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityUtil;
@@ -198,13 +196,10 @@ public final class FrenzySubAbility {
 
     // S12: caster rare major bad.
     private static void applyCasterMajorBad(ServerLevel level, LivingEntity caster, double scale) {
-        caster.addEffect(new MobEffectInstance(ModEffects.UNLUCK, 20 * 5, 1, false, false, true));
-
         if (BeyonderData.isBeyonder(caster)) {
             caster.addEffect(new MobEffectInstance(ModEffects.LOOSING_CONTROL, 20 * 3, 0, false, false, true));
         }
 
-        strikeLightningSweep(level, caster, caster.position(), scale * 0.7D);
     }
 
     // S13: target pulse.
@@ -225,28 +220,7 @@ public final class FrenzySubAbility {
             return;
         }
 
-        if (roll < 68) {
-            applySeal(level, caster, target, scale, seqGap);
-            return;
-        }
-
-        if (roll < 82) {
-            strikeLightningSweep(level, caster, target.position(), scale);
-            return;
-        }
-
-        if (roll < 92) {
-            spawnTornadoBurst(level, caster, target.position(), scale);
-            return;
-        }
-
-        if (roll < 98) {
-            spawnMeteorStrike(level, caster, target.position(), scale);
-            return;
-        }
-
-        strikeLightningSweep(level, caster, target.position(), scale);
-        spawnTornadoBurst(level, caster, target.position(), scale);
+        applySeal(level, caster, target, scale, seqGap);
     }
 
     // S14: small disorder.
@@ -280,7 +254,6 @@ public final class FrenzySubAbility {
             target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, duration, 0, false, false, true));
         }
 
-        target.addEffect(new MobEffectInstance(ModEffects.UNLUCK, duration + 40, Math.min(2, amplifier), false, false, true));
     }
 
     // S16: seal.
@@ -304,40 +277,6 @@ public final class FrenzySubAbility {
 
         target.setDeltaMovement(Vec3.ZERO);
         target.hurtMarked = true;
-    }
-
-    // S17: lightning sweep.
-    private static void strikeLightningSweep(ServerLevel level, LivingEntity caster, Vec3 center, double scale) {
-        for (int i = 0; i < 4 + level.random.nextInt(4); i++) {
-            Vec3 loc = center.add(
-                    -6.0D + level.random.nextDouble() * 12.0D,
-                    0.0D,
-                    -6.0D + level.random.nextDouble() * 12.0D
-            );
-
-            ParticleUtil.spawnSphereParticles(level, ModParticles.LIGHTNING.get(),
-                    loc.add(0, 1, 0), 0.65D * scale, 10);
-        }
-    }
-
-    // S18: tornado burst.
-    private static void spawnTornadoBurst(ServerLevel level, LivingEntity caster, Vec3 center, double scale) {
-        new Tornado().spawnCalamity(
-                level,
-                center,
-                (float) (BeyonderData.getMultiplier(caster) * scale),
-                BeyonderData.isGriefingEnabled(caster)
-        );
-    }
-
-    // S19: meteor strike.
-    private static void spawnMeteorStrike(ServerLevel level, LivingEntity caster, Vec3 center, double scale) {
-        new Meteor().spawnCalamity(
-                level,
-                center,
-                (float) (BeyonderData.getMultiplier(caster) * scale),
-                BeyonderData.isGriefingEnabled(caster)
-        );
     }
 
     // S20: cleanup.

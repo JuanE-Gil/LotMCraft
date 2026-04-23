@@ -72,7 +72,7 @@ public final class MausoleumDomainAbility extends SelectableAbility {
     }
 
     public MausoleumDomainAbility(String id) {
-        super(id, 1.0f);
+        super(id, 120.0f);
         canBeCopied = false;
         canBeReplicated = false;
     }
@@ -84,7 +84,7 @@ public final class MausoleumDomainAbility extends SelectableAbility {
 
     @Override
     public float getSpiritualityCost() {
-        return 80.0f;
+        return 2500;
     }
 
     @Override
@@ -140,6 +140,8 @@ public final class MausoleumDomainAbility extends SelectableAbility {
         int casterSeq = BeyonderData.isBeyonder(caster) ? BeyonderData.getSequence(caster) : 999;
         Session session = new Session(caster.getUUID(), casterSeq);
         SESSIONS.put(caster.getUUID(), session);
+
+        BeyonderData.reduceSpirituality(caster, BeyonderData.getMaxSpirituality(BeyonderData.getSequence(caster)) * 0.25f);
 
         for (ServerPlayer player : targets) {
             session.members.add(player.getUUID());

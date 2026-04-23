@@ -36,7 +36,7 @@ import java.util.UUID;
 public class CommandingOrdersAbility extends ToggleAbility {
 
     private static final String COMMAND_ORDER_LAST_TICK_KEY = "lotm_commanding_orders_last_tick";
-    private static final long COMMAND_ORDER_COOLDOWN_TICKS = 40;
+    private static final long COMMAND_ORDER_COOLDOWN_TICKS = 90;
     private static final int COMMAND_ORDER_RANGE = 25;
 
     private static final Map<UUID, ActiveOrder> ACTIVE_ORDERS = new HashMap<>();
@@ -60,7 +60,7 @@ public class CommandingOrdersAbility extends ToggleAbility {
 
     @Override
     public float getSpiritualityCost() {
-        return 3.0f;
+        return 10.0f;
     }
 
     @Override

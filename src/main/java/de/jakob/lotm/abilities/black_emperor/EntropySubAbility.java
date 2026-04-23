@@ -172,6 +172,8 @@ public final class EntropySubAbility {
         int roll = level.random.nextInt(100) + (stack * 10) + (seqGap * 4);
         if (roll > 99) roll = 99;
 
+        BeyonderData.reduceSpirituality(caster, 800.0f);
+
         // Always drain a little spirituality on Beyonders.
         if (BeyonderData.isBeyonder(target)) {
             float drain = 0.75f + (stack * 0.35f) + (seqGap * 0.20f);
@@ -230,14 +232,6 @@ public final class EntropySubAbility {
                     false,
                     true
             ));
-            target.addEffect(new MobEffectInstance(
-                    ModEffects.UNLUCK,
-                    duration,
-                    Math.min(3, 1 + (stack / 3)),
-                    false,
-                    false,
-                    true
-            ));
         } else {
             target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, duration, 0, false, false, true));
             target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, duration, 0, false, false, true));
@@ -257,14 +251,6 @@ public final class EntropySubAbility {
                     ModEffects.LOOSING_CONTROL,
                     duration,
                     Math.min(4, 2 + (stack / 2)),
-                    false,
-                    false,
-                    true
-            ));
-            target.addEffect(new MobEffectInstance(
-                    ModEffects.UNLUCK,
-                    duration,
-                    Math.min(3, 1 + (stack / 2)),
                     false,
                     false,
                     true
@@ -303,10 +289,9 @@ public final class EntropySubAbility {
 
         if (annihilation && BeyonderData.isBeyonder(target)) {
             target.addEffect(new MobEffectInstance(ModEffects.LOOSING_CONTROL, 20 * 4, 1, false, false, true));
-            target.addEffect(new MobEffectInstance(ModEffects.UNLUCK, 20 * 5, 1, false, false, true));
         }
 
-        target.hurt(caster.damageSources().indirectMagic(caster, caster), dmg);
+        target.hurt(caster.damageSources().mobAttack(caster), dmg);
         target.hurtMarked = true;
     }
 
@@ -351,7 +336,6 @@ public final class EntropySubAbility {
     // S15: remove only the entropy-applied debuffs, not unrelated buffs.
     private static void clearEntropyAppliedEffects(LivingEntity target) {
         target.removeEffect(ModEffects.LOOSING_CONTROL);
-        target.removeEffect(ModEffects.UNLUCK);
         target.removeEffect(MobEffects.BLINDNESS);
         target.removeEffect(MobEffects.CONFUSION);
         target.removeEffect(MobEffects.MOVEMENT_SLOWDOWN);

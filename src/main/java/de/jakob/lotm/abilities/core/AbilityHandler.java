@@ -254,7 +254,7 @@ public class AbilityHandler {
         abilities.add(new Eloquence("eloquence_ability"));
         abilities.add(new MausoleumDomainAbility("mausoleum_domain_ability"));
         abilities.add(new BriberAbility("briber_ability"));
-        abilities.add(new WeaknessDetectionAbility("weakness_detection_ability"));
+        //abilities.add(new WeaknessDetectionAbility("weakness_detection_ability"));
         abilities.add(new DistortionAbility("distortion_ability"));
         abilities.add(new CorrosionAbility("corrosion_ability"));
         abilities.add(new DisorderAbility("disorder_ability"));

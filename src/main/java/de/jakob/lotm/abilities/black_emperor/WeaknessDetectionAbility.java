@@ -197,7 +197,7 @@ public class WeaknessDetectionAbility extends ToggleAbility {
 
                 if (level.getGameTime() % 20 == 0) {
                     double bonusDmg = DamageLookup.lookupDamage(6, 0.25) * multiplier(caster);
-                    target.hurt(caster.damageSources().indirectMagic(caster, caster), (float) bonusDmg);
+                    target.hurt(caster.damageSources().mobAttack(caster), (float) bonusDmg);
                 }
             }
         }

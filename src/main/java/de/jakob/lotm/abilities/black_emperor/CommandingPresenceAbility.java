@@ -79,7 +79,7 @@ public class CommandingPresenceAbility extends ToggleAbility {
 
     @Override
     public float getSpiritualityCost() {
-        return 3.0f;
+        return 4.0f;
     }
 
     @Override

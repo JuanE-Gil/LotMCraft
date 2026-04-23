@@ -48,7 +48,7 @@ public class MagnifyAbility extends SelectableAbility {
 
     @Override
     public float getSpiritualityCost() {
-        return 60;
+        return 0;
     }
 
     @Override
@@ -64,6 +64,8 @@ public class MagnifyAbility extends SelectableAbility {
     @Override
     protected void castSelectedAbility(Level level, LivingEntity entity, int abilityIndex) {
         if (!(level instanceof ServerLevel serverLevel)) return;
+
+        BeyonderData.reduceSpirituality(entity, BeyonderData.getMaxSpirituality(BeyonderData.getSequence(entity)) * 0.20f);
 
         switch (abilityIndex) {
             case 0 -> magnifySelf(serverLevel, entity);
@@ -110,12 +112,12 @@ public class MagnifyAbility extends SelectableAbility {
         ParticleUtil.spawnSphereParticles(level, ModParticles.BLACK.get(),
                 caster.position().add(0, 1, 0), 1.25f, 20);
 
-        caster.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 20 * 12, 3, false, false, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.JUMP, 20 * 12, 3, false, false, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 20 * 12, 5, false, false, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 20 * 12, 3, false, false, true));
+        caster.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 20 * 12, 2, false, false, true));
+        caster.addEffect(new MobEffectInstance(MobEffects.JUMP, 20 * 12, 2, false, false, true));
+        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 20 * 12, 2, false, false, true));
+        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 20 * 12, 1, false, false, true));
         caster.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 20 * 10, 2, false, false, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, 20 * 12, 3, false, false, true));
+        caster.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, 20 * 12, 1, false, false, true));
         caster.addEffect(new MobEffectInstance(MobEffects.DIG_SPEED, 20 * 12, 2, false, false, true));
 
         AbilityUtil.sendActionBar(caster,
@@ -212,7 +214,7 @@ public class MagnifyAbility extends SelectableAbility {
                             mob.getNavigation().stop();
                         }
 
-                        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, MAGNIFY_GRAB_STUN_TICKS, 6, false, false, true));
+                        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, MAGNIFY_GRAB_STUN_TICKS, 5, false, false, true));
                         target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, MAGNIFY_GRAB_STUN_TICKS, 1, false, false, true));
                         target.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, MAGNIFY_GRAB_STUN_TICKS, 0, false, false, true));
                         target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, MAGNIFY_GRAB_STUN_TICKS, 0, false, false, true));
@@ -279,7 +281,7 @@ public class MagnifyAbility extends SelectableAbility {
         int seqGap = targetSeq - casterSeq;
 
         if (seqGap >= 2) {
-            target.hurt(caster.damageSources().indirectMagic(caster, caster),
+            target.hurt(caster.damageSources().mobAttack(caster),
                     Math.max(target.getHealth() + 20.0f, target.getMaxHealth() * 2.0f));
 
             AbilityUtil.sendActionBar(caster,
@@ -289,16 +291,16 @@ public class MagnifyAbility extends SelectableAbility {
 
         float percent;
         if (seqGap == 1) {
-            percent = 0.65f;
+            percent = 0.30f;
         } else if (seqGap == 0) {
-            percent = 0.50f;
+            percent = 0.20f;
         } else {
-            percent = 0.50f - (0.25f * (casterSeq - targetSeq));
+            percent = 0.20f - (0.10f * (casterSeq - targetSeq));
             if (percent < 0.0f) percent = 0.0f;
         }
 
         float damage = target.getMaxHealth() * percent;
-        target.hurt(caster.damageSources().indirectMagic(caster, caster), damage);
+        target.hurt(caster.damageSources().mobAttack(caster), damage);
 
         AbilityUtil.sendActionBar(caster,
                 Component.literal("Execution magnified.").withColor(0xAA77FF));

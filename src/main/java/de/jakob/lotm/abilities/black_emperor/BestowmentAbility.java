@@ -60,7 +60,7 @@ public class BestowmentAbility extends SelectableAbility {
     private static final double MONEY_ENTITY_PULL = 0.045D;
 
     public BestowmentAbility(String id) {
-        super(id, 4.0f);
+        super(id, 45.0f);
         canBeCopied = false;
         canBeReplicated = false;
     }
@@ -72,7 +72,7 @@ public class BestowmentAbility extends SelectableAbility {
 
     @Override
     public float getSpiritualityCost() {
-        return 45;
+        return 0;
     }
 
     @Override
@@ -90,7 +90,9 @@ public class BestowmentAbility extends SelectableAbility {
     protected void castSelectedAbility(Level level, LivingEntity entity, int abilityIndex) {
         if (!(level instanceof ServerLevel serverLevel)) return;
 
-        LivingEntity target = AbilityUtil.getTargetEntity(entity, 18, 1.5f);
+        BeyonderData.reduceSpirituality(entity, BeyonderData.getMaxSpirituality(BeyonderData.getSequence(entity)) * 0.20f);
+
+        LivingEntity target = AbilityUtil.getTargetEntity(entity, 15, 1.5f);
         if (target == null) {
             AbilityUtil.sendActionBar(entity,
                     Component.literal("No target in range.").withColor(0xFF5555));
@@ -122,7 +124,7 @@ public class BestowmentAbility extends SelectableAbility {
     private static final double MONEY_TOOL_STEP = 0.85D;
 
     private void bestowMoneyFocus(ServerLevel level, LivingEntity caster, LivingEntity target) {
-        int duration = BlackEmperorProgression.scaleTicks(caster, 20 * 8, 20, 20 * 16);
+        int duration = BlackEmperorProgression.scaleTicks(caster, 20 * 20, 40, 20 * 40);
         long until = level.getGameTime() + duration;
 
         target.getPersistentData().putLong(MONEY_UNTIL_KEY, until);
@@ -242,8 +244,7 @@ public class BestowmentAbility extends SelectableAbility {
      * Spams random abilities and adds a direct damage pulse so allies can still be hurt.
      */
     private void bestowRash(ServerLevel level, LivingEntity caster, LivingEntity target) {
-        int duration = BlackEmperorProgression.scaleTicks(caster, 20 * 8, 15, 20 * 15);
-        // Tweak this line if you want rash mode to last longer or shorter.
+        int duration = BlackEmperorProgression.scaleTicks(caster, 20 * 10, 20, 20 * 20);
         target.getPersistentData().putLong(RASH_UNTIL_KEY, level.getGameTime() + duration);
 
         RingEffectManager.createRingForAll(target.position(), 2.6f, 18,
@@ -257,6 +258,8 @@ public class BestowmentAbility extends SelectableAbility {
                 () -> {
                     if (!target.isAlive()) return;
 
+                    long now = level.getGameTime();
+
                     target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 30, 0, false, false, true));
                     target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, 1, false, false, true));
 
@@ -266,13 +269,16 @@ public class BestowmentAbility extends SelectableAbility {
                             (level.random.nextDouble() - 0.5D) * 0.18D
                     ));
 
-                    triggerRashCast(level, target);
+                    if (now % 140 == 0) {
+                        triggerRashCast(level, target);
+                    }
 
-                    // Direct overcast pulse so even ally-safe targeting cannot fully nullify this state.
-                    LivingEntity pulseVictim = findNearestLiving(level, target, 12);
-                    if (pulseVictim != null && pulseVictim != target) {
-                        float pulseDamage = BlackEmperorProgression.scaleFloat(target, 1.5f, 0.4f, 4.0f);
-                        pulseVictim.hurt(target.damageSources().indirectMagic(target, target), pulseDamage);
+                    if (now % 80 == 0) {
+                        LivingEntity pulseVictim = findNearestLiving(level, target, 10);
+                        if (pulseVictim != null && pulseVictim != target) {
+                            float pulseDamage = BlackEmperorProgression.scaleFloat(target, 1.5f, 0.4f, 4.0f);
+                            pulseVictim.hurt(target.damageSources().mobAttack(target), pulseDamage);
+                        }
                     }
                 },
                 () -> target.getPersistentData().remove(RASH_UNTIL_KEY),
@@ -308,8 +314,7 @@ public class BestowmentAbility extends SelectableAbility {
      * Reduces spirituality and delays future casts.
      */
     private void bestowSluggish(ServerLevel level, LivingEntity caster, LivingEntity target) {
-        int duration = BlackEmperorProgression.scaleTicks(caster, 20 * 10, 15, 20 * 18);
-        // Tweak this line if you want sluggishness to last longer or shorter.
+        int duration = BlackEmperorProgression.scaleTicks(caster, 20 * 12, 12, 20 * 18);
         long until = level.getGameTime() + duration;
 
         target.getPersistentData().putLong(SLUGGISH_NEXT_CAST_UNTIL_KEY, until);
@@ -320,10 +325,19 @@ public class BestowmentAbility extends SelectableAbility {
                 target.position().add(0, 1, 0), 0.9f, 14);
 
         ServerScheduler.scheduleForDuration(
-                0, 20, duration,
+                0, 40, duration,
                 () -> {
                     if (!target.isAlive()) return;
                     target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 1, false, false, true));
+                },
+                () -> target.getPersistentData().remove(SLUGGISH_NEXT_CAST_UNTIL_KEY),
+                level
+        );
+
+        ServerScheduler.scheduleForDuration(
+                0, 50, duration,
+                () -> {
+                    if (!target.isAlive()) return;
                     BeyonderData.reduceSpirituality(target, BlackEmperorProgression.scaleFloat(target, 0.08f, 0.02f, 0.18f));
                 },
                 () -> target.getPersistentData().remove(SLUGGISH_NEXT_CAST_UNTIL_KEY),
@@ -339,8 +353,7 @@ public class BestowmentAbility extends SelectableAbility {
      * Uses the mod's existing losing-control effect so sanity drops naturally.
      */
     private void bestowAnxiety(ServerLevel level, LivingEntity caster, LivingEntity target) {
-        int duration = BlackEmperorProgression.scaleTicks(caster, 20 * 7, 15, 20 * 10);
-        // Tweak this line if you want anxiety to last longer or shorter.
+        int duration = BlackEmperorProgression.scaleTicks(caster, 20 * 12, 16, 20 * 20);
         target.getPersistentData().putLong(ANXIOUS_UNTIL_KEY, level.getGameTime() + duration);
 
         RingEffectManager.createRingForAll(target.position(), 2.4f, 18,
@@ -378,8 +391,7 @@ public class BestowmentAbility extends SelectableAbility {
      * Seals Beyonder abilities for a short period.
      */
     private void bestowWillToFightSeal(ServerLevel level, LivingEntity caster, LivingEntity target) {
-        int duration = BlackEmperorProgression.scaleTicks(caster, 20 * 6, 20, 20 * 16);
-        // Tweak this line if you want the seal to last longer or shorter.
+        int duration = BlackEmperorProgression.scaleTicks(caster, 20 * 10, 16, 20 * 18);
         target.getPersistentData().putLong(SEALED_UNTIL_KEY, level.getGameTime() + duration);
 
         RingEffectManager.createRingForAll(target.position(), 2.5f, 20,

@@ -431,7 +431,7 @@ public class DistortionAbility extends SelectableAbility {
         CONCEPT_LOCK.add(partner.getUUID());
 
         try {
-            partner.hurt(victim.damageSources().indirectMagic(victim, victim), dmg * 0.5f);
+            partner.hurt(victim.damageSources().mobAttack(victim), dmg * 0.5f);
         } finally {
             CONCEPT_LOCK.remove(victim.getUUID());
             CONCEPT_LOCK.remove(partner.getUUID());

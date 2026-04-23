@@ -339,7 +339,7 @@ public class DisorderAbility extends SelectableAbility {
                     // Apply the redirected hit through the normal damage pipeline.
                     // This keeps it compatible with your damage hooks and other effects.
                     redirectedTarget.hurt(
-                            attacker.damageSources().indirectMagic(attacker, attacker),
+                            attacker.damageSources().mobAttack(attacker),
                             (float) dmg
                     );
                 }
