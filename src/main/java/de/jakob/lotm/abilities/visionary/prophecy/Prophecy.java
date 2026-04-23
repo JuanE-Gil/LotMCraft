@@ -17,10 +17,8 @@ public record Prophecy(UUID targetID, TriggerBase trigger, TriggerEnum triggerTy
     public static final String TRIGGER_TYPE = "trigger_type";
     public static final String CASTER_ID = "caster_id";
 
-    public void checkAndPerform(Level level, LivingEntity entity){
-        if(trigger.checkTrigger(level, entity)){
-            BeyonderData.playerMap.removeProphecy(entity, this);
-        }
+    public boolean checkAndPerform(Level level, LivingEntity entity){
+        return trigger.checkTrigger(level, entity);
     }
 
     public CompoundTag toNBT(HolderLookup.Provider provider){

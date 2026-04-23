@@ -66,7 +66,7 @@ public class StoryWritingAbility extends ToggleAbility {
 
     @Override
     protected float getSpiritualityCost() {
-        return 50;
+        return 80;
     }
 
     @SubscribeEvent
@@ -98,9 +98,17 @@ public class StoryWritingAbility extends ToggleAbility {
         if(op.isPresent()){
             var prophecies = op.get().prophecies();
 
+            LinkedList<Prophecy> buff = new LinkedList<>();
+
             for(var obj : prophecies){
-                obj.checkAndPerform(player.level(), player);
+                if (obj.checkAndPerform(player.level(), player)){
+                    buff.add(obj);
+                }
             }
+
+            prophecies.removeAll(buff);
+
+            BeyonderData.playerMap.setProphecies(player.getUUID(), prophecies);
         }
     }
 

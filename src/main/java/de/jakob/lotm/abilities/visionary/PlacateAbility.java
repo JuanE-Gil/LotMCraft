@@ -203,6 +203,7 @@ public class PlacateAbility extends SelectableAbility {
         int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
         entity.getData(ModAttachments.SANITY_COMPONENT).increaseSanityWithSequenceDifference(getSanityPerSeq(entitySeq), entity, AbilityUtil.getSeqWithArt(caster, this), BeyonderData.getSequence(entity));
         entity.removeEffect(ModEffects.LOOSING_CONTROL);
+        entity.removeEffect(ModEffects.MENTAL_PLAGUE);
     }
 
     @Override

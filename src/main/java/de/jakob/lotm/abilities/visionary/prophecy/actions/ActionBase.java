@@ -36,6 +36,8 @@ public abstract class ActionBase {
             case DIGESTION -> DigestionAction.load(tag, provider);
             case HEALTH -> HealthAction.load(tag, provider);
             case SANITY -> SanityAction.load(tag, provider);
+            case CALAMITY -> CalamityAction.load(tag, provider);
+            case STUN -> StunAction.load(tag, provider);
         };
     }
 
@@ -46,6 +48,8 @@ public abstract class ActionBase {
             case DIGESTION -> new DigestionAction(context);
             case HEALTH -> new HealthAction(context);
             case SANITY -> new SanityAction(context);
+            case CALAMITY -> new CalamityAction(context);
+            case STUN -> new StunAction(context);
         };
     }
 }

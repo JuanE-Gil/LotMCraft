@@ -15,6 +15,8 @@ public class ActionStringContext extends ActionContextBase {
 
     public ActionStringContext(UUID entityId) {
         super(entityId);
+
+        string = "";
     }
 
     @Override

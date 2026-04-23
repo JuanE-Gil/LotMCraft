@@ -9,6 +9,8 @@ public enum ActionsEnum {
     DIGESTION,
     SANITY,
     HEALTH,
+    CALAMITY,
+    STUN
     //DOUBLE
     ;
 

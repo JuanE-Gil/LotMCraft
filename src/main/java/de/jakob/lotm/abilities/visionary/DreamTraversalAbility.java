@@ -104,7 +104,7 @@ public class DreamTraversalAbility extends SelectableAbility {
     private void jump(Level level, LivingEntity entity) {
         if (!(level instanceof ServerLevel serverLevel)) return;
 
-        LivingEntity target = AbilityUtil.getTargetEntity(entity, getRangeBySeq(BeyonderData.getSequence(entity)), 2);
+        LivingEntity target = AbilityUtil.getTargetEntity(entity, (int) (20 * multiplier(entity)), 1.5f);
 
         if (target == null) {
             AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.dream_traversal.no_target").withColor(0xFFff124d));
@@ -153,11 +153,10 @@ public class DreamTraversalAbility extends SelectableAbility {
 
         if (hideMap.containsKey(entity.getUUID())) {
             cancelHide(serverLevel, entity);
-            clearArtifactScaling(entity);
             return;
         }
 
-        LivingEntity target = AbilityUtil.getTargetEntity(entity, 20 * (int) multiplier(entity), 2);
+        LivingEntity target = AbilityUtil.getTargetEntity(entity, 20 * (int) multiplier(entity), 1.5f);
 
         if (target == null) {
             AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.dream_traversal.no_target").withColor(0xFFff124d));
@@ -189,14 +188,14 @@ public class DreamTraversalAbility extends SelectableAbility {
         parasitationComponent.setParasited(true);
         parasitationComponent.setParasiteUUID(entity.getUUID());
 
-        PsychologicalInvisibilityAbility.add(entity, AbilityUtil.getSeqWithArt(entity, this));
-
         player.setBoundingBox(new AABB(
                 player.getX(), player.getY(), player.getZ(),
                 player.getX(), player.getY(), player.getZ()
         ));
         player.onUpdateAbilities();
         player.hurtMarked = true;
+
+        PsychologicalInvisibilityAbility.addInvisFromOtherSkills(entity, AbilityUtil.getSeqWithArt(entity, this));
     }
 
     public static void cancelHide(ServerLevel serverLevel, LivingEntity entity) {
@@ -212,8 +211,6 @@ public class DreamTraversalAbility extends SelectableAbility {
         hideMap.remove(entity.getUUID());
         hideSeqMap.remove(entity.getUUID());
 
-       PsychologicalInvisibilityAbility.remove(entity);
-
         if (entity instanceof Player player) {
             player.setBoundingBox(player.getDimensions(player.getPose()).makeBoundingBox(
                     player.getX(), player.getY(), player.getZ()
@@ -221,6 +218,8 @@ public class DreamTraversalAbility extends SelectableAbility {
             player.onUpdateAbilities();
             player.hurtMarked = true;
         }
+
+        PsychologicalInvisibilityAbility.removeInvisFromOtherSkills(entity);
     }
 
     public static boolean requiresAsleep(LivingEntity entity) {

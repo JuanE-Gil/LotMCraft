@@ -79,7 +79,7 @@ public class DisasterFantasiaAbility extends SelectableAbility {
         boolean griefing = BeyonderData.isGriefingEnabled(entity);
 
         switch (abilityIndex) {
-            case 0 -> EARTHQUAKE.spawnCalamity(serverLevel, targetPos, multiplier, griefing, 65, (float) DamageLookup.lookupDamage(1, .4f), entity);
+            case 0 -> EARTHQUAKE.spawnCalamity(serverLevel, targetPos, multiplier, griefing, 65, (float) DamageLookup.lookupDamage(1, .4f), entity, false);
             case 1 -> spawnMeteorShower(serverLevel, targetPos, multiplier, griefing, entity);
             case 2 -> createTornados(serverLevel, entity);
             case 3 -> createPlague(level, entity);

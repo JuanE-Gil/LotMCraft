@@ -21,6 +21,8 @@ public class ActionsHelper {
             case "digest" -> ActionsEnum.DIGESTION;
             case "health" -> ActionsEnum.HEALTH;
             case "sanity" -> ActionsEnum.SANITY;
+            case "calamity" -> ActionsEnum.CALAMITY;
+            case "stun" -> ActionsEnum.STUN;
             default -> null;
         };
     }
@@ -32,6 +34,8 @@ public class ActionsHelper {
             case ActionsEnum.DIGESTION -> ActionContextEnum.NUMBER;
             case ActionsEnum.HEALTH -> ActionContextEnum.NUMBER;
             case ActionsEnum.SANITY -> ActionContextEnum.NUMBER;
+            case ActionsEnum.CALAMITY -> ActionContextEnum.STRING;
+            case ActionsEnum.STUN -> ActionContextEnum.EMPTY;
         };
     }
 

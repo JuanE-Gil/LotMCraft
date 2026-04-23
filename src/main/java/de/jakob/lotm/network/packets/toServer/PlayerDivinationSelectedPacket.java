@@ -104,6 +104,8 @@ public record PlayerDivinationSelectedPacket(UUID selectedPlayerUuid, PlayerSele
         ServerPlayer targetPlayer = player.serverLevel().getServer().getPlayerList()
                 .getPlayer(packet.selectedPlayerUuid);
 
+        MetaAwarenessAbility.onDivined(player, targetPlayer);
+
         if (targetPlayer == null || !(player.level().dimension() == targetPlayer.level().dimension())) {
             player.sendSystemMessage(Component.literal("§cPlayer not found"));
             return;
@@ -174,7 +176,6 @@ public record PlayerDivinationSelectedPacket(UUID selectedPlayerUuid, PlayerSele
                     distance
             )));
         }     // Trigger MetaAwareness passive if target has it
-        MetaAwarenessAbility.onDivined(player, targetPlayer);
     }
 
     private static String getDirection(int dx, int dz) {

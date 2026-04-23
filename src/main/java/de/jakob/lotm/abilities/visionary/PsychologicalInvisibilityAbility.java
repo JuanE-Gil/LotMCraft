@@ -44,6 +44,8 @@ public class PsychologicalInvisibilityAbility extends ToggleAbility {
     public static HashMap<UUID, Integer> invisiblePlayersClient = new HashMap<>();
     public static final HashMap<UUID, Integer> hits = new HashMap<>();
 
+    public static final HashMap<UUID, Integer> finalInvisiblePlayers = new HashMap<>();
+
     public PsychologicalInvisibilityAbility(String id) {
         super(id);
         canBeCopied = false;
@@ -80,20 +82,42 @@ public class PsychologicalInvisibilityAbility extends ToggleAbility {
         clearArtifactScaling(entity);
     }
 
-    public static void add(LivingEntity entity, int seq) {
+    private static void add(LivingEntity entity, int seq) {
         invisiblePlayers.put(entity.getUUID(), seq);
         hits.put(entity.getUUID(), 0);
 
-        PacketHandler.sendToAllPlayers(new SyncPsychologicalInvisibilityPacket(invisiblePlayers));
+        finalInvisiblePlayers.putAll(invisiblePlayers);
+
+        PacketHandler.sendToAllPlayers(new SyncPsychologicalInvisibilityPacket(finalInvisiblePlayers));
         entity.setInvisible(true);
     }
 
-    public static void remove(LivingEntity entity) {
+    private static void remove(LivingEntity entity) {
         invisiblePlayers.remove(entity.getUUID());
         hits.remove(entity.getUUID());
 
-        PacketHandler.sendToAllPlayers(new SyncPsychologicalInvisibilityPacket(invisiblePlayers));
+        finalInvisiblePlayers.remove(entity.getUUID());
+
+        PacketHandler.sendToAllPlayers(new SyncPsychologicalInvisibilityPacket(finalInvisiblePlayers));
         entity.setInvisible(false);
+    }
+
+    public static void addInvisFromOtherSkills(LivingEntity entity, int seq){
+        if(!invisiblePlayers.containsKey(entity.getUUID())) {
+            finalInvisiblePlayers.put(entity.getUUID(), seq);
+
+            PacketHandler.sendToAllPlayers(new SyncPsychologicalInvisibilityPacket(finalInvisiblePlayers));
+            entity.setInvisible(true);
+        }
+    }
+
+    public static void removeInvisFromOtherSkills(LivingEntity entity){
+        if(!invisiblePlayers.containsKey(entity.getUUID())) {
+            finalInvisiblePlayers.remove(entity.getUUID());
+
+            PacketHandler.sendToAllPlayers(new SyncPsychologicalInvisibilityPacket(finalInvisiblePlayers));
+            entity.setInvisible(false);
+        }
     }
 
     public static int getHitsBySeq(int seq) {
@@ -152,7 +176,6 @@ public class PsychologicalInvisibilityAbility extends ToggleAbility {
             }
         }
 
-
         //hit someone
         if (event.getSource().getEntity() instanceof LivingEntity player) {
             var source = event.getSource();
@@ -168,7 +191,8 @@ public class PsychologicalInvisibilityAbility extends ToggleAbility {
 
     @SubscribeEvent
     public static void onLivingTarget(LivingChangeTargetEvent event) {
-        if (event.getNewAboutToBeSetTarget() != null && invisiblePlayers.containsKey(event.getNewAboutToBeSetTarget().getUUID())) {
+        if (event.getNewAboutToBeSetTarget() != null
+                && (invisiblePlayers.containsKey(event.getNewAboutToBeSetTarget().getUUID()))) {
             event.setCanceled(true);
         }
     }
@@ -219,7 +243,7 @@ public class PsychologicalInvisibilityAbility extends ToggleAbility {
         Level level = event.getLevel();
 
         for (Player player : level.players()) {
-            if (invisiblePlayersClient.containsKey(player.getUUID())) {
+            if (invisiblePlayersClient.containsKey(player.getUUID()) || DreamTraversalAbility.isHiding(player.getUUID())) {
 
                 double dist = player.distanceToSqr(
                         event.getPosition().x,

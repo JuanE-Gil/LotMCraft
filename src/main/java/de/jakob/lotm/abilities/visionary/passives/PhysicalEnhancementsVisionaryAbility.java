@@ -76,7 +76,7 @@ public class PhysicalEnhancementsVisionaryAbility extends PhysicalEnhancementsAb
                     new PhysicalEnhancement(EnhancementType.HEALTH, 17),
                     new PhysicalEnhancement(EnhancementType.REGENERATION, 3),
                     new PhysicalEnhancement(EnhancementType.FIRE_RESISTANCE, 3),
-                    new PhysicalEnhancement(EnhancementType.CONCEALMENT, 1)
+                    new PhysicalEnhancement(EnhancementType.CONCEALMENT, 0)
             );
 
             case 2 -> List.of(
@@ -86,7 +86,7 @@ public class PhysicalEnhancementsVisionaryAbility extends PhysicalEnhancementsAb
                     new PhysicalEnhancement(EnhancementType.HEALTH, 25),
                     new PhysicalEnhancement(EnhancementType.REGENERATION, 4),
                     new PhysicalEnhancement(EnhancementType.FIRE_RESISTANCE, 3),
-                    new PhysicalEnhancement(EnhancementType.CONCEALMENT, 1)
+                    new PhysicalEnhancement(EnhancementType.CONCEALMENT, 0)
             );
 
             case 1 -> List.of(
@@ -96,7 +96,7 @@ public class PhysicalEnhancementsVisionaryAbility extends PhysicalEnhancementsAb
                     new PhysicalEnhancement(EnhancementType.HEALTH, 30),
                     new PhysicalEnhancement(EnhancementType.REGENERATION, 4),
                     new PhysicalEnhancement(EnhancementType.FIRE_RESISTANCE, 4),
-                    new PhysicalEnhancement(EnhancementType.CONCEALMENT, 1)
+                    new PhysicalEnhancement(EnhancementType.CONCEALMENT, 0)
             );
 
             case 0 -> List.of(

@@ -75,6 +75,6 @@ public class MentalPlagueAbility extends Ability {
         int duration = InteractionHandler.isInteractionPossible(targetLoc, "purification", seq) ? 20 * 60 * 2 : 20 * 60 * 10;
 
         target.addEffect(new MobEffectInstance(ModEffects.MENTAL_PLAGUE, duration, 4, false, false, false));
-        ParticleUtil.spawnParticles((ServerLevel) target.level(), dust, target.getEyePosition(), 200, .4);
+        // ParticleUtil.spawnParticles((ServerLevel) target.level(), dust, target.getEyePosition(), 200, .4);
     }
 }
