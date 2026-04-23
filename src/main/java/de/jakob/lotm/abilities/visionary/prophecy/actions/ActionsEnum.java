@@ -10,7 +10,9 @@ public enum ActionsEnum {
     SANITY,
     HEALTH,
     CALAMITY,
-    STUN
+    STUN,
+    SKILL,
+    CONFUSION
     //DOUBLE
     ;
 

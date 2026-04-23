@@ -7,7 +7,9 @@ public enum TriggerContextEnum {
     POSITION,
     ITEM,
     EMPTY,
-    NUMBER
+    NUMBER,
+    STRING,
+    PLAYER
     ;
 
     public static TriggerContextEnum fromNBT(CompoundTag tag, String key) {

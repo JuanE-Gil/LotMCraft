@@ -7,7 +7,9 @@ public enum TriggerEnum {
     POSITION,
     PICK_UP,
     INSTANT,
-    HEALTH
+    HEALTH,
+    SANITY,
+    PLAYER
     ;
 
     public static TriggerEnum  fromNBT(CompoundTag tag, String key) {

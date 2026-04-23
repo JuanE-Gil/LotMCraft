@@ -119,6 +119,10 @@ public abstract class Ability {
             clearArtifactScaling(entity);
         }
 
+        if(AbilityUtil.ignoreAllies.containsKey(entity.getUUID()) && !AbilityUtil.ignoreAllies.get(entity.getUUID())){
+            AbilityUtil.ignoreAllies.remove(entity.getUUID());
+        }
+
         // Track ability use for Recording/Replicating detection
         AbilityUseTracker.trackUse(newUser, this, newUser.position(), serverLevel);
 

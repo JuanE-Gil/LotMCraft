@@ -38,6 +38,8 @@ public abstract class ActionBase {
             case SANITY -> SanityAction.load(tag, provider);
             case CALAMITY -> CalamityAction.load(tag, provider);
             case STUN -> StunAction.load(tag, provider);
+            case SKILL -> UseSkillAction.load(tag, provider);
+            case CONFUSION -> ConfusionAction.load(tag, provider);
         };
     }
 
@@ -50,6 +52,8 @@ public abstract class ActionBase {
             case SANITY -> new SanityAction(context);
             case CALAMITY -> new CalamityAction(context);
             case STUN -> new StunAction(context);
+            case SKILL -> new UseSkillAction(context);
+            case CONFUSION -> new ConfusionAction(context);
         };
     }
 }

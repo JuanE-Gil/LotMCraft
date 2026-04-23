@@ -23,6 +23,8 @@ public class ActionsHelper {
             case "sanity" -> ActionsEnum.SANITY;
             case "calamity" -> ActionsEnum.CALAMITY;
             case "stun" -> ActionsEnum.STUN;
+            case "skill" -> ActionsEnum.SKILL;
+            case "confusion" -> ActionsEnum.CONFUSION;
             default -> null;
         };
     }
@@ -36,6 +38,8 @@ public class ActionsHelper {
             case ActionsEnum.SANITY -> ActionContextEnum.NUMBER;
             case ActionsEnum.CALAMITY -> ActionContextEnum.STRING;
             case ActionsEnum.STUN -> ActionContextEnum.EMPTY;
+            case ActionsEnum.SKILL -> ActionContextEnum.STRING;
+            case ActionsEnum.CONFUSION -> ActionContextEnum.EMPTY;
         };
     }
 

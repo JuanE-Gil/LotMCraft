@@ -25,6 +25,8 @@ public class TriggerHelper {
             case "has" -> TriggerEnum.PICK_UP;
             case "instant" -> TriggerEnum.INSTANT;
             case "health" -> TriggerEnum.HEALTH;
+            case "sanity" -> TriggerEnum.SANITY;
+            case "player" -> TriggerEnum.PLAYER;
             default -> null;
         };
     }
@@ -35,6 +37,8 @@ public class TriggerHelper {
             case TriggerEnum.PICK_UP -> TriggerContextEnum.ITEM;
             case TriggerEnum.INSTANT -> TriggerContextEnum.EMPTY;
             case TriggerEnum.HEALTH -> TriggerContextEnum.NUMBER;
+            case TriggerEnum.SANITY -> TriggerContextEnum.NUMBER;
+            case TriggerEnum.PLAYER -> TriggerContextEnum.PLAYER;
         };
     }
 
