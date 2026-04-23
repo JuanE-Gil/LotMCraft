@@ -6,12 +6,11 @@ import de.jakob.lotm.abilities.core.ToggleAbility;
 import de.jakob.lotm.attachments.*;
 import de.jakob.lotm.entity.ModEntities;
 import de.jakob.lotm.entity.custom.ability_entities.OriginalBodyEntity;
-import de.jakob.lotm.network.PacketHandler;
 import de.jakob.lotm.network.packets.toClient.SyncOriginalBodyOwnerPacket;
 import de.jakob.lotm.util.helper.AbilityWheelHelper;
 import de.jakob.lotm.util.helper.AllyUtil;
 import de.jakob.lotm.util.helper.marionettes.MarionetteUtils;
-import net.minecraft.network.protocol.game.ClientboundSetCameraPacket;
+import de.jakob.lotm.util.scheduling.ServerScheduler;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
@@ -40,9 +39,7 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @EventBusSubscriber(modid = LOTMCraft.MOD_ID)
 public class ControllingUtil {
@@ -237,12 +234,17 @@ public class ControllingUtil {
                     return entity;
                 });
                 if (bodyEntity != null) {
-                    level.addFreshEntity(bodyEntity);
                     if (bodyEntity instanceof LivingEntity originalBody) {
                         copyEntities(originalBody, player);
                         copyPosition(originalBody, player);
+
+                        PhysicalEnhancementsAbility.resetEnhancements(player.getUUID());
+
+                        float health = bodyTag.getFloat("Health");
+                        ServerScheduler.scheduleDelayed(5, () -> {
+                            player.setHealth(health);
+                        }, level);
                     }
-                    bodyEntity.discard();
                 }
             }
         }
@@ -307,10 +309,7 @@ public class ControllingUtil {
         targetBarData.setAbilities(sourceBarData.getAbilities());
 
         if (BeyonderData.isBeyonder(source)) {
-            BeyonderData.setSequence(target, BeyonderData.getSequence(source));
-            BeyonderData.setPathway(target, BeyonderData.getPathway(source));
-
-            BeyonderData.setBeyonder(target, BeyonderData.getPathway(source), BeyonderData.getSequence(source),false, false, true, false, false);
+            BeyonderData.setBeyonder(target, BeyonderData.getPathway(source), BeyonderData.getSequence(source),false, false, false, false, false);
             if (source instanceof Player sourcePlayer && target instanceof Player targetPlayer) {
                 BeyonderData.digest(targetPlayer, BeyonderData.getDigestionProgress(sourcePlayer), false);
                 BeyonderData.setGriefingEnabled(targetPlayer, BeyonderData.isGriefingEnabled(sourcePlayer));
