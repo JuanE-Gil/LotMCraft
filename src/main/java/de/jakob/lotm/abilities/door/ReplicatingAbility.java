@@ -36,6 +36,7 @@ public class ReplicatingAbility extends SelectableAbility {
         cannotBeStolen = true;
         canBeReplicated = false;
         autoClear = false;
+        canBeShared = false;
     }
 
     @Override

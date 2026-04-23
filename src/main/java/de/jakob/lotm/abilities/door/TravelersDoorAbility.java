@@ -1,10 +1,12 @@
 package de.jakob.lotm.abilities.door;
 
+import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.SelectableAbility;
 import de.jakob.lotm.entity.ModEntities;
 import de.jakob.lotm.entity.custom.ability_entities.door_pathway.TravelersDoorEntity;
 import de.jakob.lotm.network.PacketHandler;
 import de.jakob.lotm.network.packets.toClient.OpenCoordinateScreenTravelersDoorPacket;
+import de.jakob.lotm.network.packets.toServer.AbilitySelectionPacket;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.TeleportationUtil;
 import de.jakob.lotm.util.helper.AbilityUtil;
@@ -38,7 +40,6 @@ public class TravelersDoorAbility extends SelectableAbility {
         canBeUsedByNPC = false;
         canBeCopied = false;
     }
-
     @Override
     public Map<String, Integer> getRequirements() {
         return new HashMap<>(Map.of("door", 5));
@@ -51,7 +52,60 @@ public class TravelersDoorAbility extends SelectableAbility {
 
     @Override
     protected String[] getAbilityNames() {
-        return new String[] {"ability.lotmcraft.travelers_door.coordinates", "ability.lotmcraft.travelers_door.spirit_world"};
+        return new String[] {
+                "ability.lotmcraft.travelers_door.spirit_world",
+                "ability.lotmcraft.travelers_door.coordinates"
+               };
+    }
+
+    @Override
+    public void nextAbility(LivingEntity entity){
+        if(getAbilityNames().length == 0)
+            return;
+
+        if(!selectedAbilities.containsKey(entity.getUUID())) {
+            selectedAbilities.put(entity.getUUID(), 0);
+        }
+
+        int selectedAbility = selectedAbilities.get(entity.getUUID());
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+
+        selectedAbility++;
+        if(selectedAbility >= getAbilityNames().length) {
+            selectedAbility = 0;
+        }
+
+        if((entitySeq > 2 && selectedAbility >= 1)){
+            selectedAbility = 0;
+        }
+
+        selectedAbilities.put(entity.getUUID(), selectedAbility);
+        PacketHandler.sendToServer(new AbilitySelectionPacket(getId(), selectedAbility));
+    }
+
+    @Override
+    public void previousAbility(LivingEntity entity){
+        if(getAbilityNames().length == 0)
+            return;
+
+        if(!selectedAbilities.containsKey(entity.getUUID())) {
+            selectedAbilities.put(entity.getUUID(), 0);
+        }
+
+        int selectedAbility = selectedAbilities.get(entity.getUUID());
+        selectedAbility--;
+        if(selectedAbility <= -1) {
+            selectedAbility = getAbilityNames().length - 1;
+        }
+
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+
+        if((entitySeq > 2 && selectedAbility >= 1)){
+            selectedAbility = 0;
+        }
+
+        selectedAbilities.put(entity.getUUID(), selectedAbility);
+        PacketHandler.sendToServer(new AbilitySelectionPacket(getId(), selectedAbility));
     }
 
     @Override
@@ -71,12 +125,9 @@ public class TravelersDoorAbility extends SelectableAbility {
             targetLoc = targetLoc.add(0, -i + 1, 0);
             break;
         }
-
-        if(abilityIndex == 0) {
-            createDoorWithCoordinates(serverLevel, player, targetLoc);
-        }
-        else if (abilityIndex == 1) {
-            createSpiritWorldDoor(serverLevel, player, targetLoc);
+        switch (abilityIndex) {
+            case 0 -> createSpiritWorldDoor(serverLevel, player, targetLoc);
+            case 1 -> createDoorWithCoordinates(serverLevel, player, targetLoc);
         }
     }
 
@@ -148,7 +199,7 @@ public class TravelersDoorAbility extends SelectableAbility {
 
     private int gteCostForDistance(Vec3 position, Vec3 validatedPos) {
         double distance = position.distanceTo(validatedPos);
-        if(distance < 50) {
+        /*if(distance < 50) {
             return 30;
         }
         else if(distance < 150) {
@@ -160,9 +211,10 @@ public class TravelersDoorAbility extends SelectableAbility {
         else if(distance < 500) {
             return 90;
         }
-        else {
-            return 10 * (int) (distance / 500) + 90;
-        }
+        else {*/
+        LOTMCraft.LOGGER.info("distance {}",distance);
+            return (int) distance;
+        //}
     }
 
     private void spawnFailureParticles(ServerLevel level, Vec3 pos) {

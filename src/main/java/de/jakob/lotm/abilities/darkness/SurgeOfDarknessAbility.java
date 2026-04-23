@@ -29,6 +29,7 @@ public class SurgeOfDarknessAbility extends Ability {
         autoClear = false;
         interactionRadius = 45;
         interactionCacheTicks = 20 * 15;
+        canBeShared = false;
     }
 
     @Override
@@ -38,7 +39,7 @@ public class SurgeOfDarknessAbility extends Ability {
 
     @Override
     public float getSpiritualityCost() {
-        return 1000;
+        return 3000;
     }
 
     @Override

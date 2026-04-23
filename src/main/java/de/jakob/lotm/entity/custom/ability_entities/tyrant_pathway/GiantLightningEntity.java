@@ -51,7 +51,7 @@ public class GiantLightningEntity extends Entity {
     private float currentDistance = 0f;
     private final List<Vec3> lightningPoints = new ArrayList<>();
     private final int updateInterval = 1;
-    private float step = 8; // Larger step for faster growth
+    private float step = 48; // Larger step for faster growth
     private int color = 0x88DDFF; // Brighter blue
     private boolean griefing;
     private float explosionPower;
@@ -82,7 +82,7 @@ public class GiantLightningEntity extends Entity {
         this.explosionPower = explosionPower;
         this.griefing = griefing;
         this.currentDistance = 2.0f;
-        this.step = 12f; // Faster advancement
+        this.step = 48f; // Faster advancement
         this.color = color;
         setPos(start.x, start.y, start.z);
 
@@ -95,7 +95,7 @@ public class GiantLightningEntity extends Entity {
             entityData.set(DIR_Y, (float) -1);
             entityData.set(DIR_Z, (float) 0);
             entityData.set(MAX_DISTANCE, maxDistance + 80);
-            entityData.set(STEP, 12f);
+            entityData.set(STEP, 48f);
             entityData.set(COLOR, color);
 
             // More branches for giant lightning, spawn them at varied distances

@@ -41,7 +41,7 @@ public class NightDomainAbility extends Ability {
 
     @Override
     public float getSpiritualityCost() {
-        return 900;
+        return 1800;
     }
 
     private final DustParticleOptions dust = new DustParticleOptions(new Vector3f(0, 0, 0), 5);

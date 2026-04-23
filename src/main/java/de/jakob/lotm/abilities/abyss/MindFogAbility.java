@@ -56,7 +56,7 @@ public class MindFogAbility extends ToggleAbility {
         if (level.isClientSide) return;
 
         ServerLevel serverLevel = (ServerLevel) level;
-        double fogRadius = 20;
+        double fogRadius = 20* (int) Math.max(multiplier(entity)/2,1);
 
         int seq = AbilityUtil.getSeqWithArt(entity, this);
 
@@ -82,7 +82,7 @@ public class MindFogAbility extends ToggleAbility {
                 .forEach(target -> {
                     if (target.hasData(ModAttachments.SANITY_COMPONENT)) {
                         target.getData(ModAttachments.SANITY_COMPONENT)
-                                .decreaseSanityWithSequenceDifference(0.05f, target, AbilityUtil.getSeqWithArt(entity, this), BeyonderData.getSequence(target));
+                                .decreaseSanityWithSequenceDifference((float) (0.0125* (int) Math.max(multiplier(entity)/2,1)), target, AbilityUtil.getSeqWithArt(entity, this), BeyonderData.getSequence(target));
                     }
 
                     if (random.nextInt(5) == 0) {

@@ -41,6 +41,7 @@ public class LoopHoleCreationAbility extends Ability {
         super(id, 16f);
         canBeCopied = false;
         autoClear = false;
+        canBeShared = false;
     }
 
     @Override
@@ -50,7 +51,7 @@ public class LoopHoleCreationAbility extends Ability {
 
     @Override
     public float getSpiritualityCost() {
-        return 1200;
+        return 6000;
     }
 
     @Override
@@ -71,13 +72,13 @@ public class LoopHoleCreationAbility extends Ability {
                 loopholeId,
                 entity.getUUID(),
                 targetLoc,
-                3.0, // radius
+                3.0*(int) Math.max(multiplier(entity)/4,1), // radius
                 serverLevel,
                 System.currentTimeMillis() + (20 * 14 * 50) // 14 seconds in milliseconds
         );
         activeLoopholes.put(loopholeId, loopholeData);
 
-        ServerScheduler.scheduleForDuration(0, 2, 20 * 14, () -> {
+        ServerScheduler.scheduleForDuration(0, 2, 20 * 7*(int) Math.max(multiplier(entity)/4,1), () -> {
             // Update entities in loophole
             updateEntitiesInLoophole(loopholeData);
 
@@ -90,7 +91,7 @@ public class LoopHoleCreationAbility extends Ability {
             });
         });
 
-        ServerScheduler.scheduleForDuration(0, 45, 20 * 14, () -> {
+        ServerScheduler.scheduleForDuration(0, 45, 20 * 7*(int) Math.max(multiplier(entity)/4,1), () -> {
             AbilityUtil.getNearbyEntities(entity, serverLevel, targetLoc, 3).forEach(e -> {
                     if(BeyonderData.isBeyonder(e))
                         TheftHandler.performAbilityTheft(serverLevel, entity, e, random, true, this);

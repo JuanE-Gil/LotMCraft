@@ -20,6 +20,7 @@ import java.util.Map;
 public class LesserConcealmentAbility extends SelectableAbility {
     public LesserConcealmentAbility(String id) {
         super(id, 4f);
+        canBeShared = false;
     }
 
     @Override
@@ -29,7 +30,7 @@ public class LesserConcealmentAbility extends SelectableAbility {
 
     @Override
     protected float getSpiritualityCost() {
-        return 1000;
+        return 1500;
     }
 
     @Override

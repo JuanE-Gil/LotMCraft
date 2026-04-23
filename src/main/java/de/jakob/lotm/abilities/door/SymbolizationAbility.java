@@ -26,7 +26,7 @@ public class SymbolizationAbility extends ToggleAbility {
 
     @Override
     public float getSpiritualityCost() {
-        return 2;
+        return 250;
     }
 
     @Override

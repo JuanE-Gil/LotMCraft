@@ -39,6 +39,7 @@ public class FateSiphoningAbility extends Ability {
     public FateSiphoningAbility(String id) {
         super(id, 20);
         canBeCopied = false;
+        canBeShared = false;
     }
 
     @Override
@@ -48,7 +49,7 @@ public class FateSiphoningAbility extends Ability {
 
     @Override
     public float getSpiritualityCost() {
-        return 1000;
+        return 4000;
     }
 
     @Override
@@ -57,7 +58,7 @@ public class FateSiphoningAbility extends Ability {
             return;
         }
 
-        LivingEntity target = AbilityUtil.getTargetEntity(entity, 30, 2);
+        LivingEntity target = AbilityUtil.getTargetEntity(entity, 30*(int) Math.max(multiplier(entity)/4,1), 2);
         if(target == null) {
             AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.fate_siphoning.no_target").withColor(0x6d32a8));
             return;
@@ -90,7 +91,7 @@ public class FateSiphoningAbility extends Ability {
                 entity);
 
         linkedEntities.put(entity.getUUID(), target.getUUID());
-        ServerScheduler.scheduleDelayed(20 * 14, () -> linkedEntities.remove(entity.getUUID()));
+        ServerScheduler.scheduleDelayed(20 * 7*(int) Math.max(multiplier(entity)/4,1), () -> linkedEntities.remove(entity.getUUID()));
     }
 
     @SubscribeEvent

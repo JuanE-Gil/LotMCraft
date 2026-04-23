@@ -36,6 +36,7 @@ public class HorrorAuraAbility extends Ability {
         postsUsedAbilityEventManually = true;
         interactionRadius = 20;
         interactionCacheTicks = 5;
+        canBeShared = false;
     }
 
     @Override
@@ -45,7 +46,7 @@ public class HorrorAuraAbility extends Ability {
 
     @Override
     public float getSpiritualityCost() {
-        return 1000;
+        return 2500;
     }
 
     @Override
@@ -55,10 +56,10 @@ public class HorrorAuraAbility extends Ability {
         }
         float multiplier = multiplier(entity);
         Location loc = new Location(entity.position(), serverLevel);
-        UUID effectID = MovableEffectManager.playEffect(MovableEffectManager.MovableEffect.HORROR_AURA, loc, 20 * 25 *(int) Math.max(multiplier/4,1), false, serverLevel, entity);
+        UUID effectID = MovableEffectManager.playEffect(MovableEffectManager.MovableEffect.HORROR_AURA, loc, 20 * 25 *(int) Math.max(multiplier/2,1), false, serverLevel, entity);
 
         AtomicInteger ticks = new AtomicInteger(0);
-        ServerScheduler.scheduleForDuration(0, 1, 20 * 30, () -> {
+        ServerScheduler.scheduleForDuration(0, 1, 20 * 15*(int) Math.max(multiplier(entity)/3, 1), () -> {
             loc.setPosition(entity.position());
             loc.setLevel(serverLevel);
             MovableEffectManager.updateEffectPosition(effectID, loc, serverLevel);
@@ -97,7 +98,7 @@ public class HorrorAuraAbility extends Ability {
                 }
 
                 SanityComponent sanityComponent = e.getData(ModAttachments.SANITY_COMPONENT);
-                sanityComponent.decreaseSanityWithSequenceDifference(0.008125f*(int) Math.max(multiplier/2,1), e, AbilityUtil.getSeqWithArt(entity, this), BeyonderData.getSequence(e));
+                sanityComponent.decreaseSanityWithSequenceDifference(0.02168f*(int) Math.max(multiplier(entity)/4,1), e, AbilityUtil.getSeqWithArt(entity, this), BeyonderData.getSequence(e));
             });
             ticks.getAndIncrement();
         }, () -> this.clearArtifactScaling(entity), serverLevel, () -> AbilityUtil.getTimeInArea(entity, new Location(entity.position(), serverLevel)));

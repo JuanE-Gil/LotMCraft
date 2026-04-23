@@ -22,7 +22,7 @@ import java.util.Map;
 
 public class BlinkAbility extends Ability {
     public BlinkAbility(String id) {
-        super(id, .001f, "blink_escape", "escape");
+        super(id, .5f, "blink_escape", "escape");
         interactionRadius = 3;
         interactionCacheTicks = 40;
     }
@@ -34,7 +34,7 @@ public class BlinkAbility extends Ability {
 
     @Override
     public float getSpiritualityCost() {
-        return 20;
+        return 400;
     }
 
     private final DustParticleOptions dust = new DustParticleOptions(
@@ -52,7 +52,7 @@ public class BlinkAbility extends Ability {
         if(level.isClientSide)
             return;
 
-        Vec3 targetLocBuff = AbilityUtil.getTargetBlock(entity, 8, true).getCenter().add(0, 1, 0);
+        Vec3 targetLocBuff = AbilityUtil.getTargetBlock(entity, 8*(int) Math.max(multiplier(entity)/4,1), true).getCenter().add(0, 1, 0);
         var targetLoc = TeleportationUtil.clampToBorder((ServerLevel) level, targetLocBuff);
 
         level.playSound(null, targetLoc.x, targetLoc.y, targetLoc.z, SoundEvents.ENDERMAN_TELEPORT, SoundSource.BLOCKS, .5f, 1);

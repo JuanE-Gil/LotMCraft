@@ -59,13 +59,13 @@ public class DarknessRevivalAbility extends PassiveAbilityItem {
 
         // Drain sanity — if not enough sanity (like around 5% ig), revival wont trigger
         SanityComponent sanity = entity.getData(ModAttachments.SANITY_COMPONENT);
-        if (sanity.getSanity() < 2.5f) return;
+        if (sanity.getSanity() < 0.05) return;
 
         event.setCanceled(true);
         entity.setHealth(entity.getMaxHealth());
 
         // Drain sanity after revival (like 5%? idk im bad at math tbh)
-        sanity.increaseSanityAndSync(-2.5f, entity);
+        sanity.increaseSanityAndSync(-1.1f, entity);
 
         ParticleUtil.spawnParticles(serverLevel, dust, entity.position().add(0, entity.getEyeHeight() / 2, 0),
                 40, .5, entity.getEyeHeight() / 2, .5, 0.1);

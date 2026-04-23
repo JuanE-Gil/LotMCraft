@@ -29,6 +29,7 @@ public class ConceptualTheftAbility extends SelectableAbility {
 
         canBeUsedByNPC = false;
         canBeCopied = false;
+        canBeShared = false;
     }
 
     @Override
@@ -38,7 +39,7 @@ public class ConceptualTheftAbility extends SelectableAbility {
 
     @Override
     protected float getSpiritualityCost() {
-        return 2000;
+        return 10000;
     }
 
     @Override

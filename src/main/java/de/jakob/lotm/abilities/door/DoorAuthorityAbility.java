@@ -39,7 +39,7 @@ public class DoorAuthorityAbility extends SelectableAbility {
 
     @Override
     protected float getSpiritualityCost() {
-        return 7000;
+        return 10000;
     }
 
     @Override

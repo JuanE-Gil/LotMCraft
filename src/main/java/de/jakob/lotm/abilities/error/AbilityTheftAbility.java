@@ -30,7 +30,7 @@ public class AbilityTheftAbility extends SelectableAbility {
 
     @Override
     public float getSpiritualityCost() {
-        return 95;
+        return 200;
     }
 
     @Override

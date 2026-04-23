@@ -90,6 +90,7 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
         canBeUsedByNPC = false;
         cannotBeStolen = true;
         canBeUsedInArtifact = false;
+        canBeShared = false;
     }
 
     @Override
@@ -99,7 +100,7 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
 
     @Override
     protected float getSpiritualityCost() {
-        return 920;
+        return 5000;
     }
 
     @Override

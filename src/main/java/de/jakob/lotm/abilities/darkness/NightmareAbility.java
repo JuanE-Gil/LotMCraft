@@ -176,15 +176,15 @@ public class NightmareAbility extends SelectableAbility {
 
         LivingEntity targetEntity = AbilityUtil.getTargetEntity(entity, 20 * (int)(Math.max(multiplier(entity)/2,1)), 2);
         if(targetEntity == null || !isAffectedByNightmare(targetEntity)) {
-            Vec3 targetPos = AbilityUtil.getTargetLocation(entity, 15, 1.5f, true);
-            ParticleUtil.createParticleSpirals((ServerLevel) level, dustSmall, targetPos, 2, 2, 2.5, .5, 8, 20 * 5, 11, 8);
+            Vec3 targetPos = AbilityUtil.getTargetLocation(entity, 15* (int)(Math.max(multiplier(entity)/2,1)), 1.5f, true);
+            ParticleUtil.createParticleSpirals((ServerLevel) level, dustSmall, targetPos, 2, 2, 2.5, .5, 8, 20 * 5* (int)(Math.max(multiplier(entity)/2,1)), 11, 8);
             return;
         }
 
         Location loc = new Location(targetEntity.position(), level);
         ParticleUtil.createParticleSpirals(dustVerySmall, loc, 1.2, 1.2, 2.5, .5, 8, 20 * 20, 11, 8);
 
-        ServerScheduler.scheduleForDuration(0, 2, 20 * 20, () -> {
+        ServerScheduler.scheduleForDuration(0, 2, 20 * 20* (int)(Math.max(multiplier(entity)/2,1)), () -> {
             if(entity.level().isClientSide)
                 return;
             loc.setPosition(targetEntity.position());

@@ -54,6 +54,7 @@ public class GraftingAbility extends SelectableAbility {
         canBeCopied = false;
         canBeUsedByNPC = false;
         canBeReplicated = false;
+        canBeShared = false;
     }
 
     @Override
@@ -63,7 +64,7 @@ public class GraftingAbility extends SelectableAbility {
 
     @Override
     protected float getSpiritualityCost() {
-        return 1400;
+        return 10000;
     }
 
     @Override

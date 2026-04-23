@@ -33,7 +33,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class CurseAbility extends Ability {
     public CurseAbility(String id) {
-        super(id, 1.5f, "curse");
+        super(id, 80f, "curse");
 
         canBeUsedByNPC = false;
         canBeCopied = false;
@@ -96,7 +96,7 @@ public class CurseAbility extends Ability {
         AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.curse.cursed_target").withColor(0x6d32a8));
         offHandItem.consume(1, player);
 
-        int curseDuration = 20 * 60 * 2;
+        int curseDuration = 20 * 10* (int) Math.max(multiplier(entity)/4,2) ;
 
         AtomicReference<UUID> taskIdRef = new AtomicReference<>(null);
         UUID taskId = ServerScheduler.scheduleForDuration(0, 8, curseDuration, () -> {
@@ -113,7 +113,7 @@ public class CurseAbility extends Ability {
 
             switch(random.nextInt(3)) {
                 case 0 -> {
-                    livingTarget.hurt(ModDamageTypes.source(livingTarget.level(), ModDamageTypes.DEMONESS_GENERIC, entity), (float) (DamageLookup.lookupDamage(4, .6) * multiplier(entity)));
+                    livingTarget.hurt(ModDamageTypes.source(livingTarget.level(), ModDamageTypes.DEMONESS_GENERIC, entity), (float) (DamageLookup.lookupDamage(4, .6) *(int) Math.max(multiplier(entity)/5,1)));
                     ParticleUtil.spawnParticles(serverLevel, ModParticles.BLACK_FLAME.get(), livingTarget.position().add(0, livingTarget.getEyeHeight() / 2, 0), 200, .4, livingTarget.getEyeHeight() / 2, .4, 0.01);
                 }
                 case 1 -> {

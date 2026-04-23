@@ -26,8 +26,6 @@ import java.util.UUID;
 
 public class RestructionAbility extends SelectableAbility {
 
-    private static final int SKELETON_COUNT = 10;
-    private static final int ZOMBIE_COUNT = 10;
 
     private static final String[] MODES = {
             "ability.lotmcraft.restruction.summon",
@@ -38,7 +36,7 @@ public class RestructionAbility extends SelectableAbility {
     private static final HashMap<UUID, List<Mob>> summonedMobs = new HashMap<>();
 
     public RestructionAbility(String id) {
-        super(id, 10f);
+        super(id, 20f);
         canBeCopied = false;
         cannotBeStolen = true;
     }
@@ -50,7 +48,7 @@ public class RestructionAbility extends SelectableAbility {
 
     @Override
     protected float getSpiritualityCost() {
-        return 500;
+        return 1500;
     }
 
     @Override
@@ -79,10 +77,10 @@ public class RestructionAbility extends SelectableAbility {
             case 1 -> release(entity);
         }
     }
-
     private void summon(ServerLevel serverLevel, LivingEntity entity) {
         List<Mob> mobs = summonedMobs.computeIfAbsent(entity.getUUID(), k -> new ArrayList<>());
-
+        int SKELETON_COUNT = Math.round(8* Math.max(multiplier(entity)/4,1));
+        int ZOMBIE_COUNT = Math.round(8* Math.max(multiplier(entity)/4,1));
         for (int i = 0; i < SKELETON_COUNT; i++) {
             Vec3 spawnPos = findSpawnPos(entity, serverLevel);
 

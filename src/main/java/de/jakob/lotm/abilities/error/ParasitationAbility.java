@@ -43,6 +43,7 @@ public class ParasitationAbility extends SelectableAbility {
         canBeCopied = false;
         canBeReplicated = false;
         canBeUsedInArtifact = false;
+        canBeShared = false;
     }
 
     @Override
@@ -52,7 +53,7 @@ public class ParasitationAbility extends SelectableAbility {
 
     @Override
     public float getSpiritualityCost() {
-        return 1;
+        return 4000;
     }
 
     @Override
@@ -109,8 +110,8 @@ public class ParasitationAbility extends SelectableAbility {
         int targetSeq = BeyonderData.isBeyonder(target) ? BeyonderData.getSequence(target) : 10;
         boolean lowerSeq = targetSeq > userSeq;
 
-        // 50% vs lower seq, 15% against same, 0% chance against higher sequence
-        float chance = lowerSeq ? 0.5f : 0.15f;
+        // 55% vs lower seq, 15% against same, 0% chance against higher sequence
+        float chance = lowerSeq ? 0.55f : 0.15f;
         if (random.nextFloat() >= chance || userSeq > targetSeq) {
             AbilityUtil.sendActionBar(player, Component.literal(lowerSeq
                     ? "§cControl failed!"

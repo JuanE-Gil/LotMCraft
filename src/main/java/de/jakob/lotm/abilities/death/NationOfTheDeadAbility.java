@@ -35,7 +35,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class NationOfTheDeadAbility extends Ability {
 
-    private static final int RADIUS = 15;
     private static final int DURATION_TICKS = 20 * 100; // 1 minute 40 seconds
 
     // Damage per second at same sequence: 1% of max HP
@@ -99,14 +98,14 @@ public class NationOfTheDeadAbility extends Ability {
 
             // Visual: sphere of death particles every 10 ticks, ring every tick
             if (ticks.get() % 10 == 0) {
-                ParticleUtil.spawnSphereParticles(serverLevel, ParticleTypes.SOUL, center, RADIUS, 80);
+                ParticleUtil.spawnSphereParticles(serverLevel, ParticleTypes.SOUL, center, 15* (int) Math.max(multiplier(entity)/4,1), 80);
             }
             ParticleUtil.spawnCircleParticles(serverLevel, DEATH_DUST, center,
-                    new Vec3(0, 1, 0), RADIUS, 24);
+                    new Vec3(0, 1, 0), 15* (int) Math.max(multiplier(entity)/4,1), 24);
 
             Set<UUID> inRangeThisTick = new HashSet<>();
 
-            AbilityUtil.getNearbyEntities(entity, serverLevel, center, RADIUS).forEach(target -> {
+            AbilityUtil.getNearbyEntities(entity, serverLevel, center, 15* (int) Math.max(multiplier(entity)/4,1)).forEach(target -> {
                 if (AllyUtil.areAllies(entity, target)) return;
 
                 int targetSeq = BeyonderData.getSequence(target);

@@ -46,7 +46,7 @@ public class MundaneConceptualTheft extends SelectableAbility {
 
     @Override
     protected float getSpiritualityCost() {
-        return 50;
+        return 500;
     }
 
     @Override
@@ -138,7 +138,7 @@ public class MundaneConceptualTheft extends SelectableAbility {
     }
 
     private void stealHealth(LivingEntity entity, LivingEntity target) {
-        float healthToSteal = (float) (DamageLookup.lookupDamage(5, 1f) * multiplier(entity));
+        float healthToSteal = (float) (DamageLookup.lookupDamage(5, 1f) *(int) Math.max(multiplier(entity)/2,1));
         target.hurt(ModDamageTypes.source(target.level(), ModDamageTypes.BEYONDER_GENERIC, entity), healthToSteal);
         entity.setHealth(Math.min(entity.getMaxHealth(), entity.getHealth() + healthToSteal));
     }

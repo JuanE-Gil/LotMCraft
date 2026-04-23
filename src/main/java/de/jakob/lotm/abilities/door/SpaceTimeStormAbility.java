@@ -21,10 +21,11 @@ import java.util.Map;
 
 public class SpaceTimeStormAbility extends Ability {
     public SpaceTimeStormAbility(String id) {
-        super(id, 18, "explosion", "destruction");
+        super(id, 60, "explosion", "destruction");
         canBeCopied = false;
         interactionRadius = 60;
         interactionCacheTicks = 20 * 12;
+        canBeShared = false;
     }
 
     @Override
@@ -34,7 +35,7 @@ public class SpaceTimeStormAbility extends Ability {
 
     @Override
     public float getSpiritualityCost() {
-        return 1700;
+        return 50000;
     }
 
     @Override
@@ -44,13 +45,13 @@ public class SpaceTimeStormAbility extends Ability {
         }
 
         boolean griefing = BeyonderData.isGriefingEnabled(entity);
-        Vec3 center = AbilityUtil.getTargetLocation(entity, 60, 3);
+        Vec3 center = AbilityUtil.getTargetLocation(entity, 60*(int) Math.max(multiplier(entity)/4,1), 3);
 
         EffectManager.playEffect(EffectManager.Effect.SPACE_FRAGMENTATION, center.x, center.y, center.z, serverLevel, entity);
 
-        List<BlockPos> blocks = AbilityUtil.getBlocksInSphereRadius(serverLevel, center, 65, true, true, false);
-        ServerScheduler.scheduleForDuration(0, 2, 20 * 18, () -> {
-            AbilityUtil.damageNearbyEntities(serverLevel, entity, 60, DamageLookup.lookupDps(1, .875, 2, 18) * (float) multiplier(entity), center, true, false);
+        List<BlockPos> blocks = AbilityUtil.getBlocksInSphereRadius(serverLevel, center, 40*(int) Math.max(multiplier(entity)/4,1), true, true, false);
+        ServerScheduler.scheduleForDuration(0, 2, 20 * 8*(int) Math.max(multiplier(entity)/4,1), () -> {
+            AbilityUtil.damageNearbyEntities(serverLevel, entity, 60*(int) Math.max(multiplier(entity)/4,1), DamageLookup.lookupDps(0, .875, 2, 18) *(int) Math.max(multiplier(entity)/4,1), center, true, false);
 
             if(griefing) {
                 blocks.stream().filter(b -> random.nextInt(175) == 0 && !serverLevel.getBlockState(b).is(ModBlocks.VOID.get())).forEach(b -> serverLevel.setBlockAndUpdate(b, Blocks.AIR.defaultBlockState()));

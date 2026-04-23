@@ -28,7 +28,7 @@ public class AvatarCreationAbility extends Ability {
 
     @Override
     public float getSpiritualityCost() {
-        return 500;
+        return 1500;
     }
 
     @Override
