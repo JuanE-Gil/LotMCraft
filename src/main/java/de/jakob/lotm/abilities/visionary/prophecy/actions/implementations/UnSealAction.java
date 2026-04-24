@@ -4,23 +4,20 @@ import de.jakob.lotm.abilities.visionary.prophecy.actions.ActionBase;
 import de.jakob.lotm.abilities.visionary.prophecy.actions.ActionsEnum;
 import de.jakob.lotm.abilities.visionary.prophecy.actions.context.ActionContextBase;
 import de.jakob.lotm.abilities.visionary.prophecy.actions.context.ActionContextEnum;
-import de.jakob.lotm.attachments.DisabledAbilitiesComponent;
 import de.jakob.lotm.attachments.ModAttachments;
-import de.jakob.lotm.util.scheduling.ServerScheduler;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 
-public class SealAction extends ActionBase {
-    public SealAction(ActionContextBase context) {
+public class UnSealAction extends ActionBase {
+    public UnSealAction(ActionContextBase context) {
         super(context);
     }
 
     @Override
     public ActionsEnum getType() {
-        return ActionsEnum.SEAL;
+        return ActionsEnum.UNSEAL;
     }
 
     @Override
@@ -30,15 +27,10 @@ public class SealAction extends ActionBase {
 
     @Override
     public void action(Level level, LivingEntity entity) {
-        DisabledAbilitiesComponent comp = entity.getData(ModAttachments.DISABLED_ABILITIES_COMPONENT);
-        comp.disableAbilityUsage("sealed_visionary");
-
-        ServerScheduler.scheduleDelayed(20 * 30, ()->{
-            comp.enableAbilityUsage("sealed_visionary");
-        });
+        entity.getData(ModAttachments.DISABLED_ABILITIES_COMPONENT.get()).enableAllAbilities();
     }
 
-    public static SealAction load(CompoundTag tag, HolderLookup.Provider provider) {
-        return new SealAction(ActionContextBase.load(ActionContextEnum.EMPTY, tag, provider));
+    public static UnSealAction load(CompoundTag tag, HolderLookup.Provider provider) {
+        return new UnSealAction(ActionContextBase.load(ActionContextEnum.EMPTY, tag, provider));
     }
 }

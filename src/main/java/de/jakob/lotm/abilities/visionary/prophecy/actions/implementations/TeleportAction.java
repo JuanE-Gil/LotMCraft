@@ -1,5 +1,7 @@
 package de.jakob.lotm.abilities.visionary.prophecy.actions.implementations;
 
+import de.jakob.lotm.LOTMCraft;
+import de.jakob.lotm.abilities.visionary.prophecy.TokenStream;
 import de.jakob.lotm.abilities.visionary.prophecy.actions.ActionBase;
 import de.jakob.lotm.abilities.visionary.prophecy.actions.ActionsEnum;
 import de.jakob.lotm.abilities.visionary.prophecy.actions.context.ActionContextBase;
@@ -8,7 +10,10 @@ import de.jakob.lotm.abilities.visionary.prophecy.actions.context.implementation
 import de.jakob.lotm.abilities.visionary.prophecy.actions.context.implementations.ActionPositionContext;
 import de.jakob.lotm.util.TeleportationUtil;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
@@ -34,6 +39,27 @@ public class TeleportAction extends ActionBase {
         if (!(entity instanceof ServerPlayer serverPlayer)) return;
 
         if(!(context instanceof ActionPositionContext position)) return;
+
+        ResourceLocation id = null;
+        if(!position.dimension.isEmpty());{
+            try {
+                id = ResourceLocation.tryParse(position.dimension);
+            }catch (NullPointerException ignored) {}
+        }
+
+        if(id != null) {
+            ServerLevel target = null;
+
+            try {
+               target = serverPlayer.getServer().getLevel(ResourceKey.create(Registries.DIMENSION, id));
+            }catch (NullPointerException ignored) {}
+
+            if(target != null){
+                var validated = TeleportationUtil.clampToBorder(target, position.pos);
+                entity.teleportTo(validated.x, validated.y, validated.z);
+                return;
+            }
+        }
 
         var validated = TeleportationUtil.clampToBorder((ServerLevel) serverPlayer.level(), position.pos);
         entity.teleportTo(validated.x, validated.y, validated.z);

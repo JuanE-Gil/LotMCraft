@@ -8,6 +8,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Saddleable;
 import net.minecraft.world.level.Level;
 
+import java.sql.Time;
+
 public abstract class ActionBase {
     public static final String CONTEXT = "action_contex";
 
@@ -41,6 +43,11 @@ public abstract class ActionBase {
             case SKILL -> UseSkillAction.load(tag, provider);
             case CONFUSION -> ConfusionAction.load(tag, provider);
             case SEAL -> SealAction.load(tag, provider);
+            case UNSEAL -> UnSealAction.load(tag, provider);
+            case SPAWN -> SpawnAction.load(tag, provider);
+            case SAY -> SayAction.load(tag, provider);
+            case WEATHER -> WeatherAction.load(tag, provider);
+            case TIME -> TimeAction.load(tag, provider);
         };
     }
 
@@ -56,6 +63,11 @@ public abstract class ActionBase {
             case SKILL -> new UseSkillAction(context);
             case CONFUSION -> new ConfusionAction(context);
             case SEAL -> new SealAction(context);
+            case UNSEAL -> new UnSealAction(context);
+            case SPAWN -> new SpawnAction(context);
+            case SAY -> new SayAction(context);
+            case WEATHER -> new WeatherAction(context);
+            case TIME -> new TimeAction(context);
         };
     }
 }

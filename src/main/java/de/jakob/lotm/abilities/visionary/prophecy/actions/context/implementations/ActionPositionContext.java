@@ -12,15 +12,20 @@ import java.util.UUID;
 
 public class ActionPositionContext extends ActionContextBase {
     public Vec3 pos;
+    public String dimension;
+
+    public static String NBT_DIMENSION = "dimension";
 
     public ActionPositionContext(UUID id, Vec3 pos){
         super(id);
         this.pos = pos;
+        dimension = "";
     }
 
     public ActionPositionContext(UUID id){
         super(id);
         this.pos = null;
+        dimension = "";
     }
 
     @Override
@@ -44,6 +49,11 @@ public class ActionPositionContext extends ActionContextBase {
             pos = Vec3.ZERO;
         }
 
+        stream.next();
+        if(!stream.match("then") || !stream.match("and")){
+            dimension = stream.peek();
+        }
+
         return this;
     }
 
@@ -54,15 +64,22 @@ public class ActionPositionContext extends ActionContextBase {
         tag.putDouble("x", pos.x);
         tag.putDouble("y", pos.y);
         tag.putDouble("z", pos.z);
+
+        tag.putString(NBT_DIMENSION, dimension);
+
         return tag;
     }
 
     public static ActionPositionContext load(CompoundTag tag, UUID id, HolderLookup.Provider provider) {
-        return new ActionPositionContext(id, new Vec3(
+        var context = new ActionPositionContext(id, new Vec3(
                 tag.getDouble("x"),
                 tag.getDouble("y"),
                 tag.getDouble("z")
         ));
+
+        context.dimension = tag.getString(NBT_DIMENSION);
+
+        return context;
     }
 
 }

@@ -72,6 +72,7 @@ public abstract class  TriggerBase {
             case HEALTH -> HealthTrigger.load(tag, actionType, contextType, provider);
             case SANITY -> SanityTrigger.load(tag, actionType, contextType, provider);
             case PLAYER -> PlayerTrigger.load(tag, actionType, contextType, provider);
+            case SEALED -> SealedTrigger.load(tag, actionType, contextType, provider);
         };
     }
 
@@ -83,6 +84,7 @@ public abstract class  TriggerBase {
             case HEALTH -> new HealthTrigger(action, context);
             case SANITY -> new SanityTrigger(action, context);
             case PLAYER -> new PlayerTrigger(action, context);
+            case SEALED -> new SealedTrigger(action, context);
         };
     }
 }

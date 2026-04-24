@@ -9,7 +9,8 @@ public enum TriggerEnum {
     INSTANT,
     HEALTH,
     SANITY,
-    PLAYER
+    PLAYER,
+    SEALED
     ;
 
     public static TriggerEnum  fromNBT(CompoundTag tag, String key) {

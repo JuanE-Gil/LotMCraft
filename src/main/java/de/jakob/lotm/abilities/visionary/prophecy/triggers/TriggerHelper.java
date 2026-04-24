@@ -27,6 +27,7 @@ public class TriggerHelper {
             case "health" -> TriggerEnum.HEALTH;
             case "sanity" -> TriggerEnum.SANITY;
             case "player" -> TriggerEnum.PLAYER;
+            case "sealed" -> TriggerEnum.SEALED;
             default -> null;
         };
     }
@@ -39,6 +40,7 @@ public class TriggerHelper {
             case TriggerEnum.HEALTH -> TriggerContextEnum.NUMBER;
             case TriggerEnum.SANITY -> TriggerContextEnum.NUMBER;
             case TriggerEnum.PLAYER -> TriggerContextEnum.PLAYER;
+            case TriggerEnum.SEALED -> TriggerContextEnum.EMPTY;
         };
     }
 

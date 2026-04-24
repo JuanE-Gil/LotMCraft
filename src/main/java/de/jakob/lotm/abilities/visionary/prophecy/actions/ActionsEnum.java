@@ -13,7 +13,12 @@ public enum ActionsEnum {
     STUN,
     SKILL,
     CONFUSION,
-    SEAL
+    SEAL,
+    UNSEAL,
+    SPAWN,
+    SAY,
+    WEATHER,
+    TIME
     //DOUBLE
     ;
 

@@ -27,6 +27,11 @@ public class ActionsHelper {
             case "skill" -> ActionsEnum.SKILL;
             case "confusion" -> ActionsEnum.CONFUSION;
             case "seal" -> ActionsEnum.SEAL;
+            case "unseal" -> ActionsEnum.UNSEAL;
+            case "spawn" -> ActionsEnum.SPAWN;
+            case "say" -> ActionsEnum.SAY;
+            case "weather" -> ActionsEnum.WEATHER;
+            case "time" -> ActionsEnum.TIME;
             default -> null;
         };
     }
@@ -43,6 +48,11 @@ public class ActionsHelper {
             case ActionsEnum.SKILL -> ActionContextEnum.STRING;
             case ActionsEnum.CONFUSION -> ActionContextEnum.EMPTY;
             case ActionsEnum.SEAL -> ActionContextEnum.EMPTY;
+            case ActionsEnum.UNSEAL -> ActionContextEnum.EMPTY;
+            case ActionsEnum.SPAWN -> ActionContextEnum.STRING;
+            case ActionsEnum.SAY -> ActionContextEnum.STRING;
+            case ActionsEnum.WEATHER -> ActionContextEnum.STRING;
+            case ActionsEnum.TIME -> ActionContextEnum.STRING;
         };
     }
 
