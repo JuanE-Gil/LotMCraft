@@ -1,5 +1,6 @@
 package de.jakob.lotm.abilities.visionary.prophecy.triggers.implementations;
 
+import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.visionary.prophecy.actions.ActionBase;
 import de.jakob.lotm.abilities.visionary.prophecy.actions.ActionsEnum;
 import de.jakob.lotm.abilities.visionary.prophecy.triggers.TriggerBase;
@@ -34,14 +35,9 @@ public class HealthTrigger extends TriggerBase {
         float value = numbers.isInt ? numbers.intValue : (float) numbers.doubleValue;
         float health = entity.getHealth();
 
-        if(switch (numbers.operation) {
-            case -2 -> value < health;
-            case -1 -> value <= health;
-            case 0 -> value == health;
-            case 1 -> value >= health;
-            case 2 -> value > health;
-            default -> true;
-        }){
+        LOTMCraft.LOGGER.info("HEALTH: value:{}, health:{}, operation: {}", value, health, numbers.operation);
+
+        if(checkOperation(value, health, numbers.operation)){
             action.action(level, entity);
             return true;
         }
@@ -55,5 +51,16 @@ public class HealthTrigger extends TriggerBase {
                                       HolderLookup.Provider provider){
         return new HealthTrigger(ActionBase.load(actionType, tag, provider),
                 TriggerContextBase.load(contextType, tag, provider));
+    }
+
+    private boolean checkOperation(float value, float value2, int operation){
+        return switch (operation) {
+            case -2 -> value2 < value;
+            case -1 -> value2 <= value;
+            case 0 -> value2 == value;
+            case 1 -> value2 >= value;
+            case 2 -> value2 > value;
+            default -> false;
+        };
     }
 }

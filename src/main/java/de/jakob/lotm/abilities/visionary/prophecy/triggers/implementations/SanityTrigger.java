@@ -1,5 +1,6 @@
 package de.jakob.lotm.abilities.visionary.prophecy.triggers.implementations;
 
+import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.visionary.prophecy.actions.ActionBase;
 import de.jakob.lotm.abilities.visionary.prophecy.actions.ActionsEnum;
 import de.jakob.lotm.abilities.visionary.prophecy.triggers.TriggerBase;
@@ -45,14 +46,14 @@ public class SanityTrigger extends TriggerBase {
 
         float sanity = entity.getData(ModAttachments.SANITY_COMPONENT.get()).getSanity();
 
-        if(switch (numbers.operation) {
-            case -2 -> value < sanity;
-            case -1 -> value <= sanity;
-            case 0 -> value == sanity;
-            case 1 -> value >= sanity;
-            case 2 -> value > sanity;
-            default -> true;
-        }){
+        var operation = numbers.operation;
+
+        LOTMCraft.LOGGER.info("SANITY: value:{}, sanity:{}, operation: {}", value, sanity, operation);
+
+        if(checkOperation(value, sanity, operation)){
+
+            LOTMCraft.LOGGER.info("in if");
+
             action.action(level, entity);
             return true;
         }
@@ -66,5 +67,16 @@ public class SanityTrigger extends TriggerBase {
                                      HolderLookup.Provider provider){
         return new SanityTrigger(ActionBase.load(actionType, tag, provider),
                 TriggerContextBase.load(contextType, tag, provider));
+    }
+
+    private boolean checkOperation(float value, float value2, int operation){
+        return switch (operation) {
+            case -2 -> value2 < value;
+            case -1 -> value2 <= value;
+            case 0 -> value2 == value;
+            case 1 -> value2 >= value;
+            case 2 -> value2 > value;
+            default -> false;
+        };
     }
 }
