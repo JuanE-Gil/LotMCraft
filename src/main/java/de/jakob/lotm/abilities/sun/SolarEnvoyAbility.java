@@ -35,7 +35,7 @@ public class SolarEnvoyAbility extends ToggleAbility {
 
     @Override
     protected float getSpiritualityCost() {
-        return 5000;
+        return 500;
     }
 
     @Override
