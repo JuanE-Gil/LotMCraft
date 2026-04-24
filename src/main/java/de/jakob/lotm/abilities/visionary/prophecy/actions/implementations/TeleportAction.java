@@ -41,7 +41,7 @@ public class TeleportAction extends ActionBase {
         if(!(context instanceof ActionPositionContext position)) return;
 
         ResourceLocation id = null;
-        if(!position.dimension.isEmpty());{
+        if(!position.dimension.isEmpty()){
             try {
                 id = ResourceLocation.tryParse(position.dimension);
             }catch (NullPointerException ignored) {}
@@ -56,7 +56,7 @@ public class TeleportAction extends ActionBase {
 
             if(target != null){
                 var validated = TeleportationUtil.clampToBorder(target, position.pos);
-                entity.teleportTo(validated.x, validated.y, validated.z);
+                serverPlayer.teleportTo(target, validated.x, validated.y, validated.z, serverPlayer.getYRot(), serverPlayer.getXRot());
                 return;
             }
         }
