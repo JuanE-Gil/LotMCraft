@@ -54,7 +54,11 @@ public class HolyOathAbility extends ToggleAbility {
 
         if (sequence <= 4) {
             tickCost = (5-sequence)*32.0f;
-        } else {
+        } else if (sequence == 0)
+        {
+            tickCost = 200.0f;
+        }
+        else {
             tickCost = 8.0f;
         }
         int effectlevel =  sequence<=4? 1: 0;
