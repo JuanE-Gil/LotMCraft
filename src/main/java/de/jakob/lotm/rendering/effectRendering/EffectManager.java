@@ -100,7 +100,8 @@ public class EffectManager {
         ARTIFACT_EXPLOSION(29),
         BLOOD_INFERNO(30),
         FOOLING(31),
-        ROTATING_RINGS(32);
+        ROTATING_RINGS(32),
+        SPACE_TEARING(33);
 
         private final int index;
 

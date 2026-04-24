@@ -15,9 +15,11 @@ import de.jakob.lotm.entity.ModEntities;
 import de.jakob.lotm.entity.client.ability_entities.big_moon.BigMoonRenderer;
 import de.jakob.lotm.entity.client.ability_entities.big_sun.BigSunRenderer;
 import de.jakob.lotm.entity.client.ability_entities.darkness_pathway.concealed_domain.ConcealedDomainRenderer;
-import de.jakob.lotm.entity.client.ability_entities.death_pathway.DeathDivineKingdomEntityRenderer;
+import de.jakob.lotm.entity.client.ability_entities.death_pathway.divine_kingdom_death.DeathDivineKingdomEntityRenderer;
+import de.jakob.lotm.entity.client.ability_entities.death_pathway.underworld_gate.UnderworldGateRenderer;
 import de.jakob.lotm.entity.client.ability_entities.door_pathway.apprentice_door.ApprenticeDoorRenderer;
 import de.jakob.lotm.entity.client.ability_entities.door_pathway.black_hole.BlackHoleRenderer;
+import de.jakob.lotm.entity.client.ability_entities.door_pathway.planet.PlanetRenderer;
 import de.jakob.lotm.entity.client.ability_entities.door_pathway.space_collapse.SpaceCollapseRenderer;
 import de.jakob.lotm.entity.client.ability_entities.door_pathway.travelers_door.TravelersDoorRenderer;
 import de.jakob.lotm.entity.client.ability_entities.meteor.MeteorRenderer;
@@ -272,6 +274,8 @@ public class LOTMCraft
             EntityRenderers.register(ModEntities.SPIRIT_BALL.get(), SpiritBallRenderer::new);
             EntityRenderers.register(ModEntities.SPIRIT_BLOCK_PROJECTILE.get(), SpiritBlockProjectileRenderer::new);
             EntityRenderers.register(ModEntities.CONCEALED_DOMAIN.get(), ConcealedDomainRenderer::new);
+            EntityRenderers.register(ModEntities.UNDERWORLD_GATE.get(), UnderworldGateRenderer::new);
+            EntityRenderers.register(ModEntities.PLANET.get(), PlanetRenderer::new);
 
             // Spirits
             EntityRenderers.register(ModEntities.SPIRIT_DERVISH_ENTITY.get(), SpiritDervishRenderer::new);

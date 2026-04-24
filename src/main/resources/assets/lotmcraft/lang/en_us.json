@@ -689,6 +689,8 @@
   "ability.lotmcraft.space_time_storm.targeted": "Targeted",
   "lotmcraft.player_teleportation_ability": "Player Teleportation",
   "lotmcraft.player_teleportation_ability.description": "Teleport to a Selected Player",
+  "lotmcraft.space_fragmentation_ability": "Space Fragmentation",
+  "lotmcraft.space_fragmentation_ability.description": "Summon illusory planets to create massive gravitational pull, distorting time and shattering the space before you",
   "lotmcraft.conceptualization_ability": "Conceptualization",
   "lotmcraft.conceptualization_ability.description": "Turn into conceptual symbols gaining massive resistance to most damage and being able to fly at high speeds",
   "lotmcraft.door_authority_ability": "Door Authority",
