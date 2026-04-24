@@ -692,6 +692,37 @@
   "lotmcraft.deceit_ability.description": "Deceive surrounding enemies for them to forget about you, or deceive the world to be invulnerable for a short time",
   "ability.lotmcraft.deceit.entities": "Deceive surrounding enemies",
   "ability.lotmcraft.deceit.world": "Deceive the world",
+
+  "ability.lotmcraft.black_emperor.mausoleum_domain": "Mausoleum Domain",
+
+  "ability.lotmcraft.bestowment.money_focus": "Money Focus",
+  "ability.lotmcraft.bestowment.rash": "Rash",
+  "ability.lotmcraft.bestowment.sluggish": "Sluggish",
+  "ability.lotmcraft.bestowment.anxiety": "Anxiety",
+  "ability.lotmcraft.bestowment.will_to_fight": "Will to Fight Seal",
+
+  "ability.lotmcraft.disorder.disordered_actions": "Disordered Actions",
+  "ability.lotmcraft.disorder.disordered_perception": "Disordered Perception",
+  "ability.lotmcraft.disorder.defensive_veil": "Defensive Veil",
+  "ability.lotmcraft.disorder.break_bonds": "Break Bonds",
+  "ability.lotmcraft.disorder.distance_warp": "Distance Warp",
+  "ability.lotmcraft.disorder.frenzy": "Frenzy",
+  "ability.lotmcraft.disorder.entropy": "Entropy",
+
+  "ability.lotmcraft.distortion.distort_action": "Distort Action",
+  "ability.lotmcraft.distortion.distort_intent": "Distort Intent",
+  "ability.lotmcraft.distortion.distort_trajectory": "Distort Trajectory",
+  "ability.lotmcraft.distortion.distort_concept": "Distort Concept",
+  "ability.lotmcraft.distortion.distort_wound": "Distort Wound",
+
+  "ability.lotmcraft.exploit.flight": "Flight",
+  "ability.lotmcraft.exploit.jump_up": "Jump Up",
+  "ability.lotmcraft.exploit.jump_forward": "Jump Forward",
+
+  "ability.lotmcraft.magnify.self": "Magnify Self",
+  "ability.lotmcraft.magnify.weather": "Magnify Weather",
+  "ability.lotmcraft.magnify.grab": "Magnify Grab",
+  "ability.lotmcraft.magnify.execution": "Magnify Execution",
   "lotmcraft.loophole_creation_ability": "Loophole Creation",
   "lotmcraft.loophole_creation_ability.description": "Create an Area, where enemies will be randomly teleported around and their abilities will be stolen",
   "lotmcraft.fate_siphoning_ability": "Fate Siphoning",
