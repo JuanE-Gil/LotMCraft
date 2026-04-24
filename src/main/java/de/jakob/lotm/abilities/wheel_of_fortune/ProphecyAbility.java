@@ -39,6 +39,7 @@ public class ProphecyAbility extends SelectableAbility {
         super(id, 4);
         canBeCopied = false;
         canBeReplicated = false;
+        canBeShared = false;
     }
 
     @Override
@@ -76,7 +77,7 @@ public class ProphecyAbility extends SelectableAbility {
             case 0 -> {
                 Vec3 targetLoc = AbilityUtil.getTargetLocation(entity, 85, 3);
 
-                MeteorEntity meteor = new MeteorEntity(level, 3.25f,  (float) DamageLookup.lookupDamage(2, 1) * (int) Math.max(BeyonderData.getMultiplier(entity)/2,1), 6, entity, BeyonderData.isGriefingEnabled(entity), 20, 34);
+                MeteorEntity meteor = new MeteorEntity(level, 3.25f,  (float) DamageLookup.lookupDamage(2, 1) * (int) Math.max(BeyonderData.getMultiplier(entity)/2,1), 4, entity, BeyonderData.isGriefingEnabled(entity), 20, 34);
                 meteor.setPosition(targetLoc);
                 level.addFreshEntity(meteor);
             }

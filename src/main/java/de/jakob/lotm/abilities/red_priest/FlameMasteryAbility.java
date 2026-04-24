@@ -1,5 +1,6 @@
 package de.jakob.lotm.abilities.red_priest;
 
+import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.SelectableAbility;
 import de.jakob.lotm.entity.custom.projectiles.FireballEntity;
 import de.jakob.lotm.util.BeyonderData;
@@ -30,7 +31,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class FlameMasteryAbility extends SelectableAbility {
     private final HashSet<UUID> transformedEntities = new HashSet<>();
     public FlameMasteryAbility(String id) {
-        super(id, 2.5f, "burning");
+        super(id, 5f, "burning");
     }
 
     @Override
@@ -70,21 +71,40 @@ public class FlameMasteryAbility extends SelectableAbility {
     private final DustParticleOptions dust = new DustParticleOptions(new Vector3f(1.0f, .95f, .95f), 2.0f);
 
     private void flameTransformation(ServerLevel level, LivingEntity entity) {
-        level.playSound(null, entity.blockPosition(), SoundEvents.BLAZE_SHOOT, entity.getSoundSource(), 1.0f, 1.0f);
-        if(transformedEntities.contains(entity.getUUID())) {
-            transformedEntities.remove(entity.getUUID());
+        level.playSound(null, entity.blockPosition(), net.minecraft.sounds.SoundEvents.BLAZE_SHOOT, entity.getSoundSource(), 1.0f, 1.0f);
+
+        UUID entityId = entity.getUUID();
+
+        if(transformedEntities.contains(entityId)) {
+            transformedEntities.remove(entityId);
             return;
         }
 
-        transformedEntities.add(entity.getUUID());
+        transformedEntities.add(entityId);
         AtomicBoolean shouldStop = new AtomicBoolean(false);
+
         ServerScheduler.scheduleUntil(level, () -> {
-            if(!transformedEntities.contains(entity.getUUID())) {
+            de.jakob.lotm.util.BeyonderData.reduceSpirituality(entity, 25);
+
+            if (de.jakob.lotm.util.BeyonderData.getSpirituality(entity) <= 0) {
+                if (entity instanceof net.minecraft.server.level.ServerPlayer player) {
+                    player.connection.send(new net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket(
+                            net.minecraft.network.chat.Component.literal("Your spirituality is exhausted.").withColor(0xFF422a2a)
+                    ));
+                }
+                transformedEntities.remove(entityId);
                 shouldStop.set(true);
                 return;
             }
-            ParticleUtil.spawnParticles(level, ParticleTypes.FLAME, entity.getEyePosition(), 60, 1.2, .05);
-            ParticleUtil.spawnParticles(level, dust, entity.getEyePosition(), 30, 1.2, .05);
+
+            if(!transformedEntities.contains(entityId)) {
+                shouldStop.set(true);
+                return;
+            }
+
+            de.jakob.lotm.util.helper.ParticleUtil.spawnParticles(level, net.minecraft.core.particles.ParticleTypes.FLAME, entity.getEyePosition(), 60, 1.2, .05);
+            de.jakob.lotm.util.helper.ParticleUtil.spawnParticles(level, dust, entity.getEyePosition(), 30, 1.2, .05);
+
             if(!entity.isShiftKeyDown())
                 entity.setDeltaMovement(entity.getLookAngle().normalize());
             else
@@ -95,7 +115,7 @@ public class FlameMasteryAbility extends SelectableAbility {
     }
 
     private void eruption(ServerLevel level, LivingEntity entity) {
-        Vec3 targetPos = AbilityUtil.getTargetLocation(entity, 20, 1.4f);
+        Vec3 targetPos = AbilityUtil.getTargetLocation(entity, 20* (int) Math.max(multiplier(entity)/4,1), 1.4f);
         boolean griefing = BeyonderData.isGriefingEnabled(entity);
         level.explode(entity, targetPos.x, targetPos.y, targetPos.z, 9, griefing, griefing ? Level.ExplosionInteraction.TNT : Level.ExplosionInteraction.NONE);
         level.explode(entity, targetPos.x, targetPos.y + 1, targetPos.z, 9, griefing, griefing ? Level.ExplosionInteraction.TNT : Level.ExplosionInteraction.NONE);
@@ -105,7 +125,7 @@ public class FlameMasteryAbility extends SelectableAbility {
         ParticleUtil.spawnParticles(level, ParticleTypes.EXPLOSION, targetPos, 90, 2, 6, 2, .02);
         ParticleUtil.spawnParticles(level, dust, targetPos, 400, 2, 6, 2, 0);
 
-        AbilityUtil.damageNearbyEntities(level, entity, 9, DamageLookup.lookupDamage(4, .85) * multiplier(entity), targetPos, true, false);
+        AbilityUtil.damageNearbyEntities(level, entity, 9, DamageLookup.lookupDamage(4, 1) * (int) Math.max(multiplier(entity)/4,1), targetPos, true, false);
 
         for(int i = 0; i < 25; i++) {
             FallingBlockEntity falling = FallingBlockEntity.fall(
@@ -129,8 +149,8 @@ public class FlameMasteryAbility extends SelectableAbility {
     }
 
     private void fireballBarrage(ServerLevel level, LivingEntity entity) {
-        double shots = 15 * multiplier(entity);
-        Vec3 targetPos = AbilityUtil.getTargetLocation(entity, 50, 1.4f);
+        double shots = 15;
+        Vec3 targetPos = AbilityUtil.getTargetLocation(entity, 50* (int) Math.max(multiplier(entity)/4,1), 1.4f);
         Vec3 pos = entity.getEyePosition();
         Vec3 dir = entity.getLookAngle();
         for (int i = 0; i < shots; i++) {
@@ -144,9 +164,10 @@ public class FlameMasteryAbility extends SelectableAbility {
 
         level.playSound(null, startPos.x, startPos.y, startPos.z, SoundEvents.BLAZE_SHOOT, entity.getSoundSource(), 1.0f, 1.0f);
 
-        FireballEntity fireball = new FireballEntity(level, entity, DamageLookup.lookupDamage(4, .4) * multiplier(entity), BeyonderData.isGriefingEnabled(entity), 1.75f);
+        FireballEntity fireball = new FireballEntity(level, entity, DamageLookup.lookupDamage(4, 0.4) * (int) Math.max(multiplier(entity)/4,1), BeyonderData.isGriefingEnabled(entity), 1.75f);
+        //LOTMCraft.LOGGER.info("damage {} multiplier {}",DamageLookup.lookupDamage(4, 0.4),(int) Math.max(multiplier(entity)/4,1));
         fireball.setPos(startPos.x, startPos.y, startPos.z); // Set initial position,
-        fireball.shoot(direction.x, direction.y, direction.z, 1.85f, 0);
+        fireball.shoot(direction.x, direction.y, direction.z, 1.85f*(int) Math.max(multiplier(entity)/4,1), 0);
         level.addFreshEntity(fireball);
     }
 }

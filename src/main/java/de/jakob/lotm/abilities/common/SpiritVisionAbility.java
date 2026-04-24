@@ -53,7 +53,8 @@ public class SpiritVisionAbility extends ToggleAbility {
                         "demoness", 7,
                         "mother", 8,
                         "wheel_of_fortune", 9,
-                        "darkness", 7
+                        "darkness", 7,
+                        "abyss",9
                 ));
 
         for(String pathway : BeyonderData.pathways) {

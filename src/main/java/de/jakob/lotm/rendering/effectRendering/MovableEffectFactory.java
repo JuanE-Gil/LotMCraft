@@ -1,9 +1,6 @@
 package de.jakob.lotm.rendering.effectRendering;
 
-import de.jakob.lotm.rendering.effectRendering.impl.BeamsOfLightEffect;
-import de.jakob.lotm.rendering.effectRendering.impl.FearAuraEffect;
-import de.jakob.lotm.rendering.effectRendering.impl.HorrorAuraEffect;
-import de.jakob.lotm.rendering.effectRendering.impl.LifeAuraEffect;
+import de.jakob.lotm.rendering.effectRendering.impl.*;
 import de.jakob.lotm.util.data.EntityLocation;
 import de.jakob.lotm.util.data.Location;
 import de.jakob.lotm.util.helper.AbilityUtil;
@@ -42,6 +39,7 @@ public class MovableEffectFactory {
             case 1 -> new LifeAuraEffect(location, duration, infinite);
             case 2 -> new FearAuraEffect(location, duration, infinite);
             case 3 -> new BeamsOfLightEffect(location, duration);
+            case 4 -> new SpaceTearEffect(location, duration, infinite);
             default -> throw new IllegalArgumentException("Unknown movable effect index: " + effectIndex);
         };
 

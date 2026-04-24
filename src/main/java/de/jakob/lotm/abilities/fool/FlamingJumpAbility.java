@@ -39,7 +39,7 @@ public class FlamingJumpAbility extends Ability {
 
     @Override
     public float getSpiritualityCost() {
-        return 12;
+        return 60;
     }
 
     @Override

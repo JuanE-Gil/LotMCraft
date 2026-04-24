@@ -30,9 +30,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class HolyLightAbility extends Ability {
     public HolyLightAbility(String id) {
-        super(id, .75f, "purification", "light_source", "light_weak");
+        super(id, 1.25f, "purification", "light_source", "light_weak");
         postsUsedAbilityEventManually = true;
-        interactionRadius = 2.5;
+        interactionRadius = 6;
     }
 
     @Override
@@ -44,7 +44,7 @@ public class HolyLightAbility extends Ability {
 
     @Override
     protected float getSpiritualityCost() {
-        return 19;
+        return 35;
     }
 
     final int radius = 16;
@@ -65,7 +65,6 @@ public class HolyLightAbility extends Ability {
 
             level.playSound(null, initialPos.x, initialPos.y - 14, initialPos.z, SoundEvents.BEACON_ACTIVATE, entity.getSoundSource(), 3.0f, 1.0f);
 
-            double multiplier = multiplier(entity);
 
             ServerScheduler.scheduleForDuration(0, 1, 18, () -> {
                 Vec3 pos = currentPos.get();
@@ -78,9 +77,9 @@ public class HolyLightAbility extends Ability {
                     lights.add(blockPos);
                 }
 
-                AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 2.5f, DamageLookup.lookupDamage(8, .8) * multiplier, pos, true, false, false, 10, ModDamageTypes.source(level, ModDamageTypes.PURIFICATION, entity));
+                AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 2.5f* (int) Math.max(multiplier(entity)/4,1), DamageLookup.lookupDamage(8, .8) * (int) Math.max(multiplier(entity)/4,1), pos, true, false, false, 10, ModDamageTypes.source(level, ModDamageTypes.PURIFICATION, entity));
 
-                currentPos.set(pos.subtract(0, 1, 0));
+                currentPos.set(pos.subtract(0, 2.5, 0));
             }, null, (ServerLevel) level, () -> AbilityUtil.getTimeInArea(entity, new Location(entity.position(), level)));
 
             ServerScheduler.scheduleDelayed(18, () -> {

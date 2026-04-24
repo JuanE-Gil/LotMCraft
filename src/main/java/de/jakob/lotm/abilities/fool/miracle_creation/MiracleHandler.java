@@ -283,7 +283,7 @@ public class MiracleHandler {
 
         EffectManager.playEffect(EffectManager.Effect.MIRACLE, targetLoc.x, targetLoc.y, targetLoc.z, level);
 
-        MeteorEntity meteor = new MeteorEntity(level, 3.25f,  (float) DamageLookup.lookupDamage(2, 1) * (int) Math.max(BeyonderData.getMultiplier(caster)/2,1), 6, caster, BeyonderData.isGriefingEnabled(caster), 17, 45);
+        MeteorEntity meteor = new MeteorEntity(level, 3.25f,  (float) DamageLookup.lookupDamage(2, 1) * (int) Math.max(BeyonderData.getMultiplier(caster)/2,1), 4, caster, BeyonderData.isGriefingEnabled(caster), 17, 45);
         meteor.setPosition(targetLoc);
         level.addFreshEntity(meteor);
     }

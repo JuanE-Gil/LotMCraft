@@ -32,6 +32,11 @@ public class ModDataComponents {
                     .persistent(Codec.BOOL)
                     .build());
 
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Boolean>> IS_TRAP =
+            DATA_COMPONENT_TYPES.register("is_trap", () -> DataComponentType.<Boolean>builder()
+                    .persistent(Codec.BOOL)
+                    .build());
+
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<Integer>> ABILITY_USES =
             DATA_COMPONENT_TYPES.register("ability_uses", () -> DataComponentType.<Integer>builder()
                     .persistent(Codec.INT)

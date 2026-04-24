@@ -19,7 +19,7 @@ import java.util.Map;
 public class DivineKingdomAbility extends Ability {
 
     public DivineKingdomAbility(String id) {
-        super(id, 6000f, "death");
+        super(id, 300f, "death");
         canBeCopied = false;
         canBeReplicated = false;
         cannotBeStolen = true;
@@ -47,11 +47,6 @@ public class DivineKingdomAbility extends Ability {
                 SoundEvents.WITHER_SPAWN, SoundSource.PLAYERS, 4.0f, 0.3f);
         level.playSound(null, caster.blockPosition(),
                 SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 3.0f, 0.5f);
-
-        if (caster instanceof ServerPlayer player) {
-            player.sendSystemMessage(Component.translatable("ability.lotmcraft.divine_kingdom.activated")
-                    .withStyle(ChatFormatting.WHITE));
-        }
 
         DeathDivineKingdomEntity domain = new DeathDivineKingdomEntity(
                 ModEntities.DEATH_DIVINE_KINGDOM.get(), level, caster);

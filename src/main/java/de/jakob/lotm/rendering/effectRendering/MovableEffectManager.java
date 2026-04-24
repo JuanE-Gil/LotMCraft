@@ -108,7 +108,8 @@ public class MovableEffectManager {
         HORROR_AURA(0),
         LIFE_AURA(1),
         FEAR_AURA(2),
-        BEAMS_OF_LIGHT(3);
+        BEAMS_OF_LIGHT(3),
+        SPACE_TEAR(4);
 
 
         private final int index;

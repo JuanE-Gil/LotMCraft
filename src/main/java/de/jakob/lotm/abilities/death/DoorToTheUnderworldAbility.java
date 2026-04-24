@@ -57,7 +57,7 @@ public class DoorToTheUnderworldAbility extends SelectableAbility {
             new DustParticleOptions(new Vector3f(0.05f, 0.0f, 0.15f), 2.0f);
 
     public DoorToTheUnderworldAbility(String id) {
-        super(id, 20);
+        super(id, 10f, "death");
     }
 
     @Override
@@ -127,7 +127,7 @@ public class DoorToTheUnderworldAbility extends SelectableAbility {
         List<Mob> mobs = summonedMobs.remove(player.getUUID());
 
         if (taskId == null && (mobs == null || mobs.isEmpty())) {
-            AbilityUtil.sendActionBar(player, Component.translatable("ability.lotmcraft.door_to_the_underworld.none_summoned").withColor(0xFF4444));
+            AbilityUtil.sendActionBar(player, Component.translatable("ability.lotmcraft.door_to_the_underworld.none_summoned").withColor(0xFF334f23));
             return;
         }
 
@@ -141,7 +141,7 @@ public class DoorToTheUnderworldAbility extends SelectableAbility {
             }
         }
 
-        AbilityUtil.sendActionBar(player, Component.translatable("ability.lotmcraft.door_to_the_underworld.released").withColor(0x44FF44));
+        AbilityUtil.sendActionBar(player, Component.translatable("ability.lotmcraft.door_to_the_underworld.released").withColor(0xFF334f23));
     }
 
     // -------------------------------------------------------------------------

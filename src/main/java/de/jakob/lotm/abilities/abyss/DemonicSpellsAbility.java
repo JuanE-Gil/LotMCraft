@@ -33,7 +33,7 @@ import java.util.*;
 public class DemonicSpellsAbility extends SelectableAbility {
     private final DustParticleOptions greenDust = new DustParticleOptions(new Vector3f(0.2f, 0.8f, 0.2f), 1.2f);
     private final DustParticleOptions purpleDust = new DustParticleOptions(new Vector3f(0.6f, 0.2f, 0.8f), 1.2f);
-    private final DustParticleOptions redDust = new DustParticleOptions(new Vector3f(0.9f, 0.2f, 0.2f), 1.2f);
+    private final DustParticleOptions redDust = new DustParticleOptions(new Vector3f(0.9f, 0.2f, 0.2f), 3.2f);
 
     public DemonicSpellsAbility(String id) {
         super(id, 3f);
@@ -80,8 +80,8 @@ public class DemonicSpellsAbility extends SelectableAbility {
 
         level.playSound(null, entity.blockPosition(), SoundEvents.SLIME_BLOCK_BREAK, entity.getSoundSource(), 2f, 0.8f);
 
-        double swampRadius = 15;
-        double damage = DamageLookup.lookupDamage(4, 0.7) * multiplier(entity);
+        double swampRadius = 15* (int) Math.max(multiplier(entity)/2,1);
+        double damage = DamageLookup.lookupDamage(4, 0.7) *multiplier(entity);
 
         ServerScheduler.scheduleForDuration(0, 20, 20 * 8, () -> {
             if(InteractionHandler.isInteractionPossible(new Location(swampCenter, level), "purification", BeyonderData.getSequence(entity))) {
@@ -94,9 +94,9 @@ public class DemonicSpellsAbility extends SelectableAbility {
                     .stream()
                     .filter(target -> AbilityUtil.mayDamage(entity, target) && !AllyUtil.isAlly(target, entity.getUUID()))
                     .forEach(target -> {
-                        target.addEffect(new MobEffectInstance(MobEffects.POISON, 20 * 6, 2, false, false));
-                        target.addEffect(new MobEffectInstance(MobEffects.WITHER, 20 * 4, 1, false, false));
-                        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20 * 4, 2, false, false));
+                        target.addEffect(new MobEffectInstance(MobEffects.POISON, 20 * 6* (int) Math.max(multiplier(entity)/4,1), 2, false, false));
+                        target.addEffect(new MobEffectInstance(MobEffects.WITHER, 20 * 4* (int) Math.max(multiplier(entity)/4,1), 1, false, false));
+                        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20 * 4* (int) Math.max(multiplier(entity)/4,1), 2, false, false));
                     });
         }, null, level, () -> AbilityUtil.getTimeInArea(entity, new Location(swampCenter, level)));
 
@@ -164,7 +164,7 @@ public class DemonicSpellsAbility extends SelectableAbility {
     }
 
     private void castHellfireWall(ServerLevel level, LivingEntity entity) {
-        double wallRadius = 13;
+        double wallRadius = 13* (int) Math.max(multiplier(entity)/2,1);
         double damage = multiplier(entity);
 
         final double centerX = entity.getX();
@@ -194,8 +194,8 @@ public class DemonicSpellsAbility extends SelectableAbility {
         ServerScheduler.scheduleForDuration(0, 5, 20 * 8, () -> {
             for (BlockPos pos : wallBlocks) {
                 if (level.getBlockState(pos).is(Blocks.BARRIER)) {
-                    ParticleUtil.spawnParticles(level, redDust, pos.getCenter(), 2, 0.2, 0.05);
-                    ParticleUtil.spawnParticles(level, ParticleTypes.FLAME, pos.getCenter(), 1, 0.3, 0.1);
+                    if(random.nextBoolean()) ParticleUtil.spawnParticles(level, redDust, pos.getCenter(), 1, 0.2, 0.05);
+                    else ParticleUtil.spawnParticles(level, ParticleTypes.FLAME, pos.getCenter(), 1, 0.3, 0.1);
                 }
             }
 

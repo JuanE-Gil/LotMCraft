@@ -475,6 +475,8 @@ public class PlayerMap extends SavedData {
                 .pathwayHistory(history)
                 .build());
 
+        entity.getData(ModAttachments.BEYONDER_COMPONENT).setPathwayHistory(history);
+
         setDirty();
     }
 

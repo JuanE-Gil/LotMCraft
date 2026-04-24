@@ -1,7 +1,8 @@
 package de.jakob.lotm.util.shapeShifting.mixin;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import de.jakob.lotm.util.shapeShifting.TransformData;
+import de.jakob.lotm.attachments.ModAttachments;
+import de.jakob.lotm.attachments.ShapeShiftComponent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.ItemInHandRenderer;
@@ -29,16 +30,13 @@ public class ItemInHandRendererMixin {
         AbstractClientPlayer player = this.minecraft.player;
         if (player == null) return;
 
-        TransformData data = (TransformData) player;
-        String shapeKey = data.getCurrentShape();
+        ShapeShiftComponent data = player.getData(ModAttachments.SHAPE_SHIFT);
+        String shapeKey = data.getShape();
 
         // skip for non transformed or player transformed
-        if (shapeKey == null || shapeKey.startsWith("player:")) {
+        if (shapeKey.isEmpty() || shapeKey.startsWith("player:")) {
             return;
         }
-        //  change hand texture for other humanoid entities (Not Implemented)
-
-        // hide hand for any other "non humanoid" models
         ci.cancel();
     }
 }

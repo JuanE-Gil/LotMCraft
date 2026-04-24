@@ -134,7 +134,7 @@ public abstract class PhysicalEnhancementsAbility extends PassiveAbilityItem {
                 var data = dataOp.get();
 
                 ControllingDataComponent controllingData = player.getData(ModAttachments.CONTROLLING_DATA);
-                if (Arrays.stream(data.charStack()).anyMatch(i -> i > 0) && controllingData.getTargetUUID() == null) {
+                if (Arrays.stream(data.charStack()).anyMatch(i -> i > 0) && controllingData.getTargetUUID() == null && !controllingData.isControlling()) {
 
                     if (sequenceLevel < 9) {
                         currentEnhancements = currentEnhancements.stream()
@@ -687,6 +687,7 @@ public abstract class PhysicalEnhancementsAbility extends PassiveAbilityItem {
         STRENGTH(Attributes.ATTACK_DAMAGE, AttributeModifier.Operation.ADD_VALUE, 3.0),
         SPEED(Attributes.MOVEMENT_SPEED, AttributeModifier.Operation.ADD_VALUE, 0.02),
         HEALTH(Attributes.MAX_HEALTH, AttributeModifier.Operation.ADD_VALUE, 4.0),
+        MINING_EFFICIENCY(Attributes.MINING_EFFICIENCY,AttributeModifier.Operation.ADD_VALUE,1.0),
         KNOCKBACK_RESISTANCE(Attributes.KNOCKBACK_RESISTANCE, AttributeModifier.Operation.ADD_VALUE, 0.05),
         ATTACK_SPEED(Attributes.ATTACK_SPEED, AttributeModifier.Operation.ADD_MULTIPLIED_BASE, 0.05),
         RESISTANCE(null, null, 0),
@@ -695,7 +696,8 @@ public abstract class PhysicalEnhancementsAbility extends PassiveAbilityItem {
         LUCK(null, null, 0),
         REGENERATION(null, null, 0),
         CONDUIT(null, null, 0),
-        DOLPHINS_GRACE(null, null, 0),
+        DOLPHINS_GRACE(Attributes.WATER_MOVEMENT_EFFICIENCY, AttributeModifier.Operation.ADD_VALUE, 1),
+        OXYGEN_BONUS(Attributes.OXYGEN_BONUS, AttributeModifier.Operation.ADD_VALUE, 1),
         UNDERWATER_BREATHING(null, null, 0),
         SATURATION(null, null, 0),
         CONCEALMENT(null, null, 0);

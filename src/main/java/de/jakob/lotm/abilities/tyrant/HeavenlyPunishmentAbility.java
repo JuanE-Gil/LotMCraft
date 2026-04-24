@@ -1,5 +1,6 @@
 package de.jakob.lotm.abilities.tyrant;
 
+import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.entity.custom.ability_entities.tyrant_pathway.GiantLightningEntity;
 import de.jakob.lotm.util.BeyonderData;
@@ -17,8 +18,9 @@ import java.util.Map;
 
 public class HeavenlyPunishmentAbility extends Ability {
     public HeavenlyPunishmentAbility(String id) {
-        super(id, 5);
+        super(id, 8);
         canBeCopied = false;
+        canBeShared = false;
     }
 
     @Override
@@ -28,7 +30,7 @@ public class HeavenlyPunishmentAbility extends Ability {
 
     @Override
     public float getSpiritualityCost() {
-        return 1950;
+        return 3000;
     }
 
     @Override
@@ -37,14 +39,14 @@ public class HeavenlyPunishmentAbility extends Ability {
             return;
         }
 
-        Vec3 targetLoc = AbilityUtil.getTargetLocation(entity, 70, 2, true);
+        Vec3 targetLoc = AbilityUtil.getTargetLocation(entity, 70* (int) Math.max(multiplier(entity)/4,1), 2, true);
         for(int i = 0; i < 35; i++) {
             BlockState state = level.getBlockState(BlockPos.containing(targetLoc.subtract(0, 1, 0)));
             if(state.getCollisionShape(level, BlockPos.containing(targetLoc)).isEmpty())
                 targetLoc = targetLoc.subtract(0, 1, 0);
         }
-
-        GiantLightningEntity lightning = new GiantLightningEntity(level, entity, targetLoc, 50, 6, DamageLookup.lookupDamage(1, .9) * (multiplier(entity)/3), BeyonderData.isGriefingEnabled(entity), 13, 200, 0x6522a8);
+        LOTMCraft.LOGGER.info("{} 2 {}",DamageLookup.lookupDamage(1, 1.2),multiplier(entity));
+        GiantLightningEntity lightning = new GiantLightningEntity(level, entity, targetLoc, 50, 6, DamageLookup.lookupDamage(1, 1.2) * (int) Math.max(multiplier(entity)/4,1), BeyonderData.isGriefingEnabled(entity), 13, 200* (int) Math.max(multiplier(entity)/4,1), 0x6522a8);
         level.addFreshEntity(lightning);
     }
 }

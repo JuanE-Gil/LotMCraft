@@ -1,5 +1,6 @@
 package de.jakob.lotm.abilities.darkness;
 
+import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.abilities.core.interaction.InteractionHandler;
 import de.jakob.lotm.attachments.DisabledAbilitiesComponent;
@@ -48,7 +49,7 @@ public class HairEntanglementAbility extends Ability {
 
     @Override
     public float getSpiritualityCost() {
-        return 600;
+        return 1200;
     }
 
     @Override
@@ -58,7 +59,7 @@ public class HairEntanglementAbility extends Ability {
         float multiplier = multiplier(entity);
         for(int i = 0; i < 8; i++) {
             Vec3 startPos = VectorUtil.getRelativePosition(entity.getEyePosition().add(entity.getLookAngle().normalize()), entity.getLookAngle().normalize(),  random.nextDouble(-4.5, 3f), random.nextDouble(-7, 7), random.nextDouble(-2, 5));
-            Vec3 targetLoc = AbilityUtil.getTargetLocation(entity, 35*(int) Math.max(multiplier/20,1), 1.4f);
+            Vec3 targetLoc = AbilityUtil.getTargetLocation(entity, 35*(int) Math.max(multiplier/2,1), 1.4f);
 
             final float step = .15f;
             final float length = (float) startPos.distanceTo(targetLoc);
@@ -78,22 +79,22 @@ public class HairEntanglementAbility extends Ability {
             }
             return;
         }
-        int targetEntitySeq = BeyonderData.getSequence(targetEntity);
-        float multiplier_target = multiplier(targetEntity);
         pacifiedEntities.add(targetEntity.getUUID());
-        int duration = 20 * 30*(int) Math.max(multiplier/4,1)/  (int) Math.max(multiplier_target/4,1);
+        int duration = 0;
 
         int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
         int targetSeq = BeyonderData.getSequence(targetEntity);
         Location eLoc = new Location(targetEntity.position(), (ServerLevel) level);
-        if(AbilityUtil.isTargetSignificantlyStronger(entitySeq, targetSeq)) {
-            duration = 35*(int) Math.max(multiplier/4,1);
-        }
-        if(AbilityUtil.isTargetSignificantlyWeaker(entitySeq, targetSeq)) {
+        if(entitySeq < targetSeq) {
             duration = 20 * 60*(int) Math.max(multiplier/4,1);
-        }
-
-        if(targetEntitySeq > entitySeq-1 ) {
+        }else if (entitySeq > targetSeq){
+            if (!BeyonderData.getPathway(targetEntity).equals("darkness")){
+                duration = 35*(int) Math.max(multiplier/4,1);
+            };
+        }else{
+            duration = 20 * 30*(int) Math.max(multiplier/4,1)/  (int) Math.max(multiplier(targetEntity)/4,1);
+        };
+        if(targetSeq > entitySeq-1 ) {
             if(targetEntity instanceof Mob) {
                 ((Mob) targetEntity).setNoAi(true);
                 ServerScheduler.scheduleDelayed(duration, () -> ((Mob) targetEntity).setNoAi(false));

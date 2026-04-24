@@ -9,6 +9,7 @@ import de.jakob.lotm.damage.ModDamageTypes;
 import de.jakob.lotm.network.PacketHandler;
 import de.jakob.lotm.network.packets.toClient.SyncSpiritChannelingPacket;
 import de.jakob.lotm.util.helper.AbilityUtil;
+import de.jakob.lotm.util.helper.DamageLookup;
 import de.jakob.lotm.util.helper.ParticleUtil;
 import de.jakob.lotm.util.scheduling.ServerScheduler;
 import net.minecraft.core.particles.DustParticleOptions;
@@ -72,7 +73,7 @@ public class SpiritChannelingAbility extends SelectableAbility {
     private static final DustParticleOptions STONE_DUST = new DustParticleOptions(new Vector3f(0.5f, 0.5f, 0.5f), 1.5f);
 
     public SpiritChannelingAbility(String id) {
-        super(id, 4f);
+        super(id, 20f);
     }
 
     @Override
@@ -205,7 +206,7 @@ public class SpiritChannelingAbility extends SelectableAbility {
 
     private void getSpirit(Level level, LivingEntity entity) {
         if (capturedSpirits.containsKey(entity.getUUID())) {
-            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.spirit_channeling.already_have").withColor(0xFF4444));
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.spirit_channeling.already_have").withColor(0xFF334f23));
             return;
         }
 
@@ -213,7 +214,7 @@ public class SpiritChannelingAbility extends SelectableAbility {
         int seq = de.jakob.lotm.util.BeyonderData.getSequence(entity);
         float successChance = (seq <= 6) ? 0.75f : 0.50f;
         if (random.nextFloat() >= successChance) {
-            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.spirit_channeling.failed").withColor(0xFF6600));
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.spirit_channeling.failed").withColor(0xFF334f23));
             return;
         }
 
@@ -227,7 +228,7 @@ public class SpiritChannelingAbility extends SelectableAbility {
         String nameKey = type == SpiritType.FROST_GHOST
                 ? "ability.lotmcraft.spirit_channeling.got_frost_ghost"
                 : "ability.lotmcraft.spirit_channeling.got_earth_spirit";
-        AbilityUtil.sendActionBar(entity, Component.translatable(nameKey).withColor(0x44FF44));
+        AbilityUtil.sendActionBar(entity, Component.translatable(nameKey).withColor(0xFF334f23));
     }
 
     private void releaseSpirit(Level level, LivingEntity entity) {
@@ -240,11 +241,12 @@ public class SpiritChannelingAbility extends SelectableAbility {
         }
 
         if (type == null) {
-            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.spirit_channeling.no_captured").withColor(0xFF4444));
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.spirit_channeling.no_captured").withColor(0xFF334f23));
             return;
         }
 
-        AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.spirit_channeling.released").withColor(0x44FF44));
+        String spiritNameKey = "ability.lotmcraft.spirit_channeling.spirit_name." + type.name().toLowerCase();
+        AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.spirit_channeling.released", Component.translatable(spiritNameKey)).withColor(0xFF334f23));
     }
 
     // -------------------------------------------------------------------------
@@ -264,7 +266,7 @@ public class SpiritChannelingAbility extends SelectableAbility {
 
             for (LivingEntity nearby : AbilityUtil.getNearbyEntities(entity, (ServerLevel) level, startPos, radius.get() + 0.5)) {
                 int targetSeq = de.jakob.lotm.util.BeyonderData.getSequence(nearby);
-                if (targetSeq <= casterSeq - 2) continue;
+                if (targetSeq <= casterSeq - 1) continue;
 
                 nearby.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 100, false, false, false));
                 nearby.addEffect(new MobEffectInstance(MobEffects.JUMP, 60, 128, false, false, false));
@@ -280,7 +282,7 @@ public class SpiritChannelingAbility extends SelectableAbility {
         if (level.isClientSide) return;
 
         if (glacialAegisActive.contains(entity.getUUID())) {
-            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.spirit_channeling.aegis_already_active").withColor(0xAAAAAA));
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.spirit_channeling.aegis_already_active").withColor(0xFF334f23));
             return;
         }
 
@@ -297,7 +299,7 @@ public class SpiritChannelingAbility extends SelectableAbility {
             }
         }, () -> glacialAegisActive.remove(entity.getUUID()), (ServerLevel) level, () -> 1.0);
 
-        AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.spirit_channeling.aegis_active").withColor(0x88DDFF));
+        AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.spirit_channeling.aegis_active").withColor(0xFF334f23));
     }
 
     // -------------------------------------------------------------------------
@@ -309,26 +311,26 @@ public class SpiritChannelingAbility extends SelectableAbility {
 
         LivingEntity target = AbilityUtil.getTargetEntity(entity, 20, 1.5f);
         if (target == null) {
-            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.spirit_channeling.no_target").withColor(0xFF4444));
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.spirit_channeling.no_target").withColor(0xFF334f23));
             return;
         }
 
         int casterSeq = de.jakob.lotm.util.BeyonderData.getSequence(entity);
         int targetSeq = de.jakob.lotm.util.BeyonderData.getSequence(target);
-        if (targetSeq <= casterSeq - 2) return;
+        if (targetSeq <= casterSeq - 1) return;
 
         // Encased in stone: cannot move, takes suffocation-style damage
         AtomicBoolean done = new AtomicBoolean(false);
 
-        ServerScheduler.scheduleForDuration(0, 2, 20 * 4, () -> {
+        ServerScheduler.scheduleForDuration(0, 2, 20 * 4* (int) Math.max(multiplier(entity)/4,1), () -> {
             if (target.isDeadOrDying()) {
                 done.set(true);
                 return;
             }
 
             // Prevent movement
-            target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 10, 100, false, false, false));
-            target.addEffect(new MobEffectInstance(MobEffects.JUMP, 10, 128, false, false, false));
+            target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, 100, false, false, false));
+            target.addEffect(new MobEffectInstance(MobEffects.JUMP, 20, 128, false, false, false));
 
             // Suffocation damage every 2 ticks (same as in wall)
             target.hurt(ModDamageTypes.source(level, ModDamageTypes.BEYONDER_GENERIC, entity), 1.0f);
@@ -377,8 +379,8 @@ public class SpiritChannelingAbility extends SelectableAbility {
                 ParticleUtil.spawnParticles((ServerLevel) level, STONE_DUST, pos, 4, 0.2);
 
                 // Check for hit
-                if (AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 1.2f,
-                        6.0f, pos, true, false,
+                if (AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 1.2f*(int) Math.max(multiplier(entity)/4,1),
+                        DamageLookup.lookupDamage(7, 0.5)*(int) Math.max(multiplier(entity)/4,1), pos, true, false,
                         ModDamageTypes.source(level, ModDamageTypes.BEYONDER_GENERIC, entity))) {
                     hasHit.set(true);
                     // Impact burst
@@ -402,9 +404,9 @@ public class SpiritChannelingAbility extends SelectableAbility {
     private void quicksand(Level level, LivingEntity entity) {
         if (level.isClientSide) return;
 
-        LivingEntity target = AbilityUtil.getTargetEntity(entity, 25, 1.5f);
+        LivingEntity target = AbilityUtil.getTargetEntity(entity, 25*(int) Math.max(multiplier(entity)/4,1), 1.5f);
         if (target == null) {
-            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.spirit_channeling.no_target").withColor(0xFF4444));
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.spirit_channeling.no_target").withColor(0xFF334f23));
             return;
         }
 
@@ -423,9 +425,9 @@ public class SpiritChannelingAbility extends SelectableAbility {
             }
 
             // Heavy slowness on entities in the area (radius 5), skip 2+ sequences stronger
-            for (LivingEntity nearby : AbilityUtil.getNearbyEntities(entity, (ServerLevel) level, center, 5.0)) {
+            for (LivingEntity nearby : AbilityUtil.getNearbyEntities(entity, (ServerLevel) level, center, 5.0*(int) Math.max(multiplier(entity)/4,1))) {
                 int targetSeq = de.jakob.lotm.util.BeyonderData.getSequence(nearby);
-                if (targetSeq <= casterSeq - 2) continue;
+                if (targetSeq <= casterSeq - 1) continue;
 
                 nearby.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 4, false, false, false));
                 // Sink into ground

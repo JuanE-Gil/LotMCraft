@@ -19,6 +19,7 @@ public class BloomingAreaAbility extends Ability {
 
         canBeUsedByNPC = false;
         canBeCopied = false;
+        canBeShared = false;
     }
 
     @Override

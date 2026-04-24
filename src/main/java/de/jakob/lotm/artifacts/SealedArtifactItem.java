@@ -4,6 +4,7 @@ import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.abyss.LanguageOfFoulnessAbility;
 import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.abilities.core.SelectableAbility;
+import de.jakob.lotm.attachments.DoorAuthorityData;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.data.ModDataComponents;
 import de.jakob.lotm.gamerule.ModGameRules;
@@ -56,6 +57,12 @@ public class SealedArtifactItem extends Item {
             player.setItemInHand(hand, ItemStack.EMPTY);
 
             return InteractionResultHolder.success(ItemStack.EMPTY);
+        }
+
+        DoorAuthorityData doorData = DoorAuthorityData.get((ServerLevel) level);
+        if (doorData.isActive() && doorData.getEffectId().equalsIgnoreCase("strengthen")) {
+            ParticleUtil.spawnParticles((ServerLevel) level, ParticleTypes.END_ROD, player.getEyePosition(), 40, .5, .05);
+            return InteractionResultHolder.fail(stack);
         }
 
         SealedArtifactData data = stack.get(ModDataComponents.SEALED_ARTIFACT_DATA);

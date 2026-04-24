@@ -15,8 +15,9 @@ import java.util.Map;
 
 public class SpaceDistortionAbility extends Ability {
     public SpaceDistortionAbility(String id) {
-        super(id, 20);
+        super(id, 45);
         canBeCopied = false;
+        canBeShared = false;
     }
 
     @Override
@@ -26,7 +27,7 @@ public class SpaceDistortionAbility extends Ability {
 
     @Override
     public float getSpiritualityCost() {
-        return 1000;
+        return 10000;
     }
 
     @Override
@@ -35,11 +36,11 @@ public class SpaceDistortionAbility extends Ability {
             return;
         }
 
-        Vec3 targetLoc = AbilityUtil.getTargetLocation(entity, 27, 2);
+        Vec3 targetLoc = AbilityUtil.getTargetLocation(entity, 27*(int) Math.max(multiplier(entity)/4,1), 2);
 
         EffectManager.playEffect(EffectManager.Effect.SPACE_DISTORTION, targetLoc.x(), targetLoc.y(), targetLoc.z(), serverLevel);
 
-        ServerScheduler.scheduleForDuration(0, 2, 20 * 15, () -> AbilityUtil.getAllNearbyEntities(entity, serverLevel, targetLoc, 70).forEach(e -> {
+        ServerScheduler.scheduleForDuration(0, 2, 20 * 15*(int) Math.max(multiplier(entity)/4,1), () -> AbilityUtil.getAllNearbyEntities(entity, serverLevel, targetLoc, 70*(int) Math.max(multiplier(entity)/4,1)).forEach(e -> {
             e.setDeltaMovement(targetLoc.subtract(e.position()).scale(.04));
             BlockPos nextPos = BlockPos.containing(e.position().add(targetLoc.subtract(e.position()).scale(.4)));
             if(!serverLevel.getBlockState(nextPos).getCollisionShape(serverLevel, nextPos).isEmpty()) {

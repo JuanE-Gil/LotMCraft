@@ -5,6 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.attachments.DisabledAbilitiesComponent;
+import de.jakob.lotm.attachments.DoorAuthorityData;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.attachments.SanityComponent;
 import de.jakob.lotm.damage.ModDamageTypes;
@@ -20,6 +21,7 @@ import de.jakob.lotm.util.helper.ParticleUtil;
 import de.jakob.lotm.util.scheduling.ServerScheduler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
@@ -29,6 +31,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -613,6 +616,8 @@ public class NegativeEffect {
         };
     }
 
+    private int potencyMultiplier = 1;
+
     /**
      * Applies the negative effect to a player
      * @param player The player holding the sealed artifact
@@ -620,6 +625,18 @@ public class NegativeEffect {
      */
 
     public void apply(Player player, boolean inMainHand, List<String> pathway) {
+        if(!player.level().isClientSide) {
+            DoorAuthorityData doorData = DoorAuthorityData.get((ServerLevel) player.level());
+            if (doorData.isActive()) {
+                if(doorData.getEffectId().equalsIgnoreCase("strengthen")) return;
+                if(doorData.getEffectId().equalsIgnoreCase("malfunction")) {
+                    potencyMultiplier = 2;
+                } else  {
+                    potencyMultiplier = 1;
+                }
+            }
+        }
+
         if (pathway.contains("fool")) applyFoolEffects(player);
         else if (pathway.contains("error")) applyErrorEffects(player);
         else if (pathway.contains("door")) applyDoorEffects(player);
@@ -642,7 +659,7 @@ public class NegativeEffect {
                 case 4, 3 -> 20 * 6;
                 case 2, 1 -> 20 * 3;
                 default -> 20 * 10;
-            };
+            } / potencyMultiplier;
         } else if(multiplier == 2){
             return switch (sequence) {
                 case 8, 7 -> 20 * 10;
@@ -650,7 +667,7 @@ public class NegativeEffect {
                 case 4, 3 -> 20 * 6;
                 case 2, 1 -> 20 * 4;
                 default -> 20 * 10;
-            };
+            } / potencyMultiplier;
         } else if(multiplier == 3){
             return switch (sequence) {
                 case 8, 7 -> 20 * 10;
@@ -659,13 +676,13 @@ public class NegativeEffect {
                 case 2 -> 20 * 4;
                 case 1 -> 20 * 2;
                 default -> 20 * 10;
-            };
+            } / potencyMultiplier;
         }
-        return 20;
+        return 20 / potencyMultiplier;
     }
 
     private int getEffectLevelForSequence(int sequence) {
-        return switch (sequence) {
+        int base = switch (sequence) {
             case 8 -> 1;
             case 7 -> 2;
             case 6 -> 3;
@@ -676,6 +693,7 @@ public class NegativeEffect {
             case 1 -> 15;
             default -> 1;
         };
+        return base * potencyMultiplier;
     }
 
     private int getTeleportIntervalForSequence(int sequence) {

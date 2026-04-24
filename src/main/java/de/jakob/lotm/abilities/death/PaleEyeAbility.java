@@ -36,10 +36,9 @@ public class PaleEyeAbility extends Ability {
 
     private static final int WITHER_DURATION = 20 * 60; // 1 minute
     private static final int BEAM_TICKS = 10;           // how long the beam persists visually
-    private static final int TARGET_RANGE = 30;
 
     public PaleEyeAbility(String id) {
-        super(id, 2400f);
+        super(id, 120f);
         canBeCopied = false;
         canBeUsedInArtifact = false;
         canBeShared = false;
@@ -62,7 +61,7 @@ public class PaleEyeAbility extends Ability {
 
         if (InteractionHandler.isInteractionPossibleStrictlyHigher(new Location(entity.position(), serverLevel), "purification", BeyonderData.getSequence(entity), -1)) return;
 
-        LivingEntity target = AbilityUtil.getTargetEntity(entity, TARGET_RANGE, 1.5f, true);
+        LivingEntity target = AbilityUtil.getTargetEntity(entity, 30* (int) Math.max(multiplier(entity)/4,1), 1.5f, true);
         if (target == null) {
             if (entity instanceof net.minecraft.world.entity.player.Player player) {
                 player.sendSystemMessage(
@@ -100,7 +99,7 @@ public class PaleEyeAbility extends Ability {
             // At same sequence: 50% of max HP
             // Each sequence the caster is weaker (target seq < caster seq) reduces damage by 40%
             int seqDiff = casterSeq - targetSeq; // positive = caster is weaker
-            float damageMultiplier = 0.5f - (seqDiff * 0.2f);
+            float damageMultiplier = 0.4f - (seqDiff * 0.4f);
             if (damageMultiplier <= 0) {
                 if (entity instanceof net.minecraft.world.entity.player.Player player) {
                     player.sendSystemMessage(

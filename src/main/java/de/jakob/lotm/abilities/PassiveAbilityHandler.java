@@ -20,6 +20,7 @@ import de.jakob.lotm.abilities.door.passives.SpiritWorldAwarenessAbility;
 import de.jakob.lotm.abilities.door.passives.VoidImmunityAbility;
 import de.jakob.lotm.abilities.error.passives.PassiveTheftAbility;
 import de.jakob.lotm.abilities.error.passives.PhysicalEnhancementsErrorAbility;
+import de.jakob.lotm.abilities.fool.passives.MiracleOfResurrectionAbility;
 import de.jakob.lotm.abilities.fool.passives.PaperDaggersAbility;
 import de.jakob.lotm.abilities.fool.passives.PhysicalEnhancementsFoolAbility;
 import de.jakob.lotm.abilities.fool.passives.PuppeteeringEnhancementsAbility;
@@ -77,6 +78,7 @@ public class PassiveAbilityHandler {
 
     public static final DeferredItem<Item> PAPER_DAGGERS = ITEMS.registerItem("paper_dagger_ability", PaperDaggersAbility::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
     public static final DeferredItem<Item> PUPPETEERING_ENHANCEMENTS = ITEMS.registerItem("puppeteering_enhancements_ability", PuppeteeringEnhancementsAbility::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
+    public static final DeferredItem<Item> MIRACLE_OF_RESURRECTION = ITEMS.registerItem("miracle_of_resurrection_ability", MiracleOfResurrectionAbility::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
 
     public static final DeferredItem<Item> NOCTURNALITY = ITEMS.registerItem("nocturnality_ability", NocturnalityAbility::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
     public static final DeferredItem<Item> DARKNESS_REVIVAL = ITEMS.registerItem("darkness_revival_ability", DarknessRevivalAbility::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));

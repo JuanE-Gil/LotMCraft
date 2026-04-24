@@ -114,14 +114,14 @@ public record PlayerDivinationSelectedPacket(UUID selectedPlayerUuid, PlayerSele
         int playerSequence = BeyonderData.getSequence(player);
         int targetSequence = BeyonderData.getSequence(targetPlayer);
 
-        int divinationDifference = 3 + DivinationUtil.getDivinationPower(player) - DivinationUtil.getConcealmentPower(targetPlayer);
-        if (divinationDifference <= 0){
-            player.sendSystemMessage(Component.literal("§cDivination failed"));
-            if(playerSequence < 4 && targetSequence > 3){
-                player.addEffect(new MobEffectInstance(ModEffects.LOOSING_CONTROL, 200, 2));
+            int divinationDifference = 3 + DivinationUtil.getDivinationPower(player) - DivinationUtil.getConcealmentPower(targetPlayer);
+            if (divinationDifference <= 0){
+                player.sendSystemMessage(Component.literal("§cDivination failed"));
+                if(playerSequence < 4 && targetSequence > 3){
+                    player.addEffect(new MobEffectInstance(ModEffects.LOOSING_CONTROL, 200, 2));
+                }
+                return;
             }
-            return;
-        }
 
         BlockPos playerPos = player.blockPosition();
         BlockPos targetPos = targetPlayer.blockPosition();
@@ -131,15 +131,16 @@ public record PlayerDivinationSelectedPacket(UUID selectedPlayerUuid, PlayerSele
 
         int distance = (int) Math.sqrt(dx * dx + dz * dz);
 
-        // distance still isn't balanced
-        int maxDistance = switch (playerSequence) {
-            case 9, 8, 7, 6, 5 -> 200 * (10 - playerSequence);
-            case 4             -> 2500;
-            case 3             -> 5000;
-            case 2             -> ((int) (player.level().getWorldBorder().getSize() * 0.001) > 5000) ? (int) (player.level().getWorldBorder().getSize() * 0.001) : 7500;
-            case 1             -> ((int) (player.level().getWorldBorder().getSize() * 0.01) > 7500) ? (int) (player.level().getWorldBorder().getSize() * 0.01) : 15000;
-            default            -> 0;
-        };
+            // distance still isn't balanced
+            int maxDistance = switch (playerSequence) {
+                case 9, 8, 7, 6, 5 -> 200 * (10 - playerSequence);
+                case 4             -> 2500;
+                case 3             -> 5000;
+                case 2             -> ((int) (player.level().getWorldBorder().getSize() * 0.001) > 5000) ? (int) (player.level().getWorldBorder().getSize() * 0.001) : 7500;
+                case 1             -> ((int) (player.level().getWorldBorder().getSize() * 0.01) > 7500) ? (int) (player.level().getWorldBorder().getSize() * 0.01) : 15000;
+                case 0             -> ((int) (player.level().getWorldBorder().getSize() * 0.1) > 15000) ? (int) (player.level().getWorldBorder().getSize() * 0.01) : 100000;
+                default            -> 100;
+            };
 
         if (distance >= maxDistance) {
             player.sendSystemMessage(Component.literal("§cPlayer is very far from you"));
@@ -157,7 +158,7 @@ public record PlayerDivinationSelectedPacket(UUID selectedPlayerUuid, PlayerSele
                     getDirection(dx, dz)
             )));
 
-        } else if(divinationDifference < 8) {
+        } else if(divinationDifference < 10) {
             player.sendSystemMessage(Component.literal(String.format(
                     "§5You sense §d%s§5 to the §d%s§5, about §d%d blocks §5away...",
                     targetPlayer.getGameProfile().getName(),

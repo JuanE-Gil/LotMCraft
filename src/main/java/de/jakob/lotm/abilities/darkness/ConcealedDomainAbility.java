@@ -16,6 +16,9 @@ public class ConcealedDomainAbility extends Ability {
         super(id, 2f);
         this.canBeCopied = false;
         this.canBeUsedByNPC = false;
+        cannotBeStolen = true;
+        canBeUsedInArtifact = false;
+        canBeShared = false;
     }
 
     @Override
@@ -25,7 +28,7 @@ public class ConcealedDomainAbility extends Ability {
 
     @Override
     public float getSpiritualityCost() {
-        return 2500;
+        return 5500;
     }
 
     @Override

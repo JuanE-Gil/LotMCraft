@@ -35,7 +35,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class SpiritCommunicationAbility extends SelectableAbility {
 
     public SpiritCommunicationAbility(String id) {
-        super(id, 100);
+        super(id, 10f);
     }
 
     @Override
@@ -134,18 +134,18 @@ public class SpiritCommunicationAbility extends SelectableAbility {
     private void spectralBind(Level level, LivingEntity entity) {
         if (level.isClientSide) return;
 
-        LivingEntity target = AbilityUtil.getTargetEntity(entity, 20, 1.5f);
+        LivingEntity target = AbilityUtil.getTargetEntity(entity, 20* (int) Math.max(multiplier(entity)/4,1), 1.5f);
         if (target == null) return;
 
         int casterSeq = BeyonderData.getSequence(entity);
         int targetSeq = BeyonderData.getSequence(target);
-        if (targetSeq <= casterSeq - 2) return;
+        if (targetSeq <= casterSeq - 1) return;
 
         // Stun: MOVEMENT_SLOWDOWN 100 for 3 seconds (60 ticks)
-        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 100, false, true, true));
+        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60* (int) Math.max(multiplier(entity)/4,1), 100, false, true, true));
         // Freezing visual (powder snow freeze ticks)
         target.setTicksFrozen(target.getTicksRequiredToFreeze() + 60);
         // Weakness
-        target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 600, 1, false, true, true));
+        target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 60* (int) Math.max(multiplier(entity)/4,1), 1, false, true, true));
     }
 }

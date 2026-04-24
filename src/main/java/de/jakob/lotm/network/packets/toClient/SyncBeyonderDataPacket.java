@@ -10,7 +10,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public record SyncBeyonderDataPacket(String pathway, int sequence, float spirituality, boolean griefingEnabled, float digestionProgress, String[] pathwayHistory, int charStack) implements CustomPacketPayload {
+public record SyncBeyonderDataPacket(String pathway, int sequence, float spirituality, boolean griefingEnabled, float digestionProgress, String[] pathwayHistory, int[] charStacks) implements CustomPacketPayload {
     public static final Type<SyncBeyonderDataPacket> TYPE =
             new Type<>(ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "sync_beyonder_data"));
 
@@ -32,6 +32,12 @@ public record SyncBeyonderDataPacket(String pathway, int sequence, float spiritu
                     }
             );
 
+    private static final StreamCodec<FriendlyByteBuf, int[]> CHAR_STACKS_CODEC =
+            StreamCodec.of(
+                    (buf, stacks) -> { for (int i = 0; i < 10; i++) ByteBufCodecs.VAR_INT.encode(buf, i < stacks.length ? stacks[i] : 0); },
+                    buf -> { int[] stacks = new int[10]; for (int i = 0; i < 10; i++) stacks[i] = ByteBufCodecs.VAR_INT.decode(buf); return stacks; }
+            );
+
     public static final StreamCodec<FriendlyByteBuf, SyncBeyonderDataPacket> STREAM_CODEC =
             StreamCodec.of(
                     (buf, packet) -> {
@@ -41,7 +47,7 @@ public record SyncBeyonderDataPacket(String pathway, int sequence, float spiritu
                         ByteBufCodecs.BOOL.encode(buf, packet.griefingEnabled());
                         ByteBufCodecs.FLOAT.encode(buf, packet.digestionProgress());
                         PATHWAY_HISTORY_CODEC.encode(buf, packet.pathwayHistory());
-                        ByteBufCodecs.VAR_INT.encode(buf, packet.charStack());
+                        CHAR_STACKS_CODEC.encode(buf, packet.charStacks());
                     },
                     buf -> new SyncBeyonderDataPacket(
                             ByteBufCodecs.STRING_UTF8.decode(buf),
@@ -50,7 +56,7 @@ public record SyncBeyonderDataPacket(String pathway, int sequence, float spiritu
                             ByteBufCodecs.BOOL.decode(buf),
                             ByteBufCodecs.FLOAT.decode(buf),
                             PATHWAY_HISTORY_CODEC.decode(buf),
-                            ByteBufCodecs.VAR_INT.decode(buf)
+                            CHAR_STACKS_CODEC.decode(buf)
                     )
             );
 
@@ -70,7 +76,7 @@ public record SyncBeyonderDataPacket(String pathway, int sequence, float spiritu
                     true,
                     packet.digestionProgress(),
                     packet.pathwayHistory(),
-                    packet.charStack()
+                    packet.charStacks()
             );
         });
     }

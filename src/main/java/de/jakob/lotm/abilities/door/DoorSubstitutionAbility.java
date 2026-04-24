@@ -31,7 +31,7 @@ public class DoorSubstitutionAbility extends Ability {
     private static final HashMap<UUID, Integer> figurineNumbers = new HashMap<>();
 
     public DoorSubstitutionAbility(String id) {
-        super(id, 10f);
+        super(id, 5f);
         canBeCopied = false;
         canBeReplicated = false;
         canBeUsedInArtifact = false;
@@ -44,7 +44,7 @@ public class DoorSubstitutionAbility extends Ability {
 
     @Override
     public float getSpiritualityCost() {
-        return 90;
+        return 900;
     }
 
     @Override

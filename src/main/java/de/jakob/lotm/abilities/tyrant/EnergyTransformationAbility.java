@@ -18,11 +18,12 @@ public class EnergyTransformationAbility extends ToggleAbility {
         canBeCopied = false;
         canBeReplicated = false;
         canBeUsedInArtifact = false;
+        canBeShared = false;
     }
 
     @Override
     public float getSpiritualityCost() {
-        return 16;
+        return 120;
     }
 
     @Override

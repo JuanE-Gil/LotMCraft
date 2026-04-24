@@ -49,20 +49,20 @@ public class MentalDisruptionAbility extends Ability {
             return;
         }
 
-        LivingEntity target = AbilityUtil.getTargetEntity(entity, 20, 1.5f);
+        LivingEntity target = AbilityUtil.getTargetEntity(entity, 20*(int) Math.max(multiplier(entity)/4,1), 1.5f);
         if(target == null) {
             AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.theft.no_target").withColor(0x4742c9));
             return;
         }
 
-        target.hurt(ModDamageTypes.source(level, ModDamageTypes.LOOSING_CONTROL, entity), (float) (DamageLookup.lookupDamage(8, .4) * multiplier(entity)));
-        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20 * 6, 8, false, false, false));
-        target.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 30, 8, false, false, false));
+        target.hurt(ModDamageTypes.source(level, ModDamageTypes.LOOSING_CONTROL, entity), (float) (DamageLookup.lookupDamage(8, .4) * (int) Math.max(multiplier(entity)/2,1)));
+        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20 * 6*(int) Math.max(multiplier(entity)/2,1), 8, false, false, false));
+        target.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 30*(int) Math.max(multiplier(entity)/2,1), 8, false, false, false));
 
         ParticleUtil.spawnParticles(serverLevel, ParticleTypes.END_ROD, target.getEyePosition(), 60, .5, .025);
         ParticleUtil.spawnParticles(serverLevel, dust, target.getEyePosition(), 120, .5, .025);
 
-        ServerScheduler.scheduleForDuration(0, 2, 20 * 4, () -> {
+        ServerScheduler.scheduleForDuration(0, 2, 20 * 4*(int) Math.max(multiplier(entity)/4,1), () -> {
             target.setDeltaMovement(new Vec3(0, 0, 0));
             target.hurtMarked = true;
         });

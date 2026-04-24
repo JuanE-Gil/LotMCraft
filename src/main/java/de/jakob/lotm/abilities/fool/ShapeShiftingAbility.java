@@ -29,7 +29,7 @@ public class ShapeShiftingAbility extends SelectableAbility {
 
     @Override
     public float getSpiritualityCost() {
-        return 100;
+        return 1000;
     }
 
     @Override

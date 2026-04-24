@@ -32,47 +32,44 @@ import java.util.UUID;
 
 public class ApprenticeDoorEntity extends Entity {
     private static final EntityDataAccessor<Integer> DATA_FACING = SynchedEntityData.defineId(ApprenticeDoorEntity.class, EntityDataSerializers.INT);
-    private static final EntityDataAccessor<Optional<UUID>> OWNERUUID = SynchedEntityData.defineId(ApprenticeDoorEntity.class, EntityDataSerializers.OPTIONAL_UUID);
+    private static final EntityDataAccessor<Optional<UUID>> OWNER_UUID = SynchedEntityData.defineId(ApprenticeDoorEntity.class, EntityDataSerializers.OPTIONAL_UUID);
+    private static final EntityDataAccessor<Integer> MAX_RADIUS = SynchedEntityData.defineId(ApprenticeDoorEntity.class, EntityDataSerializers.INT);
 
     private int duration = 20 * 10;
     private Vec3 teleportPos;
 
     private static final Set<UUID> haveTeleported = new HashSet<>();
 
-    // Required constructors for entity system
     public ApprenticeDoorEntity(EntityType<?> entityType, Level level) {
         super(entityType, level);
-        this.noPhysics = true; // Disable physics
-        this.noCulling = true; // Always render regardless of culling
+        this.noPhysics = true;
+        this.noCulling = true;
         teleportPos = this.position();
     }
 
-    // Main constructor for placing the door
-    public ApprenticeDoorEntity(EntityType<?> entityType, Level level, Direction facing, Vec3 blockCenter, int duration) {
+    public ApprenticeDoorEntity(EntityType<?> entityType, Level level, Direction facing, Vec3 blockCenter, int duration, int maxRadius) {
         this(entityType, level);
         this.setFacing(facing);
         this.duration = duration;
 
-        // Position the entity based on the block face
         Vec3 doorPosition = calculateDoorPosition(blockCenter, facing);
         this.setPos(doorPosition.x, doorPosition.y, doorPosition.z);
 
-        // Set rotation based on facing direction
         this.setYRot(facing.toYRot());
         this.setXRot(0);
+        this.setMaxRadius(maxRadius);
 
         calculateTeleportPos();
     }
 
     public void setOnlyVisibleForCertainPlayer(UUID playerUUID) {
-        this.entityData.set(OWNERUUID, Optional.ofNullable(playerUUID));
+        this.entityData.set(OWNER_UUID, Optional.ofNullable(playerUUID));
     }
 
-    final int maxSearchDepth = 100;
     private void calculateTeleportPos() {
         Vec3 startingPos = this.position();
         Vec3 dir = new Vec3(getFacing().getStepX(), 0, getFacing().getStepZ()).normalize().scale(-1);
-        for(int i = 0; i < maxSearchDepth; i++) {
+        for(int i = 0; i < getMaxRadius(); i++) {
             startingPos = startingPos.add(dir);
             if(level().getBlockState(BlockPos.containing(startingPos.x, startingPos.y, startingPos.z)).isAir())
                 break;
@@ -82,8 +79,7 @@ public class ApprenticeDoorEntity extends Entity {
     }
 
     private Vec3 calculateDoorPosition(Vec3 blockCenter, Direction facing) {
-        // Offset from block center to place door on the specified face
-        Vec3 offset = new Vec3(facing.getStepX(), facing.getStepY(), facing.getStepZ()).normalize().multiply(.6, 0, .505); // Slightly offset from block face
+        Vec3 offset = new Vec3(facing.getStepX(), facing.getStepY(), facing.getStepZ()).normalize().multiply(.6, 0, .505);
 
         return blockCenter.add(offset);
     }
@@ -135,14 +131,12 @@ public class ApprenticeDoorEntity extends Entity {
             ServerScheduler.scheduleDelayed(35, () -> haveTeleported.remove(e.getUUID()), (ServerLevel) this.level());
         }
 
-        // Optional: Add particle effects or other visual updates here
         if (this.random.nextFloat() < 0.075f) {
             spawnAmbientParticles();
         }
     }
 
     private void spawnAmbientParticles() {
-        // Add some ethereal particles around the door
         if(this.getOwnerUUID() == null)
             ParticleUtil.spawnParticles((ServerLevel) this.level(), ParticleTypes.END_ROD, this.getEyePosition().subtract(0, this.getEyeHeight() / 2, 0), 2, .55, 1, .55, .025);
     }
@@ -150,7 +144,8 @@ public class ApprenticeDoorEntity extends Entity {
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         builder.define(DATA_FACING, Direction.NORTH.get3DDataValue());
-        builder.define(OWNERUUID, Optional.empty());
+        builder.define(OWNER_UUID, Optional.empty());
+        builder.define(MAX_RADIUS, 5);
     }
 
     @Override
@@ -160,6 +155,7 @@ public class ApprenticeDoorEntity extends Entity {
             this.setOwnerUUID(compound.getUUID("Owner"));
         }
         this.duration = compound.getInt("Duration");
+        this.setMaxRadius(compound.getInt("MaxRadius"));
     }
 
     @Override
@@ -170,9 +166,9 @@ public class ApprenticeDoorEntity extends Entity {
             compound.putUUID("Owner", owner);
         }
         compound.putInt("Duration", this.duration);
+        compound.putInt("MaxRadius", this.getMaxRadius());
     }
 
-    // Getter and setter methods for facing
     public Direction getFacing() {
         return Direction.from3DDataValue(this.entityData.get(DATA_FACING));
     }
@@ -190,11 +186,19 @@ public class ApprenticeDoorEntity extends Entity {
     }
 
     public void setOwnerUUID(UUID uuid) {
-        this.entityData.set(OWNERUUID, Optional.ofNullable(uuid));
+        this.entityData.set(OWNER_UUID, Optional.ofNullable(uuid));
     }
 
     public UUID getOwnerUUID() {
-        return this.entityData.get(OWNERUUID).orElse(null);
+        return this.entityData.get(OWNER_UUID).orElse(null);
+    }
+
+    public int getMaxRadius() {
+        return this.entityData.get(MAX_RADIUS);
+    }
+
+    public void setMaxRadius(int maxRadius) {
+        this.entityData.set(MAX_RADIUS, maxRadius);
     }
 
     @Override

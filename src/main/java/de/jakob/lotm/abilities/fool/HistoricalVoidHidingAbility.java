@@ -37,11 +37,12 @@ public class HistoricalVoidHidingAbility extends ToggleAbility {
         canBeCopied = false;
         canBeReplicated = false;
         canBeUsedInArtifact = false;
+        canBeShared = false;
     }
 
     @Override
     public float getSpiritualityCost() {
-        return 25;
+        return 500;
     }
 
     @Override

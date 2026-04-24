@@ -30,6 +30,7 @@ public class BlessingAbility extends Ability {
         postsUsedAbilityEventManually = true;
         interactionRadius = 2;
         canBeCopied = false;
+        canBeShared = false;
     }
 
     @Override

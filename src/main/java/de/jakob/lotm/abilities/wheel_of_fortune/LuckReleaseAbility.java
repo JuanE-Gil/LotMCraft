@@ -21,6 +21,7 @@ public class LuckReleaseAbility extends Ability {
     public LuckReleaseAbility(String id) {
         super(id, 120);
         canBeUsedInArtifact = false;
+        canBeShared = false;
     }
 
     @Override

@@ -37,8 +37,9 @@ public class SpaceConcealmentAbility extends SelectableAbility {
     private static final Map<UUID, List<ApprenticeDoorEntity>> playerDoors = new ConcurrentHashMap<>();
 
     public SpaceConcealmentAbility(String id) {
-        super(id, 1);
+        super(id, 40f);
         canBeCopied = false;
+        canBeShared = false;
     }
 
     @Override
@@ -48,7 +49,7 @@ public class SpaceConcealmentAbility extends SelectableAbility {
 
     @Override
     protected float getSpiritualityCost() {
-        return 100;
+        return 3000;
     }
 
     @Override
@@ -110,7 +111,7 @@ public class SpaceConcealmentAbility extends SelectableAbility {
     }
 
     private void createConcealedSpace(ServerLevel level, LivingEntity entity, Vec3 center) {
-        ConcealedSpace space = new ConcealedSpace(center, level, 5, entity.getUUID());
+        ConcealedSpace space = new ConcealedSpace(center, level, 5* Math.round(Math.max(multiplier(entity)/4,1)), entity.getUUID());
 
         // Add to player's list of spaces
         playerSpaces.computeIfAbsent(entity.getUUID(), k -> new ArrayList<>()).add(space);
@@ -284,7 +285,8 @@ public class SpaceConcealmentAbility extends SelectableAbility {
                                         level,
                                         facingDirection,
                                         blockCenter,
-                                        20 * 30
+                                        20 * 30,
+                                        10
                                 );
 
                                 level.addFreshEntity(door);
@@ -297,7 +299,8 @@ public class SpaceConcealmentAbility extends SelectableAbility {
                                         level,
                                         oppositeDirection,
                                         blockCenter,
-                                        20 * 30
+                                        20 * 30,
+                                        10
                                 );
 
                                 level.addFreshEntity(oppositeDoor);

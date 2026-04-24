@@ -5,10 +5,7 @@ import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.attachments.TransformationComponent;
 import de.jakob.lotm.network.PacketHandler;
 import de.jakob.lotm.network.packets.handlers.ClientHandler;
-import de.jakob.lotm.network.packets.toClient.OpenCoordinateScreenPacket;
-import de.jakob.lotm.network.packets.toClient.OpenPlayerDivinationScreenPacket;
-import de.jakob.lotm.network.packets.toClient.OpenStructureDivinationScreenPacket;
-import de.jakob.lotm.network.packets.toClient.SyncDangerPremonitionAbilityPacket;
+import de.jakob.lotm.network.packets.toClient.*;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.PlayerSelectionWorkType;
 import de.jakob.lotm.util.data.PlayerInfo;
@@ -25,6 +22,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.neoforged.neoforge.network.PacketDistributor;
 
@@ -74,6 +72,7 @@ public class DivinationAbility extends SelectableAbility {
                 "ability.lotmcraft.divination.danger_premonition",
                 "ability.lotmcraft.divination.dream_divination",
                 "ability.lotmcraft.divination.structure_divination",
+                "ability.lotmcraft.divination.biome_divination",
                 "ability.lotmcraft.divination.player_divination",
                 "ability.lotmcraft.divination.anti_divination"
         };
@@ -85,8 +84,9 @@ public class DivinationAbility extends SelectableAbility {
             case 0 -> dangerPremonition(level, entity);
             case 1 -> dreamDivination(level, entity);
             case 2 -> structureDivination(level, entity);
-            case 3 -> playerDivination(level, entity);
-            case 4 -> antiDivination(level, entity);
+            case 3 -> biomeDivination(level, entity);
+            case 4 -> playerDivination(level, entity);
+            case 5 -> antiDivination(level, entity);
         }
     }
 
@@ -223,6 +223,23 @@ public class DivinationAbility extends SelectableAbility {
                 SoundSource.BLOCKS,
                 10.0f,
                 1.0f);
+    }
+
+    private void biomeDivination(Level level, Entity entity) {
+        if (!(entity instanceof ServerPlayer player)) return;
+
+        Registry<Biome> registry = player.serverLevel().registryAccess()
+                .registry(Registries.BIOME).orElseThrow();
+
+        List<String> biomeIds = registry.holders()
+                .map(holder -> holder.key().location().toString())
+                .sorted()
+                .toList();
+
+        PacketDistributor.sendToPlayer(
+                player,
+                new OpenBiomeDivinationScreenPacket(biomeIds)
+        );
     }
 
     public static void cleanupOnLogout(Player player) {

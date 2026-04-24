@@ -6,19 +6,18 @@ import de.jakob.lotm.abilities.core.ToggleAbility;
 import de.jakob.lotm.attachments.*;
 import de.jakob.lotm.entity.ModEntities;
 import de.jakob.lotm.entity.custom.ability_entities.OriginalBodyEntity;
-import de.jakob.lotm.network.PacketHandler;
 import de.jakob.lotm.network.packets.toClient.SyncOriginalBodyOwnerPacket;
-import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityWheelHelper;
 import de.jakob.lotm.util.helper.AllyUtil;
 import de.jakob.lotm.util.helper.marionettes.MarionetteUtils;
+import de.jakob.lotm.util.scheduling.ServerScheduler;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import de.jakob.lotm.util.shapeShifting.ShapeShiftingUtil;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.DoubleTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -29,38 +28,43 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.*;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.GameType;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.EntityTravelToDimensionEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
-import java.util.HashSet;
-import java.util.UUID;
+import java.util.*;
 
 @EventBusSubscriber(modid = LOTMCraft.MOD_ID)
 public class ControllingUtil {
 
-    public static void possess(ServerPlayer player, LivingEntity target) {
+    public static void possess(ServerPlayer player, LivingEntity target, boolean spawnOriginalBody) {
         // checks
         if (player == null) return;
         ServerLevel level = (ServerLevel) player.level();
 
-        if (target == null || !target.isAlive() || target instanceof Player) return;
+        if (target == null || !target.isAlive()) return;
 
         ControllingDataComponent data = player.getData(ModAttachments.CONTROLLING_DATA);
 
-        if (data.getTargetUUID() != null) return ;
+        if (data.isControlling()) return ;
+
+        boolean isTargetPlayer = target instanceof ServerPlayer;
 
         // making the original body and setting his owner
         OriginalBodyEntity originalBody = new OriginalBodyEntity(ModEntities.ORIGINAL_BODY.get(), level);
 
         // setting body data to the player
         data.setBodyUUID(originalBody.getUUID());
+
         data.setTargetUUID(target.getUUID());
+        data.setControlling(true, player);
 
         //copy the player and his position to original body
         copyEntities(player, originalBody);
@@ -71,46 +75,57 @@ public class ControllingUtil {
         copyPosition(target, player);
 
         // save the target to the player
-        CompoundTag targetTag = new CompoundTag();
-        target.saveWithoutId(targetTag);
+        if (!isTargetPlayer){
+            CompoundTag targetTag = new CompoundTag();
+            target.saveWithoutId(targetTag);
 
-        ResourceLocation targetId = BuiltInRegistries.ENTITY_TYPE.getKey(target.getType());
-        targetTag.putString("id", targetId.toString());
-        data.setTargetEntity(targetTag);
+            ResourceLocation targetId = BuiltInRegistries.ENTITY_TYPE.getKey(target.getType());
+            targetTag.putString("id", targetId.toString());
+            data.setTargetEntity(targetTag);
+        }
 
         // save the main body to the player
         CompoundTag bodyTag = new CompoundTag();
         originalBody.saveWithoutId(bodyTag);
 
-            // save location as well
-        ListTag posTag = new ListTag();
-        posTag.add(DoubleTag.valueOf(player.getX()));
-        posTag.add(DoubleTag.valueOf(player.getY()));
-        posTag.add(DoubleTag.valueOf(player.getZ()));
-
         ResourceLocation bodyId = BuiltInRegistries.ENTITY_TYPE.getKey(originalBody.getType());
         bodyTag.putString("id", bodyId.toString());
-        bodyTag.put("Pos", posTag);
-        data.setBodyEntity(bodyTag);
+        if (!spawnOriginalBody) {
+            // if the main body didn't spawn, pass an empty tag to return the player to his current location when resetting
+            bodyTag.put("Pos", new ListTag());
+        }
+        data.setBodyEntity(bodyTag, player);
 
-        // add the main body to the allies
-        AllyUtil.addAllyOneWay(player, originalBody.getUUID());
+        if (spawnOriginalBody) {
+            // add the main body to the allies
+            AllyUtil.addAllyOneWay(player, originalBody.getUUID());
+
+            // add the original body
+            level.addFreshEntity(originalBody);
+            originalBody.getData(ModAttachments.CONTROLLING_DATA).setOwnerUUID(player.getUUID());
+            originalBody.getData(ModAttachments.CONTROLLING_DATA).setOwnerName(player.getName().getString());
+            PacketDistributor.sendToPlayersTrackingEntity(originalBody,
+                    new SyncOriginalBodyOwnerPacket(originalBody.getId(), player.getUUID(), player.getName().getString())
+            );
+        }
 
         // change the player shape to the target
-        String entityType = ShapeShiftingUtil.getEntityTypeString(target);
-        ShapeShiftingUtil.shapeShift(player, entityType, false);
+        ShapeShiftingUtil.shapeShift(player, target, false);
 
-        // add the original body and remove the target
-        level.addFreshEntity(originalBody);
-        originalBody.getData(ModAttachments.CONTROLLING_DATA).setOwnerUUID(player.getUUID());
-        originalBody.getData(ModAttachments.CONTROLLING_DATA).setOwnerName(player.getName().getString());
-        PacketDistributor.sendToPlayersTrackingEntity(originalBody,
-                new SyncOriginalBodyOwnerPacket(originalBody.getId(), player.getUUID(), player.getName().getString())
-        );
-        target.discard();
+        // remove the target if he is not a player
+        if (!(target instanceof ServerPlayer serverTarget)){
+            target.discard();
+        } else {
+            ControllingDataComponent targetData = target.getData(ModAttachments.CONTROLLING_DATA);
+            targetData.setOwnerUUID(player.getUUID());
+            targetData.setIsControlled(true);
+            serverTarget.setGameMode(GameType.SPECTATOR);
+            serverTarget.setCamera(player);
+        }
     }
 
     public static void reset(ServerPlayer player, ServerLevel level, boolean resetData){
+        if (player == null) return;
         ControllingDataComponent data = player.getData(ModAttachments.CONTROLLING_DATA);
         CompoundTag targetTag = data.getTargetEntity();
 
@@ -123,60 +138,76 @@ public class ControllingUtil {
         // returning the target before returning to main body
         if (targetTag != null) {
             // Patch the saved tag with the player's current Beyonder state so sequence regressions persist
-            CompoundTag playerPData = player.getPersistentData();
-            String currentPathway = playerPData.getString("beyonder_pathway");
-            int currentSequence = playerPData.getInt("beyonder_sequence");
+            String currentPathway = BeyonderData.getPathway(player);
+            int currentSequence = BeyonderData.getSequence(player);
             if (!currentPathway.isEmpty() && currentSequence >= 0) {
+                // idk why that is here, "Will" added it and idk why so i'll leave it here anyways
                 targetTag.putString("Pathway", currentPathway);
                 targetTag.putInt("Sequence", currentSequence);
+
                 // also patch NeoForgeData persistent data inside the tag
-                if (targetTag.contains("NeoForgeData")) {
-                    CompoundTag nfd = targetTag.getCompound("NeoForgeData");
-                    nfd.putString("beyonder_pathway", currentPathway);
-                    nfd.putInt("beyonder_sequence", currentSequence);
-                    nfd.putFloat("beyonder_spirituality", playerPData.getFloat("beyonder_spirituality"));
-                    nfd.putFloat("beyonder_digestion_progress", playerPData.getFloat("beyonder_digestion_progress"));
+                if (targetTag.contains("neoforge:attachments")) {
+                    CompoundTag nfd = targetTag.getCompound("neoforge:attachments").getCompound("lotmcraft:beyonder_component");
+                    nfd.putString("pathway", currentPathway);
+                    nfd.putInt("sequence", currentSequence);
+                    nfd.putFloat("digestionProgress", BeyonderData.getDigestionProgress(player));
                 }
             }
+        }
 
-            Entity targetEntity = EntityType.loadEntityRecursive(targetTag, level, (entity) -> {
+        Entity targetEntity = null;
+        if (targetTag != null) {
+            targetEntity = EntityType.loadEntityRecursive(targetTag, level, (entity) -> {
                 entity.setPos(player.getX(), player.getY(), player.getZ());
-
-                // copy player inventory to the target, otherwise items will be lost
-                if (entity instanceof LivingEntity target) {
-                    copyInventories(player, target);
-                }
                 return entity;
             });
-            if (targetEntity != null) {
-                level.addFreshEntity(targetEntity);
+        } else if (data.getTargetUUID() != null) {
+            targetEntity = getPlayerByUUID(data.getTargetUUID());
+        }
 
-                // Carry over digestion progress (stored in persistent data, not NPC fields)
-                if (targetEntity instanceof LivingEntity targetLiving) {
-                    BeyonderData.setDigestionProgress(targetLiving, BeyonderData.getDigestionProgress(player));
-                    restoredTarget = targetLiving;
-                }
+        // copying some (important) data from the player to the target
+        if (targetEntity != null) {
 
-                // copy wheel abilities
-                AbilityWheelComponent sourceWheelData = player.getData(ModAttachments.ABILITY_WHEEL_COMPONENT);
-                AbilityWheelComponent targetWheelData = targetEntity.getData(ModAttachments.ABILITY_WHEEL_COMPONENT);
-                targetWheelData.setAbilities(sourceWheelData.getAbilities());
-                AbilityWheelHelper.syncToClient(player);
+            // copy player inventory to the target
+            if (targetEntity instanceof LivingEntity target) {
+                copyInventories(player, target);
+            }
 
-                // copy bar abilities
-                AbilityBarComponent sourceBarData = player.getData(ModAttachments.ABILITY_BAR_COMPONENT);
-                AbilityBarComponent targetBarData = targetEntity.getData(ModAttachments.ABILITY_BAR_COMPONENT);
-                targetBarData.setAbilities(sourceBarData.getAbilities());
+            level.addFreshEntity(targetEntity);
 
-                // preserve the targets health
-                if (targetEntity instanceof LivingEntity target) {
-                    target.setHealth(player.getHealth());
-                }
+            // Carry over digestion progress (stored in persistent data, not NPC fields)
+            if (targetEntity instanceof LivingEntity targetLiving) {
+                BeyonderData.setDigestionProgress(targetLiving, BeyonderData.getDigestionProgress(player));
+                restoredTarget = targetLiving;
+            }
 
-                // clear data
-                if (resetData) {
-                    data.removeTargetEntity();
-                }
+            // copy wheel abilities
+            AbilityWheelComponent sourceWheelData = player.getData(ModAttachments.ABILITY_WHEEL_COMPONENT);
+            AbilityWheelComponent targetWheelData = targetEntity.getData(ModAttachments.ABILITY_WHEEL_COMPONENT);
+            targetWheelData.setAbilities(sourceWheelData.getAbilities());
+            AbilityWheelHelper.syncToClient(player);
+
+            // copy bar abilities
+            AbilityBarComponent sourceBarData = player.getData(ModAttachments.ABILITY_BAR_COMPONENT);
+            AbilityBarComponent targetBarData = targetEntity.getData(ModAttachments.ABILITY_BAR_COMPONENT);
+            targetBarData.setAbilities(sourceBarData.getAbilities());
+
+            // preserve the targets health
+            if (targetEntity instanceof LivingEntity target) {
+                target.setHealth(player.getHealth());
+            }
+
+            if (targetEntity instanceof ServerPlayer serverTarget) {
+                ControllingDataComponent targetData = serverTarget.getData(ModAttachments.CONTROLLING_DATA);
+                targetData.setIsControlled(false);
+                targetData.setOwnerUUID(null);
+                serverTarget.setGameMode(GameType.SURVIVAL);
+                serverTarget.setCamera(serverTarget);
+            }
+
+            // clear data
+            if (resetData) {
+                data.setTargetEntity(null);
             }
         }
 
@@ -190,24 +221,30 @@ public class ControllingUtil {
             }
             originalBodyEntity.discard();
         } else {
-            // only a fallback in case the body didn't exist or was unloaded for some reason (it's not tested if this works or not)
+            // only a fallback in case the body didn't exist or was unloaded for some reason
             CompoundTag bodyTag = data.getBodyEntity();
             if (bodyTag != null) {
                 Entity bodyEntity = EntityType.loadEntityRecursive(bodyTag, level, (entity) -> {
                     ListTag posList = bodyTag.getList("Pos", 6);
                     if (posList.size() >= 3) {
                         entity.setPos(posList.getDouble(0),posList.getDouble(1),posList.getDouble(2));
+                    } else {
+                        entity.setPos(player.position());
                     }
                     return entity;
                 });
                 if (bodyEntity != null) {
-                    level.addFreshEntity(bodyEntity);
                     if (bodyEntity instanceof LivingEntity originalBody) {
                         copyEntities(originalBody, player);
                         copyPosition(originalBody, player);
-                    }
-                    bodyEntity.discard();
 
+                        PhysicalEnhancementsAbility.resetEnhancements(player.getUUID());
+
+                        float health = bodyTag.getFloat("Health");
+                        ServerScheduler.scheduleDelayed(5, () -> {
+                            player.setHealth(health);
+                        }, level);
+                    }
                 }
             }
         }
@@ -230,37 +267,31 @@ public class ControllingUtil {
         ShapeShiftingUtil.resetShape(player);
 
         // clearing data
-        data.removeBodyEntity();
+        data.setBodyEntity(null, player);
+        data.setControlling(false, player);
         if (resetData) {
-            data.removeOwnerUUID();
-            data.removeBodyUUID();
-            data.removeTargetUUID();
+            data.setOwnerUUID(null);
+            data.setBodyUUID(null);
+            data.setTargetUUID(null);
         }
     }
 
-    public static void copyPosition(LivingEntity source, LivingEntity target) {
-        // player position
-        if (target instanceof ServerPlayer player) {
-            player.teleportTo(
-                    (net.minecraft.server.level.ServerLevel) source.level(),
-                    source.getX(),
-                    source.getY(),
-                    source.getZ(),
-                    source.getYRot(),
-                    source.getXRot()
-            );
-            player.setYHeadRot(source.getYHeadRot());
-        }
-        // other entities
-        else {
-            target.moveTo(source.getX(), source.getY(), source.getZ(), source.getYRot(), source.getXRot());
+    private static void copyPosition(LivingEntity source, LivingEntity target) {
+        target.teleportTo(
+                (net.minecraft.server.level.ServerLevel) source.level(),
+                source.getX(),
+                source.getY(),
+                source.getZ(),
+                Set.of(),
+                source.getYRot(),
+                source.getXRot()
+        );
 
-            target.setYHeadRot(source.getYHeadRot());
-            target.setYBodyRot(source.yBodyRot);
-        }
+        target.setYHeadRot(source.getYHeadRot());
+        target.setYBodyRot(source.yBodyRot);
     }
 
-    public static void copyData(LivingEntity source, LivingEntity target) {
+    private static void copyData(LivingEntity source, LivingEntity target) {
         // copy togglable abilities
         ToggleAbility.setActiveAbilities(target, new HashSet<>(ToggleAbility.getActiveAbilitiesForEntity(source)));
 
@@ -270,48 +301,25 @@ public class ControllingUtil {
         targetWheelData.setAbilities(sourceWheelData.getAbilities());
         if (target instanceof ServerPlayer player) {
             AbilityWheelHelper.syncToClient(player);
-
         }
+
         // copy bar abilities
         AbilityBarComponent sourceBarData = source.getData(ModAttachments.ABILITY_BAR_COMPONENT);
         AbilityBarComponent targetBarData = target.getData(ModAttachments.ABILITY_BAR_COMPONENT);
         targetBarData.setAbilities(sourceBarData.getAbilities());
 
-        // copy persistent data for beyonders
-        CompoundTag sourceData = source.getPersistentData();
-        CompoundTag targetData = target.getPersistentData();
-        if (sourceData.getString("beyonder_pathway").isEmpty()) {
-            targetData.remove("beyonder_pathway");
-            targetData.remove("beyonder_sequence");
-            targetData.remove("beyonder_spirituality");
-            targetData.remove("beyonder_digestion_progress");
-            targetData.remove("beyonder_griefing_enabled");
-            targetData.remove("VoidSummoned");
-            PhysicalEnhancementsAbility.resetEnhancements(target.getUUID());
-        } else {
-            targetData.putString("beyonder_pathway", sourceData.getString("beyonder_pathway"));
-            targetData.putInt("beyonder_sequence", sourceData.getInt("beyonder_sequence"));
-            targetData.putFloat("beyonder_spirituality", sourceData.getFloat("beyonder_spirituality"));
-            targetData.putFloat("beyonder_digestion_progress", sourceData.getFloat("beyonder_digestion_progress"));
-            targetData.putBoolean("beyonder_griefing_enabled", sourceData.getBoolean("beyonder_griefing_enabled"));
-            if (sourceData.getBoolean("VoidSummoned")) {
-                targetData.putBoolean("VoidSummoned", true);
-            } else {
-                targetData.remove("VoidSummoned");
+        if (BeyonderData.isBeyonder(source)) {
+            BeyonderData.setBeyonder(target, BeyonderData.getPathway(source), BeyonderData.getSequence(source),false, false, false, false, false);
+            if (source instanceof Player sourcePlayer && target instanceof Player targetPlayer) {
+                BeyonderData.digest(targetPlayer, BeyonderData.getDigestionProgress(sourcePlayer), false);
+                BeyonderData.setGriefingEnabled(targetPlayer, BeyonderData.isGriefingEnabled(sourcePlayer));
             }
+        } else {
+            BeyonderData.clearBeyonderData(target);
         }
-
-        // sync the changes to the client
-        if(target instanceof ServerPlayer serverPlayer) {
-            PacketHandler.syncBeyonderDataToPlayer(serverPlayer);
-        }
-        else {
-            PacketHandler.syncBeyonderDataToEntity(target);
-        }
-
     }
 
-    public static void copyEntities (LivingEntity source, LivingEntity target) {
+    private static void copyEntities (LivingEntity source, LivingEntity target) {
         copyInventories(source, target);
 
         copyData(source, target);
@@ -356,9 +364,7 @@ public class ControllingUtil {
             if (targetInstance == null) continue;
 
             // mark core attributes as synced
-            if (targetInstance.getAttribute().equals(Attributes.MAX_HEALTH)) {
-                healthSynced = true;
-                }
+            if (targetInstance.getAttribute().equals(Attributes.MAX_HEALTH)) healthSynced = true;
             if (targetInstance.getAttribute().equals(Attributes.ARMOR)) armorSynced = true;
             if (targetInstance.getAttribute().equals(Attributes.ARMOR_TOUGHNESS)) armorToughnessSynced = true;
             if (targetInstance.getAttribute().equals(Attributes.ATTACK_DAMAGE)) attackDamageSynced = true;
@@ -410,9 +416,8 @@ public class ControllingUtil {
         // copy water bubbles
         target.setAirSupply(source.getAirSupply());
 
-        // copy fire lit state
+        // copy burning state
         target.setRemainingFireTicks(source.getRemainingFireTicks());
-
     }
 
     private static void syncDefaultAttribute(LivingEntity source, LivingEntity target, Holder<Attribute> attribute) {
@@ -429,22 +434,24 @@ public class ControllingUtil {
         }
     }
 
-    public static void copyInventories(LivingEntity source, LivingEntity target) {
-        // dont wanna think too much about this for now, probably there is a better way to do it but will change in the future
-        if (source instanceof Player player) {
+    private static void copyInventories(LivingEntity source, LivingEntity target) {
+        if (source instanceof Player sourcePlayer && target instanceof Player targetPlayer) {
+            Inventory sourceInv = sourcePlayer.getInventory();
+            Inventory targetInv = targetPlayer.getInventory();
+            for (int i = 0; i < Math.min(sourceInv.getContainerSize(), targetInv.getContainerSize()); i++) {
+                targetInv.setItem(i, sourceInv.getItem(i).copy());
+            }
+        }
+        else if (source instanceof Player player) {
             SimpleContainer targetInv = target.getData(ModAttachments.COPIED_INVENTORY).getInv();
             targetInv.clearContent();
-
             for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
                 targetInv.setItem(i, player.getInventory().getItem(i).copy());
             }
-            // hand slots as well
             target.setItemSlot(EquipmentSlot.MAINHAND, source.getMainHandItem().copy());
-            target.setItemSlot(EquipmentSlot.OFFHAND, source.getOffhandItem().copy());
         }
         else if (target instanceof Player player) {
             SimpleContainer sourceInv = source.getData(ModAttachments.COPIED_INVENTORY).getInv();
-
             for (int i = 0; i < Math.min(sourceInv.getContainerSize(), player.getInventory().getContainerSize()); i++) {
                 player.getInventory().setItem(i, sourceInv.getItem(i).copy());
             }
@@ -452,21 +459,18 @@ public class ControllingUtil {
         else {
             SimpleContainer sourceInv = source.getData(ModAttachments.COPIED_INVENTORY).getInv();
             SimpleContainer targetInv = target.getData(ModAttachments.COPIED_INVENTORY).getInv();
-
             targetInv.clearContent();
             for (int i = 0; i < sourceInv.getContainerSize(); i++) {
                 targetInv.setItem(i, sourceInv.getItem(i).copy());
             }
-            // hand slots as well
             target.setItemSlot(EquipmentSlot.MAINHAND, source.getMainHandItem().copy());
-            target.setItemSlot(EquipmentSlot.OFFHAND, source.getOffhandItem().copy());
         }
-        // make the entity equip armor - doesnt work for now
+
+        target.setItemSlot(EquipmentSlot.OFFHAND, source.getOffhandItem().copy());
         target.setItemSlot(EquipmentSlot.HEAD, source.getItemBySlot(EquipmentSlot.HEAD).copy());
         target.setItemSlot(EquipmentSlot.CHEST, source.getItemBySlot(EquipmentSlot.CHEST).copy());
         target.setItemSlot(EquipmentSlot.LEGS, source.getItemBySlot(EquipmentSlot.LEGS).copy());
         target.setItemSlot(EquipmentSlot.FEET, source.getItemBySlot(EquipmentSlot.FEET).copy());
-        
     }
 
     @SubscribeEvent
@@ -479,6 +483,14 @@ public class ControllingUtil {
                 ServerPlayer player = getPlayerByUUID(originalBodyData.getOwnerUUID());
 
                 if (player == null) return;
+                ControllingDataComponent playerData = player.getData(ModAttachments.CONTROLLING_DATA);
+
+                // if the player is not controlling anything => discard the main body so it doesn't drop anything
+                if (!playerData.isControlling()) {
+                    originalBody.discard();
+                    return;
+                }
+
                 event.setCanceled(true);
 
                 // reset the player
@@ -487,11 +499,11 @@ public class ControllingUtil {
                 }
 
                 // clean up data
-                ControllingDataComponent playerData = player.getData(ModAttachments.CONTROLLING_DATA);
-                playerData.removeTargetEntity();
-                playerData.removeOwnerUUID();
-                playerData.removeBodyUUID();
-                playerData.removeTargetUUID();
+                playerData.setControlling(false, player);
+                playerData.setTargetEntity(null);
+                playerData.setOwnerUUID(null);
+                playerData.setBodyUUID(null);
+                playerData.setTargetUUID(null);
 
                 // kill the player for he has sinned
                 player.hurt(event.getSource(), Float.MAX_VALUE);
@@ -506,7 +518,7 @@ public class ControllingUtil {
         if (damage >= entity.getHealth()) {
             if (entity instanceof ServerPlayer serverPlayer) {
                 ControllingDataComponent data = serverPlayer.getData(ModAttachments.CONTROLLING_DATA);
-                if (data.getTargetUUID() == null) return;
+                if (!data.isControlling()) return;
                 event.setCanceled(true);
 
                 // reset the player
@@ -514,10 +526,11 @@ public class ControllingUtil {
                     reset(serverPlayer, serverLevel, false);
                     // kill the target entity instead
                     serverLevel.getEntity(data.getTargetUUID()).hurt(event.getSource(), Float.MAX_VALUE);
-                    data.removeTargetEntity();
-                    data.removeOwnerUUID();
-                    data.removeBodyUUID();
-                    data.removeTargetUUID();
+                    data.setControlling(false, serverPlayer);
+                    data.setTargetEntity(null);
+                    data.setOwnerUUID(null);
+                    data.setBodyUUID(null);
+                    data.setTargetUUID(null);
                 }
             }
         }
@@ -542,8 +555,11 @@ public class ControllingUtil {
         Player player = event.getEntity();
         if (player.level() instanceof ServerLevel serverLevel && player instanceof ServerPlayer serverPlayer) {
             ControllingDataComponent data = player.getData(ModAttachments.CONTROLLING_DATA);
-            if (data.getTargetUUID() != null || data.getBodyUUID() != null) {
+            if (data.isControlling() || data.getBodyUUID() != null) {
                 reset(serverPlayer,serverLevel, true);
+            }
+            if (data.isControlled() && data.getOwnerUUID() != null) {
+                reset(getPlayerByUUID(data.getOwnerUUID()), serverLevel, true);
             }
         }
     }
@@ -552,9 +568,12 @@ public class ControllingUtil {
     @SubscribeEvent
     public static void onPlayerChangedDimension (EntityTravelToDimensionEvent event){
         if (event.getEntity().level() instanceof ServerLevel serverLevel && event.getEntity() instanceof ServerPlayer serverPlayer) {
-            ControllingDataComponent data = serverPlayer.getData(ModAttachments.CONTROLLING_DATA);
-            if (data.getTargetUUID() != null || data.getBodyUUID() != null) {
-                reset(serverPlayer,serverLevel, true);
+            if (!serverPlayer.serverLevel().dimension().equals(event.getDimension())) {
+                ControllingDataComponent data = serverPlayer.getData(ModAttachments.CONTROLLING_DATA);
+                if (data.isControlling() || data.getBodyUUID() != null) {
+                    event.setCanceled(true);
+                    reset(serverPlayer,serverLevel, true);
+                }
             }
         }
     }
@@ -567,6 +586,71 @@ public class ControllingUtil {
                 PacketDistributor.sendToPlayer((ServerPlayer) event.getEntity(),
                         new SyncOriginalBodyOwnerPacket(body.getId(), data.getOwnerUUID(), data.getOwnerName())
                 );
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerTargetTick(PlayerTickEvent.Post event) {
+        Player target = event.getEntity();
+
+        if (!(target instanceof ServerPlayer serverTarget)) return;
+
+        ControllingDataComponent targetData = serverTarget.getData(ModAttachments.CONTROLLING_DATA);
+        if (targetData.getOwnerUUID() == null) return;
+
+        Player owner = getPlayerByUUID(targetData.getOwnerUUID());
+        if (targetData.isControlled()) {
+            if (owner != null) {
+                serverTarget.setGameMode(GameType.SPECTATOR);
+                serverTarget.setCamera(owner);
+            } else {
+                serverTarget.setGameMode(GameType.SURVIVAL);
+                serverTarget.setCamera(serverTarget);
+            }
+        }
+    }
+
+    // track the distance between the main body and the player
+    @SubscribeEvent
+    public static void onPlayerTickDistanceFromBody (PlayerTickEvent.Post event){
+        Player player = event.getEntity();
+
+        if (player.level() instanceof ServerLevel serverLevel && player instanceof ServerPlayer serverPlayer) {
+
+            // run every 15s
+            if (player.tickCount % 300 != 0) return;
+
+            ControllingDataComponent data = player.getData(ModAttachments.CONTROLLING_DATA);
+            if (data.isControlling() || data.getBodyUUID() != null) {
+                Entity mainBodyEntity = serverLevel.getEntity(data.getBodyUUID());
+                // dont reset if main body doesn't exist
+                if (mainBodyEntity == null) return;
+
+                CompoundTag bodyData = data.getBodyEntity().getCompound("neoforge:attachments").getCompound("lotmcraft:beyonder_component");
+
+                // get the seq of main body and not the current player
+                int sequence = bodyData.getInt("sequence");
+                if (sequence == 0) return;
+
+                int controllingDistance;
+                switch (sequence) {
+                    case 5 -> controllingDistance = 500;
+                    case 4 -> controllingDistance = 1250;
+                    case 3 -> controllingDistance = 2000;
+                    case 2 -> controllingDistance = 5000;
+                    case 1 -> controllingDistance = 15000;
+                    default -> controllingDistance = 250;
+                }
+
+                // calculate the distance between main body and player
+                double dx = serverPlayer.getX() - mainBodyEntity.getX();
+                double dy = serverPlayer.getY() - mainBodyEntity.getY();
+                double dz = serverPlayer.getZ() - mainBodyEntity.getZ();
+
+                if (controllingDistance < Math.sqrt(dx * dx + dy * dy + dz * dz)) {
+                    reset(serverPlayer,serverLevel, true);
+                }
             }
         }
     }

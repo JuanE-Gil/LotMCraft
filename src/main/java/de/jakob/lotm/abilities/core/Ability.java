@@ -1,6 +1,7 @@
 package de.jakob.lotm.abilities.core;
 
 import de.jakob.lotm.LOTMCraft;
+import de.jakob.lotm.abilities.error.ParasitationAbility;
 import de.jakob.lotm.attachments.AbilityCooldownComponent;
 import de.jakob.lotm.attachments.DisabledAbilitiesComponent;
 import de.jakob.lotm.attachments.ModAttachments;
@@ -170,6 +171,14 @@ public abstract class Ability {
 
         // Check current pathway
         if(getRequirements().containsKey(pathway) && getRequirements().get(pathway) >= sequence) {
+            int reqSeq = getRequirements().get(pathway);
+            // Switched pathway players only access seq 9-5 abilities once they have a char stack at seq 4 or stronger
+            if (BeyonderData.hasSwitchedPathway(entity) && reqSeq > 4) {
+                int[] stacks = BeyonderData.getCharStacks(entity);
+                boolean hasStack = false;
+                for (int i = 1; i <= 4; i++) { if (stacks[i] > 0) { hasStack = true; break; } }
+                if (!hasStack) return false;
+            }
             return true;
         }
 
@@ -205,7 +214,7 @@ public abstract class Ability {
 
         if(!(entity instanceof Player) && !canBeUsedByNPC) return false;
 
-        if(entity instanceof Player player && player.isSpectator()) return false;
+        if(entity instanceof Player player && player.isSpectator() && !ParasitationAbility.isConcealed(player.getUUID())) return false;
 
         DisabledAbilitiesComponent disabledComponent = entity.getData(ModAttachments.DISABLED_ABILITIES_COMPONENT);
         if((disabledComponent.isAbilityUsageDisabled() || disabledComponent.isSpecificAbilityDisabled(this.getId())) && !this.canAlwaysBeUsed) return false;

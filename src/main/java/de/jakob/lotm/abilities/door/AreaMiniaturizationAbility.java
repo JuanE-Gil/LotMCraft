@@ -30,6 +30,7 @@ public class AreaMiniaturizationAbility extends Ability {
 
         canBeUsedByNPC = false;
         canBeCopied = false;
+        canBeShared = false;
     }
 
     @Override

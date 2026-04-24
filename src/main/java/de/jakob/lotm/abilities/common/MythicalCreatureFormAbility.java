@@ -88,7 +88,7 @@ public class MythicalCreatureFormAbility extends ToggleAbility {
             scaleAttribute.addTransientModifier(new AttributeModifier(ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "mythical_creature_form"), 1.9, AttributeModifier.Operation.ADD_VALUE));
         }
 
-        BeyonderData.addModifier(entity, "mythical_creature_form", (BeyonderData.getSequence(entity) > 2 ? 1.25 : 1.5));
+        BeyonderData.addModifier(entity, "mythical_creature_form", (BeyonderData.getSequence(entity) > 2 ? 1.1 : 1.25));
 
         TransformationComponent transformationComponent = entity.getData(ModAttachments.TRANSFORMATION_COMPONENT);
         transformationComponent.setTransformedAndSync(true, entity);
@@ -140,7 +140,7 @@ public class MythicalCreatureFormAbility extends ToggleAbility {
         switch (pathway){
             case "tyrant":
                 if(random.nextInt(6) == 0) {
-                    LightningEntity lightning = new LightningEntity(level, entity, e.position(), 50, 6, DamageLookup.lookupDamage(4, .7) * multiplier(entity), false, 4, 200, 0x11A8DD);
+                    LightningEntity lightning = new LightningEntity(level, entity, e.position(), 50, 6, DamageLookup.lookupDamage(4, .7) * (int) Math.max(multiplier(entity)/4,1), false, 4, 200, 0x11A8DD);
                     level.addFreshEntity(lightning);
                 }
                 break;

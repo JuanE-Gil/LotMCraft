@@ -19,7 +19,7 @@ public class WordOfSpiritAbility extends Ability {
     private static final int DURATION_TICKS = 20 * 10; // 10 seconds
 
     public WordOfSpiritAbility(String id) {
-        super(id, 900f);
+        super(id, 45f);
     }
 
     @Override
@@ -38,21 +38,20 @@ public class WordOfSpiritAbility extends Ability {
 
         if (InteractionHandler.isInteractionPossibleStrictlyHigher(new Location(entity.position(), (net.minecraft.server.level.ServerLevel) level), "purification", BeyonderData.getSequence(entity), -1)) return;
 
-        LivingEntity target = AbilityUtil.getTargetEntity(entity, 25, 1.5f);
+        LivingEntity target = AbilityUtil.getTargetEntity(entity, 25*(int) Math.max(multiplier(entity)/4,1), 1.5f);
         if (target == null) {
-            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.word_of_spirit.no_target").withColor(0xFF4444));
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.word_of_spirit.no_target").withColor(0xFF334f23));
             return;
         }
 
         int casterSeq = BeyonderData.getSequence(entity);
         int targetSeq = BeyonderData.getSequence(target);
-        // seqDiff < 0 means target is stronger; block if target is 2+ sequences stronger
-        if (targetSeq - casterSeq <= -2) {
-            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.word_of_spirit.too_strong").withColor(0xFF4444));
+        if (targetSeq - casterSeq <= -1) {
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.word_of_spirit.too_strong").withColor(0xFF334f23));
             return;
         }
 
         target.addEffect(new MobEffectInstance(ModEffects.SPIRIT_CALLED, DURATION_TICKS, 0, false, true, true));
-        AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.word_of_spirit.applied").withColor(0x7ECFCF));
+        AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.word_of_spirit.applied").withColor(0xFF334f23));
     }
 }

@@ -23,6 +23,7 @@ public class LifeDeprivationAbility extends SelectableAbility {
     public LifeDeprivationAbility(String id) {
         super(id, 15);
         canBeCopied = false;
+        canBeShared = false;
     }
 
     @Override

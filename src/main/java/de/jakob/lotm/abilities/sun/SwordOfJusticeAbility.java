@@ -16,9 +16,10 @@ import java.util.Map;
 
 public class SwordOfJusticeAbility extends Ability {
     public SwordOfJusticeAbility(String id) {
-        super(id, 2.5f, "purification", "purification_holy", "light_source", "light_strong", "light_weak");
+        super(id, 6f, "purification", "purification_holy", "light_source", "light_strong", "light_weak");
         postsUsedAbilityEventManually = true;
         canBeCopied = false;
+        canBeShared = false;
     }
 
     @Override
@@ -28,7 +29,7 @@ public class SwordOfJusticeAbility extends Ability {
 
     @Override
     protected float getSpiritualityCost() {
-        return 500;
+        return 1200;
     }
 
     @Override
@@ -37,12 +38,12 @@ public class SwordOfJusticeAbility extends Ability {
             return;
         }
 
-        Vec3 targetLoc = AbilityUtil.getTargetLocation(entity, 20, 2).add(0, 15, 0);
-        LivingEntity targetEntity = AbilityUtil.getTargetEntity(entity, 20, 2);
+        Vec3 targetLoc = AbilityUtil.getTargetLocation(entity, 20 * (int) Math.max(multiplier(entity)/4,1), 2).add(0, 15, 0);
+        LivingEntity targetEntity = AbilityUtil.getTargetEntity(entity, 20 * (int) Math.max(multiplier(entity)/4,1), 2);
         if(targetEntity != null) {
-            targetEntity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, 4, false, false, false));
+            targetEntity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 80, 4, false, false, false));
         }
-        JusticeSwordEntity swordEntity = new JusticeSwordEntity(level, targetLoc, (float) (DamageLookup.lookupDamage(3, 1) * multiplier(entity)), entity, this);
+        JusticeSwordEntity swordEntity = new JusticeSwordEntity(level, targetLoc, (float) (DamageLookup.lookupDamage(3, 1)  * (int) Math.max(multiplier(entity)/4,1)), entity, this);
         level.addFreshEntity(swordEntity);
     }
 }

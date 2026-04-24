@@ -30,9 +30,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class FlaringSunAbility extends Ability {
     public FlaringSunAbility(String id) {
-        super(id, 8, "purification", "purification_holy", "burning", "light_source", "light_strong", "light_weak");
+        super(id, 12, "purification", "purification_holy", "burning", "light_source", "light_strong", "light_weak");
         postsUsedAbilityEventManually = true;
-        interactionRadius = 14;
+        interactionRadius = 20;
         canBeCopied = false;
     }
 
@@ -43,7 +43,7 @@ public class FlaringSunAbility extends Ability {
 
     @Override
     protected float getSpiritualityCost() {
-        return 500;
+        return 800;
     }
 
     @Override
@@ -91,7 +91,7 @@ public class FlaringSunAbility extends Ability {
                 ParticleUtil.spawnSphereParticles((ServerLevel) level, ParticleTypes.FLAME, startPos, 4.75f, 200);
                 ParticleUtil.spawnSphereParticles((ServerLevel) level, ParticleTypes.END_ROD, startPos, 4.75f, 180);
 
-                AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 17, DamageLookup.lookupDps(4, .85, 4, 20) * multiplier, targetPos, true, false, 20 * 4, ModDamageTypes.source(level, ModDamageTypes.PURIFICATION, entity));
+                AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 17* (int) Math.max(multiplier(entity)/4,1), DamageLookup.lookupDps(4, .85, 4, 20) * (int) Math.max(multiplier(entity)/4,1), targetPos, true, false, 20 * 4, ModDamageTypes.source(level, ModDamageTypes.PURIFICATION, entity));
             }
             else {
                 ParticleUtil.spawnSphereParticles((ServerLevel) level, ParticleTypes.SMOKE, startPos, 4.75f, 300);

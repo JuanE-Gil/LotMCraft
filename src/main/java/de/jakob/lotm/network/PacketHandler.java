@@ -310,12 +310,6 @@ public class PacketHandler {
         );
 
         registrar.playToClient(
-                SkinDataPacket.TYPE,
-                SkinDataPacket.STREAM_CODEC,
-                SkinDataPacket::handle
-        );
-
-        registrar.playToClient(
                 DarknessEffectPacket.TYPE,
                 DarknessEffectPacket.STREAM_CODEC,
                 DarknessEffectPacket::handle
@@ -401,9 +395,21 @@ public class PacketHandler {
         );
 
         registrar.playToClient(
+                OpenBiomeDivinationScreenPacket.TYPE,
+                OpenBiomeDivinationScreenPacket.STREAM_CODEC,
+                OpenBiomeDivinationScreenPacket::handle
+        );
+
+        registrar.playToClient(
                 OpenShapeShiftingScreenPacket.TYPE,
                 OpenShapeShiftingScreenPacket.STREAM_CODEC,
                 OpenShapeShiftingScreenPacket::handle
+        );
+
+        registrar.playToClient(
+                OpenHistoricalVoidBorrowingScreenPacket.TYPE,
+                OpenHistoricalVoidBorrowingScreenPacket.STREAM_CODEC,
+                OpenHistoricalVoidBorrowingScreenPacket::handle
         );
 
         registrar.playToClient(
@@ -470,6 +476,12 @@ public class PacketHandler {
                 SyncUniquenessPacket.TYPE,
                 SyncUniquenessPacket.STREAM_CODEC,
                 SyncUniquenessPacket::handle
+        );
+
+        registrar.playToClient(
+                SyncControllingDataPacket.TYPE,
+                SyncControllingDataPacket.STREAM_CODEC,
+                SyncControllingDataPacket::handle
         );
     }
 
@@ -650,18 +662,6 @@ public class PacketHandler {
         );
 
         registrar.playToServer(
-                SkinChangePacket.TYPE,
-                SkinChangePacket.STREAM_CODEC,
-                SkinChangePacket::handle
-        );
-
-        registrar.playToServer(
-                SkinRestorePacket.TYPE,
-                SkinRestorePacket.STREAM_CODEC,
-                SkinRestorePacket::handle
-        );
-
-        registrar.playToServer(
                 InventoryOpenedPacket.TYPE,
                 InventoryOpenedPacket.STREAM_CODEC,
                 InventoryOpenedPacket::handle);
@@ -691,6 +691,16 @@ public class PacketHandler {
                 StructureDivinationSelectedPacket.TYPE,
                 StructureDivinationSelectedPacket.STREAM_CODEC,
                 StructureDivinationSelectedPacket::handle);
+
+        registrar.playToServer(
+                BiomeDivinationSelectedPacket.TYPE,
+                BiomeDivinationSelectedPacket.STREAM_CODEC,
+                BiomeDivinationSelectedPacket::handle);
+
+        registrar.playToServer(
+                HistoricalVoidBorrowingSelectedPacket.TYPE,
+                HistoricalVoidBorrowingSelectedPacket.STREAM_CODEC,
+                HistoricalVoidBorrowingSelectedPacket::handle);
 
         registrar.playToServer(
                 ShapeShiftingSelectedPacket.TYPE,
@@ -734,11 +744,11 @@ public class PacketHandler {
         float spirituality = BeyonderData.getSpirituality(player);
         boolean griefingEnabled = BeyonderData.isGriefingEnabled(player);
         float digestionProgress = BeyonderData.getDigestionProgress(player);
-        int charStackCount = BeyonderData.getCurrentCharStack(player);
+        int[] charStacks = BeyonderData.getCharStacks(player);
 
         String[] history = BeyonderData.getPathwayHistory(player);
 
-        SyncBeyonderDataPacket packet = new SyncBeyonderDataPacket(pathway, sequence, spirituality, griefingEnabled, digestionProgress, history, charStackCount);
+        SyncBeyonderDataPacket packet = new SyncBeyonderDataPacket(pathway, sequence, spirituality, griefingEnabled, digestionProgress, history, charStacks);
         sendToPlayer(player, packet);
     }
 
@@ -762,11 +772,6 @@ public class PacketHandler {
     public static void sendToTrackingAndSelf(Entity entity, CustomPacketPayload payload) {
         if (!(entity.level() instanceof ServerLevel)) return;
         PacketDistributor.sendToPlayersTrackingEntityAndSelf(entity, payload);
-    }
-
-    public static void syncSkinDataToAllPlayers(String playerName, String skinTexture, String skinSignature) {
-        SkinDataPacket packet = new SkinDataPacket(playerName, skinTexture, skinSignature);
-        sendToAllPlayers(packet);
     }
 
     public static void sendToAllPlayers(CustomPacketPayload payload) {
@@ -794,9 +799,9 @@ public class PacketHandler {
         float spirituality = BeyonderData.getSpirituality(targetPlayer);
         boolean griefingEnabled = BeyonderData.isGriefingEnabled(targetPlayer);
         float digestionProgress = BeyonderData.getDigestionProgress(targetPlayer);
-        int charStackCount = BeyonderData.getCurrentCharStack(targetPlayer);
+        int[] charStacks = BeyonderData.getCharStacks(targetPlayer);
 
-        SyncBeyonderDataPacket packet = new SyncBeyonderDataPacket(pathway, sequence, spirituality, griefingEnabled, digestionProgress, new String[10], charStackCount);
+        SyncBeyonderDataPacket packet = new SyncBeyonderDataPacket(pathway, sequence, spirituality, griefingEnabled, digestionProgress, new String[10], charStacks);
 
         targetPlayer.getServer().getPlayerList().getPlayers().forEach(player -> {
             sendToPlayer(player, packet);
