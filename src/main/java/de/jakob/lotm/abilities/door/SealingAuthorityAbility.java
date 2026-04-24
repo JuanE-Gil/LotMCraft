@@ -69,7 +69,7 @@ public class SealingAuthorityAbility extends SelectableAbility {
     private static final HashSet<TrappedEntity> trappedEntities = new HashSet<>();
 
     public SealingAuthorityAbility(String id) {
-        super(id, 25);
+        super(id, 40);
         canBeUsedByNPC = false;
     }
 
@@ -80,7 +80,7 @@ public class SealingAuthorityAbility extends SelectableAbility {
 
     @Override
     protected float getSpiritualityCost() {
-        return 10000;
+        return 80000;
     }
 
     @Override
@@ -200,7 +200,7 @@ public class SealingAuthorityAbility extends SelectableAbility {
     private void sealTarget(ServerLevel level, LivingEntity entity) {
         int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
 
-        LivingEntity target = AbilityUtil.getTargetEntity(entity, 30, 2);
+        LivingEntity target = AbilityUtil.getTargetEntity(entity, 30*(int) Math.max(multiplier(entity)/4,1), 2);
         if(target == null || sealedEntities.contains(target.getUUID())) {
             AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.curse.no_target").withColor(BeyonderData.pathwayInfos.get("door").color()));
             return;

@@ -33,7 +33,7 @@ public class WaypointAbility extends SelectableAbility {
 
     @Override
     protected float getSpiritualityCost() {
-        return 1500;
+        return 5000;
     }
 
     @Override

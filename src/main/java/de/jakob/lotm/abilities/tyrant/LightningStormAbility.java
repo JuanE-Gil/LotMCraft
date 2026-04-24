@@ -49,7 +49,7 @@ public class LightningStormAbility extends Ability {
                 true        // thundering
         );
 
-        Vec3 targetLoc = AbilityUtil.getTargetLocation(entity, 25, 2, true);
+        Vec3 targetLoc = AbilityUtil.getTargetLocation(entity, 25* (int) Math.max(multiplier(entity)/4,1), 2, true);
         for(int i = 0; i < 35; i++) {
             BlockState state = level.getBlockState(BlockPos.containing(targetLoc.subtract(0, 1, 0)));
             if(state.getCollisionShape(level, BlockPos.containing(targetLoc)).isEmpty())

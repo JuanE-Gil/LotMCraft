@@ -47,17 +47,23 @@ public class PhysicalEnhancementsDarknessAbility extends PhysicalEnhancementsAbi
 
         return switch (sequenceLevel) {
             case 9 -> List.of(
-                    new PhysicalEnhancement(EnhancementType.STRENGTH, 1 + strengthModifier),
-                    new PhysicalEnhancement(EnhancementType.SPEED, 2 + speedModifier),
-                    new PhysicalEnhancement(EnhancementType.NIGHT_VISION, 1),
-                    new PhysicalEnhancement(EnhancementType.REGENERATION, 1)
+                    new PhysicalEnhancement(EnhancementType.STRENGTH, strengthModifier),
+                    new PhysicalEnhancement(EnhancementType.SPEED, speedModifier),
+                    new PhysicalEnhancement(EnhancementType.NIGHT_VISION, 1)
             );
 
-            case 8, 7 -> List.of(
+            case 8 -> List.of(
+                    new PhysicalEnhancement(EnhancementType.STRENGTH, 1 + strengthModifier),
+                    new PhysicalEnhancement(EnhancementType.NIGHT_VISION, 1),
+                    new PhysicalEnhancement(EnhancementType.SPEED, 1 + speedModifier),
+                    new PhysicalEnhancement(EnhancementType.HEALTH, 5),
+                    new PhysicalEnhancement(EnhancementType.REGENERATION, 2)
+            );
+            case 7 -> List.of(
                     new PhysicalEnhancement(EnhancementType.STRENGTH, 2 + strengthModifier),
                     new PhysicalEnhancement(EnhancementType.NIGHT_VISION, 1),
                     new PhysicalEnhancement(EnhancementType.SPEED, 2 + speedModifier),
-                    new PhysicalEnhancement(EnhancementType.HEALTH, 5),
+                    new PhysicalEnhancement(EnhancementType.HEALTH, 6),
                     new PhysicalEnhancement(EnhancementType.REGENERATION, 2)
             );
 
@@ -107,16 +113,16 @@ public class PhysicalEnhancementsDarknessAbility extends PhysicalEnhancementsAbi
             );
 
             case 1 -> List.of(
-                    new PhysicalEnhancement(EnhancementType.STRENGTH, 4 + strengthModifier),
+                    new PhysicalEnhancement(EnhancementType.STRENGTH, 5 + strengthModifier),
                     new PhysicalEnhancement(EnhancementType.NIGHT_VISION, 1),
-                    new PhysicalEnhancement(EnhancementType.RESISTANCE, 12 + resistanceModifier),
+                    new PhysicalEnhancement(EnhancementType.RESISTANCE, 13 + resistanceModifier),
                     new PhysicalEnhancement(EnhancementType.SPEED, 5 + speedModifier),
-                    new PhysicalEnhancement(EnhancementType.HEALTH, 30),
+                    new PhysicalEnhancement(EnhancementType.HEALTH, 32),
                     new PhysicalEnhancement(EnhancementType.REGENERATION, 4)
             );
 
             case 0 -> List.of(
-                    new PhysicalEnhancement(EnhancementType.STRENGTH, 6 + strengthModifier),
+                    new PhysicalEnhancement(EnhancementType.STRENGTH, 6+ strengthModifier),
                     new PhysicalEnhancement(EnhancementType.NIGHT_VISION, 1),
                     new PhysicalEnhancement(EnhancementType.RESISTANCE, 15 + resistanceModifier),
                     new PhysicalEnhancement(EnhancementType.SPEED, 6 + speedModifier),

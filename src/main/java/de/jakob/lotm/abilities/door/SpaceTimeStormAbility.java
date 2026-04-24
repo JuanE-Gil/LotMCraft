@@ -67,7 +67,7 @@ public class SpaceTimeStormAbility extends SelectableAbility {
         AtomicInteger ticks = new AtomicInteger();
 
         ServerScheduler.scheduleForDuration(0, 1, 20 * 10, () -> {
-            Vec3 target = AbilityUtil.getTargetLocation(entity, 60, 3);
+            Vec3 target = AbilityUtil.getTargetLocation(entity, 60*(int) Math.max(multiplier(entity)/4,1), 3);
             if(target == null) return;
 
             ticks.addAndGet(1);
@@ -78,7 +78,7 @@ public class SpaceTimeStormAbility extends SelectableAbility {
             level.playSound(null, BlockPos.containing(target), SoundEvents.WITHER_SHOOT, SoundSource.AMBIENT, 1.5f, 0.75f + random.nextFloat() * 0.5f);
 
             if(ticks.get() % 10 == 0) {
-                AbilityUtil.damageNearbyEntities(level, entity, 15, DamageLookup.lookupDamage(0, .8) * multiplier(entity), target, true, false);
+                AbilityUtil.damageNearbyEntities(level, entity, 15* (int) Math.max(multiplier(entity)/4,1), DamageLookup.lookupDamage(0, .8) *(int) Math.max(multiplier(entity)/4,1), target, true, false);
             }
 
             if(griefing) {
@@ -106,7 +106,7 @@ public class SpaceTimeStormAbility extends SelectableAbility {
             ticks.addAndGet(1);
 
             if (ticks.get() % 5 == 0) {
-                AbilityUtil.damageNearbyEntities(serverLevel, entity, 60, DamageLookup.lookupDamage(0, .8) * (int) Math.max(multiplier(entity)/4,1), center, true, false);
+                AbilityUtil.damageNearbyEntities(serverLevel, entity, 60* (int) Math.max(multiplier(entity)/4,1), DamageLookup.lookupDamage(0, .8) * (int) Math.max(multiplier(entity)/4,1), center, true, false);
             }
 
             if(griefing) {

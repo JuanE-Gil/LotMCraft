@@ -30,16 +30,19 @@ public class PhysicalEnhancementsWheelOfFortuneAbility extends PhysicalEnhanceme
     protected List<PhysicalEnhancement> getEnhancementsForSequence(int sequenceLevel) {
         return switch (sequenceLevel) {
             case 9 -> List.of(
-                    new PhysicalEnhancement(EnhancementType.STRENGTH, 1),
-                    new PhysicalEnhancement(EnhancementType.SPEED, 2),
-                    new PhysicalEnhancement(EnhancementType.REGENERATION, 1)
+                    new PhysicalEnhancement(EnhancementType.SPEED, 1)
             );
 
-            case 8, 7 -> List.of(
+            case 8-> List.of(
+                    new PhysicalEnhancement(EnhancementType.STRENGTH, 1),
+                    new PhysicalEnhancement(EnhancementType.SPEED, 2),
+                    new PhysicalEnhancement(EnhancementType.HEALTH, 5)
+            );
+            case 7 -> List.of(
                     new PhysicalEnhancement(EnhancementType.STRENGTH, 2),
                     new PhysicalEnhancement(EnhancementType.SPEED, 2),
-                    new PhysicalEnhancement(EnhancementType.HEALTH, 5),
-                    new PhysicalEnhancement(EnhancementType.REGENERATION, 2)
+                    new PhysicalEnhancement(EnhancementType.HEALTH, 6),
+                    new PhysicalEnhancement(EnhancementType.REGENERATION, 1)
             );
 
             case 6 -> List.of(

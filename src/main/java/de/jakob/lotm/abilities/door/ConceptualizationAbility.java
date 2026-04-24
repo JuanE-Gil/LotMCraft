@@ -64,13 +64,13 @@ public class ConceptualizationAbility extends ToggleAbility {
         if(level.isClientSide) {
             return;
         }
-
+        /*
         DisabledFlightComponent disabledFlightComponent = entity.getData(ModAttachments.FLIGHT_DISABLE_COMPONENT);
         if(disabledFlightComponent.getCooldownTicks() > 0) {
             cancel((ServerLevel) level, entity);
             return;
         }
-
+        */
         // Allow Flying
         if(entity instanceof Player player) {
             player.getAbilities().mayfly = true;
@@ -123,6 +123,6 @@ public class ConceptualizationAbility extends ToggleAbility {
             return;
         }
 
-        event.setAmount(event.getAmount() * .25f);
+        event.setAmount(event.getAmount() * .20f);
     }
 }
