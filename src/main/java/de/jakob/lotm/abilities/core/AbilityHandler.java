@@ -210,6 +210,7 @@ public class AbilityHandler {
         abilities.add(new SpaceTimeStormAbility("space_time_storm_ability"));
         abilities.add(new ConceptualizationAbility("conceptualization_ability"));
         abilities.add(new DoorAuthorityAbility("door_authority_ability"));
+        abilities.add(new SealingAuthorityAbility("sealing_authority_ability"));
 
         // VISIONARY PATHWAY
         abilities.add(new SpectatingAbility("spectating_ability"));

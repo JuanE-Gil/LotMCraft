@@ -52,11 +52,6 @@ public class FogRenderer {
             return;
         }
 
-        FogComponent.FOG_TYPE fogType = component.getFogType();
-        if(fogType == null) {
-            return;
-        }
-
         event.setRed(component.getColor().x());
         event.setGreen(component.getColor().y());
         event.setBlue(component.getColor().z());

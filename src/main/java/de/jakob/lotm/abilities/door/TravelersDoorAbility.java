@@ -1,6 +1,5 @@
 package de.jakob.lotm.abilities.door;
 
-import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.SelectableAbility;
 import de.jakob.lotm.entity.ModEntities;
 import de.jakob.lotm.entity.custom.ability_entities.door_pathway.TravelersDoorEntity;
@@ -55,57 +54,7 @@ public class TravelersDoorAbility extends SelectableAbility {
         return new String[] {
                 "ability.lotmcraft.travelers_door.spirit_world",
                 "ability.lotmcraft.travelers_door.coordinates"
-               };
-    }
-
-    @Override
-    public void nextAbility(LivingEntity entity){
-        if(getAbilityNames().length == 0)
-            return;
-
-        if(!selectedAbilities.containsKey(entity.getUUID())) {
-            selectedAbilities.put(entity.getUUID(), 0);
-        }
-
-        int selectedAbility = selectedAbilities.get(entity.getUUID());
-        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
-
-        selectedAbility++;
-        if(selectedAbility >= getAbilityNames().length) {
-            selectedAbility = 0;
-        }
-
-        if((entitySeq > 2 && selectedAbility >= 1)){
-            selectedAbility = 0;
-        }
-
-        selectedAbilities.put(entity.getUUID(), selectedAbility);
-        PacketHandler.sendToServer(new AbilitySelectionPacket(getId(), selectedAbility));
-    }
-
-    @Override
-    public void previousAbility(LivingEntity entity){
-        if(getAbilityNames().length == 0)
-            return;
-
-        if(!selectedAbilities.containsKey(entity.getUUID())) {
-            selectedAbilities.put(entity.getUUID(), 0);
-        }
-
-        int selectedAbility = selectedAbilities.get(entity.getUUID());
-        selectedAbility--;
-        if(selectedAbility <= -1) {
-            selectedAbility = getAbilityNames().length - 1;
-        }
-
-        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
-
-        if((entitySeq > 2 && selectedAbility >= 1)){
-            selectedAbility = 0;
-        }
-
-        selectedAbilities.put(entity.getUUID(), selectedAbility);
-        PacketHandler.sendToServer(new AbilitySelectionPacket(getId(), selectedAbility));
+        };
     }
 
     @Override
@@ -170,7 +119,7 @@ public class TravelersDoorAbility extends SelectableAbility {
 
                 travelersDoorUsers.remove(player.getUUID());
 
-                int spiritualityCost = gteCostForDistance(player.position(), validatedPos);
+                int spiritualityCost = getCostForDistance(player.position(), validatedPos);
                 if(BeyonderData.getSpirituality(player) < spiritualityCost) {
                     spawnFailureParticles(serverLevel, targetLoc);
                     return;
@@ -197,24 +146,9 @@ public class TravelersDoorAbility extends SelectableAbility {
         }, serverLevel);
     }
 
-    private int gteCostForDistance(Vec3 position, Vec3 validatedPos) {
+    private int getCostForDistance(Vec3 position, Vec3 validatedPos) {
         double distance = position.distanceTo(validatedPos);
-        /*if(distance < 50) {
-            return 30;
-        }
-        else if(distance < 150) {
-            return 50;
-        }
-        else if(distance < 300) {
-            return 70;
-        }
-        else if(distance < 500) {
-            return 90;
-        }
-        else {*/
-        LOTMCraft.LOGGER.info("distance {}",distance);
-            return (int) distance;
-        //}
+        return Math.max(2000, 70 * (int) (distance / 500));
     }
 
     private void spawnFailureParticles(ServerLevel level, Vec3 pos) {

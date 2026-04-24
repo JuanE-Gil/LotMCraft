@@ -3,6 +3,7 @@ package de.jakob.lotm.events;
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.interaction.InteractionHandler;
 import de.jakob.lotm.attachments.DoorAuthorityData;
+import de.jakob.lotm.attachments.SealedDimensionData;
 import net.minecraft.server.level.ServerLevel;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -18,10 +19,16 @@ public class GlobalTickHandler {
         }
 
         InteractionHandler.cleanupInteractions();
-        DoorAuthorityData data = DoorAuthorityData.get((ServerLevel) event.getLevel());
+        DoorAuthorityData doorData = DoorAuthorityData.get((ServerLevel) event.getLevel());
 
-        if (data.isActive()) {
-            data.tick();
+        if (doorData.isActive()) {
+            doorData.tick();
+        }
+
+        SealedDimensionData sealedDimensionData = SealedDimensionData.get((ServerLevel) event.getLevel());
+
+        if (sealedDimensionData.isActive()) {
+            sealedDimensionData.tick();
         }
     }
 

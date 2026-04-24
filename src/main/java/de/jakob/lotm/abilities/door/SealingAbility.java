@@ -81,11 +81,11 @@ public class SealingAbility extends Ability {
                 duration = 20*14;
             };
             LOTMCraft.LOGGER.info("Can seal");
-            BeyonderData.addModifierWithTimeLimit(e, "sealed", .5,duration);
-            //if(BeyonderData.isBeyonder(e) && BeyonderData.getSequence(e) > entitySeq) {
+            BeyonderData.addModifierWithTimeLimit(e, "sealed", .3,duration);
+            if(BeyonderData.isBeyonder(e) && BeyonderData.getSequence(e) > entitySeq) {
                 DisabledAbilitiesComponent component = e.getData(ModAttachments.DISABLED_ABILITIES_COMPONENT);
                 component.disableAbilityUsageForTime("sealed", duration, e);
-            //}
+            }
             if(!(e instanceof Player) && !BeyonderData.isBeyonder(e) && e instanceof Mob mob) {
                 mob.setNoAi(true);
             }

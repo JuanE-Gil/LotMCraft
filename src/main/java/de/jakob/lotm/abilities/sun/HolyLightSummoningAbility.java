@@ -31,7 +31,7 @@ public class HolyLightSummoningAbility extends Ability {
     public HolyLightSummoningAbility(String id) {
         super(id, 1.5f, "purification", "light_source", "light_weak");
         postsUsedAbilityEventManually = true;
-        interactionRadius = 3.5;
+        interactionRadius = 8;
     }
 
     @Override

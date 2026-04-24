@@ -27,6 +27,7 @@ public class FireOfLightAbility extends Ability {
     public FireOfLightAbility(String id) {
         super(id, 1.75f, "purification", "burning", "light_source", "light_weak");
         postsUsedAbilityEventManually = true;
+        interactionRadius = 4;
     }
 
     @Override

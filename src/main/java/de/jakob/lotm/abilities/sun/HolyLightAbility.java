@@ -32,7 +32,7 @@ public class HolyLightAbility extends Ability {
     public HolyLightAbility(String id) {
         super(id, 1.25f, "purification", "light_source", "light_weak");
         postsUsedAbilityEventManually = true;
-        interactionRadius = 2.5;
+        interactionRadius = 6;
     }
 
     @Override

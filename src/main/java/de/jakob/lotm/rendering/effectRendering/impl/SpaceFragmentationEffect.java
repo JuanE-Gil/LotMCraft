@@ -37,7 +37,7 @@ public class SpaceFragmentationEffect extends ActiveEffect {
     private static final int DENSITY_MULTIPLIER = 4; // Massive density increase
 
     public SpaceFragmentationEffect(double x, double y, double z) {
-        super(x, y, z, 20 * 18);
+        super(x, y, z, 20 * 25);
 
         // Pre-calculate vortex geometry - multiple dense layers
         cachedVortexGeometry = calculateVortexGeometry(8, 48, 40);

@@ -70,7 +70,7 @@ public class BrewingCauldronBlockEntity extends BlockEntity implements MenuProvi
                 }
             }
 
-            //how many variables get saved in the data (progress + maxProgress)
+            //how many variables get saved in the data (progress + maxProgress) (I would 100% forget this without having written that comment :))
             @Override
             public int getCount() {
                 return 2;
@@ -113,7 +113,11 @@ public class BrewingCauldronBlockEntity extends BlockEntity implements MenuProvi
     protected void loadAdditional(CompoundTag pTag, HolderLookup.Provider pRegistries) {
         super.loadAdditional(pTag, pRegistries);
 
-        itemHandler.deserializeNBT(pRegistries, pTag.getCompound("inventory"));
+        CompoundTag inv = pTag.getCompound("inventory");
+        if (inv.contains("Size") && inv.getInt("Size") == itemHandler.getSlots()) {
+            itemHandler.deserializeNBT(pRegistries, inv);
+        }
+
         progress = pTag.getInt("brewing_cauldron.progress");
         maxProgress = pTag.getInt("brewing_cauldron.max_progress");
     }
@@ -185,7 +189,6 @@ public class BrewingCauldronBlockEntity extends BlockEntity implements MenuProvi
                 itemHandler.getStackInSlot(INPUT_SLOT_MAIN)
         );
 
-        // check if the item is historical summoned
         if (itemHandler.getStackInSlot(INPUT_SLOT_MAIN)
                 .getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY)
                 .contains("VoidSummonTime")) {

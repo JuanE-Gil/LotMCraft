@@ -99,7 +99,8 @@ public class EffectManager {
         ACID_SWAMP(28),
         ARTIFACT_EXPLOSION(29),
         BLOOD_INFERNO(30),
-        FOOLING(31);
+        FOOLING(31),
+        ROTATING_RINGS(32);
 
         private final int index;
 

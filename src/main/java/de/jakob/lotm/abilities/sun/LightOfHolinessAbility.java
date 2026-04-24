@@ -31,7 +31,7 @@ public class LightOfHolinessAbility extends Ability {
     public LightOfHolinessAbility(String id) {
         super(id, 1.85f, "purification", "light_weak");
         postsUsedAbilityEventManually = true;
-
+        interactionRadius = 10;
     }
 
     @Override

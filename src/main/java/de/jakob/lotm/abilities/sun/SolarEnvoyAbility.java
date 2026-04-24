@@ -30,6 +30,7 @@ public class SolarEnvoyAbility extends ToggleAbility {
         canBeUsedInArtifact = false;
         autoClear = false;
         canBeShared = false;
+        interactionRadius = 37;
     }
 
     @Override

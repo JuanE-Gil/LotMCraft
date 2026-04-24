@@ -26,7 +26,7 @@ public class CleaveOfPurificationAbility extends Ability {
 
         hasOptimalDistance = true;
         optimalDistance = 1f;
-        interactionRadius = 2;
+        interactionRadius = 4;
     }
 
     @Override
