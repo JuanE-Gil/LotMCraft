@@ -1,6 +1,7 @@
 package de.jakob.lotm.abilities.visionary.prophecy.triggers;
 
 import de.jakob.lotm.LOTMCraft;
+import de.jakob.lotm.abilities.visionary.passives.MetaAwarenessAbility;
 import de.jakob.lotm.abilities.visionary.prophecy.TokenStream;
 import de.jakob.lotm.abilities.visionary.prophecy.actions.ActionsHelper;
 import de.jakob.lotm.abilities.visionary.prophecy.triggers.context.TriggerContextBase;
@@ -21,6 +22,12 @@ public class TriggerHelper {
     private static @Nullable TriggerEnum getType(String str){
         return switch (str){
             case "on" -> TriggerEnum.POSITION;
+            case "has" -> TriggerEnum.PICK_UP;
+            case "instant" -> TriggerEnum.INSTANT;
+            case "health" -> TriggerEnum.HEALTH;
+            case "sanity" -> TriggerEnum.SANITY;
+            case "player" -> TriggerEnum.PLAYER;
+            case "sealed" -> TriggerEnum.SEALED;
             default -> null;
         };
     }
@@ -28,6 +35,12 @@ public class TriggerHelper {
     private static TriggerContextEnum getContextType(TriggerEnum value){
         return switch (value){
             case TriggerEnum.POSITION -> TriggerContextEnum.POSITION;
+            case TriggerEnum.PICK_UP -> TriggerContextEnum.ITEM;
+            case TriggerEnum.INSTANT -> TriggerContextEnum.EMPTY;
+            case TriggerEnum.HEALTH -> TriggerContextEnum.NUMBER;
+            case TriggerEnum.SANITY -> TriggerContextEnum.NUMBER;
+            case TriggerEnum.PLAYER -> TriggerContextEnum.PLAYER;
+            case TriggerEnum.SEALED -> TriggerContextEnum.EMPTY;
         };
     }
 
@@ -50,7 +63,7 @@ public class TriggerHelper {
         return BeyonderData.playerMap.getKeyByName(nick);
     }
 
-    public static @Nullable TriggerBase deduceWithContext(String str, int casterSeq, LivingEntity caster){
+    public static @Nullable TriggerBase deduceWithContext(String str, int casterSeq, ServerPlayer caster){
         TokenStream stream = new TokenStream(str);
 
         stream.next();
@@ -61,8 +74,14 @@ public class TriggerHelper {
         if(id == null) return null;
 
         var data = BeyonderData.playerMap.get(id).get();
-        if(casterSeq > data.sequence() && data.pathway().equals("visionary"))
+        if(casterSeq > data.sequence() && data.pathway().equals("visionary")){
+            var target = caster.level().getPlayerByUUID(id);
+            if(data.sequence() <= 1 && target != null){
+                MetaAwarenessAbility.onDivined(caster, (ServerPlayer) target);
+            }
+
             return null;
+        }
 
         stream.next();
         var type = getType(Objects.requireNonNull(stream.peek()));

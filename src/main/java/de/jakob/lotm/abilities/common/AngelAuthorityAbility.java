@@ -43,6 +43,7 @@ public class AngelAuthorityAbility extends SelectableAbility {
         this.cannotBeStolen = true;
         this.canBeReplicated = false;
         this.canBeUsedInArtifact = false;
+        this.doesNotIncreaseDigestion = true;
 
         flightSkill = null;
     }

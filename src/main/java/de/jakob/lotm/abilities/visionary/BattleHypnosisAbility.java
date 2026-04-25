@@ -5,6 +5,7 @@ import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.abilities.core.SelectableAbility;
 import de.jakob.lotm.abilities.core.interaction.InteractionHandler;
 import de.jakob.lotm.abilities.demoness.CharmAbility;
+import de.jakob.lotm.abilities.visionary.passives.MetaAwarenessAbility;
 import de.jakob.lotm.attachments.DisabledAbilitiesComponent;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.network.PacketHandler;
@@ -84,6 +85,16 @@ public class BattleHypnosisAbility extends SelectableAbility {
         UUID charmCasterUUID = CharmAbility.getCharmed().get(target.getUUID());
 
         int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+        int targetSeq = BeyonderData.getSequence(target);
+        if(BeyonderData.getPathway(target).equals("visionary") && targetSeq < entitySeq){
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.dream_traversal.failed").withColor(0xFFff124d));
+
+            if(targetSeq <= 1 && target instanceof ServerPlayer targetPlayer && entity instanceof ServerPlayer entityPlayer){
+                MetaAwarenessAbility.onDivined(entityPlayer, targetPlayer);
+            }
+
+            return;
+        }
 
         if(charmCasterUUID != null) {
             Entity charmCasterEntity = ((ServerLevel) level).getEntity(charmCasterUUID);
@@ -108,6 +119,16 @@ public class BattleHypnosisAbility extends SelectableAbility {
             UUID charmCasterUUID = CharmAbility.getCharmed().get(target.getUUID());
 
             int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+            int targetSeq = BeyonderData.getSequence(target);
+            if(BeyonderData.getPathway(target).equals("visionary") && targetSeq < entitySeq){
+                AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.dream_traversal.failed").withColor(0xFFff124d));
+
+                if(targetSeq <= 1 && target instanceof ServerPlayer targetPlayer && entity instanceof ServerPlayer entityPlayer){
+                    MetaAwarenessAbility.onDivined(entityPlayer, targetPlayer);
+                }
+
+                return;
+            }
 
             if (charmCasterUUID != null) {
                 Entity charmCasterEntity = ((ServerLevel) level).getEntity(charmCasterUUID);

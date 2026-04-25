@@ -38,11 +38,18 @@ import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 public class AbilityUtil {
 
     // ThreadLocal flag to prevent firing TargetEntityEvent when called from getTargetLocation
     private static final ThreadLocal<Boolean> INSIDE_GET_TARGET_LOCATION = ThreadLocal.withInitial(() -> false);
+
+    //if map contains entiy - ignore ally
+    //if bool is true - it will not clear the map after skill usage
+    public static Map<UUID, Boolean> ignoreAllies = new ConcurrentHashMap<UUID, Boolean>();
+
 
     // ==================== SEQUENCE UTILITY METHODS ====================
 
@@ -242,9 +249,11 @@ public class AbilityUtil {
 
         if(source == target) return false;
 
+        if(ignoreAllies.containsKey(source.getUUID())) allowAllies = true;
+
         // If we're allowing allies for support abilities, skip the mayDamage check
         if (!allowAllies && !mayDamage(source, target)) {
-            return false;
+           return false;
         }
 
         // Still check these even for support abilities
@@ -266,7 +275,6 @@ public class AbilityUtil {
         if (!mayTargetMarionette(source, target) ^ targetMarionettes) {
             return false;
         }
-
 
         // Subordinate targeting restrictions
         if (!mayTargetSubordinate(source, target)) {
