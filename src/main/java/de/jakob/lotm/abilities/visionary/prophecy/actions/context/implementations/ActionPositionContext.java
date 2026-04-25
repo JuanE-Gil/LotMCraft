@@ -54,6 +54,8 @@ public class ActionPositionContext extends ActionContextBase {
             dimension = stream.peek();
         }
 
+        if(dimension == null) dimension = "";
+
         return this;
     }
 
