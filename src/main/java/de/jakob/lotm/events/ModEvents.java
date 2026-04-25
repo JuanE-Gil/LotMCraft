@@ -5,6 +5,7 @@ import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.attachments.TeamComponent;
 import de.jakob.lotm.command.*;
 import de.jakob.lotm.entity.ModEntities;
+import de.jakob.lotm.entity.client.ability_entities.death_pathway.underworld_gate.UnderworldGateModel;
 import de.jakob.lotm.entity.client.ability_entities.door_pathway.travelers_door.TravelersDoorModel;
 import de.jakob.lotm.entity.client.ability_entities.meteor.MeteorModel;
 import de.jakob.lotm.entity.client.ability_entities.mother_pathway.blooming_area.BloomingAreaModel;
@@ -113,6 +114,7 @@ public class ModEvents {
         event.registerLayerDefinition(DesolateAreaModel.LAYER_LOCATION, DesolateAreaModel::createBodyLayer);
         event.registerLayerDefinition(QuestMarkerModel.LAYER_LOCATION, QuestMarkerModel::createBodyLayer);
         event.registerLayerDefinition(CycleOfFateModel.LAYER_LOCATION, CycleOfFateModel::createBodyLayer);
+        event.registerLayerDefinition(UnderworldGateModel.LAYER_LOCATION, UnderworldGateModel::createBodyLayer);
 
         // Spirits
         event.registerLayerDefinition(SpiritDervishModel.LAYER_LOCATION, SpiritDervishModel::createBodyLayer);

@@ -1,42 +1,25 @@
 package de.jakob.lotm.abilities.darkness;
 
-import com.google.common.util.concurrent.AtomicDouble;
-import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.SelectableAbility;
-import de.jakob.lotm.dimension.ModDimensions;
-import de.jakob.lotm.effect.ModEffects;
-import de.jakob.lotm.rendering.effectRendering.EffectManager;
-import de.jakob.lotm.util.BeyonderData;
-import de.jakob.lotm.util.data.Location;
 import de.jakob.lotm.util.helper.AbilityUtil;
-import de.jakob.lotm.util.helper.TemporaryChunkLoader;
-import de.jakob.lotm.util.scheduling.ServerScheduler;
-import de.jakob.lotm.util.shapeShifting.NameUtils;
-import de.jakob.lotm.util.shapeShifting.ShapeShiftingUtil;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.Vec3;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.neoforge.client.event.RenderNameTagEvent;
 import net.neoforged.neoforge.common.NeoForgeMod;
 
-import java.util.*;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class IdentityConcealmentAbility extends SelectableAbility {
+
     public IdentityConcealmentAbility(String id) {
         super(id, 5);
         this.canBeCopied = false;
@@ -66,46 +49,56 @@ public class IdentityConcealmentAbility extends SelectableAbility {
 
     @Override
     protected void castSelectedAbility(Level level, LivingEntity entity, int abilityIndex) {
+        if (!(entity instanceof Player)) abilityIndex = 0;
 
-        if(!(entity instanceof Player)) abilityIndex = 0;
         switch(abilityIndex) {
-            case 0 -> concealIdentity(level,entity);
+            case 0 -> concealIdentity(level, entity);
         }
     }
-    private void concealIdentity(Level level, LivingEntity entity) {
-        if(level.isClientSide) return;
 
-        if(!(entity instanceof ServerPlayer player)) return;
+    private void concealIdentity(Level level, LivingEntity entity) {
+        if (level.isClientSide) return;
+        if (!(entity instanceof ServerPlayer caster)) return;
 
         level.playSound(null,
-                player.blockPosition(),
+                caster.blockPosition(),
                 SoundEvents.AMETHYST_BLOCK_CHIME,
                 SoundSource.BLOCKS,
                 10.0f,
                 1.0f);
+
         LivingEntity targetEntity = AbilityUtil.getTargetEntity(entity, 16, 2);
-        String playerName = "§1";
-        if(targetEntity == null){
-            //NameUtils.setPlayerName(player, playerName);
-            AttributeInstance attribute = player.getAttribute(NeoForgeMod.NAMETAG_DISTANCE);
-            if (attribute != null) {
-                if (attribute.getValue() == 0){
-                    attribute.setBaseValue(64);
-                }else{
-                attribute.setBaseValue(0);};
-            }
-            return;
-        }
-        //NameUtils.setPlayerName((ServerPlayer) targetEntity, playerName);
-        AttributeInstance attribute = targetEntity.getAttribute(NeoForgeMod.NAMETAG_DISTANCE);
+
+        ServerPlayer targetPlayer = (targetEntity instanceof ServerPlayer sp) ? sp : caster;
+
+        AttributeInstance attribute = targetPlayer.getAttribute(NeoForgeMod.NAMETAG_DISTANCE);
         if (attribute != null) {
-            if (attribute.getValue() == 0){
+            if (attribute.getValue() == 0) {
                 attribute.setBaseValue(64);
-            }else{
-            attribute.setBaseValue(0);};
+
+                if (targetPlayer.getServer() != null) {
+                    targetPlayer.getServer().getPlayerList().broadcastAll(
+                            new ClientboundPlayerInfoUpdatePacket(
+                                    EnumSet.of(
+                                            ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER,
+                                            ClientboundPlayerInfoUpdatePacket.Action.UPDATE_LISTED,
+                                            ClientboundPlayerInfoUpdatePacket.Action.UPDATE_LATENCY,
+                                            ClientboundPlayerInfoUpdatePacket.Action.UPDATE_GAME_MODE,
+                                            ClientboundPlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME
+                                    ),
+                                    List.of(targetPlayer)
+                            )
+                    );
+                }
+            } else {
+                attribute.setBaseValue(0);
+
+                if (targetPlayer.getServer() != null) {
+                    targetPlayer.getServer().getPlayerList().broadcastAll(
+                            new ClientboundPlayerInfoRemovePacket(List.of(targetPlayer.getUUID()))
+                    );
+                }
+            }
         }
-
-
-    };
-// TODO: After Visionary changes make conceal traces subability
+    }
 }

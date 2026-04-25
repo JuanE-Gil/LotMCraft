@@ -76,6 +76,7 @@ public class EffectFactory {
             case 30 -> new BloodInfernoEffect(x, y, z);
             case 31 -> new FoolingEffect(x, y, z);
             case 32 -> new RotatingRingsEffect(x, y, z);
+            case 33 -> new SpaceTearingEffect(x, y, z);
             default -> throw new IllegalArgumentException("Unknown effect index: " + effectIndex);
         };
 

@@ -369,7 +369,8 @@ public class TheftHandler {
 
         int abilityCount = isLoopHole? 1 : getAbilityCountForSequence(sequence);
 
-        int abilityUses = getAbilityUsesForSequence(sequence);
+        //int abilityUses = getAbilityUsesForSequence(sequence);
+        int abilityUses = 1;
         int disableTime = getDisablingTimeForSequenceInSeconds(sequence);
 
         for (int i = 0; i < abilityCount; i++) {
@@ -406,7 +407,8 @@ public class TheftHandler {
             case 4 -> 2;
             case 3 -> 3;
             case 2 -> 4;
-            case 1, 0 -> 5;
+            case 1 -> 5;
+            case 0 -> 6;
         };
     }
 
@@ -417,7 +419,9 @@ public class TheftHandler {
             case 4 -> 120;
             case 3 -> 240;
             case 2 -> 480;
-            case 1, 0 -> 800;
+            case 1 -> 800;
+            case 0 -> 900;
+
         };
     }
 
@@ -447,22 +451,31 @@ public class TheftHandler {
 
         double failChance = difference * baseFailPerStep - luckMultiplier;
 
-        failChance = Math.min(Math.max(failChance, 0.0), 0.6);
+        float theftcap = 0;
+        if (targetSeq <= 2 && targetSeq != 0) {
+            theftcap = 0.75f;
+        } else if (targetSeq == 0) {
+            theftcap = 0.8f;
+        } else {
+            theftcap = 0.6f;
+        }
 
-        return random.nextDouble() < failChance;
+        failChance = Math.max(Math.max(failChance, 0.0), theftcap);
+        double randomnum =  random.nextDouble();
+        return randomnum < failChance;
     }
 
-
+/*
     public static int getAbilityUsesForSequence(int sequence) {
         return switch (sequence) {
             default -> 1;
             case 5 -> 5;
             case 4, 3 -> 10;
             case 2, 1 -> 20;
-            case 0 -> 30;
+            case 0 -> 40;
         };
     }
-
+*/
     public static float getSeqDifferenceMultiplier(int userSeq, int targetSeq){
         int diff = Math.abs(targetSeq - userSeq);
         float multiplier = diff * 0.15f;

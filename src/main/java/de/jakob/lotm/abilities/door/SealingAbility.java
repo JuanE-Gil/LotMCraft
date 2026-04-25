@@ -49,7 +49,7 @@ public class SealingAbility extends Ability {
 
     @Override
     public float getSpiritualityCost() {
-        return 6000;
+        return 5000;
     }
 
     private final DustParticleOptions dustOptions = new DustParticleOptions(new Vector3f(120 / 255f, 208 / 255f, 245 / 255f), 3f);

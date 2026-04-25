@@ -23,7 +23,7 @@ public class EnergyTransformationAbility extends ToggleAbility {
 
     @Override
     public float getSpiritualityCost() {
-        return 120;
+        return 220;
     }
 
     @Override
@@ -54,13 +54,13 @@ public class EnergyTransformationAbility extends ToggleAbility {
         if(level.isClientSide) {
             return;
         }
-
+/*
         DisabledFlightComponent disabledFlightComponent = entity.getData(ModAttachments.FLIGHT_DISABLE_COMPONENT);
         if(disabledFlightComponent.getCooldownTicks() > 0) {
             cancel((ServerLevel) level, entity);
             return;
         }
-
+*/
         // Allow Flying
         if(entity instanceof Player player) {
             player.getAbilities().mayfly = true;

@@ -5,6 +5,7 @@ import de.jakob.lotm.entity.custom.*;
 import de.jakob.lotm.entity.custom.ability_entities.*;
 import de.jakob.lotm.entity.custom.ability_entities.darkness_pathway.ConcealedDomainEntity;
 import de.jakob.lotm.entity.custom.ability_entities.death_pathway.DeathDivineKingdomEntity;
+import de.jakob.lotm.entity.custom.ability_entities.death_pathway.UnderworldGateEntity;
 import de.jakob.lotm.entity.custom.ability_entities.door_pathway.*;
 import de.jakob.lotm.entity.custom.ability_entities.mother_pathway.BloomingAreaEntity;
 import de.jakob.lotm.entity.custom.ability_entities.mother_pathway.CoffinEntity;
@@ -357,6 +358,14 @@ public class ModEntities {
                     .build("original_body"));
 
     // Utility
+
+    public static final Supplier<EntityType<UnderworldGateEntity>> UNDERWORLD_GATE =
+            ENTITY_TYPES.register("underworld_gate", () -> EntityType.Builder.of(UnderworldGateEntity::new, MobCategory.MISC)
+                    .sized(1.5f, 2.5f).build("underworld_gate"));
+
+    public static final Supplier<EntityType<PlanetEntity>> PLANET =
+            ENTITY_TYPES.register("planet", () -> EntityType.Builder.of(PlanetEntity::new, MobCategory.MISC)
+                    .sized(2.5f, 2.5f).build("planet"));
 
     public static final DeferredHolder<EntityType<?>, EntityType<ReturnPortalEntity>> RETURN_PORTAL =
             ENTITY_TYPES.register("return_portal", () ->

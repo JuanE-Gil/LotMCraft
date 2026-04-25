@@ -3,12 +3,14 @@ package de.jakob.lotm.abilities.death;
 import de.jakob.lotm.abilities.core.SelectableAbility;
 import de.jakob.lotm.abilities.core.interaction.InteractionHandler;
 import de.jakob.lotm.entity.ModEntities;
+import de.jakob.lotm.entity.custom.ability_entities.death_pathway.UnderworldGateEntity;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.data.Location;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.ParticleUtil;
 import de.jakob.lotm.util.helper.subordinates.SubordinateUtils;
 import de.jakob.lotm.util.scheduling.ServerScheduler;
+import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -36,7 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class DoorToTheUnderworldAbility extends SelectableAbility {
 
-    private static final int DURATION_TICKS = 20 * 60; // 1 minute
+    private static final int DURATION_TICKS = 20 * 30; // 1 minute
     private static final int SPAWN_INTERVAL = 20 * 4;
     private static final double PORTAL_RADIUS = 3.5;
 
@@ -45,10 +47,10 @@ public class DoorToTheUnderworldAbility extends SelectableAbility {
             "ability.lotmcraft.door_to_the_underworld.release"
     };
 
-    /** Tracks all mobs summoned per player so they can be despawned. */
+    /** Tracks all mobs summoned per player, so they can be despawned. */
     private static final HashMap<UUID, List<Mob>> summonedMobs = new HashMap<>();
 
-    /** Tracks the active portal scheduler task per player so it can be cancelled. */
+    /** Tracks the active portal scheduler task per player, so it can be cancelled. */
     private static final HashMap<UUID, UUID> activePortalTasks = new HashMap<>();
 
     private static final DustParticleOptions SOUL_DUST =
@@ -100,26 +102,35 @@ public class DoorToTheUnderworldAbility extends SelectableAbility {
     }
 
     private void openPortal(ServerLevel serverLevel, ServerPlayer player) {
-        Vec3 look = new Vec3(player.getLookAngle().x, 0, player.getLookAngle().z).normalize();
-        Vec3 portalCenter = player.position()
-                .add(look.x * 4, PORTAL_RADIUS, look.z * 4);
-
-        // right = perpendicular to look in the horizontal plane; up = world up
-        Vec3 right = new Vec3(-look.z, 0, look.x);
-        Vec3 up = new Vec3(0, 1, 0);
+        Vec3 portalCenter = AbilityUtil.getTargetLocation(player, 6, 1);
+        LivingEntity portalLookAtEntity = AbilityUtil.getTargetEntity(player, 6, 1);
+        if(portalLookAtEntity == null) portalLookAtEntity = player;
 
         AtomicInteger spawnTick = new AtomicInteger(0);
 
+        UnderworldGateEntity entity = new UnderworldGateEntity(ModEntities.UNDERWORLD_GATE.get(), serverLevel);
+        entity.setPos(portalCenter.x, portalCenter.y - .6, portalCenter.z);
+        Vec3 lookVec = portalLookAtEntity.position().subtract(portalCenter).normalize();
+        entity.setYRot(yawFromVector(lookVec));
+        entity.setXRot(0);
+        serverLevel.addFreshEntity(entity);
+
         UUID taskId = ServerScheduler.scheduleForDuration(0, 1, DURATION_TICKS, () -> {
             int tick = spawnTick.getAndIncrement();
-            drawPortal(serverLevel, portalCenter, right, up, tick);
-
             if (tick % SPAWN_INTERVAL == 0) {
                 spawnWave(serverLevel, player, portalCenter);
             }
-        }, () -> activePortalTasks.remove(player.getUUID()), serverLevel, () -> 1.0);
+        }, () -> {
+            activePortalTasks.remove(player.getUUID());
+            entity.discard();
+        }, serverLevel, () -> 1.0);
 
         activePortalTasks.put(player.getUUID(), taskId);
+    }
+
+    private static float yawFromVector(Vec3 dir) {
+        if (dir.lengthSqr() < 1.0E-6) return 0.0F;
+        return (float)(Math.toDegrees(Math.atan2(-dir.x, dir.z)));
     }
 
     private void release(ServerPlayer player) {
@@ -143,72 +154,6 @@ public class DoorToTheUnderworldAbility extends SelectableAbility {
 
         AbilityUtil.sendActionBar(player, Component.translatable("ability.lotmcraft.door_to_the_underworld.released").withColor(0xFF334f23));
     }
-
-    // -------------------------------------------------------------------------
-    // Visual
-    // -------------------------------------------------------------------------
-
-    private void drawPortal(ServerLevel level, Vec3 center, Vec3 right, Vec3 up, int tick) {
-        // Outer rim — soul fire flames around the circle edge
-        int rimPoints = 48;
-        for (int i = 0; i < rimPoints; i++) {
-            double t = (2 * Math.PI * i) / rimPoints;
-            double cosT = Math.cos(t) * PORTAL_RADIUS;
-            double sinT = Math.sin(t) * PORTAL_RADIUS;
-            Vec3 rimPos = center
-                    .add(right.scale(cosT))
-                    .add(up.scale(sinT));
-            level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME,
-                    rimPos.x, rimPos.y, rimPos.z, 1, 0, 0, 0, 0);
-        }
-
-        // Animated swirling inner fill — reverse portal particles
-        double swirl = tick * 0.12;
-        for (int i = 0; i < 20; i++) {
-            double angle = swirl + (2 * Math.PI * i) / 20.0;
-            double r = random.nextDouble() * (PORTAL_RADIUS - 0.3);
-            Vec3 fillPos = center
-                    .add(right.scale(Math.cos(angle) * r))
-                    .add(up.scale(Math.sin(angle) * r));
-            level.sendParticles(ParticleTypes.REVERSE_PORTAL,
-                    fillPos.x, fillPos.y, fillPos.z, 1, 0, 0, 0, 0.04);
-        }
-
-        // Soul particles drifting upward along the rim
-        if (tick % 2 == 0) {
-            double t = random.nextDouble() * 2 * Math.PI;
-            Vec3 soulPos = center
-                    .add(right.scale(Math.cos(t) * PORTAL_RADIUS))
-                    .add(up.scale(Math.sin(t) * PORTAL_RADIUS));
-            level.sendParticles(ParticleTypes.SOUL,
-                    soulPos.x, soulPos.y, soulPos.z, 1, 0, 0.05, 0, 0.02);
-        }
-
-        // Teal dust ring slightly outside the rim
-        if (tick % 3 == 0) {
-            int dustPoints = 16;
-            for (int i = 0; i < dustPoints; i++) {
-                double t = (2 * Math.PI * i) / dustPoints;
-                double r = PORTAL_RADIUS + 0.3;
-                Vec3 dustPos = center
-                        .add(right.scale(Math.cos(t) * r))
-                        .add(up.scale(Math.sin(t) * r));
-                level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME,
-                        dustPos.x, dustPos.y, dustPos.z, 1, 0, 0, 0, 0);
-            }
-        }
-
-        // Occasional smoke at the base of the portal
-        if (tick % 5 == 0) {
-            Vec3 base = center.add(up.scale(-PORTAL_RADIUS));
-            for (int i = 0; i < 3; i++) {
-                Vec3 smokePos = base.add(right.scale((random.nextDouble() - 0.5) * PORTAL_RADIUS));
-                level.sendParticles(ParticleTypes.LARGE_SMOKE,
-                        smokePos.x, smokePos.y, smokePos.z, 1, 0, 0.05, 0, 0.01);
-            }
-        }
-    }
-
     // -------------------------------------------------------------------------
     // Spawn
     // -------------------------------------------------------------------------

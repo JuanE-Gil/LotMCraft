@@ -26,7 +26,7 @@ public class SpaceTearingAbility extends Ability {
 
     @Override
     public float getSpiritualityCost() {
-        return 5000;
+        return 1500;
     }
 
     @Override

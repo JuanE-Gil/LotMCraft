@@ -45,7 +45,6 @@ public class HeavenlyPunishmentAbility extends Ability {
             if(state.getCollisionShape(level, BlockPos.containing(targetLoc)).isEmpty())
                 targetLoc = targetLoc.subtract(0, 1, 0);
         }
-        LOTMCraft.LOGGER.info("{} 2 {}",DamageLookup.lookupDamage(1, 1.2),multiplier(entity));
         GiantLightningEntity lightning = new GiantLightningEntity(level, entity, targetLoc, 50, 6, DamageLookup.lookupDamage(1, 1.2) * (int) Math.max(multiplier(entity)/4,1), BeyonderData.isGriefingEnabled(entity), 13, 200* (int) Math.max(multiplier(entity)/4,1), 0x6522a8);
         level.addFreshEntity(lightning);
     }
