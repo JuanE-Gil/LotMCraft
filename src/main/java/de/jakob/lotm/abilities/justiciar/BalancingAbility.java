@@ -24,8 +24,7 @@ public class BalancingAbility extends Ability {
 
     public static final List<BalancingZone> ACTIVE_ZONES = new CopyOnWriteArrayList<>();
 
-    private static final int ZONE_DURATION = 3600;
-    private static final double ZONE_RADIUS = 60.0;
+    private static final double ZONE_RADIUS = 120.0;
 
     public BalancingAbility(String id) {
         super(id, 30f);
@@ -41,20 +40,33 @@ public class BalancingAbility extends Ability {
 
     @Override
     protected float getSpiritualityCost() {
-        return 800;
+        return 1600;
     }
 
     @Override
     public void onAbilityUse(Level level, LivingEntity entity) {
         if (level.isClientSide) return;
         ServerLevel serverLevel = (ServerLevel) level;
-
+        int ZONE_DURATION = 3600 * (int) Math.max(multiplier(entity) / 4, 1);
         long expiryTick = serverLevel.getGameTime() + ZONE_DURATION;
         BalancingZone zone = new BalancingZone(entity.getUUID(), entity.position(), serverLevel, expiryTick);
         ACTIVE_ZONES.add(zone);
 
         final Vec3 center = zone.center;
-        final double TARGET_MULTIPLIER = 2.625;
+
+        List<LivingEntity> initialEntities = AbilityUtil.getNearbyEntities(null, serverLevel, center, (int) ZONE_RADIUS);
+        double totalMultiplier = 0;
+        int beyonderCount = 0;
+
+        for (LivingEntity e : initialEntities) {
+            if (BeyonderData.isBeyonder(e)) {
+                totalMultiplier += BeyonderData.getMultiplier(e);
+                beyonderCount++;
+            }
+        }
+
+        final double TARGET_MULTIPLIER = beyonderCount > 0 ? (totalMultiplier / beyonderCount) : BeyonderData.getMultiplier(entity);
+
         final String MODIFIER_ID = "balancing_zone_" + zone.ownerId;
 
         ServerScheduler.scheduleForDuration(0, 5, ZONE_DURATION, () -> {

@@ -54,7 +54,8 @@ public class ProhibitionAbility extends SelectableAbility {
                 "ability.lotmcraft.prohibition.players",
                 "ability.lotmcraft.prohibition.outside_world",
                 "ability.lotmcraft.prohibition.stand_ins",
-                "ability.lotmcraft.prohibition.marionette_interchange"
+                "ability.lotmcraft.prohibition.marionette_interchange",
+                "ability.lotmcraft.prohibition.theft"
         };
     }
 
@@ -195,7 +196,8 @@ public class ProhibitionAbility extends SelectableAbility {
         PLAYERS("Players"),
         OUTSIDE_WORLD("Outside World"),
         STAND_INS("Stand-ins"),
-        MARIONETTE_INTERCHANGE("Marionette Interchange");
+        MARIONETTE_INTERCHANGE("Marionette Interchange"),
+        THEFT("Theft");
 
         public final String displayName;
 

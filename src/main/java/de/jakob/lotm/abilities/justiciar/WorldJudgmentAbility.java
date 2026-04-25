@@ -18,7 +18,7 @@ import java.util.UUID;
 public class WorldJudgmentAbility extends Ability {
 
     public WorldJudgmentAbility(String id) {
-        super(id, 60f * 3);
+        super(id, 60f * 2);
         hasOptimalDistance = true;
         optimalDistance = 20f;
         canBeCopied = false;
@@ -33,7 +33,7 @@ public class WorldJudgmentAbility extends Ability {
 
     @Override
     protected float getSpiritualityCost() {
-        return 500;
+        return 20000;
     }
 
     @Override
@@ -60,7 +60,7 @@ public class WorldJudgmentAbility extends Ability {
         }
 
         // First cast: designate target
-        LivingEntity target = AbilityUtil.getTargetEntity(entity, 30, 5);
+        LivingEntity target = AbilityUtil.getTargetEntity(entity, 30*(int) Math.max(multiplier(entity)/4,1), 5);
         if (target == null || target == entity) {
             AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.world_judgment.no_target").withColor(color));
             return;

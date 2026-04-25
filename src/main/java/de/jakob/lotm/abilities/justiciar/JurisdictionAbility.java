@@ -7,6 +7,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.NeoForge;
 
@@ -16,8 +17,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class JurisdictionAbility extends Ability {
 
     public static final List<JurisdictionZone> ACTIVE_ZONES = new CopyOnWriteArrayList<>();
-
-
 
     public JurisdictionAbility(String id) {
         super(id, 0f, "jurisdiction");
@@ -98,14 +97,14 @@ public class JurisdictionAbility extends Ability {
                 () -> {
                     if (!zone.active) return;
 
-                    List<LivingEntity> nearby = zone.level.getEntitiesOfClass(
-                            LivingEntity.class,
+                    List<Player> nearby = zone.level.getEntitiesOfClass(
+                            Player.class,
                             owner.getBoundingBox().inflate(zone.radius),
                             e -> e != owner
                     );
 
                     Set<UUID> seen = new HashSet<>();
-                    for (LivingEntity e : nearby) {
+                    for (Player e : nearby) {
                         boolean inside = zone.contains(e);
                         UUID id = e.getUUID();
                         seen.add(id);

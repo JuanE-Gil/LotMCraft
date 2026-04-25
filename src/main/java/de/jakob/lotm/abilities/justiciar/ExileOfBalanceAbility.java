@@ -21,9 +21,8 @@ public class ExileOfBalanceAbility extends Ability {
 
     public static final Map<UUID, Long> EXILED_ENTITIES = new ConcurrentHashMap<>();
 
-    private static final double ZONE_RADIUS = 40.0;
-    private static final int MIN_EXILE_DURATION = 200;   // 10 seconds
-    private static final int MAX_EXILE_DURATION = 2400;  // 2 minutes
+    private static final double ZONE_RADIUS = 80.0;
+    // 2 minutes
 
     public ExileOfBalanceAbility(String id) {
         super(id, 60f);
@@ -39,7 +38,7 @@ public class ExileOfBalanceAbility extends Ability {
 
     @Override
     protected float getSpiritualityCost() {
-        return 600;
+        return 1200;
     }
 
     @Override
@@ -65,17 +64,18 @@ public class ExileOfBalanceAbility extends Ability {
             }
         }
 
-        // Power score: sum of (10 - sequence) per beyonder
-        int casterScore = casterSide.stream()
+        // Power score: sum of multiplier per beyonder
+        double casterScore = casterSide.stream()
                 .filter(BeyonderData::isBeyonder)
-                .mapToInt(e -> 10 - BeyonderData.getSequence(e))
+                .mapToDouble(BeyonderData::getMultiplier)
                 .sum();
-        int enemyScore = enemySide.stream()
-                .mapToInt(e -> 10 - BeyonderData.getSequence(e))
+        double enemyScore = enemySide.stream()
+                .filter(BeyonderData::isBeyonder) // Safety filter
+                .mapToDouble(BeyonderData::getMultiplier)
                 .sum();
 
         // Fizzle if sides are within 10% of each other
-        int total = casterScore + enemyScore;
+        double total = casterScore + enemyScore;
         if (total == 0 || Math.abs(casterScore - enemyScore) <= total * 0.10) {
             if (entity instanceof net.minecraft.server.level.ServerPlayer sp) {
                 sp.sendSystemMessage(Component.translatable("ability.lotmcraft.exile_of_balance.already_balanced")
@@ -89,18 +89,21 @@ public class ExileOfBalanceAbility extends Ability {
         List<LivingEntity> dominantSide = enemyDominant ? enemySide : new ArrayList<>(casterSide);
         if (!enemyDominant) dominantSide.remove(entity); // never exile caster
 
-        // Sort by sequence ascending (lowest seq = highest power = exiled first)
-        dominantSide.sort(Comparator.comparingInt(BeyonderData::getSequence));
+        // Sort descending by multiplier (highest multiplier = highest power = exiled first)
+        dominantSide.sort((e1, e2) -> Double.compare(BeyonderData.getMultiplier(e2), BeyonderData.getMultiplier(e1)));
 
-        int weakerScore = enemyDominant ? casterScore : enemyScore;
-        int dominantScore = enemyDominant ? enemyScore : casterScore;
+        double weakerScore = enemyDominant ? casterScore : enemyScore;
+        double dominantScore = enemyDominant ? enemyScore : casterScore;
 
         long gameTime = serverLevel.getGameTime();
         int exiledCount = 0;
+        int MIN_EXILE_DURATION = 2400;
+        int MAX_EXILE_DURATION = 4800;
 
         for (LivingEntity target : dominantSide) {
-            if (dominantScore <= weakerScore + (int)(weakerScore * 0.10)) break;
-            int power = 10 - BeyonderData.getSequence(target);
+            if (dominantScore <= weakerScore + (weakerScore * 0.10)) break;
+
+            double power = BeyonderData.getMultiplier(target);
             int durationTicks = MIN_EXILE_DURATION + random.nextInt(MAX_EXILE_DURATION - MIN_EXILE_DURATION + 1);
             EXILED_ENTITIES.put(target.getUUID(), gameTime + durationTicks);
             dominantScore -= power;

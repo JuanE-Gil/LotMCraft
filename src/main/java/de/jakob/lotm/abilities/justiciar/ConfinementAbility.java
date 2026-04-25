@@ -27,8 +27,7 @@ public class ConfinementAbility extends Ability {
 
     public static final List<ConfinementZone> ACTIVE_ZONES = new CopyOnWriteArrayList<>();
 
-    private static final int RADIUS = 6;
-    private static final int DURATION = 1200;
+
 
     // Yellow/gold dust particle for the cage outline
     private static final DustParticleOptions GOLD_DUST = new DustParticleOptions(
@@ -71,6 +70,10 @@ public class ConfinementAbility extends Ability {
                     existing.deactivate();
                     ACTIVE_ZONES.remove(existing);
                 });
+
+        int RADIUS = 6*(int) Math.max(multiplier(entity)/4,1);
+        int DURATION = 1200*(int) Math.max(multiplier(entity)/4,1);
+
 
         Vec3 center = AbilityUtil.getTargetLocation(entity, 12, 2f);
 

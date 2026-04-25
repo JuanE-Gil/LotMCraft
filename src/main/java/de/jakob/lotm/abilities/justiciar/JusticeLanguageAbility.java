@@ -10,10 +10,12 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.NeoForge;
@@ -29,7 +31,7 @@ public class JusticeLanguageAbility extends SelectableAbility {
     public static final Set<UUID> FLOG_ACTIVE = ConcurrentHashMap.newKeySet();
 
     public JusticeLanguageAbility(String id) {
-        super(id, 8f, "justice_language");
+        super(id, 4f, "justice_language");
         interactionRadius = 20;
         hasOptimalDistance = false;
         postsUsedAbilityEventManually = true;
@@ -42,7 +44,7 @@ public class JusticeLanguageAbility extends SelectableAbility {
 
     @Override
     protected float getSpiritualityCost() {
-        return 100;
+        return 200;
     }
 
     @Override
@@ -67,9 +69,10 @@ public class JusticeLanguageAbility extends SelectableAbility {
     }
 
     private void maintainSecrecy(ServerLevel serverLevel, LivingEntity caster) {
-        LivingEntity target = AbilityUtil.getTargetEntity(caster, 20, 1.4f);
+        LivingEntity target = AbilityUtil.getTargetEntity(caster, 20*(int) Math.max(multiplier(caster)/4,1), 1.4f);
         if (target == null) return;
-
+        Vec3 startPos = caster.getEyePosition().subtract(0, .2, 0).add(caster.getLookAngle().normalize());
+        serverLevel.playSound(null, startPos.x, startPos.y, startPos.z, SoundEvents.BLAZE_SHOOT, caster.getSoundSource(), 2.0f, .5f);
         target.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 600, 2, false, false));
         target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 600, 1, false, false));
 
@@ -81,13 +84,19 @@ public class JusticeLanguageAbility extends SelectableAbility {
     }
 
     private void death(ServerLevel serverLevel, LivingEntity caster) {
-        LivingEntity target = AbilityUtil.getTargetEntity(caster, 20, 1.4f);
+        LivingEntity target = AbilityUtil.getTargetEntity(caster, 20*(int) Math.max(multiplier(caster)/4,1), 1.4f);
         if (target == null) return;
 
-        // Fail chance based on caster sequence: (seq+1)/10.0
-        // Seq 6 = 70% fail, Seq 1 = 20% fail
+        int targetSeq = BeyonderData.getSequence(target);
         int seq = BeyonderData.getSequence(caster);
-        double failChance = (seq + 1) / 10.0;
+        double failChance = 0;
+        if (targetSeq<seq) {
+            failChance = 0.4f;
+        } else if (targetSeq == seq) {
+            failChance = 0.6f;
+        } else {
+            failChance = 0.8f;
+        }
 
         if (random.nextDouble() < failChance) {
             if (caster instanceof ServerPlayer sp) {
@@ -95,9 +104,10 @@ public class JusticeLanguageAbility extends SelectableAbility {
             }
             return;
         }
-
-        target.setHealth(target.getMaxHealth() / 2f);
-
+        Vec3 startPos = caster.getEyePosition().subtract(0, .2, 0).add(caster.getLookAngle().normalize());
+        serverLevel.playSound(null, startPos.x, startPos.y, startPos.z, SoundEvents.BLAZE_SHOOT, caster.getSoundSource(), 2.0f, .5f);
+        target.setHealth(target.getHealth() - (target.getMaxHealth() / 4f));
+        target.hurtMarked = true;
         String targetName = target.getDisplayName().getString();
         if (caster instanceof ServerPlayer sp) {
             sp.sendSystemMessage(Component.translatable("ability.lotmcraft.justice_language.death_declared",
@@ -110,7 +120,8 @@ public class JusticeLanguageAbility extends SelectableAbility {
 
     private void flog(ServerLevel serverLevel, LivingEntity caster) {
         FLOG_ACTIVE.add(caster.getUUID());
-
+        Vec3 startPos = caster.getEyePosition().subtract(0, .2, 0).add(caster.getLookAngle().normalize());
+        serverLevel.playSound(null, startPos.x, startPos.y, startPos.z, SoundEvents.BLAZE_SHOOT, caster.getSoundSource(), 2.0f, .5f);
         if (caster instanceof ServerPlayer sp) {
             sp.sendSystemMessage(Component.translatable("ability.lotmcraft.justice_language.flog_prepared")
                     .withStyle(ChatFormatting.GOLD));
@@ -130,9 +141,10 @@ public class JusticeLanguageAbility extends SelectableAbility {
         // Schedule bleeding DoT: 5 ticks x 20 interval = 5 hits over 100 ticks
         ServerScheduler.scheduleRepeating(0, 20, 5, () -> {
             if (!target.isAlive()) return;
-            float dmg = target.getMaxHealth() * 0.04f;
+            float dmg = target.getMaxHealth() * 0.12f;
             float newHealth = Math.max(0, target.getHealth() - dmg);
             target.setHealth(newHealth);
+            target.hurtMarked = true;
         }, serverLevel, () -> target.isAlive());
     }
 }

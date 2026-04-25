@@ -20,10 +20,9 @@ public class IndividualBalanceAbility extends Ability {
 
     public static final Map<UUID, Long> INDIVIDUALLY_BALANCED = new ConcurrentHashMap<>();
 
-    private static final int DURATION = 1200; // 1 minute
 
     public IndividualBalanceAbility(String id) {
-        super(id, 120f);
+        super(id, 40f);
         interactionRadius = 20;
         hasOptimalDistance = true;
         optimalDistance = 10f;
@@ -37,7 +36,7 @@ public class IndividualBalanceAbility extends Ability {
 
     @Override
     protected float getSpiritualityCost() {
-        return 1000;
+        return 2000;
     }
 
     @Override
@@ -55,9 +54,9 @@ public class IndividualBalanceAbility extends Ability {
             }
             return;
         }
-
+        int DURATION = 3600*(int) Math.max(multiplier(entity)/4,1);
         UUID targetId = target.getUUID();
-        INDIVIDUALLY_BALANCED.put(targetId, serverLevel.getGameTime() + DURATION);
+        INDIVIDUALLY_BALANCED.put(targetId, serverLevel.getGameTime() +DURATION );
         ServerScheduler.scheduleDelayed(DURATION, () -> INDIVIDUALLY_BALANCED.remove(targetId));
 
         // Gold/white ring at target

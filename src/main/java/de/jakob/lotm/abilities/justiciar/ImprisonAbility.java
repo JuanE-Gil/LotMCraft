@@ -36,7 +36,7 @@ public class ImprisonAbility extends Ability {
 
     @Override
     protected float getSpiritualityCost() {
-        return 50;
+        return 100;
     }
 
     @Override
@@ -50,7 +50,7 @@ public class ImprisonAbility extends Ability {
             return;
         }
 
-        LivingEntity target = AbilityUtil.getTargetEntity(caster, 15, 1.4f);
+        LivingEntity target = AbilityUtil.getTargetEntity(caster, 15*(int) Math.max(multiplier(caster)/4,1), 1.4f);
         if (target == null) return;
 
         final UUID targetId = target.getUUID();
@@ -64,6 +64,12 @@ public class ImprisonAbility extends Ability {
             if (!(e instanceof LivingEntity t) || !t.isAlive()) return;
             t.setDeltaMovement(Vec3.ZERO);
             t.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, 127, false, false));
+            t.setOnGround(true);
+            var pos = t.position();
+            t.setDeltaMovement(new Vec3(0, 0, 0));
+            t.hurtMarked = true;
+
+            t.teleportTo(pos.x, pos.y, pos.z);
         }, serverLevel, () -> IMPRISONED.contains(targetId));
 
         // VFX every 100 ticks
