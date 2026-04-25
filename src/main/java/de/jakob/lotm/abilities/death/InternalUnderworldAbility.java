@@ -396,7 +396,7 @@ public class InternalUnderworldAbility extends SelectableAbility {
             Vec3 pos = player.position().add(look.x * 2, 0, look.z * 2);
             entity.moveTo(pos.x, pos.y, pos.z, player.getYRot(), 0);
             entity.setUUID(UUID.randomUUID());
-            entity.getPersistentData().putBoolean("VoidSummoned", true);
+            entity.getPersistentData().putBoolean("UnderworldSummoned", true);
 
             boolean spawned = level.addFreshEntity(entity);
 

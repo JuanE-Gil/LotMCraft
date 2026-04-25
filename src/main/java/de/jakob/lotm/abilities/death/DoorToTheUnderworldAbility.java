@@ -178,6 +178,7 @@ public class DoorToTheUnderworldAbility extends SelectableAbility {
         Vec3 groundPos = Vec3.atBottomCenterOf(blockPos.above());
 
         mob.setPos(groundPos.x, groundPos.y, groundPos.z);
+        mob.getPersistentData().putBoolean("UnderworldSummoned", true);
         level.addFreshEntity(mob);
 
         SubordinateUtils.turnEntityIntoSubordinate(mob, player, false);

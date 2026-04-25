@@ -1058,6 +1058,7 @@ public class HistoricalVoidSummoningAbility extends SelectableAbility {
         if(entity.getPersistentData().getBoolean("VoidSummoned")) {
             if (entity.getPersistentData().getLong("VoidSummonTime") < serverLevel.getGameTime()) {
                 entity.remove(Entity.RemovalReason.DISCARDED);
+                return;
             }
             if (serverLevel.getPlayerByUUID(entity.getPersistentData().getUUID("VoidSummonOwner")) instanceof ServerPlayer serverPlayer) {
                 decrementSummonedCount(serverPlayer, entity.getPersistentData().getLong("VoidSummonTime"));

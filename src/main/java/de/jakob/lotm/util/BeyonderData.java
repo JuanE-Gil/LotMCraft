@@ -162,6 +162,12 @@ public class BeyonderData {
             callPassiveEffectsOnRemoved(entity, serverLevel);
         }
 
+        if(Objects.equals(sequence, LOTMCraft.NON_BEYONDER_SEQ)
+                || pathway.equals("none")) {
+            clearBeyonderData(entity);
+            return;
+        }
+
         if(entity instanceof ServerPlayer player) {
             if(!skipCheck && !playerMap.check(pathway, sequence)) return;
 
@@ -171,12 +177,6 @@ public class BeyonderData {
 
             if(clearCharStack) playerMap.clearStack(player);
             else playerMap.setStack(player, sequence, sequence);
-        }
-
-        if(Objects.equals(sequence, LOTMCraft.NON_BEYONDER_SEQ)
-                || pathway.equals("none")) {
-            clearBeyonderData(entity);
-            return;
         }
 
         boolean griefing = !BeyonderData.isBeyonder(entity) || BeyonderData.isGriefingEnabled(entity);

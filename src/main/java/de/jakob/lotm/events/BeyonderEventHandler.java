@@ -217,7 +217,8 @@ public class BeyonderEventHandler {
         public static void onPlayerDrops (LivingDropsEvent event){
             // sorry nihil i have to mess with your method :)
             // cancel the drop of items completely for summoned entities
-            if (event.getEntity().getPersistentData().contains("VoidSummoned")) {
+            if (event.getEntity().getPersistentData().contains("VoidSummoned") ||
+                    event.getEntity().getPersistentData().contains("UnderworldSummoned")) {
                 event.setCanceled(true);
                 return;
             }
