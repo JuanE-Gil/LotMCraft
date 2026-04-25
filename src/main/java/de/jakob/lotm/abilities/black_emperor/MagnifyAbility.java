@@ -65,7 +65,7 @@ public class MagnifyAbility extends SelectableAbility {
     protected void castSelectedAbility(Level level, LivingEntity entity, int abilityIndex) {
         if (!(level instanceof ServerLevel serverLevel)) return;
 
-        BeyonderData.reduceSpirituality(entity, BeyonderData.getMaxSpirituality(BeyonderData.getSequence(entity)) * 0.20f);
+        BeyonderData.reduceSpirituality(entity, BeyonderData.getMaxSpirituality(BeyonderData.getPathway(entity), BeyonderData.getSequence(entity)) * 0.20f);
 
         switch (abilityIndex) {
             case 0 -> magnifySelf(serverLevel, entity);

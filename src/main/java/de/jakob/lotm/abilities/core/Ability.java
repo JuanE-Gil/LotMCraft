@@ -1,6 +1,7 @@
 package de.jakob.lotm.abilities.core;
 
 import de.jakob.lotm.LOTMCraft;
+import de.jakob.lotm.abilities.black_emperor.EntropySubAbility;
 import de.jakob.lotm.abilities.error.ParasitationAbility;
 import de.jakob.lotm.attachments.AbilityCooldownComponent;
 import de.jakob.lotm.attachments.DisabledAbilitiesComponent;
@@ -97,7 +98,7 @@ public abstract class Ability {
 
         // Consume spirituality
         if(shouldConsumeSpirituality(newUser) && consumeSpirituality) {
-            BeyonderData.reduceSpirituality(newUser, getSpiritualityCost());
+            BeyonderData.reduceSpirituality(newUser, getInflatedSpiritualityCost(newUser, serverLevel));
         }
 
         // Digest potion
@@ -107,7 +108,17 @@ public abstract class Ability {
 
         // Handle Cooldown
         AbilityCooldownComponent component = newUser.getData(ModAttachments.COOLDOWN_COMPONENT);
-        component.setCooldown(id, cooldown);
+        int inflatedCooldown = cooldown;
+        var pdata = newUser.getPersistentData();
+        if (pdata.contains(EntropySubAbility.SENSORY_DECAY_COOLDOWN_MULT_KEY)) {
+            if (pdata.getLong(EntropySubAbility.SENSORY_DECAY_COOLDOWN_UNTIL_KEY) > serverLevel.getGameTime()) {
+                inflatedCooldown = (int)(cooldown * pdata.getFloat(EntropySubAbility.SENSORY_DECAY_COOLDOWN_MULT_KEY));
+            } else {
+                pdata.remove(EntropySubAbility.SENSORY_DECAY_COOLDOWN_MULT_KEY);
+                pdata.remove(EntropySubAbility.SENSORY_DECAY_COOLDOWN_UNTIL_KEY);
+            }
+        }
+        component.setCooldown(id, inflatedCooldown);
 
         if(AbilityUtil.hasArtifactScaling(entity)){
             artifactScalingMap.put(entity.getUUID(), AbilityUtil.getArtifactScalingSeq(entity));
@@ -143,6 +154,20 @@ public abstract class Ability {
     public abstract Map<String, Integer> getRequirements();
 
     protected abstract float getSpiritualityCost();
+
+    public float getInflatedSpiritualityCost(LivingEntity entity, ServerLevel level) {
+        float base = getSpiritualityCost();
+        var pdata = entity.getPersistentData();
+        if (pdata.contains(EntropySubAbility.ENTROPY_DRAIN_SPIRIT_MULT_KEY)) {
+            if (pdata.getLong(EntropySubAbility.ENTROPY_DRAIN_SPIRIT_UNTIL_KEY) > level.getGameTime()) {
+                return base * pdata.getFloat(EntropySubAbility.ENTROPY_DRAIN_SPIRIT_MULT_KEY);
+            } else {
+                pdata.remove(EntropySubAbility.ENTROPY_DRAIN_SPIRIT_MULT_KEY);
+                pdata.remove(EntropySubAbility.ENTROPY_DRAIN_SPIRIT_UNTIL_KEY);
+            }
+        }
+        return base;
+    }
 
     public float multiplier(LivingEntity entity) {
         return (float) AbilityUtil.getMultiplierWithArt(entity, this);

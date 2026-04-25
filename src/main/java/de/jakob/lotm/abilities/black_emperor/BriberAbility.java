@@ -15,7 +15,6 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -212,7 +211,7 @@ public class BriberAbility extends SelectableAbility {
 
         ServerScheduler.scheduleForDuration(
                 0,
-                20,
+                20 * 10,
                 20 * 30,
                 () -> {
                     UUID mappedCaster = ARROGANCE.get(target.getUUID());
@@ -226,10 +225,6 @@ public class BriberAbility extends SelectableAbility {
 
                     target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 40, 0, false, false, true));
 
-                    if (target instanceof Mob mob) {
-                        mob.setTarget(null);
-                    }
-
                     target.setDeltaMovement(
                             target.getDeltaMovement().add(
                                     (serverLevel.random.nextDouble() - 0.5D) * 0.12D,
@@ -237,8 +232,6 @@ public class BriberAbility extends SelectableAbility {
                                     (serverLevel.random.nextDouble() - 0.5D) * 0.12D
                             )
                     );
-
-                    triggerRandomAbility(serverLevel, target);
                 },
                 () -> {
                     UUID mappedCaster = ARROGANCE.get(target.getUUID());
@@ -261,7 +254,7 @@ public class BriberAbility extends SelectableAbility {
         ServerScheduler.scheduleForDuration(
                 0,
                 10,
-                20 * 10,
+                20 * 30,
                 () -> {
                     UUID mappedCaster = CHARMED.get(target.getUUID());
                     if (mappedCaster == null || !mappedCaster.equals(caster.getUUID())) {
@@ -269,19 +262,6 @@ public class BriberAbility extends SelectableAbility {
                     }
 
                     target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, 2, false, false, true));
-
-                    if (target instanceof Mob mob) {
-                        mob.setTarget(null);
-                        mob.getNavigation().stop();
-                    }
-
-                    target.setDeltaMovement(
-                            target.getDeltaMovement().add(
-                                    (serverLevel.random.nextDouble() - 0.5D) * 0.08D,
-                                    0.0D,
-                                    (serverLevel.random.nextDouble() - 0.5D) * 0.08D
-                            )
-                    );
                 },
                 () -> {
                     UUID mappedCaster = CHARMED.get(target.getUUID());
@@ -292,30 +272,6 @@ public class BriberAbility extends SelectableAbility {
                 serverLevel
         );
     }
-
-    private void triggerRandomAbility(ServerLevel serverLevel, LivingEntity target) {
-        if (!BeyonderData.isBeyonder(target)) {
-            return;
-        }
-
-        String pathway = BeyonderData.getPathway(target);
-        int sequence = BeyonderData.getSequence(target);
-
-        Random rng = new Random(serverLevel.random.nextLong());
-
-        var randomAbility = LOTMCraft.abilityHandler.getRandomAbility(
-                pathway,
-                sequence,
-                rng,
-                false,
-                List.of(this)
-        );
-
-        if (randomAbility != null) {
-            randomAbility.useAbility(serverLevel, target, true, true, true);
-        }
-    }
-
 
     // This resolves the real attacker for melee, projectiles, and many ability hits.
     private static LivingEntity resolveDamageDealer(DamageSource source) {
@@ -347,9 +303,10 @@ public class BriberAbility extends SelectableAbility {
 
         LivingEntity victim = event.getEntity();
 
-        // Charm: the charmed target cannot damage the caster, whether it is melee or ability damage.
+        // Charm: if the charmed target attacks the caster, cancel the hit and break the charm.
         UUID charmedCaster = CHARMED.get(attacker.getUUID());
         if (charmedCaster != null && charmedCaster.equals(victim.getUUID())) {
+            CHARMED.remove(attacker.getUUID());
             event.setNewDamage(0);
             return;
         }

@@ -1,12 +1,25 @@
 package de.jakob.lotm.abilities.black_emperor;
 
+import de.jakob.lotm.LOTMCraft;
+import de.jakob.lotm.abilities.core.SelectableAbility;
+import de.jakob.lotm.attachments.AbilityWheelComponent;
+import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.effect.ModEffects;
+import de.jakob.lotm.network.PacketHandler;
+import de.jakob.lotm.network.packets.toClient.SyncAbilitySelectionPacket;
+import de.jakob.lotm.network.packets.toClient.SyncAbilityWheelPacket;
 import de.jakob.lotm.particle.ModParticles;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.ParticleUtil;
 import de.jakob.lotm.util.helper.RingEffectManager;
 import de.jakob.lotm.util.scheduling.ServerScheduler;
+import net.minecraft.server.level.ServerPlayer;
+
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -17,6 +30,8 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +44,14 @@ public final class EntropySubAbility {
     public static final String ENTROPY_STACK_KEY = "lotm_entropy_stack";
     public static final String ENTROPY_UNTIL_KEY = "lotm_entropy_until";
 
+    // Sensory decay cooldown inflation: stores the multiplier and its expiry tick
+    public static final String SENSORY_DECAY_COOLDOWN_MULT_KEY = "lotm_sensory_decay_cd_mult";
+    public static final String SENSORY_DECAY_COOLDOWN_UNTIL_KEY = "lotm_sensory_decay_cd_until";
+
+    // Entropy drain spirituality inflation: stores the multiplier and its expiry tick
+    public static final String ENTROPY_DRAIN_SPIRIT_MULT_KEY = "lotm_entropy_drain_spirit_mult";
+    public static final String ENTROPY_DRAIN_SPIRIT_UNTIL_KEY = "lotm_entropy_drain_spirit_until";
+
     private static final int ENTROPY_DURATION_TICKS = 20 * 60;    // 1 minute
     private static final int ENTROPY_PULSE_INTERVAL = 20 * 20;     // every 20 seconds
     private static final int ENTROPY_PULSES_PER_TARGET = 3;
@@ -36,6 +59,19 @@ public final class EntropySubAbility {
 
     // How often we check for targets leaving range.
     private static final int ENTROPY_RANGE_CHECK_INTERVAL = 5;
+
+    private static final List<Holder<MobEffect>> HARMFUL_EFFECTS = new ArrayList<>();
+
+    private static List<Holder<MobEffect>> getHarmfulEffects() {
+        if (HARMFUL_EFFECTS.isEmpty()) {
+            for (Holder<MobEffect> holder : BuiltInRegistries.MOB_EFFECT.holders().toList()) {
+                if (holder.value().getCategory() == MobEffectCategory.HARMFUL) {
+                    HARMFUL_EFFECTS.add(holder);
+                }
+            }
+        }
+        return HARMFUL_EFFECTS;
+    }
 
     private EntropySubAbility() {
     }
@@ -205,11 +241,31 @@ public final class EntropySubAbility {
         spawnEntropyHitFX(level, target, scale, stack);
     }
 
-    // S9: softer disorder, mostly movement/sight disruption.
+    // S9: softer disorder — randomize the selected mode of the target's currently active wheel ability.
     private static void applyMinorEntropy(ServerLevel level, LivingEntity target, double scale, int stack) {
         target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20 * (4 + stack), Math.min(2, stack / 2), false, false, false));
         target.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 20 * 3, 0, false, false, false));
         target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 20 * 3, 0, false, false, false));
+
+        if (target instanceof ServerPlayer player) {
+            AbilityWheelComponent wheel = player.getData(ModAttachments.ABILITY_WHEEL_COMPONENT);
+            int selectedIndex = wheel.getSelectedAbility();
+            if (selectedIndex >= 0 && selectedIndex < wheel.getAbilities().size()) {
+                String abilityId = wheel.getAbilities().get(selectedIndex);
+                if (LOTMCraft.abilityHandler.getById(abilityId) instanceof SelectableAbility selectable) {
+                    String[] names = selectable.getAbilityNamesCopy();
+                    if (names.length > 1) {
+                        int current = selectable.getSelectedAbilityIndex(player.getUUID());
+                        int randomIndex;
+                        do {
+                            randomIndex = level.random.nextInt(names.length);
+                        } while (randomIndex == current);
+                        selectable.setSelectedAbility(player, randomIndex);
+                        PacketHandler.sendToPlayer(player, new SyncAbilitySelectionPacket(abilityId, randomIndex));
+                    }
+                }
+            }
+        }
 
         target.setDeltaMovement(target.getDeltaMovement().add(
                 (level.random.nextDouble() - 0.5D) * 0.22D * scale,
@@ -219,7 +275,7 @@ public final class EntropySubAbility {
         target.hurtMarked = true;
     }
 
-    // S10: stronger mental and spiritual collapse.
+    // S10: stronger mental and spiritual collapse — shuffle the target's ability wheel order.
     private static void applyControlCollapse(ServerLevel level, LivingEntity target, double scale, int stack) {
         int duration = 20 * (6 + stack);
 
@@ -236,6 +292,17 @@ public final class EntropySubAbility {
             target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, duration, 0, false, false, true));
             target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, duration, 0, false, false, true));
             target.addEffect(new MobEffectInstance(MobEffects.POISON, duration, 0, false, false, true));
+        }
+
+        if (target instanceof ServerPlayer player) {
+            AbilityWheelComponent wheel = player.getData(ModAttachments.ABILITY_WHEEL_COMPONENT);
+            if (wheel.getAbilities().size() > 1) {
+                ArrayList<String> shuffled = new ArrayList<>(wheel.getAbilities());
+                Collections.shuffle(shuffled, new java.util.Random(level.random.nextLong()));
+                wheel.setAbilities(shuffled);
+                wheel.setSelectedAbility(0);
+                PacketHandler.sendToPlayer(player, new SyncAbilityWheelPacket(shuffled, 0));
+            }
         }
 
         target.setDeltaMovement(target.getDeltaMovement().multiply(0.60D, 0.85D, 0.60D));
@@ -261,6 +328,11 @@ public final class EntropySubAbility {
         target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, duration, 0, false, false, true));
         target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, duration, Math.min(3, 1 + stack / 2), false, false, true));
 
+        // Random spirituality cost inflation 10–50% for the duration
+        float spiritMult = 1.1f + level.random.nextFloat() * 0.4f;
+        target.getPersistentData().putFloat(ENTROPY_DRAIN_SPIRIT_MULT_KEY, spiritMult);
+        target.getPersistentData().putLong(ENTROPY_DRAIN_SPIRIT_UNTIL_KEY, level.getGameTime() + duration);
+
         target.setDeltaMovement(target.getDeltaMovement().multiply(0.50D, 0.80D, 0.50D));
         target.hurtMarked = true;
     }
@@ -273,6 +345,11 @@ public final class EntropySubAbility {
         target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, duration, 0, false, false, true));
         target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, duration, Math.min(3, 1 + stack / 2), false, false, true));
 
+        // Random cooldown inflation 10–50% for the duration
+        float mult = 1.1f + level.random.nextFloat() * 0.4f;
+        target.getPersistentData().putFloat(SENSORY_DECAY_COOLDOWN_MULT_KEY, mult);
+        target.getPersistentData().putLong(SENSORY_DECAY_COOLDOWN_UNTIL_KEY, level.getGameTime() + duration);
+
         target.setDeltaMovement(target.getDeltaMovement().multiply(0.35D, 0.70D, 0.35D));
         target.hurtMarked = true;
 
@@ -283,15 +360,24 @@ public final class EntropySubAbility {
                 target.position().add(0, 1, 0), 0.55D + stack * 0.08D, 14 + stack);
     }
 
-    // S13: direct decay damage.
+    // Damage reduced by armor and resistance for both rolls.
     private static void applyEntropyDamage(ServerLevel level, LivingEntity caster, LivingEntity target, int stack, boolean annihilation) {
         float dmg = (float) (target.getMaxHealth() * (annihilation ? 0.12D : 0.06D) + (stack * (annihilation ? 2.5D : 1.25D)));
 
-        if (annihilation && BeyonderData.isBeyonder(target)) {
-            target.addEffect(new MobEffectInstance(ModEffects.LOOSING_CONTROL, 20 * 4, 1, false, false, true));
+        if (!annihilation) {
+            // Entropy Damage: apply every harmful vanilla effect at max potion-obtainable level (II / amplifier 1)
+            for (Holder<MobEffect> effect : getHarmfulEffects()) {
+                target.addEffect(new MobEffectInstance(effect, 20 * 45, 1, false, false, true));
+            }
         }
 
-        target.hurt(caster.damageSources().mobAttack(caster), dmg);
+        if (annihilation) {
+            if (BeyonderData.isBeyonder(target)) {
+                target.addEffect(new MobEffectInstance(ModEffects.LOOSING_CONTROL, 20 * 4, 1, false, false, true));
+            }
+            target.hurt(caster.damageSources().mobAttack(caster), dmg);
+        }
+
         target.hurtMarked = true;
     }
 
@@ -341,6 +427,10 @@ public final class EntropySubAbility {
         target.removeEffect(MobEffects.MOVEMENT_SLOWDOWN);
         target.removeEffect(MobEffects.WEAKNESS);
         target.removeEffect(MobEffects.POISON);
+        target.getPersistentData().remove(SENSORY_DECAY_COOLDOWN_MULT_KEY);
+        target.getPersistentData().remove(SENSORY_DECAY_COOLDOWN_UNTIL_KEY);
+        target.getPersistentData().remove(ENTROPY_DRAIN_SPIRIT_MULT_KEY);
+        target.getPersistentData().remove(ENTROPY_DRAIN_SPIRIT_UNTIL_KEY);
     }
 
     // S16: cleanup tags.

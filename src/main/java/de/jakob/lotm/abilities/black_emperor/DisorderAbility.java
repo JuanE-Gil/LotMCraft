@@ -1,6 +1,7 @@
 package de.jakob.lotm.abilities.black_emperor;
 
 import de.jakob.lotm.LOTMCraft;
+import de.jakob.lotm.abilities.core.AbilityUsedEvent;
 import de.jakob.lotm.abilities.core.SelectableAbility;
 import de.jakob.lotm.particle.ModParticles;
 import de.jakob.lotm.util.BeyonderData;
@@ -14,7 +15,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.Level;
@@ -35,6 +35,7 @@ public class DisorderAbility extends SelectableAbility {
     // NBT keys — public so DistortionAbility.breakBonds can clear them
     public static final String DISORDERED_ACTION_KEY      = "lotm_disordered_action";
     public static final String DISORDERED_PERCEPTION_KEY  = "lotm_disordered_perception";
+    public static final String DISORDERED_PERCEPTION_CHARGES_KEY = "lotm_disordered_perception_charges";
     public static final String DISTANCE_WARP_KEY          = "lotm_distance_warp";
 
 
@@ -156,14 +157,14 @@ public class DisorderAbility extends SelectableAbility {
     }
 
     /**
-     * Disorder Perception: the target's attack accuracy is impaired for 7 seconds —
-     * a 40 % chance per outgoing hit that the strike deals zero damage.
+     * Disorder Perception: the target's next 3 ability uses are replaced with a random
+     * ability from their own pathway, excluding DisorderAbility itself.
      */
     private void disorderPerception(ServerLevel level, LivingEntity caster, LivingEntity target) {
         target.getPersistentData().putBoolean(DISORDERED_PERCEPTION_KEY, true);
+        target.getPersistentData().putInt(DISORDERED_PERCEPTION_CHARGES_KEY, 3);
         target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 20 * 7, 0, false, false, true));
 
-        // Expanding sphere of black particles + small dark ring at the target's feet
         ParticleUtil.spawnSphereParticles(level, ModParticles.BLACK.get(),
                 target.position().add(0, 1, 0), 1.0, 16);
         RingEffectManager.createRingForAll(target.position(), 2.5f, 18,
@@ -172,8 +173,10 @@ public class DisorderAbility extends SelectableAbility {
         AbilityUtil.sendActionBar(caster,
                 Component.literal("Perception disordered.").withColor(0x9933CC));
 
-        ServerScheduler.scheduleDelayed(20 * 7, () ->
-                target.getPersistentData().remove(DISORDERED_PERCEPTION_KEY), level);
+        ServerScheduler.scheduleDelayed(20 * 7, () -> {
+            target.getPersistentData().remove(DISORDERED_PERCEPTION_KEY);
+            target.getPersistentData().remove(DISORDERED_PERCEPTION_CHARGES_KEY);
+        }, level);
     }
 
     /**
@@ -302,6 +305,45 @@ public class DisorderAbility extends SelectableAbility {
     // -------------------------------------------------------------------------
     // Event hooks
     // -------------------------------------------------------------------------
+
+    @SubscribeEvent
+    public static void onAbilityUsed(AbilityUsedEvent event) {
+        LivingEntity entity = event.getEntity();
+        if (!entity.getPersistentData().getBoolean(DISORDERED_PERCEPTION_KEY)) return;
+        if (!(entity.level() instanceof ServerLevel serverLevel)) return;
+
+        // Don't intercept DisorderAbility itself to avoid recursion
+        if (event.getAbility() instanceof DisorderAbility) return;
+
+        int charges = entity.getPersistentData().getInt(DISORDERED_PERCEPTION_CHARGES_KEY);
+        if (charges <= 0) {
+            entity.getPersistentData().remove(DISORDERED_PERCEPTION_KEY);
+            entity.getPersistentData().remove(DISORDERED_PERCEPTION_CHARGES_KEY);
+            return;
+        }
+
+        // Cancel intended ability and fire a random one instead
+        event.setCanceled(true);
+
+        String pathway = BeyonderData.getPathway(entity);
+        int sequence = BeyonderData.getSequence(entity);
+        var randomAbility = LOTMCraft.abilityHandler.getRandomAbility(
+                pathway, sequence, new java.util.Random(), false,
+                List.of(event.getAbility(), LOTMCraft.abilityHandler.getById("disorder_ability"))
+        );
+
+        if (randomAbility != null) {
+            randomAbility.useAbility(serverLevel, entity, true, true, true);
+        }
+
+        int remaining = charges - 1;
+        if (remaining <= 0) {
+            entity.getPersistentData().remove(DISORDERED_PERCEPTION_KEY);
+            entity.getPersistentData().remove(DISORDERED_PERCEPTION_CHARGES_KEY);
+        } else {
+            entity.getPersistentData().putInt(DISORDERED_PERCEPTION_CHARGES_KEY, remaining);
+        }
+    }
 
     @SubscribeEvent
     public static void onDisorderEvents(LivingDamageEvent.Pre event) {

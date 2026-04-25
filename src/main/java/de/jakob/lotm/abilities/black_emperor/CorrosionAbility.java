@@ -1,10 +1,14 @@
 package de.jakob.lotm.abilities.black_emperor;
 
 import de.jakob.lotm.abilities.core.ToggleAbility;
+import de.jakob.lotm.attachments.ModAttachments;
+import de.jakob.lotm.network.PacketHandler;
+import de.jakob.lotm.network.packets.toClient.SyncCorrosionFovPacket;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
@@ -86,9 +90,17 @@ public class CorrosionAbility extends ToggleAbility {
         // Decay exposure for entities that left the aura
         exposureTicks.entrySet().removeIf(entry -> {
             if (!currentlyInRange.contains(entry.getKey())) {
-                // Decay at half the rate it built up — leaving doesn't instantly cure
                 int remaining = entry.getValue() - 2;
-                if (remaining <= 0) return true;
+                if (remaining <= 0) {
+                    // Reset FOV if this was a player
+                    if (level instanceof ServerLevel sl) {
+                        ServerPlayer leaver = sl.getServer().getPlayerList().getPlayer(entry.getKey());
+                        if (leaver != null) {
+                            PacketHandler.sendToPlayer(leaver, new SyncCorrosionFovPacket(1.0f));
+                        }
+                    }
+                    return true;
+                }
                 entry.setValue(remaining);
             }
             return false;
@@ -99,6 +111,17 @@ public class CorrosionAbility extends ToggleAbility {
     public void stop(Level level, LivingEntity entity) {
         if (level.isClientSide) return;
         entity.getPersistentData().remove("lotm_corrosion_active");
+
+        // Reset FOV for any players that were in the aura
+        if (level instanceof ServerLevel sl) {
+            for (UUID uuid : exposureTicks.keySet()) {
+                ServerPlayer player = sl.getServer().getPlayerList().getPlayer(uuid);
+                if (player != null) {
+                    PacketHandler.sendToPlayer(player, new SyncCorrosionFovPacket(1.0f));
+                }
+            }
+        }
+
         exposureTicks.clear();
         entity.sendSystemMessage(Component.literal("§cCorrosion: OFF"));
     }
@@ -128,14 +151,13 @@ public class CorrosionAbility extends ToggleAbility {
             }
         }
 
-        // Stage 2 — Irrationality takes hold: mobs retarget randomly, players get confusion
+        // Stage 2 — Irrationality takes hold: mobs retarget randomly, players get confusion + random FOV
         if (ticks >= STAGE_2_TICKS) {
             target.addEffect(new MobEffectInstance(
                     MobEffects.CONFUSION, 60, 0, false, false, false));
 
             if (target instanceof Mob mob && level.getGameTime() % 60 == 0) {
                 if (level.random.nextFloat() < 0.50f) {
-                    // Pick a random nearby entity — could be an ally
                     List<LivingEntity> nearby = level.getEntitiesOfClass(
                             LivingEntity.class,
                             target.getBoundingBox().inflate(12),
@@ -147,6 +169,12 @@ public class CorrosionAbility extends ToggleAbility {
                 }
             }
 
+            // Every 5 seconds, send a random FOV multiplier to player targets
+            if (target instanceof ServerPlayer player && level.getGameTime() % 100 == 0) {
+                float fov = 0.6f + level.random.nextFloat() * 1.2f; // range: 0.6x – 1.8x
+                PacketHandler.sendToPlayer(player, new SyncCorrosionFovPacket(fov));
+            }
+
             if (target instanceof Player player && ticks == STAGE_2_TICKS) {
                 AbilityUtil.sendActionBar(player,
                         Component.literal("The greed is overwhelming — your thoughts are scattered.")
@@ -154,17 +182,14 @@ public class CorrosionAbility extends ToggleAbility {
             }
         }
 
-        // Stage 3 — Full corruption: Beyonder targets fire abilities chaotically
+        // Stage 3 — Full corruption: target loses sanity every 3 seconds
         if (ticks >= STAGE_3_TICKS) {
             target.addEffect(new MobEffectInstance(
                     MobEffects.WEAKNESS, 40, 1, false, false, false));
 
-            // Every 3 seconds, a corrupted Beyonder uses a random ability on
-            // the nearest entity (ignoring ally checks — irrational behavior)
-            if (BeyonderData.isBeyonder(target) && level.getGameTime() % 60 == 0) {
-                if (level.random.nextFloat() < 0.60f) {
-                    triggerIrrationalAbility(level, target);
-                }
+            if (level.getGameTime() % 60 == 0) {
+                var sanity = target.getData(ModAttachments.SANITY_COMPONENT);
+                sanity.increaseSanityAndSync(-0.01f, target);
             }
 
             if (target instanceof Player player && ticks == STAGE_3_TICKS) {
@@ -172,25 +197,6 @@ public class CorrosionAbility extends ToggleAbility {
                         Component.literal("You can no longer control yourself. Darkness consumes you.")
                                 .withColor(0x440066));
             }
-        }
-    }
-
-    /**
-     * Forces a corrupted Beyonder target to use one of their own abilities on the
-     * nearest entity regardless of ally status — mimicking irrational, greedy behavior.
-     */
-    private void triggerIrrationalAbility(ServerLevel level, LivingEntity target) {
-        String pathway = BeyonderData.getPathway(target);
-        int sequence = BeyonderData.getSequence(target);
-
-        java.util.Random rng = new java.util.Random(level.random.nextLong());
-
-        var randomAbility = de.jakob.lotm.LOTMCraft.abilityHandler.getRandomAbility(
-                pathway, sequence, rng, false, List.of());
-
-        if (randomAbility != null) {
-            // ignoreAllies = true so the corrupted entity can hurt friends
-            randomAbility.useAbility(level, target, true, true, true);
         }
     }
 }

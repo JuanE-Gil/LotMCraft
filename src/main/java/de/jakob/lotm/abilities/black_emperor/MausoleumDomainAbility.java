@@ -137,7 +137,7 @@ public final class MausoleumDomainAbility extends Ability {
         Session session = new Session(caster.getUUID(), casterSeq);
         SESSIONS.put(caster.getUUID(), session);
 
-        BeyonderData.reduceSpirituality(caster, BeyonderData.getMaxSpirituality(BeyonderData.getSequence(caster)) * 0.25f);
+        BeyonderData.reduceSpirituality(caster, BeyonderData.getMaxSpirituality(BeyonderData.getPathway(caster), BeyonderData.getSequence(caster)) * 0.25f);
 
         for (ServerPlayer player : targets) {
             session.members.add(player.getUUID());

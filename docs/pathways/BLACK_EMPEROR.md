@@ -50,12 +50,12 @@
 
 | Roll | Outcome | Effect |
 |------|---------|--------|
-| < 25 | Minor Entropy | Slowness + Blindness + Confusion |
-| 25–49 | Control Collapse | Losing Control (6 + stack levels) |
-| 50–69 | Sensory Decay | Blindness + Confusion + Slowness III |
-| 70–85 | Entropy Drain | Blindness + Confusion + Slowness III + Losing Control |
-| 86–95 | Entropy Damage | 6% max HP + (stack × 1.25) direct damage |
-| 96+ | Annihilation | 12% max HP + (stack × 2.5) direct damage + Losing Control |
+| < 25 | Minor Entropy | Slowness + Blindness + Confusion; randomizes the selected mode of the target's currently active ability |
+| 25–49 | Control Collapse | Losing Control (6 + stack levels); shuffles the order of abilities on the target's wheel |
+| 50–69 | Sensory Decay | Blindness + Confusion + Slowness III; all ability cooldowns inflated by a random 10–50% for the duration |
+| 70–85 | Entropy Drain | Blindness + Confusion + Slowness III + Losing Control; spirituality cost of all abilities inflated by a random 10–50% for the duration |
+| 86–95 | Entropy Effect | Every harmful Minecraft effect applied at Level II (max potion-obtainable) for 45 seconds |
+| 96+ | Entropy Damage | 12% max HP + (stack × 2.5) damage (reduced by armor/resistance) + Losing Control |
 
 ---
 
@@ -74,11 +74,11 @@
 | `halt` | Slowness III (3s), zeroed velocity, mobs get No-AI for 3s |
 | `retreat` | Slowness (2s), pushed away at 0.65 force with 0.12 upward |
 | `advance` | Slowness (1.25s), mobs navigate to caster at 1.0 speed, players pulled at 0.35 force |
-| `silence` | Weakness (2.5s), Confusion (1.75s), all Beyonder abilities disabled for 14 seconds |
+| `silence` | Weakness (2.5s), Confusion (1.75s), all active toggle abilities stopped, all Beyonder abilities disabled for 5 seconds |
 
 **Head Lock:** Targets 2+ sequences weaker have their head locked downward (36–54° based on gap).
 
-**Damage Reflection:** When the caster takes damage from a Beyonder under presence, applies Weakness II + Slowness III to the attacker and pushes them away.
+**Damage Reflection:** When the caster takes damage from a Beyonder of equal or weaker sequence, the attacker's outgoing damage is reduced by 50% for 3 seconds and they are pushed away. Stronger Beyonders (lower sequence) are immune.
 
 ---
 
@@ -101,7 +101,7 @@
 
 **Combat Spirituality Drain (Seq 5 and below):** Targets in combat with the caster lose `1.0 + (seq_gap × 0.25)` spirituality per second.
 
-**Damage Reflection:** Same as Commanding Orders — Weakness II + Slowness III to attacker, knockback applied.
+**Damage Reflection:** Same as Commanding Orders — attacker's outgoing damage reduced by 50% for 3 seconds and knockback applied. Stronger Beyonders immune.
 
 ---
 
@@ -121,8 +121,8 @@
 **Target pulses** (outcome varies by sequence gap):
 | Outcome | Effect |
 |---------|--------|
-| Minor Disorder | Slowness (1–4s) + Blindness (2s) + Confusion (2–4s) |
-| Control Loss | Losing Control / Confusion / Weakness for 3–7s |
+| Minor Disorder | 3 random harmful effects (2–4s) + random movement nudge |
+| Control Loss | Target's inventory order is shuffled; Losing Control / Confusion / Weakness for 3–7s |
 | Seal | Slowness III + Weakness + ability seal for 4–7s |
 
 ---
@@ -148,22 +148,22 @@ Five selectable modes. Duration of each effect scales with caster sequence (stro
 - **Duration:** 10–20 seconds (scales with sequence)
 - Applies **Confusion** (1.5s) + **Slowness II** (1s) every 0.4 seconds.
 - Causes chaotic movement nudges every second.
-- Triggers a random ability cast every 7 seconds.
+- Drops a random equipped item (armor, mainhand, or offhand) every 7 seconds.
 - Pulses damage to the nearest entity within 10 blocks every 4 seconds.
 
 **Mode 2 — Sluggish**
 - **Duration:** 12–18 seconds (scales with sequence)
 - Applies **Slowness II** (2s) every 2 seconds.
 - Drains spirituality every 2.5 seconds.
-- Blocks all ability usage for the duration.
+- Cancels regeneration for the duration.
 
 **Mode 3 — Anxiety**
-- **Duration:** 12–20 seconds (scales with sequence)
-- Applies **Losing Control** (Level 3 at Seq 4+) + Confusion (2s) + Weakness (2s) every second.
-- Causes natural sanity loss.
+- **Duration:** 10 seconds
+- Applies **Confusion** (2s) + **Weakness** (2s) every second.
+- Drains 2% sanity every second.
 
 **Mode 4 — Will to Fight Seal**
-- **Duration:** 10–18 seconds (scales with sequence)
+- **Duration:** 10 seconds base, +1 second per sequence above 9 (weaker target = longer)
 - Applies **Weakness II** + **Slowness II** for the full duration.
 - Seals all Beyonder abilities until the effect expires.
 
@@ -249,9 +249,9 @@ Seven selectable modes:
 - **Duration:** 6 seconds
 
 **Mode 1 — Disordered Perception**
-- 40% chance per outgoing hit to deal 0 damage.
 - Applies **Confusion** (7 seconds, Level 0).
-- **Duration:** 7 seconds
+- The target's next 3 ability uses are replaced with a random ability from their own pathway (DisorderAbility excluded).
+- **Duration:** 7 seconds (or until all 3 charges are consumed)
 
 **Mode 2 — Defensive Veil** *(self-cast)*
 - Grants the caster a **35% chance to negate any incoming hit**.
@@ -286,8 +286,8 @@ Seven selectable modes:
 | Stage | Threshold | Effects (every 2–3 seconds) | Message |
 |-------|-----------|----------------------------|---------|
 | 1 | 3+ seconds | Slowness I; mobs randomly halt navigation (35% chance) | "You feel an inexplicable greed stirring..." |
-| 2 | 8+ seconds | Confusion; mobs randomly retarget nearby entities (50% chance) | "The greed is overwhelming — your thoughts are scattered." |
-| 3 | 15+ seconds | Weakness II; Beyonder targets fire random abilities (60% chance every 3s) | "You can no longer control yourself. Darkness consumes you." |
+| 2 | 8+ seconds | Confusion; mobs randomly retarget nearby entities (50% chance); players' FOV randomized every 5 seconds | "The greed is overwhelming — your thoughts are scattered." |
+| 3 | 15+ seconds | Weakness II; targets lose 1% sanity every 3 seconds | "You can no longer control yourself. Darkness consumes you." |
 
 **Exposure Decay:** Decays at half rate when leaving the aura.
 
@@ -371,14 +371,13 @@ Three selectable modes:
 
 **Mode 1 — Arrogance** *(30 seconds)*
 - **Confusion** (2s) every second.
-- Mobs lose target and navigation; random movement nudges every second.
+- Random movement nudges every 10 seconds.
 - **20% chance per incoming hit** to completely dodge the damage.
-- Triggers a random ability cast every second.
 
-**Mode 2 — Charm** *(10 seconds)*
+**Mode 2 — Charm** *(30 seconds)*
 - **Slowness III** (1s) every 0.5 seconds.
-- Mobs lose target and navigation; random movement nudges every 0.5 seconds.
-- Charmed target deals **0 damage** to the caster.
+- **On hit:** if the charmed target attacks the caster, the hit is cancelled and charm is broken.
+- If the target never attacks the caster, charm expires naturally after 30 seconds.
 
 ---
 

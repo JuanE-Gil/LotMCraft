@@ -9,16 +9,23 @@ import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.ParticleUtil;
 import de.jakob.lotm.util.helper.RingEffectManager;
 import de.jakob.lotm.util.scheduling.ServerScheduler;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
-
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -170,7 +177,7 @@ public final class FrenzySubAbility {
             case 0 -> caster.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 20 * 8, 1, false, false, true));
             case 1 -> caster.addEffect(new MobEffectInstance(MobEffects.JUMP, 20 * 8, 1, false, false, true));
             case 2 -> caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 20 * 8, 1, false, false, true));
-            case 3 -> caster.addEffect(new MobEffectInstance(ModEffects.LUCK, 20 * 10, 1, false, false, true));
+            case 3 -> caster.addEffect(new MobEffectInstance(MobEffects.LUCK, 20 * 10, 1, false, false, true));
             case 4 -> caster.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, 20 * 10, 1, false, false, true));
             default -> {
                 caster.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 20 * 5, 1, false, false, true));
@@ -223,15 +230,29 @@ public final class FrenzySubAbility {
         applySeal(level, caster, target, scale, seqGap);
     }
 
-    // S14: small disorder.
-    private static void applyMinorDisorder(ServerLevel level, LivingEntity caster, LivingEntity target, double scale, int seqGap) {
-        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20 * (2 + seqGap), Math.min(2, seqGap), false, false, false));
-        target.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 20 * 2, 0, false, false, false));
-        target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 20 * (2 + seqGap), 0, false, false, false));
+    private static final List<Holder<MobEffect>> HARMFUL_EFFECTS = new ArrayList<>();
 
-        if (target instanceof Mob mob) {
-            mob.setTarget(null);
-            mob.getNavigation().stop();
+    private static List<Holder<MobEffect>> getHarmfulEffects() {
+        if (HARMFUL_EFFECTS.isEmpty()) {
+            for (Holder<MobEffect> holder : BuiltInRegistries.MOB_EFFECT.holders().toList()) {
+                if (holder.value().getCategory() == MobEffectCategory.HARMFUL) {
+                    HARMFUL_EFFECTS.add(holder);
+                }
+            }
+        }
+        return HARMFUL_EFFECTS;
+    }
+
+    // S14: small disorder — apply 3 random harmful vanilla effects.
+    private static void applyMinorDisorder(ServerLevel level, LivingEntity caster, LivingEntity target, double scale, int seqGap) {
+        List<Holder<MobEffect>> pool = new ArrayList<>(getHarmfulEffects());
+        Collections.shuffle(pool, new java.util.Random(level.random.nextLong()));
+
+        int count = 0;
+        for (Holder<MobEffect> effect : pool) {
+            if (count >= 3) break;
+            target.addEffect(new MobEffectInstance(effect, 20 * (2 + seqGap), 0, false, false, false));
+            count++;
         }
 
         target.setDeltaMovement(target.getDeltaMovement().add(
@@ -242,18 +263,26 @@ public final class FrenzySubAbility {
         target.hurtMarked = true;
     }
 
-    // S15: heavier control loss.
+    // S15: heavier control loss — shuffle the target's inventory.
     private static void applyControlLoss(ServerLevel level, LivingEntity caster, LivingEntity target, double scale, int seqGap) {
+        if (target instanceof Player player) {
+            List<ItemStack> items = player.getInventory().items;
+            List<ItemStack> copy = new ArrayList<>(items);
+            Collections.shuffle(copy, new java.util.Random(level.random.nextLong()));
+            for (int i = 0; i < items.size(); i++) {
+                items.set(i, copy.get(i));
+            }
+            player.getInventory().setChanged();
+        }
+
         int duration = 20 * (3 + seqGap);
         int amplifier = Math.min(2, 1 + seqGap / 2);
-
         if (BeyonderData.isBeyonder(target)) {
             target.addEffect(new MobEffectInstance(ModEffects.LOOSING_CONTROL, duration, amplifier, false, false, true));
         } else {
             target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, duration, 0, false, false, true));
             target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, duration, 0, false, false, true));
         }
-
     }
 
     // S16: seal.

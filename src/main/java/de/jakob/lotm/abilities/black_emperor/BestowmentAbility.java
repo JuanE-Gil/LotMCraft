@@ -1,9 +1,10 @@
 package de.jakob.lotm.abilities.black_emperor;
 
 import de.jakob.lotm.LOTMCraft;
+import de.jakob.lotm.abilities.PhysicalEnhancementsAbility;
 import de.jakob.lotm.abilities.core.AbilityUseEvent;
 import de.jakob.lotm.abilities.core.SelectableAbility;
-import de.jakob.lotm.effect.ModEffects;
+import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.particle.ModParticles;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityUtil;
@@ -27,10 +28,10 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.UUID;
 
 @EventBusSubscriber(modid = LOTMCraft.MOD_ID)
@@ -90,7 +91,7 @@ public class BestowmentAbility extends SelectableAbility {
     protected void castSelectedAbility(Level level, LivingEntity entity, int abilityIndex) {
         if (!(level instanceof ServerLevel serverLevel)) return;
 
-        BeyonderData.reduceSpirituality(entity, BeyonderData.getMaxSpirituality(BeyonderData.getSequence(entity)) * 0.20f);
+        BeyonderData.reduceSpirituality(entity, BeyonderData.getMaxSpirituality(BeyonderData.getPathway(entity), BeyonderData.getSequence(entity)) * 0.20f);
 
         LivingEntity target = AbilityUtil.getTargetEntity(entity, 15, 1.5f);
         if (target == null) {
@@ -270,7 +271,7 @@ public class BestowmentAbility extends SelectableAbility {
                     ));
 
                     if (now % 140 == 0) {
-                        triggerRashCast(level, target);
+                        dropRandomEquipment(level, target);
                     }
 
                     if (now % 80 == 0) {
@@ -286,38 +287,42 @@ public class BestowmentAbility extends SelectableAbility {
         );
     }
 
-    private void triggerRashCast(ServerLevel level, LivingEntity target) {
-        if (!BeyonderData.isBeyonder(target)) {
-            return;
+    private void dropRandomEquipment(ServerLevel level, LivingEntity target) {
+        List<net.minecraft.world.entity.EquipmentSlot> candidates = new java.util.ArrayList<>();
+
+        for (net.minecraft.world.entity.EquipmentSlot slot : new net.minecraft.world.entity.EquipmentSlot[]{
+                net.minecraft.world.entity.EquipmentSlot.MAINHAND,
+                net.minecraft.world.entity.EquipmentSlot.OFFHAND,
+                net.minecraft.world.entity.EquipmentSlot.HEAD,
+                net.minecraft.world.entity.EquipmentSlot.CHEST,
+                net.minecraft.world.entity.EquipmentSlot.LEGS,
+                net.minecraft.world.entity.EquipmentSlot.FEET
+        }) {
+            if (!target.getItemBySlot(slot).isEmpty()) {
+                candidates.add(slot);
+            }
         }
 
-        String pathway = BeyonderData.getPathway(target);
-        int sequence = BeyonderData.getSequence(target);
+        if (candidates.isEmpty()) return;
 
-        Random rng = new Random(level.random.nextLong());
-
-        var randomAbility = LOTMCraft.abilityHandler.getRandomAbility(
-                pathway,
-                sequence,
-                rng,
-                false,
-                List.of(this)
-        );
-
-        if (randomAbility != null) {
-            randomAbility.useAbility(level, target, true, true, true);
-        }
+        net.minecraft.world.entity.EquipmentSlot chosen = candidates.get(level.random.nextInt(candidates.size()));
+        net.minecraft.world.item.ItemStack item = target.getItemBySlot(chosen).copy();
+        target.setItemSlot(chosen, net.minecraft.world.item.ItemStack.EMPTY);
+        target.spawnAtLocation(item);
     }
 
     /**
      * The feeling of sluggishness.
-     * Reduces spirituality and delays future casts.
+     * Reduces spirituality, cancels regeneration, and slows the target.
      */
     private void bestowSluggish(ServerLevel level, LivingEntity caster, LivingEntity target) {
         int duration = BlackEmperorProgression.scaleTicks(caster, 20 * 12, 12, 20 * 18);
         long until = level.getGameTime() + duration;
 
         target.getPersistentData().putLong(SLUGGISH_NEXT_CAST_UNTIL_KEY, until);
+
+        // Suppress passive regeneration for the full duration
+        PhysicalEnhancementsAbility.suppressRegen(target, duration * 50L);
 
         RingEffectManager.createRingForAll(target.position(), 2.3f, 18,
                 0.56f, 0.12f, 0.72f, 1.0f, 0.16f, 0.8f, level);
@@ -353,7 +358,7 @@ public class BestowmentAbility extends SelectableAbility {
      * Uses the mod's existing losing-control effect so sanity drops naturally.
      */
     private void bestowAnxiety(ServerLevel level, LivingEntity caster, LivingEntity target) {
-        int duration = BlackEmperorProgression.scaleTicks(caster, 20 * 12, 16, 20 * 20);
+        int duration = 20 * 10;
         target.getPersistentData().putLong(ANXIOUS_UNTIL_KEY, level.getGameTime() + duration);
 
         RingEffectManager.createRingForAll(target.position(), 2.4f, 18,
@@ -361,22 +366,14 @@ public class BestowmentAbility extends SelectableAbility {
         ParticleUtil.spawnSphereParticles(level, ModParticles.BLACK.get(),
                 target.position().add(0, 1, 0), 1.0f, 16);
 
-        int amplifier = BlackEmperorProgression.isSeq4Plus(caster) ? 3 : 0;
-        target.addEffect(new MobEffectInstance(
-                ModEffects.LOOSING_CONTROL,
-                duration,
-                amplifier,
-                false,
-                true,
-                true
-        ));
-
         ServerScheduler.scheduleForDuration(
                 0, 20, duration,
                 () -> {
                     if (!target.isAlive()) return;
                     target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 40, 0, false, false, true));
                     target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 40, 0, false, false, true));
+                    var sanity = target.getData(ModAttachments.SANITY_COMPONENT);
+                    sanity.increaseSanityAndSync(-0.02f, target);
                 },
                 () -> target.getPersistentData().remove(ANXIOUS_UNTIL_KEY),
                 level
@@ -391,7 +388,7 @@ public class BestowmentAbility extends SelectableAbility {
      * Seals Beyonder abilities for a short period.
      */
     private void bestowWillToFightSeal(ServerLevel level, LivingEntity caster, LivingEntity target) {
-        int duration = BlackEmperorProgression.scaleTicks(caster, 20 * 10, 16, 20 * 18);
+        int duration = BlackEmperorProgression.scaleTicks(caster, 20 * 10, 20, Integer.MAX_VALUE);
         target.getPersistentData().putLong(SEALED_UNTIL_KEY, level.getGameTime() + duration);
 
         RingEffectManager.createRingForAll(target.position(), 2.5f, 20,
@@ -423,13 +420,6 @@ public class BestowmentAbility extends SelectableAbility {
             return;
         }
 
-        long slowCastUntil = entity.getPersistentData().getLong(SLUGGISH_NEXT_CAST_UNTIL_KEY);
-        if (slowCastUntil > now) {
-            event.setCanceled(true);
-            entity.getPersistentData().putLong(SLUGGISH_NEXT_CAST_UNTIL_KEY, now + 20);
-            AbilityUtil.sendActionBar(entity,
-                    Component.literal("You cannot focus long enough to cast.").withColor(0xFF5555));
-        }
     }
 
     private boolean canBestow(LivingEntity caster, LivingEntity target) {

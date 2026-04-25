@@ -40,6 +40,8 @@ public class CommandingOrdersAbility extends ToggleAbility {
     private static final int COMMAND_ORDER_RANGE = 25;
 
     private static final Map<UUID, ActiveOrder> ACTIVE_ORDERS = new HashMap<>();
+    private static final Map<UUID, Long> REFLECTED_UNTIL = new HashMap<>();
+    private static final long REFLECT_DURATION_TICKS = 60L;
 
     private record ActiveOrder(
             UUID casterId,
@@ -172,7 +174,7 @@ public class CommandingOrdersAbility extends ToggleAbility {
             case "halt" -> 60L;
             case "retreat" -> 40L;
             case "advance" -> 40L;
-            case "silence" -> 70L;
+            case "silence" -> 100L;
             default -> 40L;
         };
     }
@@ -256,9 +258,13 @@ public class CommandingOrdersAbility extends ToggleAbility {
                 player.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 35, 0, false, false, false));
                 lockHeadDown(player, caster, casterSeq);
 
+                // Stop all active toggle abilities immediately
+                ToggleAbility.cleanUp(level, player);
+
+                // Disable all Beyonder abilities for 5 seconds
                 if (BeyonderData.isBeyonder(player)) {
                     DisabledAbilitiesComponent component = player.getData(ModAttachments.DISABLED_ABILITIES_COMPONENT);
-                    component.disableAbilityUsageForTime("commanding_silence", 20 * 14, player);
+                    component.disableAbilityUsageForTime("commanding_silence", 20 * 5, player);
                 }
 
                 syncPlayerPosition(player, level, player.position(), player.getYRot(), player.getXRot());
@@ -325,15 +331,15 @@ public class CommandingOrdersAbility extends ToggleAbility {
 
         if (!CommandingPresenceAbility.isActive(victim.getUUID())) return;
 
+        // Stronger Beyonders (lower sequence) are not debuffed
         if (BeyonderData.isBeyonder(attacker)) {
             int attackerSeq = BeyonderData.getSequence(attacker);
             int casterSeq = BeyonderData.getSequence(victim);
-
-            if (attackerSeq <= casterSeq) {
-                attacker.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 40, 1, false, false, false));
-                attacker.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 30, 2, false, false, false));
-            }
+            if (attackerSeq < casterSeq) return;
         }
+
+        // Debuff attacker's outgoing damage by 50% for 3 seconds
+        REFLECTED_UNTIL.put(attacker.getUUID(), attacker.level().getGameTime() + REFLECT_DURATION_TICKS);
 
         Vec3 pushDir = attacker.position().subtract(victim.position()).normalize();
         attacker.setDeltaMovement(pushDir.x * 0.45, 0.28, pushDir.z * 0.45);
@@ -344,6 +350,22 @@ public class CommandingOrdersAbility extends ToggleAbility {
                     Component.literal("Fighting the presence exhausts you.")
                             .withColor(0x8800CC));
         }
+    }
+
+    @SubscribeEvent
+    public static void onReflectedDamage(LivingDamageEvent.Pre event) {
+        LivingEntity attacker = resolveAttacker(event.getSource());
+        if (attacker == null) return;
+
+        Long until = REFLECTED_UNTIL.get(attacker.getUUID());
+        if (until == null) return;
+
+        if (attacker.level().getGameTime() > until) {
+            REFLECTED_UNTIL.remove(attacker.getUUID());
+            return;
+        }
+
+        event.setNewDamage(event.getNewDamage() * 0.5f);
     }
 
     private static LivingEntity resolveAttacker(DamageSource source) {

@@ -316,6 +316,18 @@ public class PacketHandler {
         );
 
         registrar.playToClient(
+                SyncCorrosionFovPacket.TYPE,
+                SyncCorrosionFovPacket.STREAM_CODEC,
+                SyncCorrosionFovPacket::handle
+        );
+
+        registrar.playToClient(
+                SyncAbilitySelectionPacket.TYPE,
+                SyncAbilitySelectionPacket.STREAM_CODEC,
+                SyncAbilitySelectionPacket::handle
+        );
+
+        registrar.playToClient(
                 SyncAllyDataPacket.TYPE,
                 SyncAllyDataPacket.STREAM_CODEC,
                 SyncAllyDataPacket::handle

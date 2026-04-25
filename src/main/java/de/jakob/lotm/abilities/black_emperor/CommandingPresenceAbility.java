@@ -1,7 +1,6 @@
 package de.jakob.lotm.abilities.black_emperor;
 
 import de.jakob.lotm.LOTMCraft;
-import de.jakob.lotm.abilities.common.MythicalCreatureFormAbility;
 import de.jakob.lotm.abilities.core.ToggleAbility;
 import de.jakob.lotm.particle.ModParticles;
 import de.jakob.lotm.util.BeyonderData;
@@ -48,6 +47,10 @@ public class CommandingPresenceAbility extends ToggleAbility {
     // S2: retaliation
     private static final Map<UUID, UUID> RETALIATING_MOBS = new HashMap<>();
     private static final Map<UUID, Long> RETALIATING_MOBS_UNTIL = new HashMap<>();
+
+    // Damage reflection debuff: attacker deals 50% less damage for a short window
+    private static final Map<UUID, Long> REFLECTED_UNTIL = new HashMap<>();
+    private static final long REFLECT_DURATION_TICKS = 60L;
 
     // S3: drain window
     private static final Map<UUID, UUID> PRESENCE_SPIRITUALITY_DRAIN = new HashMap<>();
@@ -371,9 +374,7 @@ public class CommandingPresenceAbility extends ToggleAbility {
         // S4: restore size
         AttributeInstance scaleAttr = entity.getAttribute(Attributes.SCALE);
         if (scaleAttr != null) {
-            if (MythicalCreatureFormAbility.isActive(entity.getUUID())) {
-                scaleAttr.setBaseValue(2.75D);
-            } else if (entity.getPersistentData().contains(SHARED_SCALE_BACKUP_KEY)) {
+            if (entity.getPersistentData().contains(SHARED_SCALE_BACKUP_KEY)) {
                 scaleAttr.setBaseValue(entity.getPersistentData().getDouble(SHARED_SCALE_BACKUP_KEY));
                 entity.getPersistentData().remove(SHARED_SCALE_BACKUP_KEY);
             }
@@ -438,8 +439,8 @@ public class CommandingPresenceAbility extends ToggleAbility {
             }
         }
 
-        attacker.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 40, 1, false, false, false));
-        attacker.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 30, 2, false, false, false));
+        // Debuff attacker's outgoing damage by 50% for 3 seconds
+        REFLECTED_UNTIL.put(attacker.getUUID(), attacker.level().getGameTime() + REFLECT_DURATION_TICKS);
 
         var pushDir = attacker.position().subtract(victim.position()).normalize();
         attacker.setDeltaMovement(pushDir.x * 0.45, 0.28, pushDir.z * 0.45);
@@ -450,6 +451,22 @@ public class CommandingPresenceAbility extends ToggleAbility {
                     Component.literal("Fighting the presence exhausts you.")
                             .withColor(0x8800CC));
         }
+    }
+
+    @SubscribeEvent
+    public static void onReflectedDamage(LivingDamageEvent.Pre event) {
+        LivingEntity attacker = resolveAttacker(event.getSource());
+        if (attacker == null) return;
+
+        Long until = REFLECTED_UNTIL.get(attacker.getUUID());
+        if (until == null) return;
+
+        if (attacker.level().getGameTime() > until) {
+            REFLECTED_UNTIL.remove(attacker.getUUID());
+            return;
+        }
+
+        event.setNewDamage(event.getNewDamage() * 0.5f);
     }
 
     private static LivingEntity resolveAttacker(DamageSource source) {
