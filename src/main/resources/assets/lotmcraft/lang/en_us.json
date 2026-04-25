@@ -940,6 +940,13 @@
   "lotmcraft.confinement_ability": "Confinement",
   "lotmcraft.confinement_ability.description": "Erect invisible barrier walls forming a hollow cage around a target location. Teleportation out of the cage is blocked.",
 
+
+  "lotmcraft.recognition_ability": "Recognition",
+  "lotmcraft.jurisdiction_ability": "Jurisdiction",
+
+
+
+
   "lotmcraft.justice_language_ability": "Justice Language",
   "lotmcraft.justice_language_ability.description": "Speak verdicts in the Language of Justice. Enforce secrecy, declare death, or prepare a flogging.",
   "ability.lotmcraft.justice_language.maintain_secrecy": "Maintain Secrecy",

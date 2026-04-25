@@ -25,9 +25,7 @@ public class ProhibitionAbility extends SelectableAbility {
     public static final List<ProhibitionZone> ACTIVE_ZONES = new CopyOnWriteArrayList<>();
     public static final Map<UUID, Integer> FAIL_COUNT_BY_ENTITY = new ConcurrentHashMap<>();
 
-    private static final int ZONE_DURATION = 3600;
-    private static final int MAX_ZONES_PER_TYPE = 3;
-    private static final double ZONE_RADIUS = 40.0;
+    private static final double ZONE_RADIUS = 80.0;
 
     public ProhibitionAbility(String id) {
         super(id, 15f, "prohibition");
@@ -66,7 +64,8 @@ public class ProhibitionAbility extends SelectableAbility {
         ServerLevel serverLevel = (ServerLevel) level;
 
         int casterSeq = BeyonderData.getSequence(entity);
-
+        int ZONE_DURATION = 3600*(int) Math.max(multiplier(entity)/4,1);
+        int MAX_ZONES_PER_TYPE = 3*(int) Math.max(multiplier(entity)/4,1);
         // Check for resistance from same-or-higher-rank beyonders in range
         double failChance = casterSeq <= 4 ? 0.15 : 0.4;
 

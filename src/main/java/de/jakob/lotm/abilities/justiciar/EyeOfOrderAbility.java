@@ -1,15 +1,16 @@
 package de.jakob.lotm.abilities.justiciar;
 
-import de.jakob.lotm.abilities.core.Ability;
+import de.jakob.lotm.abilities.core.ToggleAbility;
 import de.jakob.lotm.abilities.core.AbilityUsedEvent;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.ParticleUtil;
-import de.jakob.lotm.util.scheduling.ServerScheduler;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
@@ -20,7 +21,7 @@ import org.joml.Vector3f;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class EyeOfOrderAbility extends Ability {
+public class EyeOfOrderAbility extends ToggleAbility {
 
     public static final List<EyeZone> ACTIVE_ZONES = new CopyOnWriteArrayList<>();
 
@@ -35,7 +36,7 @@ public class EyeOfOrderAbility extends Ability {
             new Vector3f(0.05f, 0.05f, 0.05f), 1.0f);
 
     public EyeOfOrderAbility(String id) {
-        super(id, 10f, "eye_of_order");
+        super(id, "eye_of_order");
         hasOptimalDistance = false;
     }
 
@@ -46,7 +47,7 @@ public class EyeOfOrderAbility extends Ability {
 
     @Override
     protected float getSpiritualityCost() {
-        return 36;
+        return 0;
     }
 
     private static int getRadiusForSequence(int seq) {
@@ -65,8 +66,62 @@ public class EyeOfOrderAbility extends Ability {
     }
 
     @Override
-    public void onAbilityUse(Level level, LivingEntity entity) {
+    public void start(Level level, LivingEntity entity) {
         if (level.isClientSide) return;
+
+        int sequence = BeyonderData.getSequence(entity);
+        int radius = getRadiusForSequence(sequence) *(int) Math.max(multiplier(entity)/4,1);
+
+        BeyonderData.reduceSpirituality(entity, 36);
+
+        EyeZone zone = new EyeZone(entity.getUUID(), entity, (ServerLevel) level, radius);
+        ACTIVE_ZONES.add(zone);
+
+        NeoForge.EVENT_BUS.post(new AbilityUsedEvent((ServerLevel) level, entity.position(), entity, this, interactionFlags, radius, 40));
+    }
+
+    @Override
+    public void tick(Level level, LivingEntity entity) {
+        if (level.isClientSide) return;
+
+        Optional<EyeZone> zoneOpt = ACTIVE_ZONES.stream()
+                .filter(z -> z.ownerId.equals(entity.getUUID()))
+                .findFirst();
+
+        if (zoneOpt.isEmpty()) return;
+        EyeZone zone = zoneOpt.get();
+
+        zone.ticksActive++;
+        if (zone.ticksActive >= DURATION) {
+            cancel((ServerLevel) level, entity);
+            return;
+        }
+
+        if (entity.tickCount % TICK_RATE != 0) return;
+
+        BeyonderData.reduceSpirituality(entity, 3);
+
+        if (BeyonderData.getSpirituality(entity) <= 0) {
+            if (entity instanceof ServerPlayer player) {
+                player.connection.send(new ClientboundSetActionBarTextPacket(
+                        Component.literal("Your spirituality is exhausted.").withColor(0xFF422a2a)
+                ));
+            }
+
+
+            cancel((ServerLevel) level, entity);
+            return;
+        }
+
+
+        applyGlow(zone);
+        spawnParticles(zone);
+    }
+
+    @Override
+    public void stop(Level level, LivingEntity entity) {
+        if (level.isClientSide) return;
+
 
         Optional<EyeZone> existing = ACTIVE_ZONES.stream()
                 .filter(z -> z.ownerId.equals(entity.getUUID()))
@@ -75,52 +130,10 @@ public class EyeOfOrderAbility extends Ability {
         if (existing.isPresent()) {
             EyeZone zone = existing.get();
             cleanupGlow(zone);
-            zone.deactivate();
             ACTIVE_ZONES.remove(zone);
-
-            NeoForge.EVENT_BUS.post(new AbilityUsedEvent((ServerLevel) level, entity.position(), entity, this, interactionFlags, 0, 0));
-            return;
         }
 
-        int sequence = getSequence(entity);
-        int radius = getRadiusForSequence(sequence);
-
-        BeyonderData.reduceSpirituality(entity, 36);
-
-        EyeZone zone = new EyeZone(entity.getUUID(), entity, (ServerLevel) level, radius);
-        ACTIVE_ZONES.add(zone);
-
-        ServerScheduler.scheduleForDuration(0, TICK_RATE, DURATION, () -> {
-            if (!zone.isActive()) return;
-
-            BeyonderData.reduceSpirituality(zone.owner, 3);
-
-            if (BeyonderData.getSpirituality(zone.owner) <= 0) {
-                AbilityUtil.sendActionBar(zone.owner, Component.translatable("ability.lotmcraft.eye_of_order.exhausted"));
-                cleanupGlow(zone);
-                zone.deactivate();
-                ACTIVE_ZONES.remove(zone);
-
-                NeoForge.EVENT_BUS.post(new AbilityUsedEvent(zone.level, zone.owner.position(), zone.owner, this, interactionFlags, 0, 0));
-                return;
-            }
-
-            applyGlow(zone);
-            spawnParticles(zone);
-
-        }, () -> {
-            cleanupGlow(zone);
-            zone.deactivate();
-            ACTIVE_ZONES.remove(zone);
-
-            NeoForge.EVENT_BUS.post(new AbilityUsedEvent((ServerLevel) level, entity.position(), entity, this, interactionFlags, 0, 0));
-        }, (ServerLevel) level);
-
-        NeoForge.EVENT_BUS.post(new AbilityUsedEvent((ServerLevel) level, entity.position(), entity, this, interactionFlags, radius, 40));
-    }
-
-    private int getSequence(LivingEntity entity) {
-        return 8;
+        NeoForge.EVENT_BUS.post(new AbilityUsedEvent((ServerLevel) level, entity.position(), entity, this, interactionFlags, 0, 0));
     }
 
     private static void addToTeam(ServerLevel level, LivingEntity entity, String teamName) {
@@ -141,9 +154,13 @@ public class EyeOfOrderAbility extends Ability {
 
     private static void removeFromTeams(ServerLevel level, LivingEntity entity) {
         var scoreboard = level.getScoreboard();
-        for (String teamName : List.of("eye_red", "eye_gold", "eye_black")) {
-            var team = scoreboard.getPlayerTeam(teamName);
-            if (team != null) scoreboard.removePlayerFromTeam(entity.getStringUUID(), team);
+        var currentTeam = scoreboard.getPlayersTeam(entity.getStringUUID());
+
+        if (currentTeam != null) {
+            String teamName = currentTeam.getName();
+            if (teamName.equals("eye_red") || teamName.equals("eye_gold") || teamName.equals("eye_black")) {
+                scoreboard.removePlayerFromTeam(entity.getStringUUID(), currentTeam);
+            }
         }
     }
 
@@ -157,21 +174,37 @@ public class EyeOfOrderAbility extends Ability {
                 e -> e != owner
         );
 
+        Set<UUID> nearbyUuids = new HashSet<>();
+        for (LivingEntity e : nearby) {
+            nearbyUuids.add(e.getUUID());
+        }
+
+        for (UUID trackedId : zone.all()) {
+            if (!nearbyUuids.contains(trackedId)) {
+                LivingEntity e = (LivingEntity) zone.level.getEntity(trackedId);
+                if (e != null) {
+                    e.setGlowingTag(false);
+                    removeFromTeams(zone.level, e);
+                }
+                zone.redGlow.remove(trackedId);
+                zone.blackGlow.remove(trackedId);
+                zone.goldGlow.remove(trackedId);
+            }
+        }
+
         for (LivingEntity target : nearby) {
             target.setInvisible(false);
+            UUID targetId = target.getUUID();
+
+            zone.redGlow.remove(targetId);
+            zone.blackGlow.remove(targetId);
+            zone.goldGlow.remove(targetId);
 
             if (target instanceof Mob mob) {
-                if (mob.getType().getCategory() == MobCategory.MONSTER) {
+                if (mob.getType().getCategory() == MobCategory.MONSTER || mob.getTarget() != null) {
                     target.setGlowingTag(true);
                     addToTeam(zone.level, target, "eye_red");
-                    zone.redGlow.add(target.getUUID());
-                    continue;
-                }
-
-                if (mob.getTarget() != null) {
-                    target.setGlowingTag(true);
-                    addToTeam(zone.level, target, "eye_red");
-                    zone.redGlow.add(target.getUUID());
+                    zone.redGlow.add(targetId);
                     continue;
                 }
             }
@@ -179,13 +212,13 @@ public class EyeOfOrderAbility extends Ability {
             if (isEvilDisorderMadness(target)) {
                 target.setGlowingTag(true);
                 addToTeam(zone.level, target, "eye_black");
-                zone.blackGlow.add(target.getUUID());
+                zone.blackGlow.add(targetId);
                 continue;
             }
 
             target.setGlowingTag(true);
             addToTeam(zone.level, target, "eye_gold");
-            zone.goldGlow.add(target.getUUID());
+            zone.goldGlow.add(targetId);
         }
     }
 
@@ -229,25 +262,17 @@ public class EyeOfOrderAbility extends Ability {
         public final ServerLevel level;
         public final double radius;
 
+        public int ticksActive = 0;
+
         public final Set<UUID> redGlow = new HashSet<>();
         public final Set<UUID> blackGlow = new HashSet<>();
         public final Set<UUID> goldGlow = new HashSet<>();
-
-        private boolean active = true;
 
         public EyeZone(UUID ownerId, LivingEntity owner, ServerLevel level, double radius) {
             this.ownerId = ownerId;
             this.owner = owner;
             this.level = level;
             this.radius = radius;
-        }
-
-        public boolean isActive() {
-            return active;
-        }
-
-        public void deactivate() {
-            active = false;
         }
 
         public Set<UUID> all() {

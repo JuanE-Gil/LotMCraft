@@ -64,7 +64,7 @@ public class AuthorityAbility extends SelectableAbility {
 
     private void applyStunIfEnhanced(LivingEntity caster, LivingEntity target) {
         if (BeyonderData.getSequence(caster) <= 4) {
-            target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 127, false, false));
+            target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40*(int) Math.max(multiplier(caster)/4,1), 127, false, false));
             target.setDeltaMovement(Vec3.ZERO);
         }
     }
@@ -75,13 +75,13 @@ public class AuthorityAbility extends SelectableAbility {
         if (level.isClientSide) return;
         ServerLevel serverLevel = (ServerLevel) level;
 
-        AbilityUtil.getNearbyEntities(entity, serverLevel, entity.position(), 15).forEach(target -> {
+        AbilityUtil.getNearbyEntities(entity, serverLevel, entity.position(), 15*(int) Math.max(multiplier(entity)/4,1)).forEach(target -> {
             List<Holder<MobEffect>> toRemove = target.getActiveEffects().stream()
                     .filter(e -> e.getEffect().value().getCategory() == MobEffectCategory.BENEFICIAL)
                     .map(MobEffectInstance::getEffect)
                     .collect(Collectors.toList());
             toRemove.forEach(target::removeEffect);
-            target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 20 * 8, 0));
+            target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 20 * 8*(int) Math.max(multiplier(entity)/4,1), 0));
             applyStunIfEnhanced(entity, target);
         });
 
@@ -94,9 +94,9 @@ public class AuthorityAbility extends SelectableAbility {
         if (level.isClientSide) return;
         ServerLevel serverLevel = (ServerLevel) level;
 
-        AbilityUtil.getNearbyEntities(entity, serverLevel, entity.position(), 15).forEach(target -> {
-            target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20 * 20, 1)); // Slowness II, 20 seconds
-            target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 20 * 8, 0));
+        AbilityUtil.getNearbyEntities(entity, serverLevel, entity.position(), 15*(int) Math.max(multiplier(entity)/4,1)).forEach(target -> {
+            target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20 * 20*(int) Math.max(multiplier(entity)/4,1), 1)); // Slowness II, 20 seconds
+            target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 20 * 8*(int) Math.max(multiplier(entity)/4,1), 0));
             applyStunIfEnhanced(entity, target);
         });
 
@@ -109,8 +109,8 @@ public class AuthorityAbility extends SelectableAbility {
         if (level.isClientSide) return;
         ServerLevel serverLevel = (ServerLevel) level;
 
-        AbilityUtil.getNearbyEntities(entity, serverLevel, entity.position(), 15).forEach(target -> {
-            target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 20 * 8, 0));
+        AbilityUtil.getNearbyEntities(entity, serverLevel, entity.position(), 15*(int) Math.max(multiplier(entity)/4,1)).forEach(target -> {
+            target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 20 * 8*(int) Math.max(multiplier(entity)/4,1), 0));
             applyStunIfEnhanced(entity, target);
             if (random.nextDouble() < 0.4) {
                 List<EquipmentSlot> equippedSlots = new ArrayList<>();

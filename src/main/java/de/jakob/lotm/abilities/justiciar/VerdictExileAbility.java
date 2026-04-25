@@ -44,7 +44,7 @@ public class VerdictExileAbility extends Ability {
         if (level.isClientSide) return;
         ServerLevel serverLevel = (ServerLevel) level;
 
-        LivingEntity target = AbilityUtil.getTargetEntity(entity, 25, 1.4f);
+        LivingEntity target = AbilityUtil.getTargetEntity(entity, 25*(int) Math.max(multiplier(entity)/4,1), 1.4f);
         if (target == null) {
             if (entity instanceof ServerPlayer sp) {
                 sp.sendSystemMessage(Component.translatable("ability.lotmcraft.verdict_exile.no_target").withStyle(ChatFormatting.RED));
@@ -54,11 +54,11 @@ public class VerdictExileAbility extends Ability {
 
         // Launch target upward — use absolute Y velocity so it always launches regardless of current motion
         Vec3 current = target.getDeltaMovement();
-        target.setDeltaMovement(current.x, Math.max(current.y, 0) + 3.5, current.z);
+        target.setDeltaMovement(current.x, Math.max(current.y, 0) + 3.5*(int) Math.max(multiplier(entity)/4,1), current.z);
         target.hurtMarked = true;
 
         // Apply Slow Falling
-        target.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, 200, 0, false, false));
+        target.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, 200*(int) Math.max(multiplier(entity)/4,1), 0, false, false));
 
         // Spawn cone-shaped gold/red particles
         Vec3 look = entity.getLookAngle();
