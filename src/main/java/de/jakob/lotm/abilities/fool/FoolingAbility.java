@@ -20,11 +20,8 @@ import java.util.Map;
 
 public class FoolingAbility extends Ability {
 
-    private static final int EFFECT_DURATION_TICKS = 20 * 60 * 5; // 5 minutes
-    private static final double AOE_RADIUS = 15.0;
-
     public FoolingAbility(String id) {
-        super(id, 30f); // 30 second cooldown
+        super(id, 45f);
         hasOptimalDistance = false;
         canBeShared = false;
     }
@@ -36,7 +33,7 @@ public class FoolingAbility extends Ability {
 
     @Override
     public float getSpiritualityCost() {
-        return 50;
+        return 80000;
     }
 
     @Override
@@ -44,7 +41,8 @@ public class FoolingAbility extends Ability {
         if (level.isClientSide) return;
 
         ServerLevel serverLevel = (ServerLevel) level;
-
+        int EFFECT_DURATION_TICKS = 20 * 60 *(int) Math.max(multiplier(entity)/4,1); // 5 minutes
+        double AOE_RADIUS = 50.0*(int) Math.max(multiplier(entity)/4,1);
         serverLevel.playSound(null,
                 entity.getX(), entity.getY(), entity.getZ(),
                 SoundEvents.AMETHYST_CLUSTER_BREAK,

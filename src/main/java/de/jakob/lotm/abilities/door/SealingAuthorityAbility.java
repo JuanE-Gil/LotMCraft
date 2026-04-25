@@ -69,7 +69,7 @@ public class SealingAuthorityAbility extends SelectableAbility {
     private static final HashSet<TrappedEntity> trappedEntities = new HashSet<>();
 
     public SealingAuthorityAbility(String id) {
-        super(id, 40);
+        super(id, 45);
         canBeUsedByNPC = false;
     }
 
@@ -116,13 +116,13 @@ public class SealingAuthorityAbility extends SelectableAbility {
             currentlySealedLocation = null;
         }
 
-        List<BlockPos> barrierBlocks = AbilityUtil.getBlocksInEllipsoid(serverLevel, entity.position(), 120, 25, false, false, false);
+        List<BlockPos> barrierBlocks = AbilityUtil.getBlocksInEllipsoid(serverLevel, entity.position(), 60*(int) Math.max(multiplier(entity)/4,1), 13*(int) Math.max(multiplier(entity)/4,1), false, false, false);
 
-        TimeChangeEntity timeChangeEntity = new TimeChangeEntity(ModEntities.TIME_CHANGE.get(), serverLevel, 20 * 60 * 2, entity.getUUID(), 120, 0.00001f);
+        TimeChangeEntity timeChangeEntity = new TimeChangeEntity(ModEntities.TIME_CHANGE.get(), serverLevel, 20 * 60 *(int) Math.max(multiplier(entity)/4,1), entity.getUUID(), 60*(int) Math.max(multiplier(entity)/4,1), 0.00001f);
         serverLevel.addFreshEntity(timeChangeEntity);
         timeChangeEntity.setPos(entity.position().add(0, 0, 0));
 
-        currentlySealedLocation = new SealedLocation(entity.getUUID(), new Location(entity.position(), serverLevel), 120, 20 * 60 * 2, barrierBlocks, timeChangeEntity);
+        currentlySealedLocation = new SealedLocation(entity.getUUID(), new Location(entity.position(), serverLevel), 60*(int) Math.max(multiplier(entity)/4,1), 20 * 60 *(int) Math.max(multiplier(entity)/4,1), barrierBlocks, timeChangeEntity);
 
 
         serverLevel.playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.BEACON_ACTIVATE, entity.getSoundSource(), 1.5f, 0.6f);
@@ -140,7 +140,7 @@ public class SealingAuthorityAbility extends SelectableAbility {
 
     private void lockDimension(Level level, LivingEntity entity) {
         if(level.isClientSide) {
-            ClientHandler.applyCameraShakeToPlayersInRadius(3, 40, (ClientLevel) level, entity.position(), 20);
+            ClientHandler.applyCameraShakeToPlayersInRadius(3, 40, (ClientLevel) level, entity.position(), 20*(int) Math.max(multiplier(entity)/4,1));
             return;
         }
 
@@ -174,7 +174,7 @@ public class SealingAuthorityAbility extends SelectableAbility {
             return;
         }
 
-        data.activate(20 * 60 * 10, level.dimension().location().toString());
+        data.activate(20 * 60 * 8+(int) Math.max(multiplier(entity)/4,1), level.dimension().location().toString());
         AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.sealing_authority.dimension_sealed").withColor(BeyonderData.pathwayInfos.get("door").color()));
     }
 
