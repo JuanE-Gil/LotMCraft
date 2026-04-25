@@ -52,7 +52,6 @@ public class DarknessRevivalAbility extends PassiveAbilityItem {
 
         if (!((DarknessRevivalAbility) PassiveAbilityHandler.DARKNESS_REVIVAL.get()).shouldApplyTo(entity)) return;
 
-        if (event.getSource().is(ModDamageTypes.LOOSING_CONTROL)) return;
         if (LawAbility.SOLACE_KILLED.contains(entity.getUUID())) return;
 
         // Must be at or below light level 7

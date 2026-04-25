@@ -38,10 +38,9 @@ public class OrderProxyAbility extends SelectableAbility {
     /** Entities marked here (died in a Resurrecting prohibition zone) cannot be revived. */
     public static final Set<UUID> NO_REVIVAL_ENTITIES = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
-    public static final double PROHIBITION_RADIUS = 50.0;
-    public static final double LAW_RADIUS = 15.0;
-    private static final int MAX_PROHIBITION_ZONES = 3;
-    private static final int MAX_LAW_ZONES = 2;
+    public static final double PROHIBITION_RADIUS = 100.0;
+    public static final double LAW_RADIUS = 30.0;
+
 
     public OrderProxyAbility(String id) {
         super(id, 20f, "order_proxy");
@@ -137,7 +136,7 @@ public class OrderProxyAbility extends SelectableAbility {
             }
             return;
         }
-
+        int MAX_PROHIBITION_ZONES = 3*(int) Math.max(multiplier(entity)/4,1);
         if (PERMANENT_PROHIBITION_ZONES.size() >= MAX_PROHIBITION_ZONES) {
             if (entity instanceof ServerPlayer sp) {
                 sp.sendSystemMessage(Component.translatable("ability.lotmcraft.order_proxy.prohibition_limit")
@@ -174,7 +173,7 @@ public class OrderProxyAbility extends SelectableAbility {
             }
             return;
         }
-
+        int MAX_LAW_ZONES = 2*(int) Math.max(multiplier(entity)/4,1);
         if (PERMANENT_LAW_ZONES.size() >= MAX_LAW_ZONES) {
             if (entity instanceof ServerPlayer sp) {
                 sp.sendSystemMessage(Component.translatable("ability.lotmcraft.order_proxy.law_limit")

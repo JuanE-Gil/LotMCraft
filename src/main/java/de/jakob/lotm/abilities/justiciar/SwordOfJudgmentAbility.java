@@ -20,7 +20,7 @@ public class SwordOfJudgmentAbility extends Ability {
     private static final double CHANCE_PER_FAIL = 0.10;
 
     public SwordOfJudgmentAbility(String id) {
-        super(id, 10f);
+        super(id, 5f);
         interactionRadius = 20;
         hasOptimalDistance = true;
         optimalDistance = 10f;
@@ -37,7 +37,7 @@ public class SwordOfJudgmentAbility extends Ability {
 
     @Override
     protected float getSpiritualityCost() {
-        return 200;
+        return 400;
     }
 
     @Override
@@ -45,7 +45,7 @@ public class SwordOfJudgmentAbility extends Ability {
         if (level.isClientSide) return;
         ServerLevel serverLevel = (ServerLevel) level;
 
-        LivingEntity target = AbilityUtil.getTargetEntity(entity, 20, 1.5f);
+        LivingEntity target = AbilityUtil.getTargetEntity(entity, 2030*(int) Math.max(multiplier(entity)/4,1), 1.5f);
         if (target == null) return;
 
         int failCount = ProhibitionAbility.FAIL_COUNT_BY_ENTITY.getOrDefault(target.getUUID(), 0);

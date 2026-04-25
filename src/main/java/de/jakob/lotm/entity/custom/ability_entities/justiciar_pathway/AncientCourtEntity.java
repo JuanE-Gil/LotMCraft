@@ -28,7 +28,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class AncientCourtEntity extends Entity {
 
     public static final List<AncientCourtEntity> ACTIVE_COURTS = new CopyOnWriteArrayList<>();
-    public static final int RADIUS = 120;
+    public static final int RADIUS = 240;
 
     private static final EntityDataAccessor<Integer> DURATION =
             SynchedEntityData.defineId(AncientCourtEntity.class, EntityDataSerializers.INT);

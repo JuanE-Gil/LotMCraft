@@ -2,6 +2,7 @@ package de.jakob.lotm.abilities.justiciar;
 
 import com.google.common.util.concurrent.AtomicDouble;
 import de.jakob.lotm.abilities.core.Ability;
+import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.scheduling.ServerScheduler;
 import net.minecraft.ChatFormatting;
@@ -11,6 +12,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -18,7 +20,7 @@ import java.util.HashMap;
 public class ExecutionAbility extends Ability {
 
     public ExecutionAbility(String id) {
-        super(id, 60f, "execution");
+        super(id, 40f, "execution");
         interactionRadius = 20;
         hasOptimalDistance = false;
     }
@@ -30,16 +32,27 @@ public class ExecutionAbility extends Ability {
 
     @Override
     public float getSpiritualityCost() {
-        return 600;
+        return 1200;
     }
 
     @Override
     public void onAbilityUse(Level level, LivingEntity caster) {
         if (level.isClientSide) return;
         ServerLevel serverLevel = (ServerLevel) level;
+        LivingEntity target = AbilityUtil.getTargetEntity(caster, 20*(int) Math.max(multiplier(caster)/4,1), 1.5f);
 
-        // 70% fail chance
-        if (random.nextDouble() < 0.7) {
+        int targetSeq = BeyonderData.getSequence(target);
+        int seq = BeyonderData.getSequence(caster);
+
+        double failChance =0;
+        if (targetSeq<seq) {
+            failChance = 1;
+        } else if (targetSeq == seq) {
+            failChance = 0.65f;
+        } else {
+            failChance = 0.8f;
+        }
+        if (random.nextDouble() < failChance) {
             if (caster instanceof ServerPlayer player) {
                 player.sendSystemMessage(Component.translatable("ability.lotmcraft.execution.verdict_failed")
                         .withStyle(ChatFormatting.RED));
@@ -47,7 +60,7 @@ public class ExecutionAbility extends Ability {
             return;
         }
 
-        LivingEntity target = AbilityUtil.getTargetEntity(caster, 20, 1.5f);
+
         if (target == null) {
             if (caster instanceof ServerPlayer player) {
                 player.sendSystemMessage(Component.translatable("ability.lotmcraft.execution.no_target")
@@ -56,13 +69,27 @@ public class ExecutionAbility extends Ability {
             return;
         }
 
-        playGuillotineAnimation(serverLevel, target);
+        playGuillotineAnimation(serverLevel, target,caster);
     }
 
-    private static void playGuillotineAnimation(ServerLevel serverLevel, LivingEntity target) {
+    private static void playGuillotineAnimation(ServerLevel serverLevel, LivingEntity target,LivingEntity entity) {
         final double tx = target.getX();
         final double ty = target.getY();
         final double tz = target.getZ();
+
+        // stun
+
+        ServerScheduler.scheduleForDuration(0, 1, 40,
+                () -> {
+                    target.setOnGround(true);
+                    var pos = target.position();
+                    target.setDeltaMovement(new Vec3(0, 0, 0));
+                    target.hurtMarked = true;
+
+                    target.teleportTo(pos.x, pos.y, pos.z);
+                });
+
+
 
         // Blade descends from Y+8 down to Y+0 over 40 ticks (0.2 per tick)
         AtomicDouble bladeY = new AtomicDouble(ty + 8.0);
@@ -93,7 +120,14 @@ public class ExecutionAbility extends Ability {
                     // Kill bypassing revival
                     LawAbility.SOLACE_KILLED.add(target.getUUID());
                     if (target instanceof ServerPlayer) {
-                        target.hurt(serverLevel.damageSources().magic(), Float.MAX_VALUE);
+                        int targetSeq = BeyonderData.getSequence(target);
+                        int seq = BeyonderData.getSequence(entity);
+                        if (targetSeq<seq) {
+                            target.hurt(serverLevel.damageSources().magic(), Float.MAX_VALUE);
+                        }else{
+                            target.setHealth(target.getHealth() - (target.getMaxHealth() * 0.7f));
+                            target.hurtMarked = true;
+                        };
                     } else {
                         target.kill();
                     }

@@ -111,7 +111,7 @@ public class JudgmentSwordEntity extends Entity {
         }
 
         if (!isNoGravity()) {
-            setDeltaMovement(getDeltaMovement().add(0, -0.04D, 0));
+            setDeltaMovement(getDeltaMovement().add(0, -1D, 0));
         }
         move(MoverType.SELF, getDeltaMovement());
 
@@ -124,7 +124,7 @@ public class JudgmentSwordEntity extends Entity {
                 ServerLevel serverLevel = (ServerLevel) level();
                 LivingEntity target = getTarget(serverLevel);
                 if (target != null) {
-                    target.hurt(serverLevel.damageSources().magic(), getDamage());
+                    AbilityUtil.damageNearbyEntities((ServerLevel) level(), getOwner((ServerLevel) level()), 3.75f, getDamage(), position(), true, false);
                 }
 
                 // Gold-white impact ring

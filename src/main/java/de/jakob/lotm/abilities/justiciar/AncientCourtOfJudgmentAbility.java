@@ -27,7 +27,7 @@ public class AncientCourtOfJudgmentAbility extends Ability {
 
     @Override
     protected float getSpiritualityCost() {
-        return 3000;
+        return 10000;
     }
 
     @Override

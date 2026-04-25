@@ -30,11 +30,10 @@ public class LawAbility extends SelectableAbility {
     /** Last ability ID used per entity UUID, for Law of Sealing. */
     public static final Map<UUID, String> LAST_USED_ABILITY = new ConcurrentHashMap<>();
 
-    private static final int WEAKEN_DURATION = 20 * 30;   // 30 seconds
-    private static final int ENHANCE_DURATION = 20 * 60;  // 60 seconds
+
 
     public LawAbility(String id) {
-        super(id, 20f, "law");
+        super(id, 5f, "law");
         interactionRadius = 40;
         hasOptimalDistance = false;
         postsUsedAbilityEventManually = true;
@@ -47,7 +46,7 @@ public class LawAbility extends SelectableAbility {
 
     @Override
     protected float getSpiritualityCost() {
-        return 400;
+        return 800;
     }
 
     @Override
@@ -78,6 +77,7 @@ public class LawAbility extends SelectableAbility {
     // ── Weaken Mysticism, Enhance Reality ────────────────────────────────────
 
     private void weakenMysticism(ServerLevel serverLevel, LivingEntity entity) {
+        int WEAKEN_DURATION = 20 * 30*(int) Math.max(multiplier(entity)/4,1);
         List<LivingEntity> nearby = AbilityUtil.getNearbyEntities(entity, serverLevel, entity.position(), 40);
         nearby.stream()
                 .filter(BeyonderData::isBeyonder)
@@ -94,6 +94,7 @@ public class LawAbility extends SelectableAbility {
     // ── Weaken Reality, Enhance Mysticism ────────────────────────────────────
 
     private void enhanceMysticism(ServerLevel serverLevel, LivingEntity entity) {
+        int ENHANCE_DURATION = 20 * 60*(int) Math.max(multiplier(entity)/4,1);
         List<LivingEntity> nearby = AbilityUtil.getNearbyEntities(entity, serverLevel, entity.position(), 40);
         nearby.stream()
                 .filter(BeyonderData::isBeyonder)
@@ -113,7 +114,7 @@ public class LawAbility extends SelectableAbility {
         // Broadcast the solemn declaration
         broadcastToNearby(serverLevel, caster, Component.translatable("ability.lotmcraft.law.solace_declared").withStyle(ChatFormatting.GOLD));
 
-        List<LivingEntity> nearby = AbilityUtil.getNearbyEntities(caster, serverLevel, caster.position(), 40);
+        List<LivingEntity> nearby = AbilityUtil.getNearbyEntities(caster, serverLevel, caster.position(), 40*(int) Math.max(multiplier(caster)/4,1));
         for (LivingEntity e : nearby) {
             if (!e.getType().is(EntityTypeTags.UNDEAD)) continue;
 
@@ -132,7 +133,7 @@ public class LawAbility extends SelectableAbility {
     // ── Law of Sealing ────────────────────────────────────────────────────────
 
     private void lawOfSealing(ServerLevel serverLevel, LivingEntity caster) {
-        LivingEntity target = AbilityUtil.getTargetEntity(caster, 20, 1.5f);
+        LivingEntity target = AbilityUtil.getTargetEntity(caster, 20*(int) Math.max(multiplier(caster)/4,1), 1.5f);
         if (target == null) {
             if (caster instanceof ServerPlayer player) {
                 player.sendSystemMessage(Component.translatable("ability.lotmcraft.law.sealing_no_target").withStyle(ChatFormatting.RED));
@@ -149,7 +150,7 @@ public class LawAbility extends SelectableAbility {
         }
 
         target.getData(ModAttachments.DISABLED_ABILITIES_COMPONENT)
-                .disableSpecificAbilityForTime(abilityId, "law_of_sealing", 20 * 30);
+                .disableSpecificAbilityForTime(abilityId, "law_of_sealing", 20 * 60*2*(int) Math.max(multiplier(caster)/4,1));
 
         String abilityName = abilityId;
         de.jakob.lotm.abilities.core.Ability sealed = LOTMCraft.abilityHandler.getById(abilityId);

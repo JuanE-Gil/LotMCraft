@@ -3,6 +3,7 @@ package de.jakob.lotm.abilities.justiciar;
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.abilities.core.AbilityUsedEvent;
+import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleTypes;
@@ -67,7 +68,7 @@ public class PunishmentAbility extends Ability {
             return;
         }
 
-        LivingEntity target = AbilityUtil.getTargetEntity(entity, 20, 1.5f);
+        LivingEntity target = AbilityUtil.getTargetEntity(entity, 20*(int) Math.max(multiplier(entity)/4,1), 1.5f);
         if (target == null) {
             if (entity instanceof ServerPlayer player) {
                 player.sendSystemMessage(Component.translatable("ability.lotmcraft.punishment.no_target").withStyle(ChatFormatting.RED));
@@ -139,6 +140,7 @@ public class PunishmentAbility extends Ability {
             case 3 -> new MobEffectInstance(MobEffects.REGENERATION, 20 * 10, 1);
             default -> new MobEffectInstance(MobEffects.ABSORPTION, 20 * 10, 1);
         });
+        BeyonderData.addModifierWithTimeLimit(entity, "punishment_buff", 1.2, 20*5);
     }
 
     private static void applyRandomDebuff(LivingEntity entity) {
@@ -149,6 +151,7 @@ public class PunishmentAbility extends Ability {
             case 3 -> new MobEffectInstance(MobEffects.POISON, 20 * 5, 1);
             default -> new MobEffectInstance(MobEffects.WITHER, 20 * 5, 0);
         });
+        BeyonderData.addModifierWithTimeLimit(entity, "punishment_debuff", 0.7, 20*5);
     }
 
     // ── Condition 1: Thorns — punishment target attacks the caster ───────────

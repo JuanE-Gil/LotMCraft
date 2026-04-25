@@ -28,7 +28,7 @@ public class DeliveringJudgmentAbility extends Ability {
 
     @Override
     protected float getSpiritualityCost() {
-        return 100;
+        return 300;
     }
 
     @Override

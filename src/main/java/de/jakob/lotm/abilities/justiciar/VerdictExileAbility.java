@@ -6,9 +6,12 @@ import de.jakob.lotm.particle.ModParticles;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.ParticleUtil;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -44,23 +47,39 @@ public class VerdictExileAbility extends Ability {
         if (level.isClientSide) return;
         ServerLevel serverLevel = (ServerLevel) level;
 
-        LivingEntity target = AbilityUtil.getTargetEntity(entity, 25*(int) Math.max(multiplier(entity)/4,1), 1.4f);
+        LivingEntity target = AbilityUtil.getTargetEntity(entity, 25 *(int) Math.max(multiplier(entity)/4,1), 1.4f);
         if (target == null) {
             if (entity instanceof ServerPlayer sp) {
                 sp.sendSystemMessage(Component.translatable("ability.lotmcraft.verdict_exile.no_target").withStyle(ChatFormatting.RED));
             }
             return;
         }
+        Vec3 startPos = entity.position();
+        level.playSound(null, BlockPos.containing(startPos), SoundEvents.ENDER_DRAGON_GROWL, SoundSource.BLOCKS, 3, 1);
+        Vec3 awayDir = target.position().subtract(entity.position()).multiply(1, 0, 1).normalize();
 
-        // Launch target upward — use absolute Y velocity so it always launches regardless of current motion
-        Vec3 current = target.getDeltaMovement();
-        target.setDeltaMovement(current.x, Math.max(current.y, 0) + 3.5*(int) Math.max(multiplier(entity)/4,1), current.z);
+
+        if (awayDir.lengthSqr() == 0) {
+            awayDir = entity.getLookAngle().multiply(1, 0, 1).normalize();
+        }
+
+        double tpUpDistance = 15.0 * (int) Math.max(multiplier(entity)/2,1) ;
+        double tpAwayDistance = 10.0 * (int) Math.max(multiplier(entity)/2,1) ;
+
+        target.teleportTo(
+                target.getX() + (awayDir.x * tpAwayDistance),
+                target.getY() + tpUpDistance,
+                target.getZ() + (awayDir.z * tpAwayDistance)
+        );
+
+        double pushHorizontal = 2.0 * (int) Math.max(multiplier(entity)/2,1) ;
+        double pushVertical = 1.5 *(int) Math.max(multiplier(entity)/2,1) ;
+
+        target.setDeltaMovement(awayDir.x * pushHorizontal, pushVertical, awayDir.z * pushHorizontal);
         target.hurtMarked = true;
 
-        // Apply Slow Falling
         target.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, 200*(int) Math.max(multiplier(entity)/4,1), 0, false, false));
 
-        // Spawn cone-shaped gold/red particles
         Vec3 look = entity.getLookAngle();
         Vec3 origin = entity.getEyePosition();
 

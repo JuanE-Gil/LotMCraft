@@ -165,6 +165,10 @@ public class ProhibitionHandler {
         return isInZone(pos, level, ProhibitionAbility.ProhibitionType.MARIONETTE_INTERCHANGE);
     }
 
+    public static boolean IsInTheftZone(Vec3 pos, ServerLevel level) {
+        return isInZone(pos, level, ProhibitionAbility.ProhibitionType.THEFT);
+    }
+
     @SubscribeEvent
     public static void onAbilityUseExile(AbilityUseEvent event) {
         LivingEntity entity = event.getEntity();
