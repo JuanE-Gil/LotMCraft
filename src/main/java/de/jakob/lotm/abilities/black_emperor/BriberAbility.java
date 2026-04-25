@@ -60,7 +60,7 @@ public class BriberAbility extends SelectableAbility {
 
     @Override
     public float getSpiritualityCost() {
-        return 75;
+        return 125;
     }
 
     @Override
@@ -88,7 +88,7 @@ public class BriberAbility extends SelectableAbility {
             return;
         }
 
-        LivingEntity target = AbilityUtil.getTargetEntity(entity, 18, 1.5f);
+        LivingEntity target = AbilityUtil.getTargetEntity(entity, 18*(int) Math.max(multiplier(entity)/4,1), 1.5f);
         if (target == null) {
             AbilityUtil.sendActionBar(entity, Component.literal("No target found.").withColor(0xFF5555));
             return;
@@ -315,7 +315,7 @@ public class BriberAbility extends SelectableAbility {
         // This now applies to ability damage too, not just melee.
         UUID arroganceCaster = ARROGANCE.get(attacker.getUUID());
         if (arroganceCaster != null && arroganceCaster.equals(victim.getUUID())) {
-            if (victim.level().random.nextFloat() < 0.20f) {
+            if (victim.level().random.nextFloat() < 0.80f) {
                 event.setNewDamage(0);
 
 

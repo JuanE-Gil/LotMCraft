@@ -29,7 +29,7 @@ public class Eloquence extends Ability {
 
     @Override
     public float getSpiritualityCost() {
-        return 5;
+        return 50;
     }
 
 
