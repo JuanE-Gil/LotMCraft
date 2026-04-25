@@ -31,6 +31,11 @@ public class DreamMazeEventHandler {
     public static void onBlockBreak(BlockEvent.BreakEvent event) {
         if (!(event.getLevel() instanceof ServerLevel serverLevel)) return;
         if (serverLevel.dimension().equals(ModDimensions.DREAM_MAZE_DIMENSION_KEY)) {
+
+            var entity = event.getPlayer();
+            if(BeyonderData.getPathway(entity).equals("visionary") && BeyonderData.getSequence(entity) <= 0 )
+                return;
+
             event.setCanceled(true);
         }
     }
