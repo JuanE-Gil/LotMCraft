@@ -59,8 +59,8 @@ public class ActionsHelper {
     public static @Nullable ActionBase deduceActionWithContext(String str, int casterSeq){
         TokenStream stream = new TokenStream(str);
 
+        String nick = stream.peek().replaceFirst("^@", "");
         stream.next();
-        String nick = stream.peek();
         UUID id = BeyonderData.playerMap.getKeyByName(nick);
 
         if(id == null) return null;

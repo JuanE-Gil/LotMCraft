@@ -57,18 +57,16 @@ public class TriggerHelper {
     public static @Nullable UUID getUUIDFromNick(String str){
         TokenStream stream = new TokenStream(str);
 
+        String nick = stream.peek().replaceFirst("^@", "");
         stream.next();
-
-        String nick = stream.peek();
         return BeyonderData.playerMap.getKeyByName(nick);
     }
 
     public static @Nullable TriggerBase deduceWithContext(String str, int casterSeq, ServerPlayer caster){
         TokenStream stream = new TokenStream(str);
 
+        String nick = stream.peek().replaceFirst("^@", "");
         stream.next();
-
-        String nick = stream.peek();
         UUID id = BeyonderData.playerMap.getKeyByName(nick);
 
         if(id == null) return null;
