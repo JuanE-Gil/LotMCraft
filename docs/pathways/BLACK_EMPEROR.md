@@ -390,7 +390,6 @@ Three selectable modes:
 - **Radius:** 5 blocks
 - Applies to all nearby entities (excluding caster):
   - **Weakness:** Level 1, 10 seconds
-- Caster receives **Hero of the Village** (Level 0, 10 seconds).
 
 ---
 ### Law Proficiency
