@@ -29,10 +29,10 @@ public class Earthquake extends Calamity{
 
     @Override
     public void spawnCalamity(ServerLevel level, Vec3 startPos, float multiplier, boolean griefing) {
-        spawnCalamity(level, startPos, multiplier, griefing, 28, 9.5f, null);
+        spawnCalamity(level, startPos, multiplier, griefing, 28, 9.5f, null, false);
     }
 
-    public void spawnCalamity(ServerLevel level, Vec3 startPos, float multiplier, boolean griefing, int radius, float rawDamage, LivingEntity caster) {
+    public void spawnCalamity(ServerLevel level, Vec3 startPos, float multiplier, boolean griefing, int radius, float rawDamage, LivingEntity caster, boolean damageCaster) {
         List<BlockPos> blocks = new ArrayList<>(AbilityUtil.getBlocksInCircle(level, startPos.add(0, -2, 0), 30));
         for(int i = -12; i < 13; i++) {
             blocks.addAll(AbilityUtil.getBlocksInCircle(level, startPos.add(0, i, 0), radius));
@@ -49,6 +49,15 @@ public class Earthquake extends Calamity{
                         e.setDeltaMovement(new Vec3((0.5 - random.nextDouble()) * 0.5, 0.25 + random.nextDouble() * .75, (0.5 - random.nextDouble()) * 0.25));
                 }
             });
+
+            if(damageCaster){
+                if(AbilityUtil.distanceToGround(level, caster) < 1.5) {
+                    if(random.nextBoolean())
+                        caster.hurt(ModDamageTypes.source(level, ModDamageTypes.BEYONDER_GENERIC), rawDamage * multiplier);
+                    if(random.nextInt(12) == 0)
+                        caster.setDeltaMovement(new Vec3((0.5 - random.nextDouble()) * 0.5, 0.25 + random.nextDouble() * .75, (0.5 - random.nextDouble()) * 0.25));
+                }
+            }
 
             for(BlockPos b : validBlocks) {
                 if(random.nextInt(35) == 0)

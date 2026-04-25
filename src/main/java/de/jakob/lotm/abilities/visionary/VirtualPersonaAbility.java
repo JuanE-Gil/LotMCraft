@@ -1,6 +1,7 @@
 package de.jakob.lotm.abilities.visionary;
 
 import de.jakob.lotm.abilities.core.SelectableAbility;
+import de.jakob.lotm.abilities.visionary.passives.MetaAwarenessAbility;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.attachments.SanityComponent;
 import de.jakob.lotm.entity.ModEntities;
@@ -10,6 +11,7 @@ import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.RingEffectManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.LivingEntity;
@@ -27,6 +29,7 @@ public class VirtualPersonaAbility extends SelectableAbility {
         canBeCopied = false;
         canBeReplicated = false;
         canBeUsedInArtifact = false;
+        cannotBeStolen = true;
     }
 
     @Override
@@ -78,6 +81,18 @@ public class VirtualPersonaAbility extends SelectableAbility {
             return;
         }
 
+        int targetSeq = BeyonderData.getSequence(target);
+        if(BeyonderData.getPathway(target).equals("visionary") && BeyonderData.getSequence(target) <
+                BeyonderData.getSequence(entity)){
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.dream_traversal.failed").withColor(0xFFff124d));
+
+            if(targetSeq <= 1 && target instanceof ServerPlayer targetPlayer && entity instanceof ServerPlayer entityPlayer){
+                MetaAwarenessAbility.onDivined(targetPlayer, entityPlayer);
+            }
+
+            return;
+        }
+
         applyVirtualPersonaStack(level, target);
     }
 
@@ -93,13 +108,13 @@ public class VirtualPersonaAbility extends SelectableAbility {
 
         sanity.addVirtualPersonaStack();
 
-        RingEffectManager.createRingForAll(
-                entity.getEyePosition().subtract(0, .4, 0),
-                2, 60,
-                250 / 255f, 201 / 255f, 102 / 255f,
-                1, .5f, .75f,
-                (ServerLevel) level
-        );
+//        RingEffectManager.createRingForAll(
+//                entity.getEyePosition().subtract(0, .4, 0),
+//                2, 60,
+//                250 / 255f, 201 / 255f, 102 / 255f,
+//                1, .5f, .75f,
+//                (ServerLevel) level
+//        );
 
         level.playSound(null,
                 entity.position().x, entity.position().y, entity.position().z,

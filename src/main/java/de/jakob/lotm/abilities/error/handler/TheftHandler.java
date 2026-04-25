@@ -421,6 +421,7 @@ public class TheftHandler {
             case 2 -> 480;
             case 1 -> 800;
             case 0 -> 900;
+
         };
     }
 
@@ -461,7 +462,6 @@ public class TheftHandler {
 
         failChance = Math.max(Math.max(failChance, 0.0), theftcap);
         double randomnum =  random.nextDouble();
-        //LOTMCraft.LOGGER.info("random {}, failChance {}", randomnum, failChance);
         return randomnum < failChance;
     }
 

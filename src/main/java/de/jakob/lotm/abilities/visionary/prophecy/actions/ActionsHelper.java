@@ -3,6 +3,7 @@ package de.jakob.lotm.abilities.visionary.prophecy.actions;
 import de.jakob.lotm.abilities.visionary.prophecy.TokenStream;
 import de.jakob.lotm.abilities.visionary.prophecy.actions.context.ActionContextBase;
 import de.jakob.lotm.abilities.visionary.prophecy.actions.context.ActionContextEnum;
+import de.jakob.lotm.abilities.visionary.prophecy.actions.context.implementations.ActionStringContext;
 import de.jakob.lotm.util.BeyonderData;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -17,13 +18,41 @@ public class ActionsHelper {
     private static @Nullable ActionsEnum getType(String str){
         return switch (str){
             case "drop" -> ActionsEnum.DROP_ITEM;
+            case "teleport" -> ActionsEnum.TELEPORT;
+            case "digest" -> ActionsEnum.DIGESTION;
+            case "health" -> ActionsEnum.HEALTH;
+            case "sanity" -> ActionsEnum.SANITY;
+            case "calamity" -> ActionsEnum.CALAMITY;
+            case "stun" -> ActionsEnum.STUN;
+            case "skill" -> ActionsEnum.SKILL;
+            case "confusion" -> ActionsEnum.CONFUSION;
+            case "seal" -> ActionsEnum.SEAL;
+            case "unseal" -> ActionsEnum.UNSEAL;
+            case "spawn" -> ActionsEnum.SPAWN;
+            case "say" -> ActionsEnum.SAY;
+            case "weather" -> ActionsEnum.WEATHER;
+            case "time" -> ActionsEnum.TIME;
             default -> null;
         };
     }
 
-    private static ActionContextEnum getContextType(ActionsEnum value){
+    public static ActionContextEnum getContextType(ActionsEnum value){
         return switch (value){
             case ActionsEnum.DROP_ITEM -> ActionContextEnum.ITEM;
+            case ActionsEnum.TELEPORT -> ActionContextEnum.POSITION;
+            case ActionsEnum.DIGESTION -> ActionContextEnum.NUMBER;
+            case ActionsEnum.HEALTH -> ActionContextEnum.NUMBER;
+            case ActionsEnum.SANITY -> ActionContextEnum.NUMBER;
+            case ActionsEnum.CALAMITY -> ActionContextEnum.STRING;
+            case ActionsEnum.STUN -> ActionContextEnum.EMPTY;
+            case ActionsEnum.SKILL -> ActionContextEnum.STRING;
+            case ActionsEnum.CONFUSION -> ActionContextEnum.EMPTY;
+            case ActionsEnum.SEAL -> ActionContextEnum.EMPTY;
+            case ActionsEnum.UNSEAL -> ActionContextEnum.EMPTY;
+            case ActionsEnum.SPAWN -> ActionContextEnum.STRING;
+            case ActionsEnum.SAY -> ActionContextEnum.STRING;
+            case ActionsEnum.WEATHER -> ActionContextEnum.STRING;
+            case ActionsEnum.TIME -> ActionContextEnum.STRING;
         };
     }
 
@@ -36,7 +65,11 @@ public class ActionsHelper {
 
         if(id == null) return null;
 
-        stream = moveToThen(stream);
+        return deduceActionWithContextSkipNick(stream, casterSeq, id);
+    }
+
+    public static @Nullable ActionBase deduceActionWithContextSkipNick(TokenStream stream, int casterSeq, UUID id){
+        stream = moveToThenOrAnd(stream);
         if(stream == null) return null;
 
         stream.next();
@@ -55,12 +88,12 @@ public class ActionsHelper {
         return action;
     }
 
-    private static TokenStream moveToThen(TokenStream stream){
-        if(stream.match("then")) return stream;
+    private static TokenStream moveToThenOrAnd(TokenStream stream){
+        if(stream.match("then") || stream.match("and")) return stream;
         else if (stream.isEmpty()) return null;
         else {
             stream.next();
-            return moveToThen(stream);
+            return moveToThenOrAnd(stream);
         }
     }
 
@@ -68,7 +101,7 @@ public class ActionsHelper {
         ResourceLocation id = ResourceLocation.tryParse(input);
 
         if (id == null) {
-            return null; // invalid format
+            return null;
         }
 
         return BuiltInRegistries.ITEM.getOptional(id).orElse(null);

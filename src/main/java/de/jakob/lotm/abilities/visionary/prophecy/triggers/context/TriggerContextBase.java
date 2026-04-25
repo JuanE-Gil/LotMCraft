@@ -5,7 +5,7 @@ import de.jakob.lotm.abilities.visionary.prophecy.actions.context.ActionContextB
 import de.jakob.lotm.abilities.visionary.prophecy.actions.context.ActionContextEnum;
 import de.jakob.lotm.abilities.visionary.prophecy.actions.context.implementations.ActionItemsContext;
 import de.jakob.lotm.abilities.visionary.prophecy.actions.context.implementations.ActionPositionContext;
-import de.jakob.lotm.abilities.visionary.prophecy.triggers.context.implementations.TriggerPositionContext;
+import de.jakob.lotm.abilities.visionary.prophecy.triggers.context.implementations.*;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.LivingEntity;
@@ -44,12 +44,22 @@ public abstract class TriggerContextBase {
 
         return switch (type) {
             case POSITION -> TriggerPositionContext.load(tag, id, provider);
+            case ITEM -> TriggerItemsContext.load(tag, id, provider);
+            case EMPTY -> TriggerEmptyContext.load(tag, id, provider);
+            case NUMBER -> TriggerNumbersContext.load(tag, id, provider);
+            case STRING -> TriggerStringContext.load(tag, id, provider);
+            case PLAYER -> TriggerPlayerContext.load(tag, id, provider);
         };
     }
 
     public static TriggerContextBase create(TriggerContextEnum type, UUID id){
         return switch (type){
             case POSITION -> new TriggerPositionContext(id);
+            case ITEM -> new TriggerItemsContext(id);
+            case EMPTY -> new TriggerEmptyContext(id);
+            case NUMBER -> new TriggerNumbersContext(id);
+            case STRING -> new TriggerStringContext(id);
+            case PLAYER -> new TriggerPlayerContext(id);
         };
     }
 }

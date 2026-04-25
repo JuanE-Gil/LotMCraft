@@ -8,7 +8,7 @@ import de.jakob.lotm.abilities.visionary.prophecy.actions.implementations.DropIt
 import de.jakob.lotm.abilities.visionary.prophecy.triggers.context.TriggerContextBase;
 import de.jakob.lotm.abilities.visionary.prophecy.triggers.context.TriggerContextEnum;
 import de.jakob.lotm.abilities.visionary.prophecy.triggers.context.implementations.TriggerPositionContext;
-import de.jakob.lotm.abilities.visionary.prophecy.triggers.implementations.PositionTrigger;
+import de.jakob.lotm.abilities.visionary.prophecy.triggers.implementations.*;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.LivingEntity;
@@ -67,12 +67,24 @@ public abstract class  TriggerBase {
 
         return switch (type) {
             case POSITION -> PositionTrigger.load(tag, actionType, contextType, provider);
+            case PICK_UP -> HasItemTrigger.load(tag, actionType, contextType, provider);
+            case INSTANT -> InstantTrigger.load(tag, actionType, contextType, provider);
+            case HEALTH -> HealthTrigger.load(tag, actionType, contextType, provider);
+            case SANITY -> SanityTrigger.load(tag, actionType, contextType, provider);
+            case PLAYER -> PlayerTrigger.load(tag, actionType, contextType, provider);
+            case SEALED -> SealedTrigger.load(tag, actionType, contextType, provider);
         };
     }
 
     public static TriggerBase create(TriggerEnum type, ActionBase action, TriggerContextBase context){
         return switch (type){
             case POSITION -> new PositionTrigger(action, context);
+            case PICK_UP -> new HasItemTrigger(action, context);
+            case INSTANT -> new InstantTrigger(action, context);
+            case HEALTH -> new HealthTrigger(action, context);
+            case SANITY -> new SanityTrigger(action, context);
+            case PLAYER -> new PlayerTrigger(action, context);
+            case SEALED -> new SealedTrigger(action, context);
         };
     }
 }
