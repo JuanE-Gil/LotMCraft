@@ -2,6 +2,7 @@ package de.jakob.lotm.abilities.justiciar;
 
 import de.jakob.lotm.abilities.core.ToggleAbility;
 import de.jakob.lotm.abilities.core.AbilityUsedEvent;
+import de.jakob.lotm.abilities.visionary.PsychologicalInvisibilityAbility;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.ParticleUtil;
@@ -38,6 +39,7 @@ public class EyeOfOrderAbility extends ToggleAbility {
     public EyeOfOrderAbility(String id) {
         super(id, "eye_of_order");
         hasOptimalDistance = false;
+        canBeUsedInArtifact = false;
     }
 
     @Override
@@ -113,7 +115,6 @@ public class EyeOfOrderAbility extends ToggleAbility {
             return;
         }
 
-
         applyGlow(zone);
         spawnParticles(zone);
     }
@@ -121,7 +122,6 @@ public class EyeOfOrderAbility extends ToggleAbility {
     @Override
     public void stop(Level level, LivingEntity entity) {
         if (level.isClientSide) return;
-
 
         Optional<EyeZone> existing = ACTIVE_ZONES.stream()
                 .filter(z -> z.ownerId.equals(entity.getUUID()))
@@ -171,7 +171,9 @@ public class EyeOfOrderAbility extends ToggleAbility {
         List<LivingEntity> nearby = owner.level().getEntitiesOfClass(
                 LivingEntity.class,
                 owner.getBoundingBox().inflate(zone.radius),
-                e -> e != owner
+                e -> e != owner || !(PsychologicalInvisibilityAbility.
+                        finalInvisiblePlayers.containsKey(e) &&
+                        PsychologicalInvisibilityAbility.finalInvisiblePlayers.get(e) <= BeyonderData.getSequence(owner))
         );
 
         Set<UUID> nearbyUuids = new HashSet<>();
