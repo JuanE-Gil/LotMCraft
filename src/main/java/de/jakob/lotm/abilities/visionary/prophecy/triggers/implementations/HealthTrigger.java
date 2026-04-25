@@ -35,8 +35,6 @@ public class HealthTrigger extends TriggerBase {
         float value = numbers.isInt ? numbers.intValue : (float) numbers.doubleValue;
         float health = entity.getHealth();
 
-        LOTMCraft.LOGGER.info("HEALTH: value:{}, health:{}, operation: {}", value, health, numbers.operation);
-
         if(checkOperation(value, health, numbers.operation)){
             action.action(level, entity);
             return true;

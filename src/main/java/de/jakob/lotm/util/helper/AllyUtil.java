@@ -81,6 +81,8 @@ public class AllyUtil {
         if (entity1 == null || entity2 == null) return false;
         if (entity1.getUUID().equals(entity2.getUUID())) return true;
 
+        if(AbilityUtil.ignoreAllies.containsKey(entity1.getUUID())) return false;
+
         AllyComponent comp1 = entity1.getData(ModAttachments.ALLY_COMPONENT.get());
         return comp1.isAlly(entity2.getUUID());
     }
@@ -91,6 +93,8 @@ public class AllyUtil {
     public static boolean isAlly(LivingEntity entity, UUID allyUUID) {
         if (entity == null || allyUUID == null) return false;
         if (entity.getUUID().equals(allyUUID)) return true;
+
+        if(AbilityUtil.ignoreAllies.containsKey(entity.getUUID())) return false;
 
         AllyComponent comp = entity.getData(ModAttachments.ALLY_COMPONENT.get());
         return comp.isAlly(allyUUID);

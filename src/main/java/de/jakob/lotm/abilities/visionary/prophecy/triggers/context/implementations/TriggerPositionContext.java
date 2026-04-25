@@ -17,7 +17,9 @@ import java.util.UUID;
 public class TriggerPositionContext extends TriggerContextBase {
     public Vec3 pos;
     public int range;
+    public String dimension;
 
+    public static String NBT_DIMENSION = "dimension";
     public static String NBT_RANGE = "range";
 
     public TriggerPositionContext(UUID entityId, Vec3 pos) {
@@ -25,6 +27,7 @@ public class TriggerPositionContext extends TriggerContextBase {
 
         this.pos = pos;
         range = 5;
+        dimension = "";
     }
 
     public TriggerPositionContext(UUID id){
@@ -61,6 +64,11 @@ public class TriggerPositionContext extends TriggerContextBase {
             range = Integer.parseInt(Objects.requireNonNull(stream.peek()));
         }catch (NumberFormatException ignored){}
 
+        stream.next();
+        if(!stream.match("then") || !stream.match("and")){
+            dimension = stream.peek();
+        }
+
         return this;
     }
 
@@ -74,18 +82,22 @@ public class TriggerPositionContext extends TriggerContextBase {
 
         tag.putInt(NBT_RANGE, range);
 
+        tag.putString(NBT_DIMENSION, dimension);
+
         return tag;
     }
 
     public static TriggerPositionContext load(CompoundTag tag, UUID id, HolderLookup.Provider provider) {
-        var contex = new TriggerPositionContext(id, new Vec3(
+        var context = new TriggerPositionContext(id, new Vec3(
                 tag.getDouble("x"),
                 tag.getDouble("y"),
                 tag.getDouble("z")));
 
-        contex.range = tag.getInt(NBT_RANGE);
+        context.range = tag.getInt(NBT_RANGE);
 
-        return contex;
+        context.dimension = tag.getString(NBT_DIMENSION);
+
+        return context;
 
     }
 }

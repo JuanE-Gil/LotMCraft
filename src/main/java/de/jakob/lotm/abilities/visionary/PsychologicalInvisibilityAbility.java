@@ -243,7 +243,7 @@ public class PsychologicalInvisibilityAbility extends ToggleAbility {
         Level level = event.getLevel();
 
         for (Player player : level.players()) {
-            if (invisiblePlayersClient.containsKey(player.getUUID()) || DreamTraversalAbility.isHiding(player.getUUID())) {
+            if (invisiblePlayersClient.containsKey(player.getUUID())) {
 
                 double dist = player.distanceToSqr(
                         event.getPosition().x,

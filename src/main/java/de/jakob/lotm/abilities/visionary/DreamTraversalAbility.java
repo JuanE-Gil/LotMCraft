@@ -195,7 +195,7 @@ public class DreamTraversalAbility extends SelectableAbility {
         player.onUpdateAbilities();
         player.hurtMarked = true;
 
-        PsychologicalInvisibilityAbility.addInvisFromOtherSkills(entity, AbilityUtil.getSeqWithArt(entity, this));
+        PsychologicalInvisibilityAbility.addInvisFromOtherSkills(entity, hideSeqMap.get(entity.getUUID()));
     }
 
     public static void cancelHide(ServerLevel serverLevel, LivingEntity entity) {
@@ -271,7 +271,7 @@ public class DreamTraversalAbility extends SelectableAbility {
 
     @SubscribeEvent
     public static void onEntityTick(EntityTickEvent.Post event) {
-        if (!(event.getEntity() instanceof LivingEntity entity)) return;
+        if (!(event.getEntity() instanceof ServerPlayer entity)) return;
         if (entity.level().isClientSide) return;
         if (!(entity.level() instanceof ServerLevel serverLevel)) return;
         if (!hideMap.containsKey(entity.getUUID())) return;

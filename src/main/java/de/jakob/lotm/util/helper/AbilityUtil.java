@@ -253,7 +253,7 @@ public class AbilityUtil {
 
         // If we're allowing allies for support abilities, skip the mayDamage check
         if (!allowAllies && !mayDamage(source, target)) {
-            return false;
+           return false;
         }
 
         // Still check these even for support abilities

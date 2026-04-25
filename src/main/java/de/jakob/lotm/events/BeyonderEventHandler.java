@@ -1,13 +1,11 @@
 package de.jakob.lotm.events;
 
 import de.jakob.lotm.LOTMCraft;
+import de.jakob.lotm.abilities.visionary.DreamTraversalAbility;
 import de.jakob.lotm.abilities.visionary.PsychologicalInvisibilityAbility;
 import de.jakob.lotm.artifacts.SealedArtifactData;
+import de.jakob.lotm.attachments.*;
 import de.jakob.lotm.damage.ModDamageTypes;
-import de.jakob.lotm.attachments.DisabledFlightComponent;
-import de.jakob.lotm.attachments.KillCountComponent;
-import de.jakob.lotm.attachments.ModAttachments;
-import de.jakob.lotm.attachments.SacrificeRevertComponent;
 import de.jakob.lotm.data.ModDataComponents;
 import de.jakob.lotm.effect.ModEffects;
 import de.jakob.lotm.gamerule.ModGameRules;
@@ -21,11 +19,10 @@ import de.jakob.lotm.potions.BeyonderPotion;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.ClientBeyonderCache;
 import de.jakob.lotm.util.playerMap.StoredData;
-import de.jakob.lotm.attachments.SharedAbilitiesComponent;
-import de.jakob.lotm.attachments.TeamComponent;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.TeamUtils;
 import de.jakob.lotm.util.scheduling.ServerScheduler;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -76,13 +73,19 @@ public class BeyonderEventHandler {
                     playerMap.put(serverPlayer);
                 }
 
-                serverPlayer.addEffect(new MobEffectInstance(ModEffects.CONCEALMENT, 20 * 5, 99));
-                BeyonderData.recalculateCharStackModifiers(serverPlayer);
-                serverPlayer.getData(ModAttachments.LUCK_COMPONENT.get()).setLuck(0);
-                PacketHandler.sendToPlayer(serverPlayer, new SyncPsychologicalInvisibilityPacket(PsychologicalInvisibilityAbility.invisiblePlayers));
 
-                PacketHandler.syncBeyonderDataToPlayer(serverPlayer);
             }
+
+            ParasitationComponent parasitationComponent = serverPlayer.getData(ModAttachments.PARASITE_COMPONENT);
+            parasitationComponent.setParasited(false);
+            parasitationComponent.setParasiteUUID(null);
+
+            serverPlayer.addEffect(new MobEffectInstance(ModEffects.CONCEALMENT, 20 * 5, 99));
+            BeyonderData.recalculateCharStackModifiers(serverPlayer);
+            serverPlayer.getData(ModAttachments.LUCK_COMPONENT.get()).setLuck(0);
+            PacketHandler.sendToPlayer(serverPlayer, new SyncPsychologicalInvisibilityPacket(PsychologicalInvisibilityAbility.invisiblePlayers));
+
+            PacketHandler.syncBeyonderDataToPlayer(serverPlayer);
         }}
 
         private static void convertLegacyNBT (ServerPlayer serverPlayer){
@@ -184,6 +187,8 @@ public class BeyonderEventHandler {
                 return;
             }
             if (player.getServer() == null) return;
+
+            DreamTraversalAbility.cancelHide((ServerLevel) player.level(), player);
 
             TeamComponent team = player.getData(ModAttachments.TEAM_COMPONENT.get());
 

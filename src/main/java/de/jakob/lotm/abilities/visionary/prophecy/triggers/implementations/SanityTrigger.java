@@ -48,12 +48,7 @@ public class SanityTrigger extends TriggerBase {
 
         var operation = numbers.operation;
 
-        LOTMCraft.LOGGER.info("SANITY: value:{}, sanity:{}, operation: {}", value, sanity, operation);
-
         if(checkOperation(value, sanity, operation)){
-
-            LOTMCraft.LOGGER.info("in if");
-
             action.action(level, entity);
             return true;
         }

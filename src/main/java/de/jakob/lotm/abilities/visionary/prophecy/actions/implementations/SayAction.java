@@ -15,6 +15,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.ServerChatEvent;
 import org.checkerframework.checker.units.qual.C;
 
 public class SayAction extends ActionBase {
@@ -37,9 +39,17 @@ public class SayAction extends ActionBase {
         if(!(context instanceof ActionStringContext string)) return;
         if(!(entity instanceof ServerPlayer player)) return;
 
-        PlayerChatMessage msg = PlayerChatMessage.system(string.string);
+        Component component = Component.literal(string.string);
 
-        player.getServer().getPlayerList().broadcastChatMessage(msg, player, ChatType.bind(ChatType.CHAT, player));
+        ServerChatEvent event = new ServerChatEvent(player, string.string, component);
+
+        NeoForge.EVENT_BUS.post(event);
+
+        if (!event.isCanceled()) {
+            PlayerChatMessage msg = PlayerChatMessage.system(string.string);
+
+            player.getServer().getPlayerList().broadcastChatMessage(msg, player, ChatType.bind(ChatType.CHAT, player));
+        }
     }
 
     public static SayAction load(CompoundTag tag, HolderLookup.Provider provider) {

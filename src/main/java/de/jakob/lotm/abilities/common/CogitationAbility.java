@@ -26,6 +26,7 @@ public class CogitationAbility extends ToggleAbility {
         cannotBeStolen = true;
         canBeUsedInArtifact = false;
         canBeShared = false;
+        this.doesNotIncreaseDigestion = true;
     }
 
     @Override
