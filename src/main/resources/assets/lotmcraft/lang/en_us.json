@@ -1613,6 +1613,7 @@
   "lotm.spirituality": "Spirituality",
   "lotm.on": "On",
   "lotm.off": "Off",
+  "lotmcraft.no_target": "No target found",
   "lotm.passive": "Passive",
   "lotm.toggleable": "Toggleable",
   "lotm.selectable": "Selectable",
