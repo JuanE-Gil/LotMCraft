@@ -80,7 +80,7 @@ public class SealingAuthorityAbility extends SelectableAbility {
 
     @Override
     protected float getSpiritualityCost() {
-        return 80000;
+        return 50000;
     }
 
     @Override
