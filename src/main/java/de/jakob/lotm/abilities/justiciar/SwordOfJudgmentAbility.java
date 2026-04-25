@@ -28,6 +28,7 @@ public class SwordOfJudgmentAbility extends Ability {
         canBeCopied = true;
         canBeUsedByNPC = false;
         canBeReplicated = true;
+        canBeShared = false;
     }
 
     @Override

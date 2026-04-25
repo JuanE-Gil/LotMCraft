@@ -116,7 +116,7 @@ public class JurisdictionAbility extends Ability {
 
                         if (!inside && zone.inside.contains(id)) {
                             zone.inside.remove(id);
-                            owner.sendSystemMessage(Component.literal(e.getName().getString() + " has left your Jurisdiction."));
+//                            owner.sendSystemMessage(Component.literal(e.getName().getString() + " has left your Jurisdiction."));
                         }
                     }
 

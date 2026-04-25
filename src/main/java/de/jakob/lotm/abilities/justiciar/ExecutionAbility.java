@@ -23,6 +23,9 @@ public class ExecutionAbility extends Ability {
         super(id, 40f, "execution");
         interactionRadius = 20;
         hasOptimalDistance = false;
+        canBeShared = false;
+        canBeCopied = false;
+        canBeReplicated = false;
     }
 
     @Override

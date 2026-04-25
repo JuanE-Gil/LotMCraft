@@ -929,7 +929,7 @@
   "lotmcraft.jurisdiction_ability": "Jurisdiction",
   "lotmcraft.jurisdiction_ability.description": "establishes a large zone centered on your position. You are alerted when entities enter or leave. Inside your Jurisdiction, your Eye of Order range is doubled.",
 
-  "lotmcraft.eye_of_order_ability": "eye of order",
+  "lotmcraft.eye_of_order_ability": "Eye of Order",
   "lotmcraft.eye_of_order_ability.description": "highlight the dangers around you making them glow red",
   "ability.lotmcraft.eye_of_order.exhausted": "Your spirituality is exhausted.",
 
@@ -956,6 +956,7 @@
   "ability.lotmcraft.prohibition.outside_world": "Prohibit Outside World",
   "ability.lotmcraft.prohibition.stand_ins": "Law: Prohibit Stand-ins",
   "ability.lotmcraft.prohibition.marionette_interchange": "Law: Prohibit Marionette Interchange",
+  "ability.lotmcraft.prohibition.theft": "Law: Prohibit Acts of Theft",
   "ability.lotmcraft.prohibition.verdict_failed": "Your Verdict has Failed",
   "ability.lotmcraft.prohibition.zone_prohibited": "[%s] is Prohibited here",
   "lotmcraft.prohibition.beyonder_abilities": "[Beyonder Abilities] is Prohibited here",
@@ -1014,7 +1015,7 @@
   "ability.lotmcraft.law.sealing_no_ability": "[Law of Sealing] No recent ability found to seal.",
   "ability.lotmcraft.law.sealing_broadcast_prefix": "[Law of Sealing] ",
   "ability.lotmcraft.law.sealing_broadcast_middle": "'s ",
-  "ability.lotmcraft.law.sealing_broadcast_suffix": " has been sealed for 30 seconds.",
+  "ability.lotmcraft.law.sealing_broadcast_suffix": " has been sealed.",
   "ability.lotmcraft.law.sealing_target_prefix": "[Law of Sealing] Your ability ",
   "ability.lotmcraft.law.sealing_target_suffix": " has been sealed.",
 

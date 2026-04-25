@@ -29,6 +29,8 @@ public class ExileOfBalanceAbility extends Ability {
         interactionRadius = 40;
         hasOptimalDistance = false;
         postsUsedAbilityEventManually = true;
+        canBeShared = false;
+        canBeCopied = false;
     }
 
     @Override

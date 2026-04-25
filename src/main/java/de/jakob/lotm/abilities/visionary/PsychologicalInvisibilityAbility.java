@@ -15,11 +15,14 @@ import de.jakob.lotm.util.ClientBeyonderCache;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.scheduling.ServerScheduler;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -27,16 +30,14 @@ import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderPlayerEvent;
+import net.neoforged.neoforge.common.NeoForgeMod;
 import net.neoforged.neoforge.event.PlayLevelSoundEvent;
 import net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @EventBusSubscriber(modid = LOTMCraft.MOD_ID)
 public class PsychologicalInvisibilityAbility extends ToggleAbility {
@@ -76,6 +77,40 @@ public class PsychologicalInvisibilityAbility extends ToggleAbility {
         }
     }
 
+    private static void removeOrAddName(LivingEntity entity){
+        if(entity instanceof ServerPlayer targetPlayer) {
+            AttributeInstance attribute = targetPlayer.getAttribute(NeoForgeMod.NAMETAG_DISTANCE);
+            if (attribute != null) {
+                if (attribute.getValue() == 0) {
+                    attribute.setBaseValue(64);
+
+                    if (targetPlayer.getServer() != null) {
+                        targetPlayer.getServer().getPlayerList().broadcastAll(
+                                new ClientboundPlayerInfoUpdatePacket(
+                                        EnumSet.of(
+                                                ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER,
+                                                ClientboundPlayerInfoUpdatePacket.Action.UPDATE_LISTED,
+                                                ClientboundPlayerInfoUpdatePacket.Action.UPDATE_LATENCY,
+                                                ClientboundPlayerInfoUpdatePacket.Action.UPDATE_GAME_MODE,
+                                                ClientboundPlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME
+                                        ),
+                                        List.of(targetPlayer)
+                                )
+                        );
+                    }
+                } else {
+                    attribute.setBaseValue(0);
+
+                    if (targetPlayer.getServer() != null) {
+                        targetPlayer.getServer().getPlayerList().broadcastAll(
+                                new ClientboundPlayerInfoRemovePacket(List.of(targetPlayer.getUUID()))
+                        );
+                    }
+                }
+            }
+        }
+    }
+
     @Override
     public void stop(Level level, LivingEntity entity) {
         remove(entity);
@@ -88,6 +123,8 @@ public class PsychologicalInvisibilityAbility extends ToggleAbility {
 
         finalInvisiblePlayers.putAll(invisiblePlayers);
 
+        removeOrAddName(entity);
+
         PacketHandler.sendToAllPlayers(new SyncPsychologicalInvisibilityPacket(finalInvisiblePlayers));
         entity.setInvisible(true);
     }
@@ -97,6 +134,8 @@ public class PsychologicalInvisibilityAbility extends ToggleAbility {
         hits.remove(entity.getUUID());
 
         finalInvisiblePlayers.remove(entity.getUUID());
+
+        removeOrAddName(entity);
 
         PacketHandler.sendToAllPlayers(new SyncPsychologicalInvisibilityPacket(finalInvisiblePlayers));
         entity.setInvisible(false);

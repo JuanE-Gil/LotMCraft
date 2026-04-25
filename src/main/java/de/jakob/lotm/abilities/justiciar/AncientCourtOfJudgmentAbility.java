@@ -18,6 +18,7 @@ public class AncientCourtOfJudgmentAbility extends Ability {
         canBeCopied = false;
         canBeUsedByNPC = false;
         canBeReplicated = false;
+        canBeShared = false;
     }
 
     @Override

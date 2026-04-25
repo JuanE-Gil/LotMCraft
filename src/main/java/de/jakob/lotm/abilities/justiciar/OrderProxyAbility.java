@@ -47,6 +47,9 @@ public class OrderProxyAbility extends SelectableAbility {
         interactionRadius = 50;
         hasOptimalDistance = false;
         postsUsedAbilityEventManually = true;
+        canBeShared = false;
+        canBeCopied= false;
+        canBeReplicated = false;
     }
 
     @Override

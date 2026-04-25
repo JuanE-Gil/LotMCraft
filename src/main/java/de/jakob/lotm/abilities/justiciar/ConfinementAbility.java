@@ -71,7 +71,7 @@ public class ConfinementAbility extends Ability {
                     ACTIVE_ZONES.remove(existing);
                 });
 
-        int RADIUS = 6*(int) Math.max(multiplier(entity)/4,1);
+        int RADIUS = 6;
         int DURATION = 1200*(int) Math.max(multiplier(entity)/4,1);
 
 

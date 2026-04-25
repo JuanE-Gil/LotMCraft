@@ -171,9 +171,7 @@ public class EyeOfOrderAbility extends ToggleAbility {
         List<LivingEntity> nearby = owner.level().getEntitiesOfClass(
                 LivingEntity.class,
                 owner.getBoundingBox().inflate(zone.radius),
-                e -> e != owner || !(PsychologicalInvisibilityAbility.
-                        finalInvisiblePlayers.containsKey(e) &&
-                        PsychologicalInvisibilityAbility.finalInvisiblePlayers.get(e) <= BeyonderData.getSequence(owner))
+                e -> e != owner
         );
 
         Set<UUID> nearbyUuids = new HashSet<>();

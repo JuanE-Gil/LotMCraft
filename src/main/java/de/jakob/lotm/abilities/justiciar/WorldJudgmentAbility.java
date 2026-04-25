@@ -18,12 +18,13 @@ import java.util.UUID;
 public class WorldJudgmentAbility extends Ability {
 
     public WorldJudgmentAbility(String id) {
-        super(id, 60f * 2);
+        super(id, 45f);
         hasOptimalDistance = true;
         optimalDistance = 20f;
         canBeCopied = false;
         canBeUsedByNPC = false;
         canBeReplicated = false;
+        canBeShared = false;
     }
 
     @Override

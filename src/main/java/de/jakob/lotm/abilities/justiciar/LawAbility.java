@@ -37,6 +37,8 @@ public class LawAbility extends SelectableAbility {
         interactionRadius = 40;
         hasOptimalDistance = false;
         postsUsedAbilityEventManually = true;
+        canBeCopied = false;
+        canBeShared=false;
     }
 
     @Override

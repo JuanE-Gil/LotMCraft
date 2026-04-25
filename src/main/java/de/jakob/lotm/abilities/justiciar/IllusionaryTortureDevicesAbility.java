@@ -100,7 +100,7 @@ public class IllusionaryTortureDevicesAbility extends SelectableAbility {
                     if (!player.getMainHandItem().equals(brandingIron)) return;
 
                     if (player.getAttackStrengthScale(0) == 1.0f) {
-                        LivingEntity target = AbilityUtil.getTargetEntity(player, 4* (int) Math.max(multiplier(entity)/4,1), 2.5f);
+                        LivingEntity target = AbilityUtil.getTargetEntity(player, 4* (int) Math.max(multiplier(entity)/4,1), 0.8f);
                         if (target != null) {
                             double damage = DamageLookup.lookupDamage(7, 0.6) * (int) Math.max(multiplier(entity)/4,1);
                             target.hurt(ModDamageTypes.source(level, ModDamageTypes.BEYONDER_GENERIC, entity), (float) damage);
@@ -145,7 +145,7 @@ public class IllusionaryTortureDevicesAbility extends SelectableAbility {
         if (level.isClientSide) return;
         if (!(level instanceof ServerLevel serverLevel)) return;
 
-        LivingEntity target = AbilityUtil.getTargetEntity(entity, 18* (int) Math.max(multiplier(entity)/4,1), 2.5f);
+        LivingEntity target = AbilityUtil.getTargetEntity(entity, 18* (int) Math.max(multiplier(entity)/4,1), 1.3f);
         if (target == null || target == entity) return;
 
         double damage = DamageLookup.lookupDamage(7, 0.8) * (int) Math.max(multiplier(entity)/4,1);
@@ -177,7 +177,7 @@ public class IllusionaryTortureDevicesAbility extends SelectableAbility {
         if (level.isClientSide) return;
         if (!(level instanceof ServerLevel serverLevel)) return;
 
-        LivingEntity target = AbilityUtil.getTargetEntity(entity, 12* (int) Math.max(multiplier(entity)/4,1), 0.8f);
+        LivingEntity target = AbilityUtil.getTargetEntity(entity, 12* (int) Math.max(multiplier(entity)/4,1), 1.3f);
         if (target == null || target == entity) return;
 
         double damage = DamageLookup.lookupDamage(7, 0.6) * (int) Math.max(multiplier(entity)/4,1);
