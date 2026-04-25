@@ -34,7 +34,7 @@ public class ConceptualizationAbility extends ToggleAbility {
 
     @Override
     public float getSpiritualityCost() {
-        return 300;
+        return 220;
     }
 
     @Override

@@ -7,6 +7,7 @@ import de.jakob.lotm.entity.custom.ability_entities.TimeChangeEntity;
 import de.jakob.lotm.entity.custom.ability_entities.door_pathway.PlanetEntity;
 import de.jakob.lotm.network.packets.handlers.ClientHandler;
 import de.jakob.lotm.rendering.effectRendering.EffectManager;
+import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.DamageLookup;
 import de.jakob.lotm.util.helper.ParticleUtil;
@@ -32,12 +33,8 @@ public class SpaceFragmentationAbility extends Ability {
 
     @Override
     public void onAbilityUse(Level level, LivingEntity entity) {
-        if(level.isClientSide) {
-            ClientHandler.changeToThirdPerson(entity);
-            return;
-        }
 
-        Vec3 targetLoc = entity.getEyePosition().add(entity.getLookAngle().normalize().scale(7));
+        Vec3 targetLoc =  AbilityUtil.getTargetLocation(entity, 35*(int) Math.max(multiplier(entity)/4,1), 2);
 
         EffectManager.playEffect(EffectManager.Effect.SPACE_TEARING, targetLoc.x(), targetLoc.y(), targetLoc.z(), (ServerLevel) level, entity);
 
@@ -63,14 +60,16 @@ public class SpaceFragmentationAbility extends Ability {
         AtomicInteger tick = new AtomicInteger(0);
         ServerScheduler.scheduleForDuration(0, 1, 20 * 5, () -> {
             if(tick.get() % 20 == 0) {
-                AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 25, DamageLookup.lookupDamage(1, .75f), targetLoc, true, true);
+                AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 25, DamageLookup.lookupDamage(1, .75f) *(int) Math.max(multiplier(entity)/6,1), targetLoc, true, true);
             }
-
-            AbilityUtil.getBlocksInSphereRadius(level, targetLoc, Math.max(2, tick.get() / 6f), true, true, false).forEach(pos -> {
-                if(level.random.nextFloat() < 0.3f && level.getBlockState(pos).getDestroySpeed(level, pos) >= 0 && !pos.getCenter().equals(BlockPos.containing(entity.position().subtract(0, 1, 0)).getCenter())) {
-                    level.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
-                }
-            });
+            if (BeyonderData.isGriefingEnabled(entity))
+            {
+                AbilityUtil.getBlocksInSphereRadius(level, targetLoc, Math.max(2, tick.get() / 6f), true, true, false).forEach(pos -> {
+                    if (level.random.nextFloat() < 0.3f && level.getBlockState(pos).getDestroySpeed(level, pos) >= 0 && !pos.getCenter().equals(BlockPos.containing(entity.position().subtract(0, 1, 0)).getCenter())) {
+                        level.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
+                    }
+                });
+            };
 
             tick.getAndIncrement();
         }, () -> planets.forEach(PlanetEntity::discard), (ServerLevel) level);
@@ -83,6 +82,6 @@ public class SpaceFragmentationAbility extends Ability {
 
     @Override
     protected float getSpiritualityCost() {
-        return 300;
+        return 12000;
     }
 }
