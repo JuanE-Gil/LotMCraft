@@ -924,6 +924,11 @@
   "ability.lotmcraft.authority.slow": "Slow",
   "ability.lotmcraft.authority.armor_remove": "Armor Remove",
 
+  "lotmcraft.recognition_ability": "Recognition",
+  "lotmcraft.recognition_ability.description": "reveals the name, pathway, and sequence of a targeted entity within 40 blocks. Does not reveal lower sequence Justiciars or significantly stronger entities.",
+  "lotmcraft.jurisdiction_ability": "Jurisdiction",
+  "lotmcraft.jurisdiction_ability.description": "establishes a large zone centered on your position. You are alerted when entities enter or leave. Inside your Jurisdiction, your Eye of Order range is doubled.",
+
   "lotmcraft.eye_of_order_ability": "eye of order",
   "lotmcraft.eye_of_order_ability.description": "highlight the dangers around you making them glow red",
   "ability.lotmcraft.eye_of_order.exhausted": "Your spirituality is exhausted.",
@@ -955,13 +960,6 @@
 
   "lotmcraft.confinement_ability": "Confinement",
   "lotmcraft.confinement_ability.description": "Erect invisible barrier walls forming a hollow cage around a target location. Teleportation out of the cage is blocked.",
-
-
-  "lotmcraft.recognition_ability": "Recognition",
-  "lotmcraft.jurisdiction_ability": "Jurisdiction",
-
-
-
 
   "lotmcraft.justice_language_ability": "Justice Language",
   "lotmcraft.justice_language_ability.description": "Speak verdicts in the Language of Justice. Enforce secrecy, declare death, or prepare a flogging.",
