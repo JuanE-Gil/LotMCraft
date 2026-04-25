@@ -22,7 +22,7 @@ import java.util.Map;
 
 public class BlinkAbility extends Ability {
     public BlinkAbility(String id) {
-        super(id, .5f, "blink_escape", "escape");
+        super(id, .005f, "blink_escape", "escape");
         interactionRadius = 3;
         interactionCacheTicks = 40;
     }

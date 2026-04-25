@@ -72,7 +72,7 @@ public class TelepathyAbility extends ToggleAbility {
 
         AbilityUtil.sendActionBar(entity, Component.literal(
                 "§d" + name + " §7| Sanity: " + color + sanityPercent + "%" +
-                        ((diff <= 0 && entitySeq <= 4) ? " Pathway: " + BeyonderData.getPathway(target) +
+                        ((diff <= 0 && entitySeq <= 4) ? "§7 Pathway: " + BeyonderData.getPathway(target) +
                                 " Sequence: " + targetSeq : "")
         ));
     }

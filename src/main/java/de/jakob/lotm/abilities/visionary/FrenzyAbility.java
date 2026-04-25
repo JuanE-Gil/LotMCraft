@@ -9,6 +9,7 @@ import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.DamageLookup;
 import de.jakob.lotm.util.helper.ParticleUtil;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
@@ -46,10 +47,13 @@ public class FrenzyAbility extends Ability {
 
     @Override
     public void onAbilityUse(Level level, LivingEntity entity) {
-        if(level.isClientSide)
-            return;
-
         LivingEntity target = AbilityUtil.getTargetEntity(entity, 20, 2);
+
+        if (level.isClientSide) {
+            if(target != null)
+                ParticleUtil.spawnParticles((ClientLevel) level, dust, target.getEyePosition(), 35, .5);
+            return;
+        }
 
         if(target == null) {
             if(entity instanceof ServerPlayer player) {
@@ -58,6 +62,7 @@ public class FrenzyAbility extends Ability {
             }
             return;
         }
+
 
         int amplifier = getAmplifier(entity, target);
 
