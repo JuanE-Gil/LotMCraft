@@ -26,6 +26,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 import java.util.HashMap;
@@ -46,9 +47,6 @@ public final class MausoleumDomainAbility extends Ability {
     private static final int ROOM_HALF_XZ = 75;
     private static final int ROOM_HALF_Y = 32;
     private static final double CAST_RANGE = 25.0D;
-
-    private static final Map<BlockPos, BlockState> ROOM_SNAPSHOT = new HashMap<>();
-    private static long LAST_ROOM_REPAIR_TICK = -1L;
 
     private static final Map<UUID, Session> SESSIONS = new HashMap<>();
     private static final Map<UUID, UUID> PLAYER_TO_CASTER = new HashMap<>();
@@ -117,8 +115,6 @@ public final class MausoleumDomainAbility extends Ability {
                     Component.literal("The mausoleum is already sealed.").withColor(0xFF5555));
             return;
         }
-
-        ensureRoomSnapshot(mausoleum);
 
         AABB range = caster.getBoundingBox().inflate(CAST_RANGE);
         Set<ServerPlayer> targets = new HashSet<>(overworld.getEntitiesOfClass(
@@ -226,14 +222,32 @@ public final class MausoleumDomainAbility extends Ability {
         PLAYER_TO_CASTER.remove(playerId);
     }
 
+    private static boolean structurePlaced = false;
+
     @SubscribeEvent
     public static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
+
+        if (!structurePlaced) {
+            MinecraftServer server = player.getServer();
+            if (server != null) {
+                prePlaceStructure(server);
+                structurePlaced = true;
+            }
+        }
 
         if (PENDING_DEATHS.contains(player.getUUID())) {
             player.invulnerableTime = 0;
             killPlayer(player);
         }
+    }
+
+    @SubscribeEvent
+    public static void onServerStopped(ServerStoppedEvent event) {
+        structurePlaced = false;
+        SESSIONS.clear();
+        PLAYER_TO_CASTER.clear();
+        PENDING_DEATHS.clear();
     }
 
     @SubscribeEvent
@@ -269,11 +283,6 @@ public final class MausoleumDomainAbility extends Ability {
 
         ServerLevel mausoleum = server.getLevel(MAUSOLEUM_DIMENSION);
         if (mausoleum == null) return;
-
-        if (mausoleum.getGameTime() != LAST_ROOM_REPAIR_TICK) {
-            LAST_ROOM_REPAIR_TICK = mausoleum.getGameTime();
-            restoreRoomSnapshot(mausoleum);
-        }
 
         if (!sp.level().dimension().equals(MAUSOLEUM_DIMENSION)) {
             teleportPlayer(sp, mausoleum, new Vec3(75.5D, findGroundY(mausoleum, 75, 75), 75.5D));
@@ -348,8 +357,8 @@ public final class MausoleumDomainAbility extends Ability {
             return;
         }
 
-        // Check if structure is already placed by testing a known block
-        BlockState check = mausoleum.getBlockState(new BlockPos(75, 0, 75));
+        // Check if structure is already placed by testing a block above the bedrock floor
+        BlockState check = mausoleum.getBlockState(new BlockPos(75, 1, 75));
         if (!check.isAir()) {
             LOTMCraft.LOGGER.info("Mausoleum structure already present, skipping placement.");
             return;
@@ -364,29 +373,6 @@ public final class MausoleumDomainAbility extends Ability {
             LOTMCraft.LOGGER.info("Mausoleum chunks saved.");
         } catch (Exception e) {
             LOTMCraft.LOGGER.error("Failed to pre-place mausoleum structure: {}", e.getMessage());
-        }
-    }
-
-    private static void ensureRoomSnapshot(ServerLevel mausoleum) {
-        if (!ROOM_SNAPSHOT.isEmpty()) return;
-
-        for (int x = 0; x < STRUCT_WIDTH; x++) {
-            for (int y = 0; y < STRUCT_HEIGHT; y++) {
-                for (int z = 0; z < STRUCT_LENGTH; z++) {
-                    BlockPos pos = new BlockPos(x, y, z);
-                    ROOM_SNAPSHOT.put(pos, mausoleum.getBlockState(pos));
-                }
-            }
-        }
-    }
-
-    private static void restoreRoomSnapshot(ServerLevel mausoleum) {
-        for (Map.Entry<BlockPos, BlockState> entry : ROOM_SNAPSHOT.entrySet()) {
-            BlockPos pos = entry.getKey();
-            BlockState expected = entry.getValue();
-            if (!mausoleum.getBlockState(pos).equals(expected)) {
-                mausoleum.setBlockAndUpdate(pos, expected);
-            }
         }
     }
 
