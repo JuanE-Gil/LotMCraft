@@ -21,6 +21,8 @@ public abstract class ToggleAbility extends Ability {
     private static final HashMap<UUID, HashSet<ToggleAbility>> activeAbilitiesClientCache = new HashMap<>();
 
 
+    public int tickRate = 5;
+
     protected ToggleAbility(String id, String... interactionFlags) {
         super(id, 0, interactionFlags);
 

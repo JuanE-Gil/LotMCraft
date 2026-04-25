@@ -1,5 +1,7 @@
 package de.jakob.lotm.entity.custom.ability_entities.wheel_of_fortune_pathway;
 
+import de.jakob.lotm.attachments.LuckComponent;
+import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.effect.ModEffects;
 import de.jakob.lotm.entity.ModEntities;
 import de.jakob.lotm.util.BeyonderData;
@@ -66,7 +68,13 @@ public class MisfortuneWordsEntity extends Entity {
                 if(getCasterEntity() != null && !AbilityUtil.mayTarget(getCasterEntity(), e))
                     return;
 
-                e.addEffect(new MobEffectInstance(ModEffects.UNLUCK, 20 * 60 * 5, 12, false, false, false));
+                LuckComponent luckComponent = e.getData(ModAttachments.LUCK_COMPONENT.get());
+                int luck = luckComponent.getLuck();
+
+                if(luck < 1000 && luck > -3000) {
+                    luckComponent.setLuck(-3000);
+                }
+
                 if(!affectedEntities.contains(e.getUUID())) {
                     affectedEntities.add(e.getUUID());
                     setAffectedEntitiesCount(getAffectedEntitiesCount() + (e instanceof Player ? 10 : 1));

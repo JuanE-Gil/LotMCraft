@@ -53,7 +53,6 @@ public record PlayerDivinationSelectedPacket(UUID selectedPlayerUuid) implements
             int playerSequence = BeyonderData.getSequence(player);
             int targetSequence = BeyonderData.getSequence(targetPlayer);
 
-
             int divinationDifference = 3 + DivinationUtil.getDivinationPower(player) - DivinationUtil.getConcealmentPower(targetPlayer);
             if (divinationDifference <= 0){
                 player.sendSystemMessage(Component.literal("§cDivination failed"));
@@ -78,7 +77,8 @@ public record PlayerDivinationSelectedPacket(UUID selectedPlayerUuid) implements
                 case 3             -> 5000;
                 case 2             -> ((int) (player.level().getWorldBorder().getSize() * 0.001) > 5000) ? (int) (player.level().getWorldBorder().getSize() * 0.001) : 7500;
                 case 1             -> ((int) (player.level().getWorldBorder().getSize() * 0.01) > 7500) ? (int) (player.level().getWorldBorder().getSize() * 0.01) : 15000;
-                default            -> 0;
+                case 0             -> ((int) (player.level().getWorldBorder().getSize() * 0.1) > 15000) ? (int) (player.level().getWorldBorder().getSize() * 0.01) : 100000;
+                default            -> 100;
             };
 
             if (distance >= maxDistance) {
@@ -97,7 +97,7 @@ public record PlayerDivinationSelectedPacket(UUID selectedPlayerUuid) implements
                         getDirection(dx, dz)
                 )));
 
-            } else if(divinationDifference < 8) {
+            } else if(divinationDifference < 10) {
                 player.sendSystemMessage(Component.literal(String.format(
                         "§5You sense §d%s§5 to the §d%s§5, about §d%d blocks §5away...",
                         targetPlayer.getGameProfile().getName(),
@@ -115,7 +115,8 @@ public record PlayerDivinationSelectedPacket(UUID selectedPlayerUuid) implements
                         targetPlayer.blockPosition().getZ(),
                         distance
                 )));
-            }
+            }     // Trigger MetaAwareness passive if target has it
+            de.jakob.lotm.abilities.visionary.passives.MetaAwarenessAbility.onDivined(player, targetPlayer);
         });
     }
 

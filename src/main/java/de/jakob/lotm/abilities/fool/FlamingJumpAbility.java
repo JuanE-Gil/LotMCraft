@@ -26,9 +26,10 @@ import java.util.Map;
 
 public class FlamingJumpAbility extends Ability {
     public FlamingJumpAbility(String id) {
-        super(id, .05f);
+        super(id, 1f);
 
         canBeUsedByNPC = false;
+        this.doesNotIncreaseDigestion = true;
     }
 
     @Override
@@ -38,7 +39,7 @@ public class FlamingJumpAbility extends Ability {
 
     @Override
     public float getSpiritualityCost() {
-        return 12;
+        return 60;
     }
 
     @Override

@@ -1,45 +1,49 @@
 package de.jakob.lotm.abilities.error;
 
 import de.jakob.lotm.LOTMCraft;
-import de.jakob.lotm.abilities.core.ToggleAbility;
+import de.jakob.lotm.abilities.core.Ability;
+import de.jakob.lotm.abilities.core.SelectableAbility;
+import de.jakob.lotm.abilities.error.handler.TheftHandler;
+import de.jakob.lotm.attachments.ControllingDataComponent;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.attachments.ParasitationComponent;
-import de.jakob.lotm.attachments.TransformationComponent;
+import de.jakob.lotm.damage.ModDamageTypes;
 import de.jakob.lotm.util.BeyonderData;
+import de.jakob.lotm.util.ControllingUtil;
 import de.jakob.lotm.util.helper.AbilityUtil;
+import de.jakob.lotm.util.helper.marionettes.MarionetteUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.effect.MobEffectCategory;
-import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent;
-import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @EventBusSubscriber(modid = LOTMCraft.MOD_ID)
-public class ParasitationAbility extends ToggleAbility {
+public class ParasitationAbility extends SelectableAbility {
 
-    private static final HashMap<UUID, UUID> hostMap = new HashMap<>();
+    private static final HashMap<UUID, UUID> concealedMap = new HashMap<>();
+    private static final HashMap<UUID, UUID> controllingMap = new HashMap<>();
+    private static final HashMap<UUID, Integer> controllingTimer = new HashMap<>();
+    private static final HashMap<UUID, Boolean> controllingLowerSeq = new HashMap<>();
+
     public ParasitationAbility(String id) {
-        super(id);
-
+        super(id, 5f);
         canBeUsedByNPC = false;
         canBeCopied = false;
         canBeReplicated = false;
         canBeUsedInArtifact = false;
+        canBeShared = false;
     }
 
     @Override
@@ -49,175 +53,301 @@ public class ParasitationAbility extends ToggleAbility {
 
     @Override
     public float getSpiritualityCost() {
-        return 1;
+        return 4000;
     }
 
     @Override
-    public void start(Level level, LivingEntity entity) {
-        if(level.isClientSide) {
+    protected String[] getAbilityNames() {
+        return new String[]{
+                "ability.lotmcraft.parasitation.controlling",
+                "ability.lotmcraft.parasitation.concealed"
+        };
+    }
+
+    @Override
+    protected void castSelectedAbility(Level level, LivingEntity entity, int abilityIndex) {
+        switch (abilityIndex) {
+            case 0 -> controlling(level, entity);
+            case 1 -> concealed(level, entity);
+        }
+    }
+
+    private void controlling(Level level, LivingEntity entity) {
+        if (level.isClientSide) return;
+        if (!(level instanceof ServerLevel serverLevel)) return;
+        if (!(entity instanceof ServerPlayer player)) return;
+
+        // Already controlling — exit
+        if (controllingMap.containsKey(player.getUUID())) {
+            exitControl(serverLevel, player);
             return;
         }
 
-        LivingEntity host = AbilityUtil.getTargetEntity(entity, 8, 2);
-        if(host == null) {
+        LivingEntity target = AbilityUtil.getTargetEntity(player, 8, 2);
+        if (target == null) {
             AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.parasitation.no_target").withColor(0x3240bf));
             return;
+        };
+
+        // If currently concealed, cancel concealment
+        if (concealedMap.containsKey(player.getUUID())) {
+            cancelConcealed(serverLevel, player);
         }
 
-        if(BeyonderData.isBeyonder(host) && BeyonderData.getSequence(host) <= BeyonderData.getSequence(entity)) {
-            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.parasitation.target_too_strong").withColor(0xbf3232));
-            return;
-        }
-
-        hostMap.put(entity.getUUID(), host.getUUID());
-
-        TransformationComponent transformationComponent = entity.getData(ModAttachments.TRANSFORMATION_COMPONENT);
-        transformationComponent.setTransformedAndSync(true, entity);
-        transformationComponent.setTransformationIndexAndSync(TransformationComponent.TransformationType.PARASTATION, entity);
-
-        ParasitationComponent parasitationComponent = host.getData(ModAttachments.PARASITE_COMPONENT);
-        parasitationComponent.setParasited(true);
-        parasitationComponent.setParasiteUUID(entity.getUUID());
+        attemptControl(serverLevel, player, target);
     }
 
-    @Override
-    public void tick(Level level, LivingEntity entity) {
-        if(!(level instanceof ServerLevel serverLevel)) {
+    private void attemptControl(ServerLevel serverLevel, ServerPlayer player, LivingEntity target) {
+        // 0.05 heart to trigger substitutes/swaps
+        target.hurt(ModDamageTypes.source(serverLevel, ModDamageTypes.BEYONDER_GENERIC, player), 0.1f);
+
+        if (!target.isAlive() || target.isRemoved()) {
+            AbilityUtil.sendActionBar(player, Component.literal("§cTarget evaded!"));
             return;
         }
 
-        if(entity instanceof Player player) {
-            player.setBoundingBox(new AABB(
-                    player.getX(), player.getY(), player.getZ(),
-                    player.getX(), player.getY(), player.getZ()
-            ));
-            player.onUpdateAbilities();
-            player.hurtMarked = true;
-        }
+        int userSeq = BeyonderData.getSequence(player);
+        int targetSeq = BeyonderData.isBeyonder(target) ? BeyonderData.getSequence(target) : 10;
+        boolean lowerSeq = targetSeq > userSeq;
 
-        if(!hostMap.containsKey(entity.getUUID())) {
-            cancel(serverLevel, entity);
+        // 55% vs lower seq, 15% against same, 0% chance against higher sequence
+        float chance = lowerSeq ? 0.55f : 0.15f;
+        if (random.nextFloat() >= chance || userSeq > targetSeq) {
+            AbilityUtil.sendActionBar(player, Component.literal(lowerSeq
+                    ? "§cControl failed!"
+                    : "§cControl failed — resistance too strong!"));
             return;
         }
 
-        Entity host = serverLevel.getEntity(hostMap.get(entity.getUUID()));
-        if(host == null || host.isRemoved() || host.distanceToSqr(entity) > 128 || !host.isAlive() || !(host instanceof LivingEntity)) {
-            cancel(serverLevel, entity);
-            return;
+        startControl(serverLevel, player, target, lowerSeq);
+    }
+
+    private void startControl(ServerLevel serverLevel, ServerPlayer player, LivingEntity target, boolean lowerSeq) {
+        controllingMap.put(player.getUUID(), target.getUUID());
+        controllingLowerSeq.put(player.getUUID(), lowerSeq);
+
+        if (!lowerSeq) {
+            controllingTimer.put(player.getUUID(), 100);
         }
 
-        Vec3 dir = new Vec3(entity.getLookAngle().x(), 0, entity.getLookAngle().z()).normalize().scale(Math.min(-.85f, -1 * host.getBbWidth()));
-        Vec3 hostPos = entity.position().add(dir);
+        ParasitationComponent pc = target.getData(ModAttachments.PARASITE_COMPONENT);
+        pc.setParasited(true);
+        pc.setParasiteUUID(player.getUUID());
 
-        host.teleportTo(serverLevel, hostPos.x(), hostPos.y(), hostPos.z(), Set.of(), entity.getYRot(), entity.getXRot());
+        ControllingUtil.possess(player, target, false);
+    }
 
-        AbilityUtil.getNearbyEntities(entity, serverLevel, entity.position(), 64).forEach(e -> {
-            if(e != host && e != entity && e instanceof Mob mob && mob.getTarget() == entity) {
-                mob.setTarget(null);
-                mob.hurtMarked = true;
+    public static void exitControl(ServerLevel serverLevel, ServerPlayer player) {
+        if (!controllingMap.containsKey(player.getUUID())) return;
+        boolean lowerSeq = controllingLowerSeq.getOrDefault(player.getUUID(), false);
+        UUID hostUUID = controllingMap.get(player.getUUID());
+
+        controllingMap.remove(player.getUUID());
+        controllingTimer.remove(player.getUUID());
+        controllingLowerSeq.remove(player.getUUID());
+
+        ControllingUtil.reset(player, serverLevel, true);
+
+        Entity hostEntity = serverLevel.getEntity(hostUUID);
+        if (hostEntity instanceof LivingEntity host) {
+            ParasitationComponent pc = host.getData(ModAttachments.PARASITE_COMPONENT);
+            pc.setParasited(false);
+            pc.setParasiteUUID(null);
+
+            if (!lowerSeq) {
+                boolean killedBySteal = performExitSteal(serverLevel, player, host);
+                if (killedBySteal) MarionetteUtils.turnEntityIntoMarionette(host, player);
             }
-        });
-
-        if(host instanceof Mob mob) {
-            mob.setTarget(entity.getLastHurtMob());
-            mob.hurtMarked = true;
-        }
-
-        host.fallDistance = 0;
-        host.hurtMarked = true;
-
-        entity.setRemainingFireTicks(0);
-        entity.getActiveEffects().stream()
-                .map(MobEffectInstance::getEffect)
-                .filter(effect -> effect.value().getCategory() == MobEffectCategory.HARMFUL)
-                .toList()
-                .forEach(entity::removeEffect);
-
-
-        // Stop when overridden by another transformation^1
-        TransformationComponent transformationComponent = entity.getData(ModAttachments.TRANSFORMATION_COMPONENT);
-        if (!transformationComponent.isTransformed() || transformationComponent.getTransformationIndex() != TransformationComponent.TransformationType.PARASTATION.getIndex()) {
-            cancel((ServerLevel) level, entity);
-            return;
         }
     }
 
-    @Override
-    public void stop(Level level, LivingEntity entity) {
-        if(!(level instanceof ServerLevel serverLevel))
-            return;
+    private static boolean performExitSteal(ServerLevel serverLevel, ServerPlayer player, LivingEntity host) {
+        Random random = new Random();
+        float roll = random.nextFloat();
 
-        if(hostMap.containsKey(entity.getUUID())) {
-            Entity host = serverLevel.getEntity(hostMap.get(entity.getUUID()));
-            if(host != null && host.isAlive() && host instanceof LivingEntity livingHost) {
-                ParasitationComponent parasitationComponent = livingHost.getData(ModAttachments.PARASITE_COMPONENT);
-                parasitationComponent.setParasited(false);
-                parasitationComponent.setParasiteUUID(null);
+        Ability instance = LOTMCraft.abilityHandler.getById("parasitation_ability");
+
+        if (roll < 0.50f) {
+            stealArmor(player, host);
+        } else if (roll < 0.75f) {
+            TheftHandler.stealItemsFromEntity(host, player, instance);
+        } else if (roll < 0.90f) {
+            TheftHandler.performAbilityTheft(serverLevel, player, host, random, true, instance);
+        } else {
+            // Health drain — check if it kills
+            float drain = host.getMaxHealth() * 0.2f;
+            host.setHealth(host.getHealth() - drain);
+            if (host.getHealth() <= 0) {
+                host.kill();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static void stealArmor(ServerPlayer player, LivingEntity host) {
+        Ability instance = LOTMCraft.abilityHandler.getById("parasitation_ability");
+
+        for (EquipmentSlot slot : new EquipmentSlot[]{EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET}) {
+            ItemStack armor = host.getItemBySlot(slot);
+            if (!armor.isEmpty()) {
+                if (!player.getInventory().add(armor.copy())) {
+                    player.drop(armor.copy(), false);
+                }
+                host.setItemSlot(slot, ItemStack.EMPTY);
+                return;
+            }
+        }
+        TheftHandler.stealItemsFromEntity(host, player, instance);
+    }
+
+
+    // conceal mode
+    private void concealed(Level level, LivingEntity entity) {
+        if (level.isClientSide) return;
+        if (!(level instanceof ServerLevel serverLevel)) return;
+        if (!(entity instanceof ServerPlayer player)) return;
+
+        // first reset concealment in all cases
+        if (concealedMap.containsKey(player.getUUID())) {
+            cancelConcealed(serverLevel, player);
+            return;
+        }
+
+        LivingEntity target = AbilityUtil.getTargetEntity(player, 8, 2);
+
+        if (target == null) {
+            AbilityUtil.sendActionBar(player, Component.translatable("ability.lotmcraft.parasitation.no_target").withColor(0x3240bf));
+            return;
+        }
+
+        if (!isValidConcealedTarget(player, target)) {
+            AbilityUtil.sendActionBar(player, Component.translatable("ability.lotmcraft.parasitation.target_too_strong").withColor(0xbf3232));
+            return;
+        }
+
+        // If currently controlling, switch to concealed
+        if (controllingMap.containsKey(entity.getUUID())) {
+            exitControl(serverLevel, player);
+            LivingEntity currentHost = resolveHost(serverLevel, controllingMap.get(player.getUUID()));
+            LivingEntity newHost = ((currentHost == null || !target.getUUID().equals(currentHost.getUUID()))) ? target : currentHost;
+
+            if (isValidConcealedTarget(player, newHost)) {
+                startConcealed(serverLevel, player, newHost);
+                return;
+            } else {
+                AbilityUtil.sendActionBar(player, Component.translatable("ability.lotmcraft.parasitation.target_too_strong").withColor(0xbf3232));
             }
         }
 
-        hostMap.remove(entity.getUUID());
+        startConcealed(serverLevel, player, target);
+    }
 
-        if(entity instanceof Player player) {
-            player.setBoundingBox(player.getDimensions(player.getPose()).makeBoundingBox(
-                    player.getX(), player.getY(), player.getZ()
-            ));
-            player.onUpdateAbilities();
-            player.hurtMarked = true;
+    private boolean isValidConcealedTarget(LivingEntity entity, LivingEntity target) {
+        if (!BeyonderData.isBeyonder(target)) return true;
+        return BeyonderData.getSequence(target) > BeyonderData.getSequence(entity);
+    }
+
+    private void startConcealed(ServerLevel serverLevel, ServerPlayer serverPlayer, LivingEntity host) {
+        concealedMap.put(serverPlayer.getUUID(), host.getUUID());
+
+        ParasitationComponent pc = host.getData(ModAttachments.PARASITE_COMPONENT);
+        pc.setParasited(true);
+        pc.setParasiteUUID(serverPlayer.getUUID());
+
+        serverPlayer.setGameMode(GameType.SPECTATOR);
+        serverPlayer.setCamera(host);
+    }
+
+    private void cancelConcealed(ServerLevel serverLevel, ServerPlayer serverPlayer) {
+        if (concealedMap.containsKey(serverPlayer.getUUID())) {
+            Entity hostEntity = serverLevel.getEntity(concealedMap.get(serverPlayer.getUUID()));
+            if (hostEntity instanceof LivingEntity host) {
+                ParasitationComponent pc = host.getData(ModAttachments.PARASITE_COMPONENT);
+                pc.setParasited(false);
+                pc.setParasiteUUID(null);
+            }
+        }
+        concealedMap.remove(serverPlayer.getUUID());
+
+        serverPlayer.setGameMode(GameType.SURVIVAL);
+        serverPlayer.setCamera(null);
+    }
+
+    // to set the player as spectator when in concealment mode
+    @SubscribeEvent
+    public static void onPlayerTargetTick(PlayerTickEvent.Post event) {
+        Player target = event.getEntity();
+
+        if (!(target instanceof ServerPlayer serverTarget)) return;
+
+        if (!isConcealed(serverTarget.getUUID())) return;
+
+        UUID currentHostUUID = concealedMap.get(serverTarget.getUUID());
+
+        Entity host = serverTarget.serverLevel().getEntity(currentHostUUID);
+
+        if (isConcealed(serverTarget.getUUID())) {
+            if (host != null) {
+                serverTarget.setGameMode(GameType.SPECTATOR);
+                serverTarget.setCamera(host);
+            } else {
+                serverTarget.setGameMode(GameType.SURVIVAL);
+                serverTarget.setCamera(serverTarget);
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onEntityTick(PlayerTickEvent.Post event) {
+        Player player = event.getEntity();
+
+        if (!(player instanceof ServerPlayer serverPlayer)) return;
+
+        if (serverPlayer.level().isClientSide) return;
+        if (!(serverPlayer.level() instanceof ServerLevel serverLevel)) return;
+
+
+        ControllingDataComponent data = serverPlayer.getData(ModAttachments.CONTROLLING_DATA);
+        if (!data.isControlling()) {
+            // Ended externally — clean up without calling reset again
+            controllingMap.remove(serverPlayer.getUUID());
+            controllingTimer.remove(serverPlayer.getUUID());
+            controllingLowerSeq.remove(serverPlayer.getUUID());
+            return;
         }
 
-        TransformationComponent transformationComponent = entity.getData(ModAttachments.TRANSFORMATION_COMPONENT);
-        if(transformationComponent.isTransformed() && transformationComponent.getTransformationIndex() == TransformationComponent.TransformationType.PARASTATION.getIndex()) {
-            transformationComponent.setTransformedAndSync(false, entity);
+        // Tick down timer for same/higher seq
+        boolean lowerSeq = controllingLowerSeq.getOrDefault(serverPlayer.getUUID(), false);
+        if (!lowerSeq) {
+            int ticks = controllingTimer.getOrDefault(serverPlayer.getUUID(), 0) - 1;
+            if (ticks <= 0) {
+                serverLevel.getServer().execute(() -> exitControl(serverLevel, serverPlayer));
+                return;
+            }
+            controllingTimer.put(serverPlayer.getUUID(), ticks);
         }
+    }
+
+    private static LivingEntity resolveHost(ServerLevel serverLevel, UUID uuid) {
+        if (uuid == null) return null;
+        Entity entity = serverLevel.getEntity(uuid);
+        return entity instanceof LivingEntity living ? living : null;
     }
 
     public static LivingEntity getHostForEntity(ServerLevel serverLevel, LivingEntity parasite) {
-        if(!hostMap.containsKey(parasite.getUUID())) {
-            return null;
-        }
-
-        UUID hostUUID = hostMap.get(parasite.getUUID());
+        UUID hostUUID = controllingMap.get(parasite.getUUID());
+        if (hostUUID == null) hostUUID = concealedMap.get(parasite.getUUID());
+        if (hostUUID == null) return null;
         Entity host = serverLevel.getEntity(hostUUID);
-        if(host instanceof LivingEntity livingHost) {
-            return livingHost;
-        }
-
-        return null;
+        return host instanceof LivingEntity living ? living : null;
     }
 
-    @SubscribeEvent
-    public static void onLivingChangeTarget(LivingChangeTargetEvent event) {
-        if (!(event.getEntity() instanceof Mob mob)) {
-            return;
-        }
-
-        LivingEntity newTarget = event.getNewAboutToBeSetTarget();
-        if (newTarget == null || !hostMap.containsKey(newTarget.getUUID())) {
-            return;
-        }
-
-        event.setCanceled(true);
+    public static boolean isConcealed(UUID uuid) {
+        return concealedMap.containsKey(uuid);
     }
 
-    @SubscribeEvent
-    public static void onLivingDamage(LivingIncomingDamageEvent event) {
-
-        var entity = event.getEntity();
-        if(!(entity.level() instanceof ServerLevel serverLevel)) {
-            return;
-        }
-
-        if(hostMap.containsKey(entity.getUUID())){
-            var target = serverLevel.getEntity(hostMap.get(entity.getUUID()));
-            if(target == null) return;
-
-            float damage = event.getAmount();
-            DamageSource source = serverLevel.damageSources().generic();
-
-            target.hurt(source, damage);
-
-            event.setCanceled(true);
-        }
+    public static boolean isControlling(UUID uuid) {
+        return controllingMap.containsKey(uuid);
     }
 }

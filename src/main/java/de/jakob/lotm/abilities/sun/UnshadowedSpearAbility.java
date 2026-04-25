@@ -16,7 +16,7 @@ import java.util.Map;
 
 public class UnshadowedSpearAbility extends Ability {
     public UnshadowedSpearAbility(String id) {
-        super(id, 1, "purification", "light_source", "light_strong", "light_weak");
+        super(id, 1.5f, "purification", "light_source", "light_strong", "light_weak");
         postsUsedAbilityEventManually = true;
         canBeCopied = false;
     }
@@ -28,7 +28,7 @@ public class UnshadowedSpearAbility extends Ability {
 
     @Override
     protected float getSpiritualityCost() {
-        return 150;
+        return 250;
     }
 
     @Override
@@ -41,9 +41,9 @@ public class UnshadowedSpearAbility extends Ability {
 
         level.playSound(null, startPos.x, startPos.y, startPos.z, SoundEvents.BEACON_ACTIVATE, entity.getSoundSource(), 1.0f, 1.0f);
 
-        UnshadowedSpearProjectileEntity spear = new UnshadowedSpearProjectileEntity(level, entity, DamageLookup.lookupDamage(4, .8) * multiplier(entity), BeyonderData.isGriefingEnabled(entity), this);
+        UnshadowedSpearProjectileEntity spear = new UnshadowedSpearProjectileEntity(level, entity, DamageLookup.lookupDamage(4, .8) * (int) Math.max(multiplier(entity)/4,1), BeyonderData.isGriefingEnabled(entity), this);
         spear.setPos(startPos.x, startPos.y, startPos.z); // Set initial position
-        spear.shoot(direction.x, direction.y, direction.z, 3f, 0);
+        spear.shoot(direction.x, direction.y, direction.z, 9f* (int) Math.max(multiplier(entity)/4,1), 0);
         level.addFreshEntity(spear);
     }
 }

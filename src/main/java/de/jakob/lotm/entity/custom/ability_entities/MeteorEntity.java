@@ -1,5 +1,6 @@
 package de.jakob.lotm.entity.custom.ability_entities;
 
+import de.jakob.lotm.abilities.core.AbilityUsedEvent;
 import de.jakob.lotm.entity.ModEntities;
 import de.jakob.lotm.rendering.effectRendering.EffectManager;
 import de.jakob.lotm.util.helper.AbilityUtil;
@@ -19,6 +20,7 @@ import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.common.NeoForge;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -48,7 +50,7 @@ public class MeteorEntity extends Entity {
 
     public MeteorEntity(Level level, float speed, float damage, float size, @Nullable Entity caster, boolean griefing, float explosionSize, float radius) {
         super(ModEntities.Meteor.get(), level);
-        this.setSpeed(speed);
+        this.setSpeed(speed * 1.75f);
         this.setDamage(damage);
         this.setSize(size);
         this.setGriefing(griefing);
@@ -165,15 +167,12 @@ public class MeteorEntity extends Entity {
         this.setPos(newPos);
     }
 
-    Vec3 lastPos;
-
     public int getLifeTicks() {
         return lifeTicks;
     }
 
     @Override
     public void tick() {
-        // Petrification Logic -- run before super.tick() to stop movement completely
         if(getTags().contains("petrified")) {
             petrifiedTicks++;
             if(petrifiedTicks >= 20 * 5) {
@@ -201,10 +200,15 @@ public class MeteorEntity extends Entity {
 
         moveTo(position().add(direction.normalize().scale(getSpeed())));
 
-        if(position().distanceTo(targetPos.subtract(0, 1, 0)) < .5 || (lastPos != null && position().distanceTo(targetPos.subtract(0, 1, 0)) > lastPos.distanceTo(targetPos.subtract(0, 1, 0))) || !level().getBlockState(BlockPos.containing(position())).isAir()) {
+        if(!level().getBlockState(BlockPos.containing(position())).isAir()) {
             AbilityUtil.damageNearbyEntities(serverLevel, getCaster() instanceof LivingEntity l ? l : null, getRadius(), getDamage(), position(), true, false);
             EffectManager.playEffect(EffectManager.Effect.EXPLOSION, position().x, position().y, position().z, serverLevel);
-            PerformantExplosion.create(serverLevel, getCaster(), position(), getExplosionSize(), isGriefing(), isGriefing() ? Explosion.BlockInteraction.DESTROY_WITH_DECAY : Explosion.BlockInteraction.KEEP);
+            PerformantExplosion.create(serverLevel, getCaster(), position(), getExplosionSize() * 1.5f, isGriefing(), isGriefing() ? Explosion.BlockInteraction.DESTROY_WITH_DECAY : Explosion.BlockInteraction.KEEP);
+
+            if(getCaster() instanceof LivingEntity livingCaster) {
+                String[] flags = isAbyssImpact() ? new String[]{"explosion", "corruption"} : new String[]{"explosion", "burning"};
+                NeoForge.EVENT_BUS.post(new AbilityUsedEvent(serverLevel, position(), livingCaster, null, flags, getRadius(), 15));
+            }
 
             if (isAbyssImpact()) {
                 // Spawn a cluster of green pillars around the impact point
@@ -230,8 +234,6 @@ public class MeteorEntity extends Entity {
 
             discard();
         }
-
-        lastPos = position();
     }
     
     @Override

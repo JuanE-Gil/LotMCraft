@@ -61,7 +61,8 @@ public class PoisonousFlameAbility extends Ability {
         Vec3 startPos = entity.getEyePosition().subtract(0, .2, 0).add(entity.getLookAngle().normalize());
         level.playSound(null, startPos.x, startPos.y, startPos.z, SoundEvents.BLAZE_SHOOT, entity.getSoundSource(), 2.0f, .5f);
 
-        if (InteractionHandler.isInteractionPossible(new Location(startPos, level), "water", BeyonderData.getSequence(entity))) {
+        if (InteractionHandler.isInteractionPossible(new Location(startPos, level), "water",
+                AbilityUtil.getSeqWithArt(entity, this))) {
             level.playSound(null, startPos.x, startPos.y, startPos.z, SoundEvents.FIRE_EXTINGUISH, entity.getSoundSource(), 2.0f, .5f);
             ParticleUtil.spawnParticles((ServerLevel) level, ParticleTypes.LARGE_SMOKE, startPos, 10, .2, .1);
             ParticleUtil.spawnParticles((ServerLevel) level, ParticleTypes.FALLING_WATER, startPos, 50, .2, .1);
@@ -97,14 +98,15 @@ public class PoisonousFlameAbility extends Ability {
 
         // Purification neutralizes the poison effect
         Location flameLoc = new Location(startPos, level);
-        int seq = BeyonderData.getSequence(entity);
+        int seq = AbilityUtil.getSeqWithArt(entity, this);
         boolean purified = InteractionHandler.isInteractionPossible(flameLoc, "purification", seq);
 
         AbilityUtil.damageNearbyEntities(
                 (ServerLevel) level,
                 entity,
-                2.75,
-                DamageLookup.lookupDamage(8, .9) * multiplier(entity),
+                2.75* (int) multiplier(entity),
+                DamageLookup.lookupDamage(8, .9) *
+                        multiplier(entity),
                 startPos,
                 true,
                 false,
@@ -116,7 +118,7 @@ public class PoisonousFlameAbility extends Ability {
 
         if(!purified) {
             AbilityUtil.addPotionEffectToNearbyEntities(
-                    (ServerLevel) level, entity, 3, startPos, new MobEffectInstance(MobEffects.POISON, 20 * 8, 2, false, true)
+                    (ServerLevel) level, entity, 3, startPos, new MobEffectInstance(MobEffects.POISON, 20 * 8* (int) Math.max(multiplier(entity)/2,1), 2, false, true)
             );
         }
 

@@ -28,9 +28,8 @@ public class DesireControlAbility extends SelectableAbility {
     private static final Set<UUID> targetedEntities = new HashSet<>();
 
     public DesireControlAbility(String id) {
-        super(id, 5.0f);
+        super(id, 10.0f);
         this.canBeCopied = false;
-        this.canBeReplicated = false;
     }
 
     @Override
@@ -80,6 +79,7 @@ public class DesireControlAbility extends SelectableAbility {
 
         // Cancel when calming effect is active
         if (InteractionHandler.isInteractionPossible(new Location(target.position(), level), "calming", BeyonderData.getSequence(entity))) {
+            ParticleUtil.spawnParticles(level, new DustParticleOptions(new Vector3f(250 / 255f, 201 / 255f, 102 / 255f), 1.25f), entity.position().add(0, 1, 0), 200, 1, 0.5);
             return;
         }
 
@@ -90,7 +90,7 @@ public class DesireControlAbility extends SelectableAbility {
 
         if (target.hasData(ModAttachments.SANITY_COMPONENT)) {
             target.getData(ModAttachments.SANITY_COMPONENT)
-                    .increaseSanityAndSync(-0.3f * (float) multiplier(entity), target);
+                    .decreaseSanityWithSequenceDifference(1f * (int) Math.max(multiplier(entity)/4,1), target, AbilityUtil.getSeqWithArt(entity, this), BeyonderData.getSequence(target));
         }
 
         target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, duration, 2, false, false));
@@ -107,7 +107,7 @@ public class DesireControlAbility extends SelectableAbility {
     }
 
     private void castAoeDesireControl(ServerLevel level, LivingEntity entity) {
-        double aoeRadius = 20;
+        double aoeRadius = 20* (int) Math.max(multiplier(entity)/2,1);
 
         ParticleUtil.spawnSphereParticles(level, desireDust, entity.position().add(0, 1, 0), 12, 200);
         ParticleUtil.spawnSphereParticles(level, ParticleTypes.EFFECT, entity.position().add(0, 1, 0), 10, 100);
@@ -115,6 +115,7 @@ public class DesireControlAbility extends SelectableAbility {
 
         // Cancel when calming effect is active
         if (InteractionHandler.isInteractionPossible(new Location(entity.position(), level), "calming", BeyonderData.getSequence(entity))) {
+            ParticleUtil.spawnParticles(level, new DustParticleOptions(new Vector3f(250 / 255f, 201 / 255f, 102 / 255f), 1.25f), entity.position().add(0, 1, 0), 200, 1, 0.5);
             return;
         }
 
@@ -127,11 +128,11 @@ public class DesireControlAbility extends SelectableAbility {
 
                     if (target.hasData(ModAttachments.SANITY_COMPONENT)) {
                         target.getData(ModAttachments.SANITY_COMPONENT)
-                                .increaseSanityAndSync(-0.15f * (float) multiplier(entity), target);
+                                .decreaseSanityWithSequenceDifference(0.75f * (int) Math.max(multiplier(entity)/4,1), target, AbilityUtil.getSeqWithArt(entity, this), BeyonderData.getSequence(target));
                     }
 
-                    target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 20 * 4, 1, false, false));
-                    target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20 * 4, 2, false, false));
+                    target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 20 * 4* (int) Math.max(multiplier(entity)/2,1), 1, false, false));
+                    target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20 * 4* (int) Math.max(multiplier(entity)/2,1), 2, false, false));
                 });
     }
 
@@ -143,12 +144,13 @@ public class DesireControlAbility extends SelectableAbility {
     }
 
     private int calculateAmplifier(LivingEntity caster, LivingEntity target) {
+        int castersSeq = AbilityUtil.getSeqWithArt(caster, this);
+        int targetSeq = BeyonderData.getSequence(target);
+
         if (AbilityUtil.isTargetSignificantlyWeaker(caster, target)) {
             return 4;
         }
 
-        int castersSeq = BeyonderData.getSequence(caster);
-        int targetSeq = BeyonderData.getSequence(target);
         int diff = targetSeq - castersSeq;
 
         if (diff >= 2) {

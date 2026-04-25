@@ -18,6 +18,10 @@ public abstract class SelectableAbility extends Ability {
         super(id, cooldown, interactionFlags);
     }
 
+    public int getSelectedAbilityIndex(UUID uuid) {
+        return selectedAbilities.getOrDefault(uuid, 0);
+    }
+
     protected abstract String[] getAbilityNames();
 
     public String[] getAbilityNamesCopy() {

@@ -1,9 +1,7 @@
 package de.jakob.lotm.network.packets.toClient;
 
 import de.jakob.lotm.LOTMCraft;
-import de.jakob.lotm.gui.custom.Introspect.IntrospectScreen;
-import de.jakob.lotm.util.ClientBeyonderCache;
-import net.minecraft.client.Minecraft;
+import de.jakob.lotm.network.packets.handlers.ClientHandler;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -27,10 +25,6 @@ public record SyncIntrospectMenuPacket(int sequence, String pathway, float sanit
     }
     
     public static void handle(SyncIntrospectMenuPacket packet, IPayloadContext context) {
-        context.enqueueWork(() -> {
-            if (Minecraft.getInstance().screen instanceof IntrospectScreen screen) {
-                screen.updateMenuData(packet.sequence(), packet.pathway(), ClientBeyonderCache.getDigestionProgress(context.player().getUUID()), packet.sanity);
-            }
-        });
+        context.enqueueWork(() -> ClientHandler.handleSyncIntrospectMenuPacket(packet, context.player().getUUID()));
     }
 }

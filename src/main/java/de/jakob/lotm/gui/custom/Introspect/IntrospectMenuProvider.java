@@ -17,7 +17,6 @@ public class IntrospectMenuProvider implements MenuProvider {
     private final float sanity;
     private final List<ItemStack> passiveAbilities;
 
-
     public IntrospectMenuProvider(List<ItemStack> passiveAbilities, int sequence, String pathway, float digestionProgress, float sanity) {
         this.sequence = sequence;
         this.pathway = pathway;

@@ -1,5 +1,6 @@
 package de.jakob.lotm.abilities.common;
 
+import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.ToggleAbility;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.attachments.TransformationComponent;
@@ -8,30 +9,20 @@ import de.jakob.lotm.entity.custom.ability_entities.tyrant_pathway.LightningEnti
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.DamageLookup;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.Level;
-import de.jakob.lotm.abilities.black_emperor.CommandingPresenceAbility;import de.jakob.lotm.abilities.black_emperor.CommandingPresenceAbility;
-
-
-
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.UUID;
 
 public class MythicalCreatureFormAbility extends ToggleAbility {
-
-
-    public static boolean isActive(UUID uuid) {
-        return ACTIVE.contains(uuid);
-    }
-    private static final String SHARED_SCALE_BACKUP_KEY = "lotm_shared_scale_backup";
-    private static final HashSet<UUID> ACTIVE = new HashSet<>();
 
     private static final HashMap<UUID, Double> previousScale = new HashMap<>();
 
@@ -42,6 +33,7 @@ public class MythicalCreatureFormAbility extends ToggleAbility {
         this.cannotBeStolen = true;
         this.canBeReplicated = false;
         this.canBeUsedInArtifact = false;
+        this.canAlwaysBeUsed = true;
     }
 
     @Override
@@ -50,21 +42,14 @@ public class MythicalCreatureFormAbility extends ToggleAbility {
             return;
         }
 
-        AttributeInstance scaleAttribute = entity.getAttribute(Attributes.SCALE);
-        if(scaleAttribute != null && !CommandingPresenceAbility.isActive(entity.getUUID())) {
-            scaleAttribute.setBaseValue(2.75);
-        }
-
         int seq = BeyonderData.getSequence(entity);
         if(seq > 2){
             var sanity = entity.getData(ModAttachments.SANITY_COMPONENT.get());
-            sanity.setSanityAndSync(sanity.getSanity() - (seq == 4 ? 0.01f : 0.005f), entity);
+            sanity.setSanityAndSync(Math.max(0.0f, sanity.getSanity() - (seq == 4 ? 0.01f : 0.005f)), entity);
         }
 
-        // Buff user
-        BeyonderData.addModifier(entity, "mythical_creature_form", (seq > 2 ? 1.25 : 1.75));
-
-        int amplifier = (seq > 2 ? 4 : 6);
+        //Buff user
+        int amplifier = (seq > 2 ? 3 : 6);
 
         // Make all entities lower than you loose control when seeing you
         AbilityUtil.getNearbyEntities(entity, serverLevel, entity.position(), 30).forEach(e -> {
@@ -78,7 +63,7 @@ public class MythicalCreatureFormAbility extends ToggleAbility {
 
                     if (!entity.getData(ModAttachments.ALLY_COMPONENT.get()).isAlly(e.getUUID())) {
 
-                        if (!e.hasEffect(ModEffects.LOOSING_CONTROL)) { // Only apply effect when effect wasn't applied already, otherwise they would never actually die
+                        if (!e.hasEffect(ModEffects.LOOSING_CONTROL)) {
                             e.addEffect(new MobEffectInstance(ModEffects.LOOSING_CONTROL, 20 * 4, amplifier));
                         }
 
@@ -86,7 +71,6 @@ public class MythicalCreatureFormAbility extends ToggleAbility {
                     }
         });
 
-        // Stop when overridden by another transformation
         TransformationComponent transformationComponent = entity.getData(ModAttachments.TRANSFORMATION_COMPONENT);
         if (!transformationComponent.isTransformed() || transformationComponent.getTransformationIndex() != TransformationComponent.TransformationType.MYTHICAL_CREATURE.getIndex()) {
             cancel((ServerLevel) level, entity);
@@ -100,18 +84,21 @@ public class MythicalCreatureFormAbility extends ToggleAbility {
             return;
         }
 
-        ACTIVE.add(entity.getUUID());
-
         AttributeInstance scaleAttribute = entity.getAttribute(Attributes.SCALE);
         if(scaleAttribute != null) {
-            if (!entity.getPersistentData().contains(SHARED_SCALE_BACKUP_KEY)) {
-                entity.getPersistentData().putDouble(SHARED_SCALE_BACKUP_KEY, scaleAttribute.getBaseValue());
-            }
+            scaleAttribute.addTransientModifier(new AttributeModifier(ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "mythical_creature_form"), 1.9, AttributeModifier.Operation.ADD_VALUE));
         }
+
+        BeyonderData.addModifier(entity, "mythical_creature_form", (BeyonderData.getSequence(entity) > 2 ? 1.1 : 1.25));
 
         TransformationComponent transformationComponent = entity.getData(ModAttachments.TRANSFORMATION_COMPONENT);
         transformationComponent.setTransformedAndSync(true, entity);
         transformationComponent.setTransformationIndexAndSync(TransformationComponent.TransformationType.MYTHICAL_CREATURE, entity);
+        String additionalData = BeyonderData.getPathway(entity);
+        if(additionalData.equals("door") && BeyonderData.getSequence(entity) <= 2) {
+            additionalData = "door_high";
+        }
+        transformationComponent.setAdditionalDataAndSync(additionalData, entity);
     }
 
     @Override
@@ -120,18 +107,9 @@ public class MythicalCreatureFormAbility extends ToggleAbility {
             return;
         }
 
-        ACTIVE.remove(entity.getUUID());
-
         AttributeInstance scaleAttribute = entity.getAttribute(Attributes.SCALE);
         if(scaleAttribute != null) {
-            if (CommandingPresenceAbility.isActive(entity.getUUID())) {
-                int seq = BeyonderData.getSequence(entity);
-                scaleAttribute.setBaseValue(seq <= 2 ? 2.0D : 1.5D);
-            } else if (entity.getPersistentData().contains(SHARED_SCALE_BACKUP_KEY)) {
-                scaleAttribute.setBaseValue(entity.getPersistentData().getDouble(SHARED_SCALE_BACKUP_KEY));
-                entity.getPersistentData().remove(SHARED_SCALE_BACKUP_KEY);
-            }
-            entity.refreshDimensions();
+            scaleAttribute.removeModifier(ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "mythical_creature_form"));
         }
 
         BeyonderData.removeModifier(entity, "mythical_creature_form");
@@ -161,7 +139,7 @@ public class MythicalCreatureFormAbility extends ToggleAbility {
         switch (pathway){
             case "tyrant":
                 if(random.nextInt(6) == 0) {
-                    LightningEntity lightning = new LightningEntity(level, entity, e.position(), 50, 6, DamageLookup.lookupDamage(4, .7) * multiplier(entity), false, 4, 200, 0x11A8DD);
+                    LightningEntity lightning = new LightningEntity(level, entity, e.position(), 50, 6, DamageLookup.lookupDamage(4, .7) * (int) Math.max(multiplier(entity)/4,1), false, 4, 200, 0x11A8DD);
                     level.addFreshEntity(lightning);
                 }
                 break;

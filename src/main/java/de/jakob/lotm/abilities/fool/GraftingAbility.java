@@ -54,6 +54,7 @@ public class GraftingAbility extends SelectableAbility {
         canBeCopied = false;
         canBeUsedByNPC = false;
         canBeReplicated = false;
+        canBeShared = false;
     }
 
     @Override
@@ -63,7 +64,7 @@ public class GraftingAbility extends SelectableAbility {
 
     @Override
     protected float getSpiritualityCost() {
-        return 1400;
+        return 10000;
     }
 
     @Override
@@ -168,8 +169,10 @@ public class GraftingAbility extends SelectableAbility {
             return;
         }
 
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+
         // Check if the source entity (graftingStartEntity) can resist ability grafting
-        double failureChance = AbilityUtil.getSequenceFailureChance(entity, graftingStartEntity);
+        double failureChance = AbilityUtil.getSequenceFailureChance(entitySeq, BeyonderData.getSequence(graftingStartEntity));
         if (ThreadLocalRandom.current().nextDouble() < failureChance) {
             graftingAbilitiesEntities.remove(entity.getUUID());
             AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.grafting.resisted").withColor(color));
@@ -222,8 +225,10 @@ public class GraftingAbility extends SelectableAbility {
             return;
         }
 
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+
         // Check if the source entity (graftingStartEntity) can resist the graft
-        double failureChance = AbilityUtil.getSequenceFailureChance(entity, graftingStartEntity);
+        double failureChance = AbilityUtil.getSequenceFailureChance(entitySeq, BeyonderData.getSequence(graftingStartEntity));
         if (ThreadLocalRandom.current().nextDouble() < failureChance) {
             graftingDamageEntities.remove(entity.getUUID());
             AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.grafting.resisted").withColor(color));

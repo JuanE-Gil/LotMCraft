@@ -16,6 +16,7 @@ public class FlightAbility extends ToggleAbility {
         super(id);
         canBeCopied = false;
         canBeReplicated = false;
+        canBeShared = false;
     }
 
     @Override

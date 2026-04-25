@@ -703,7 +703,7 @@ public class PotionRecipes {
                 new ItemStack(Items.PORKCHOP, 1),
                 new ItemStack(Objects.requireNonNull(BeyonderCharacteristicItemHandler.selectCharacteristicOfPathwayAndSequence("black_emperor", 8)))
         ));
-        
+
         RECIPES.add(new PotionRecipe(
                 (BeyonderPotion) PotionItemHandler.BRIBER_POTION.get(),
                 new ItemStack(Items.DIAMOND, 1),
@@ -751,6 +751,61 @@ public class PotionRecipes {
                 new ItemStack(Items.WITHER_ROSE, 1),
                 new ItemStack(Items.NETHERITE_SCRAP, 1),
                 new ItemStack(Objects.requireNonNull(BeyonderCharacteristicItemHandler.selectCharacteristicOfPathwayAndSequence("black_emperor", 1)))
+        ));
+
+        RECIPES.add(new PotionRecipe(
+                (BeyonderPotion) PotionItemHandler.CORPSE_COLLECTOR_POTION.get(),
+                new ItemStack(Items.ROTTEN_FLESH, 1),
+                new ItemStack(Items.BONE, 1),
+                new ItemStack(Objects.requireNonNull(BeyonderCharacteristicItemHandler.selectCharacteristicOfPathwayAndSequence("death", 9)))
+        ));
+        RECIPES.add(new PotionRecipe(
+                (BeyonderPotion) PotionItemHandler.GRAVEDIGGER_POTION.get(),
+                new ItemStack(Items.BONE_MEAL, 1),
+                new ItemStack(Items.DIRT, 1),
+                new ItemStack(Objects.requireNonNull(BeyonderCharacteristicItemHandler.selectCharacteristicOfPathwayAndSequence("death", 8)))
+        ));
+        RECIPES.add(new PotionRecipe(
+                (BeyonderPotion) PotionItemHandler.SPIRIT_MEDIUM_POTION.get(),
+                new ItemStack(Items.COAL, 1),
+                new ItemStack(Items.AMETHYST_SHARD, 1),
+                new ItemStack(Objects.requireNonNull(BeyonderCharacteristicItemHandler.selectCharacteristicOfPathwayAndSequence("death", 7)))
+        ));
+        RECIPES.add(new PotionRecipe(
+                (BeyonderPotion) PotionItemHandler.SPIRIT_GUIDE_POTION.get(),
+                new ItemStack(Items.CRYING_OBSIDIAN, 1),
+                new ItemStack(Items.IRON_INGOT, 1),
+                new ItemStack(Objects.requireNonNull(BeyonderCharacteristicItemHandler.selectCharacteristicOfPathwayAndSequence("death", 6)))
+        ));
+        RECIPES.add(new PotionRecipe(
+                (BeyonderPotion) PotionItemHandler.GATEKEEPER_POTION.get(),
+                new ItemStack(Items.OBSIDIAN, 1),
+                new ItemStack(Items.FLINT_AND_STEEL, 1),
+                new ItemStack(Objects.requireNonNull(BeyonderCharacteristicItemHandler.selectCharacteristicOfPathwayAndSequence("death", 5)))
+        ));
+        RECIPES.add(new PotionRecipe(
+                (BeyonderPotion) PotionItemHandler.UNDYING_POTION.get(),
+                new ItemStack(Items.GOLDEN_APPLE, 1),
+                new ItemStack(Items.LAVA_BUCKET, 1),
+                new ItemStack(Objects.requireNonNull(BeyonderCharacteristicItemHandler.selectCharacteristicOfPathwayAndSequence("death", 4)))
+        ));
+        RECIPES.add(new PotionRecipe(
+                (BeyonderPotion) PotionItemHandler.FERRYMAN_POTION.get(),
+                new ItemStack(Items.OAK_BOAT, 1),
+                new ItemStack(Items.SOUL_SOIL, 1),
+                new ItemStack(Objects.requireNonNull(BeyonderCharacteristicItemHandler.selectCharacteristicOfPathwayAndSequence("death", 3)))
+        ));
+        RECIPES.add(new PotionRecipe(
+                (BeyonderPotion) PotionItemHandler.DEATH_CONSUL_POTION.get(),
+                new ItemStack(Items.MAGMA_BLOCK, 1),
+                new ItemStack(Items.WITHER_SKELETON_SKULL, 1),
+                new ItemStack(Objects.requireNonNull(BeyonderCharacteristicItemHandler.selectCharacteristicOfPathwayAndSequence("death", 2)))
+        ));
+        RECIPES.add(new PotionRecipe(
+                (BeyonderPotion) PotionItemHandler.PALE_EMPEROR_POTION.get(),
+                new ItemStack(Items.WITHER_ROSE, 1),
+                new ItemStack(Items.NETHER_STAR, 1),
+                new ItemStack(Objects.requireNonNull(BeyonderCharacteristicItemHandler.selectCharacteristicOfPathwayAndSequence("death", 1)))
         ));
     }
 

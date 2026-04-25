@@ -2,6 +2,8 @@ package de.jakob.lotm.abilities.wheel_of_fortune;
 
 import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.abilities.core.SelectableAbility;
+import de.jakob.lotm.attachments.LuckComponent;
+import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.effect.ModEffects;
 import de.jakob.lotm.entity.ModEntities;
 import de.jakob.lotm.entity.custom.ability_entities.tyrant_pathway.GiantLightningEntity;
@@ -37,6 +39,7 @@ public class ProphecyAbility extends SelectableAbility {
         super(id, 4);
         canBeCopied = false;
         canBeReplicated = false;
+        canBeShared = false;
     }
 
     @Override
@@ -74,7 +77,7 @@ public class ProphecyAbility extends SelectableAbility {
             case 0 -> {
                 Vec3 targetLoc = AbilityUtil.getTargetLocation(entity, 85, 3);
 
-                MeteorEntity meteor = new MeteorEntity(level, 3.25f,  (float) DamageLookup.lookupDamage(2, 1) * (float) BeyonderData.getMultiplier(entity), 6, entity, BeyonderData.isGriefingEnabled(entity), 20, 34);
+                MeteorEntity meteor = new MeteorEntity(level, 3.25f,  (float) DamageLookup.lookupDamage(2, 1) * (int) Math.max(BeyonderData.getMultiplier(entity)/2,1), 4, entity, BeyonderData.isGriefingEnabled(entity), 20, 34);
                 meteor.setPosition(targetLoc);
                 level.addFreshEntity(meteor);
             }
@@ -86,7 +89,7 @@ public class ProphecyAbility extends SelectableAbility {
                         targetLoc = targetLoc.subtract(0, 1, 0);
                 }
 
-                GiantLightningEntity lightning = new GiantLightningEntity(level, entity, targetLoc, 50, 6, DamageLookup.lookupDamage(2, .85) * multiplier(entity), BeyonderData.isGriefingEnabled(entity), 13, 200, 0x6522a8);
+                GiantLightningEntity lightning = new GiantLightningEntity(level, entity, targetLoc, 50, 6, DamageLookup.lookupDamage(2, 1)  * (int) Math.max(BeyonderData.getMultiplier(entity)/2,1), BeyonderData.isGriefingEnabled(entity), 13, 200, 0x6522a8);
                 level.addFreshEntity(lightning);
             }
             case 2 -> {
@@ -94,12 +97,12 @@ public class ProphecyAbility extends SelectableAbility {
 
                 Vec3 pos = AbilityUtil.getTargetLocation(entity, 12, 2);
 
-                TornadoEntity tornado = target == null ? new TornadoEntity(ModEntities.TORNADO.get(), level, .15f, (float) DamageLookup.lookupDamage(2, .75) * (float) BeyonderData.getMultiplier(entity), entity) : new TornadoEntity(ModEntities.TORNADO.get(), level, .15f, 32.5f * (float) BeyonderData.getMultiplier(entity), entity, target);
+                TornadoEntity tornado = target == null ? new TornadoEntity(ModEntities.TORNADO.get(), level, .15f, (float) DamageLookup.lookupDamage(2, 1), entity) : new TornadoEntity(ModEntities.TORNADO.get(), level, .15f, 32.5f * (int) Math.max(BeyonderData.getMultiplier(entity)/2,1), entity, target);
                 tornado.setPos(pos);
                 level.addFreshEntity(tornado);
 
                 for(int i = 0; i < 5; i++) {
-                    TornadoEntity additionalTornado = target == null || (new Random()).nextInt(4) != 0 ? new TornadoEntity(ModEntities.TORNADO.get(), level, .15f, (float) DamageLookup.lookupDamage(2, .75) * (float) BeyonderData.getMultiplier(entity), entity) : new TornadoEntity(ModEntities.TORNADO.get(), level, .15f, (float) DamageLookup.lookupDamage(2, .75) * (float) BeyonderData.getMultiplier(entity), entity, target);
+                    TornadoEntity additionalTornado = target == null || (new Random()).nextInt(4) != 0 ? new TornadoEntity(ModEntities.TORNADO.get(), level, .15f, (float) DamageLookup.lookupDamage(2, .75) * (int) Math.max(BeyonderData.getMultiplier(entity)/2,1), entity) : new TornadoEntity(ModEntities.TORNADO.get(), level, .15f, (float) DamageLookup.lookupDamage(2, .75) * (int) Math.max(BeyonderData.getMultiplier(entity)/2,1), entity, target);
                     Vec3 randomOffset = new Vec3((level.random.nextDouble() - 0.5) * 40, 3, (level.random.nextDouble() - 0.5) * 40);
                     additionalTornado.setPos(pos.add(randomOffset));
                     level.addFreshEntity(additionalTornado);
@@ -112,7 +115,7 @@ public class ProphecyAbility extends SelectableAbility {
 
                 level.playSound(null, entity.blockPosition(), SoundEvents.GENERIC_SPLASH, entity.getSoundSource(), 5, 1.0f);
 
-                TsunamiEntity tsunami = new TsunamiEntity(level, position, direction, (float) (DamageLookup.lookupDamage(2, .75) * multiplier(entity)), BeyonderData.isGriefingEnabled(entity), entity);
+                TsunamiEntity tsunami = new TsunamiEntity(level, position, direction, (float) (DamageLookup.lookupDamage(2, 1) * (int) Math.max(BeyonderData.getMultiplier(entity)/2,1)), BeyonderData.isGriefingEnabled(entity), entity);
                 level.addFreshEntity(tsunami);
             }
         }
@@ -134,7 +137,9 @@ public class ProphecyAbility extends SelectableAbility {
                 BeyonderData.addModifierWithTimeLimit(target, "prophecy", 0.6, 20 * 40);
             }
             case 1 -> {
-                target.addEffect(new MobEffectInstance(ModEffects.UNLUCK, 20 * 40, 20, false, false, false));
+                LuckComponent component = target.getData(ModAttachments.LUCK_COMPONENT.get());
+                int amplifier = (int) Math.min(Math.round(BeyonderData.getMultiplier(entity) * 6.25f) * 100, 6500);
+                component.addLuckWithMin(-amplifier, (int) (-amplifier * 1.5));
                 EffectManager.playEffect(EffectManager.Effect.MISFORTUNE_CURSE, target.getX(), target.getY() + 1, target.getZ(), (ServerLevel) level);
             }
             case 2 -> {
@@ -155,7 +160,8 @@ public class ProphecyAbility extends SelectableAbility {
     }
 
     private void giveLuckEffect(Level level, LivingEntity entity) {
-        entity.addEffect(new MobEffectInstance(ModEffects.LUCK, 20 * 20, 26, false, false, false));
+        LuckComponent component = entity.getData(ModAttachments.LUCK_COMPONENT.get());
+        component.addLuckWithMax(3000, 3000);
         EffectManager.playEffect(EffectManager.Effect.BLESSING, entity.getX(), entity.getY() + 1, entity.getZ(), (ServerLevel) level);
     }
 

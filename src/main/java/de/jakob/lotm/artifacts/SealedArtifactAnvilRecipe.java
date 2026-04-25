@@ -22,32 +22,26 @@ public class SealedArtifactAnvilRecipe {
         ItemStack left = event.getLeft();
         ItemStack right = event.getRight();
 
-        // Check if right slot has a beyonder characteristic
         if (!(right.getItem() instanceof BeyonderCharacteristicItem characteristic)) {
             return;
         }
 
-        // check if the item is historical summoned
         if (right.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).contains("VoidSummonTime")) {
             return;
         }
 
-        // Check if left slot has a valid base item
         if (!SealedArtifactHandler.isValidBaseItem(left.getItem())) {
             return;
         }
 
-        // Create the sealed artifact
         ItemStack result = switch (SealedArtifactHandler.getBaseTypeName(left.getItem())) {
-            //case "bell" -> new ItemStack(ModItems.SEALED_ARTIFACT_BELL);
-            //case "chain" -> new ItemStack(ModItems.SEALED_ARTIFACT_CHAIN);
             case "gem" -> new ItemStack(ModItems.SEALED_ARTIFACT_GEM);
             case "star" -> new ItemStack(ModItems.SEALED_ARTIFACT_STAR);
             default -> new ItemStack(ModItems.SEALED_ARTIFACT);
         };
 
         if (left.getCount() > 1) {
-            event.setCanceled(true); // Prevent the recipe from working
+            event.setCanceled(true);
             return;
         }
 
@@ -74,10 +68,8 @@ public class SealedArtifactAnvilRecipe {
             result.set(ModDataComponents.SEALED_ARTIFACT_GENERATED_FAILED,
                 isFailed((ServerLevel) level, characteristic.getSequence()));
 
-        // Set the result
         event.setOutput(result);
-        
-        // Set the cost (XP levels)
+
         int sequence = characteristic.getSequence();
         int cost = (sequence <= 1) ? 65 :
                    (sequence == 2) ? 50 :
@@ -86,18 +78,13 @@ public class SealedArtifactAnvilRecipe {
 
         event.setCost(cost);
 
-        // Material cost is handled automatically by the anvil
         event.setMaterialCost(1);
     }
 
     public static boolean isFailed(ServerLevel level, int seq){
         float additional = 0.0f;
 
-        switch (seq){
-            case 6,5 -> additional += 0.1f;
-            case 4,3 -> additional += 0.2f;
-            case 2,1 -> additional += 0.3f;
-        }
+        additional += seq < 7 && seq > 0 ? Math.min((7 - seq) * 0.15f, .5f) : 0;
 
         return level.random.nextFloat() < 0.2f + additional;
     }

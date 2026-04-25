@@ -7,6 +7,29 @@ public class ClientData {
     private static List<String> abilityWheelAbilities = new ArrayList<>();
     private static int selectedAbility = 0;
 
+    // When true, the ability wheel is showing shared abilities rather than the player's own wheel
+    public static boolean sharedAbilityMode = false;
+
+    // Personal shared wheel ordering, set from IntrospectScreen's Shared tab
+    private static List<String> sharedWheelAbilities = new ArrayList<>();
+    private static int selectedSharedAbility = 0;
+
+    public static List<String> getSharedWheelAbilities() {
+        return sharedWheelAbilities;
+    }
+
+    public static void setSharedWheelAbilities(List<String> abilities) {
+        sharedWheelAbilities = new ArrayList<>(abilities);
+    }
+
+    public static int getSelectedSharedAbility() {
+        return selectedSharedAbility;
+    }
+
+    public static void setSelectedSharedAbility(int index) {
+        selectedSharedAbility = index;
+    }
+
     private static List<String> copiedAbilityIds = new ArrayList<>();
     private static List<String> copiedAbilityCopyTypes = new ArrayList<>();
     private static List<Integer> copiedAbilityRemainingUses = new ArrayList<>();

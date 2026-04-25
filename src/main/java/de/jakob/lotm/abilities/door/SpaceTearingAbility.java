@@ -14,8 +14,9 @@ import java.util.Map;
 
 public class SpaceTearingAbility extends Ability {
     public SpaceTearingAbility(String id) {
-        super(id, 2);
+        super(id, 6);
         canBeCopied = false;
+        canBeShared = false;
     }
 
     @Override
@@ -25,7 +26,7 @@ public class SpaceTearingAbility extends Ability {
 
     @Override
     public float getSpiritualityCost() {
-        return 800;
+        return 1500;
     }
 
     @Override
@@ -33,8 +34,8 @@ public class SpaceTearingAbility extends Ability {
         if(level.isClientSide)
             return;
 
-        Vec3 targetLoc = AbilityUtil.getTargetLocation(entity, 27, 2);
-        SpaceCollapseEntity collapse = new SpaceCollapseEntity(level, targetLoc, (float) DamageLookup.lookupDps(3, .875, 4, 20) * (float) multiplier(entity), BeyonderData.isGriefingEnabled(entity), entity);
+        Vec3 targetLoc = AbilityUtil.getTargetLocation(entity, 27*(int) Math.max(multiplier(entity)/4,1), 2);
+        SpaceCollapseEntity collapse = new SpaceCollapseEntity(level, targetLoc, (float) DamageLookup.lookupDps(3, 1, 4, 20) *(int) Math.max(multiplier(entity)/4,1), BeyonderData.isGriefingEnabled(entity), entity);
         level.addFreshEntity(collapse);
     }
 }

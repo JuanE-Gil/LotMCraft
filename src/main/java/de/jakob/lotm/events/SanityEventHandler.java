@@ -1,6 +1,5 @@
 package de.jakob.lotm.events;
 
-import de.jakob.lotm.abilities.black_emperor.BlackEmperorSanity;
 import de.jakob.lotm.attachments.DisabledAbilitiesComponent;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.attachments.SanityComponent;
@@ -29,16 +28,25 @@ public class SanityEventHandler {
             return;
         }
 
-        // Only process server-side and every 20 ticks (1 second)
         if(entity.level().isClientSide || entity.tickCount % 20 != 0) {
             return;
         }
 
         SanityComponent sanityComp = entity.getData(ModAttachments.SANITY_COMPONENT);
 
-        // Add sanity back over time if not angel, otherwise reduce it
-        float sanityIncrease = BeyonderData.isBeyonder(entity) && BeyonderData.getSequence(entity) <= 2 ? -0.00025f : 0.0025f;
-        sanityIncrease = BlackEmperorSanity.applySanityLossResistance(entity, sanityIncrease);
+        boolean isBeyonder = BeyonderData.isBeyonder(entity);
+        boolean isHighSequence = isBeyonder && BeyonderData.getSequence(entity) <= 2;
+        boolean hasSwitched = BeyonderData.hasSwitchedPathway(entity);
+        boolean hasUndigestedStack = isBeyonder
+                && entity instanceof Player digestionPlayer
+                && BeyonderData.getCurrentCharStack(entity) > 0
+                && BeyonderData.getDigestionProgress(digestionPlayer) < 1.0f;
+
+        boolean shouldDrain = isHighSequence || sanityComp.getSanity() < .2f || hasUndigestedStack || hasSwitched;
+        float sanityIncrease = shouldDrain ? 0 : 0.0025f;
+        if (isHighSequence || sanityComp.getSanity() < .2f) sanityIncrease -= 0.00025f;
+        if (hasUndigestedStack) sanityIncrease -= 0.00025f;
+        if (hasSwitched) sanityIncrease -= 0.00025f;
         sanityComp.increaseSanityAndSync(sanityIncrease, entity);
 
         float sanity = sanityComp.getSanity();
@@ -53,23 +61,7 @@ public class SanityEventHandler {
         // ---------------- SANITY → BEYONDER INSTABILITY ----------------
         if (BeyonderData.isBeyonder(entity)) {
             Random random = new Random();
-            float sanityLoss = 1.0f - sanity;
-            UUID uuid = entity.getUUID();
-
-            // ----- MULTIPLIER SCALING -----
-            double sanityMultiplier;
-
-            if (sanityValue >= 64) {
-                sanityMultiplier = 1.0;
-            } else if (sanityValue >= 50) {
-                sanityMultiplier = 0.95;
-            } else if (sanityValue >= 35) {
-                sanityMultiplier = 0.85;
-            } else if (sanityValue >= 20) {
-                sanityMultiplier = 0.7;
-            } else {
-                sanityMultiplier = Math.max(0.2, 0.5 - sanityLoss);
-            }
+            double sanityMultiplier = getSanityMultiplier(entity, sanity, sanityValue);
 
             // Always refresh for 2000 ms
             BeyonderData.addModifier(entity, "sanity_loss", sanityMultiplier);
@@ -168,7 +160,7 @@ public class SanityEventHandler {
         }
 
         // PHASE 4: Sanity 5-19 - Critical state, starting to lose control
-        else if(sanityValue >= 5 && sanityValue < 20) {
+        else if(sanityValue >= 5) {
             entity.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 200, 2, false, false));
             entity.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 25, 3, false, true));
             entity.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 200, 0, false, false));
@@ -200,7 +192,7 @@ public class SanityEventHandler {
         }
 
         // PHASE 5: Sanity 0-4 - Complete loss of control, near certain death
-        else if(sanityValue < 5) {
+        else {
             entity.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 200, 3, false, false));
             entity.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 25, 4, false, true));
             entity.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 200, 1, false, false));
@@ -238,6 +230,27 @@ public class SanityEventHandler {
                 }
             }
         }
+    }
+
+    private static double getSanityMultiplier(LivingEntity entity, float sanity, int sanityValue) {
+        float sanityLoss = 1.0f - sanity;
+        UUID uuid = entity.getUUID();
+
+        // ----- MULTIPLIER SCALING -----
+        double sanityMultiplier;
+
+        if (sanityValue >= 64) {
+            sanityMultiplier = 1.0;
+        } else if (sanityValue >= 50) {
+            sanityMultiplier = 0.95;
+        } else if (sanityValue >= 35) {
+            sanityMultiplier = 0.85;
+        } else if (sanityValue >= 20) {
+            sanityMultiplier = 0.7;
+        } else {
+            sanityMultiplier = Math.max(0.2, 0.5 - sanityLoss);
+        }
+        return sanityMultiplier;
     }
 
 }

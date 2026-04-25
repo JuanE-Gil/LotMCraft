@@ -23,8 +23,6 @@ public class CullAbility extends ToggleAbility {
 
     public CullAbility(String id) {
         super(id);
-        canBeCopied = false;
-        canBeReplicated = false;
     }
 
     @Override
@@ -41,7 +39,7 @@ public class CullAbility extends ToggleAbility {
     public void start(Level level, LivingEntity entity) {
         if(level.isClientSide)
             return;
-        BeyonderData.addModifier(entity, "cull", 1.7);
+        BeyonderData.addModifier(entity, "cull", 1.3);
         if(entity instanceof ServerPlayer player)
             PacketHandler.sendToPlayer(player, new SyncCullAbilityPacket(true));
     }

@@ -2,8 +2,11 @@ package de.jakob.lotm.abilities.darkness;
 
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.SelectableAbility;
+import de.jakob.lotm.abilities.error.handler.TheftHandler;
+import de.jakob.lotm.effect.ModEffects;
 import de.jakob.lotm.network.PacketHandler;
 import de.jakob.lotm.network.packets.toClient.SyncNightmareAbilityPacket;
+import de.jakob.lotm.util.TeleportationUtil;
 import de.jakob.lotm.util.data.Location;
 import de.jakob.lotm.util.data.NightmareCenter;
 import de.jakob.lotm.util.helper.*;
@@ -54,11 +57,12 @@ public class NightmareAbility extends SelectableAbility {
     }
 
     public NightmareAbility(String id) {
-        super(id, .15f);
+        super(id, 1);
 
         canBeCopied = false;
         canBeUsedByNPC = false;
         canBeReplicated = false;
+        autoClear = false;
     }
 
     @Override
@@ -85,6 +89,10 @@ public class NightmareAbility extends SelectableAbility {
             case 3 -> attack(level, entity);
             case 4 -> teleport(level, entity);
         }
+
+        if(abilityIndex != 3){
+            clearArtifactScaling(entity);
+        }
     }
 
     private void teleport(Level level, LivingEntity entity) {
@@ -102,8 +110,10 @@ public class NightmareAbility extends SelectableAbility {
         Vec3 targetLoc = getTargetBlock(entity, 8).getCenter().add(0, 1, 0);
         level.playSound(null, targetLoc.x, targetLoc.y, targetLoc.z, SoundEvents.ENDERMAN_TELEPORT, SoundSource.BLOCKS, .5f, 1);
 
-        entity.teleportTo(targetLoc.x, targetLoc.y, targetLoc.z);
-        ParticleUtil.spawnParticles((ServerLevel) level, dustSmall, targetLoc.add(0, .5, 0), 30, .4, 1, .4, 0);
+        var validatedPos = TeleportationUtil.clampToBorder( (ServerLevel) level, targetLoc);
+
+        entity.teleportTo(validatedPos.x, validatedPos.y, validatedPos.z);
+        ParticleUtil.spawnParticles((ServerLevel) level, dustSmall, validatedPos.add(0, .5, 0), 30, .4, 1, .4, 0);
     }
 
     private void attack(Level level, LivingEntity entity) {
@@ -118,7 +128,7 @@ public class NightmareAbility extends SelectableAbility {
             return;
         }
 
-        Vec3 targetLoc = AbilityUtil.getTargetLocation(entity, 20, 2);
+        Vec3 targetLoc = AbilityUtil.getTargetLocation(entity, 20 * (int)(Math.max(multiplier(entity)/2,1)), 2);
         if(!isBlockInRadius(targetLoc, entity.getUUID())) {
             if(entity instanceof ServerPlayer player) {
                 ClientboundSetActionBarTextPacket packet = new ClientboundSetActionBarTextPacket(Component.literal("You cant attack outside the nightmare.").withColor(0xFFff124d));
@@ -137,7 +147,7 @@ public class NightmareAbility extends SelectableAbility {
         ServerScheduler.scheduleUntil((ServerLevel) level, () -> {
             Vec3 pos = currentPos.get();
 
-            if(AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 1.2f, DamageLookup.lookupDamage(7, 1) * multiplier(entity), pos, true, false, true, 0)) {
+            if(AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 1.2f, DamageLookup.lookupDamage(7, 1.3) * multiplier(entity), pos, true, false, true, 0)) {
                 hasHit.set(true);
                 return;
             }
@@ -149,7 +159,7 @@ public class NightmareAbility extends SelectableAbility {
             ParticleUtil.spawnParticles((ServerLevel) level, dustVerySmall, pos, 20, .25, 0);
 
             currentPos.set(pos.add(dir));
-        }, null, hasHit);
+        }, () -> this.clearArtifactScaling(entity), hasHit);
     }
 
     private void restrict(Level level, LivingEntity entity) {
@@ -164,17 +174,17 @@ public class NightmareAbility extends SelectableAbility {
             return;
         }
 
-        LivingEntity targetEntity = AbilityUtil.getTargetEntity(entity, 20, 2);
+        LivingEntity targetEntity = AbilityUtil.getTargetEntity(entity, 20 * (int)(Math.max(multiplier(entity)/2,1)), 2);
         if(targetEntity == null || !isAffectedByNightmare(targetEntity)) {
-            Vec3 targetPos = AbilityUtil.getTargetLocation(entity, 15, 1.5f, true);
-            ParticleUtil.createParticleSpirals((ServerLevel) level, dustSmall, targetPos, 2, 2, 2.5, .5, 8, 20 * 5, 11, 8);
+            Vec3 targetPos = AbilityUtil.getTargetLocation(entity, 15* (int)(Math.max(multiplier(entity)/2,1)), 1.5f, true);
+            ParticleUtil.createParticleSpirals((ServerLevel) level, dustSmall, targetPos, 2, 2, 2.5, .5, 8, 20 * 5* (int)(Math.max(multiplier(entity)/2,1)), 11, 8);
             return;
         }
 
         Location loc = new Location(targetEntity.position(), level);
         ParticleUtil.createParticleSpirals(dustVerySmall, loc, 1.2, 1.2, 2.5, .5, 8, 20 * 20, 11, 8);
 
-        ServerScheduler.scheduleForDuration(0, 2, 20 * 20, () -> {
+        ServerScheduler.scheduleForDuration(0, 2, 20 * 20* (int)(Math.max(multiplier(entity)/2,1)), () -> {
             if(entity.level().isClientSide)
                 return;
             loc.setPosition(targetEntity.position());
@@ -184,9 +194,14 @@ public class NightmareAbility extends SelectableAbility {
             ParticleUtil.drawParticleLine((ServerLevel) level, dustSmall, startPos, startPos.add(-2.75, -3, 0), .25, 1);
             ParticleUtil.drawParticleLine((ServerLevel) level, dustSmall, startPos, startPos.add(0, -3, -2.75), .25, 1);
             ParticleUtil.drawParticleLine((ServerLevel) level, dustSmall, startPos, startPos.add(0, -3, 2.75), .25, 1);
-            targetEntity.setDeltaMovement(0, 0, 0);
+            targetEntity.setOnGround(true);
+            var pos = targetEntity.position();
+            targetEntity.setDeltaMovement(new Vec3(0, 0, 0));
             targetEntity.hurtMarked = true;
-            targetEntity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 10, 10, false, false, false));
+
+            targetEntity.teleportTo(pos.x, pos.y, pos.z);
+            targetEntity.hurtMarked = true;
+            targetEntity.addEffect(new MobEffectInstance(ModEffects.ASLEEP, 40, 10, false, false, false));
         }, (ServerLevel) level);
     }
 
@@ -207,7 +222,7 @@ public class NightmareAbility extends SelectableAbility {
             return;
         }
 
-        BlockPos targetLoc = AbilityUtil.getTargetBlock(entity, 35, false);
+        BlockPos targetLoc = AbilityUtil.getTargetBlock(entity, 35 * (int)(Math.max(multiplier(entity)/20,1)), false);
         BlockState state = level.getBlockState(targetLoc);
         if(!isBlockInRadius(targetLoc.getCenter(), entity.getUUID()) || state.getCollisionShape(level, targetLoc).isEmpty()) {
             if(entity instanceof ServerPlayer player) {
@@ -283,7 +298,7 @@ public class NightmareAbility extends SelectableAbility {
             return;
         }
 
-        int radius = 40;
+        int radius = 40*(int) multiplier(entity);
         NightmareCenter center = new NightmareCenter(level, entity.position(), radius * radius);
 
         for(NightmareCenter c : activeNightmaresServer.values()) {
@@ -389,7 +404,7 @@ public class NightmareAbility extends SelectableAbility {
 
         // Capture the sphere BEFORE modifying it so we can restore it later
         if (storedRegions.containsKey(casterUuid)) {
-            storedRegions.get(casterUuid).captureSphere(centerPos, radius);
+            storedRegions.get(casterUuid).captureSphere(level, centerPos, radius);
         }
 
         // Iterate through all positions in a cube around the center

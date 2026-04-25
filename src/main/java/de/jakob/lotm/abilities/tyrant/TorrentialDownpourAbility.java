@@ -1,6 +1,7 @@
 package de.jakob.lotm.abilities.tyrant;
 
 import de.jakob.lotm.abilities.core.Ability;
+import de.jakob.lotm.abilities.core.AbilityUsedEvent;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.data.Location;
 import de.jakob.lotm.util.helper.AbilityUtil;
@@ -20,14 +21,19 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.common.NeoForge;
 import org.joml.Vector3f;
 
 import java.util.*;
 
 public class TorrentialDownpourAbility extends Ability {
     public TorrentialDownpourAbility(String id) {
-        super(id, 40);
+        super(id, 25, "water", "water_strong");
         canBeCopied = false;
+        postsUsedAbilityEventManually = true;
+        interactionRadius = 25;
+        interactionCacheTicks = 20 * 30;
+        canBeShared = false;
     }
 
     @Override
@@ -54,7 +60,7 @@ public class TorrentialDownpourAbility extends Ability {
 
     @Override
     public float getSpiritualityCost() {
-        return 900;
+        return 1200;
     }
 
     @Override
@@ -74,9 +80,11 @@ public class TorrentialDownpourAbility extends Ability {
         Vec3 cloudPos = startPos.add(0, 12, 0);
         Vec3 rainPos = startPos.add(0, 7, 0);
 
-        List<BlockPos> blocks = new ArrayList<>(AbilityUtil.getBlocksInCircle((ServerLevel) level, startPos.add(0, -2, 0), 27));
+        NeoForge.EVENT_BUS.post(new AbilityUsedEvent(serverLevel, startPos, entity, this, interactionFlags, interactionRadius, interactionCacheTicks));
+
+        List<BlockPos> blocks = new ArrayList<>(AbilityUtil.getBlocksInCircle((ServerLevel) level, startPos.add(0, -2, 0), 27* (int) Math.max(multiplier(entity)/4,1)));
         for(int i = -12; i < 13; i++) {
-            blocks.addAll(AbilityUtil.getBlocksInCircle((ServerLevel) level, startPos.add(0, i, 0), 27));
+            blocks.addAll(AbilityUtil.getBlocksInCircle((ServerLevel) level, startPos.add(0, i, 0), 27* (int) Math.max(multiplier(entity)/4,1)));
         }
 
         List<BlockPos> validBlocks = blocks.stream().filter(b -> !level.getBlockState(b).getCollisionShape(level, b).isEmpty() && level.getBlockState(b.above()).getCollisionShape(level, b).isEmpty() && !level.getBlockState(b).is(Blocks.WATER)).toList();
@@ -87,7 +95,7 @@ public class TorrentialDownpourAbility extends Ability {
         activeDownpours.add(data);
 
         // Scheduler for Animations
-        ServerScheduler.scheduleForDuration(0, 4, 20 * 30, () -> {
+        ServerScheduler.scheduleForDuration(0, 4, 20 * 30* (int) Math.max(multiplier(entity)/4,1), () -> {
             boolean isFrozen = isFrozen(downpourId);
 
             level.playSound(null, rainPos.x, rainPos.y, rainPos.z, SoundEvents.WEATHER_RAIN, SoundSource.WEATHER, 2, 1);
@@ -116,8 +124,9 @@ public class TorrentialDownpourAbility extends Ability {
         }, () -> activeDownpours.remove(data), (ServerLevel) level, () -> AbilityUtil.getTimeInArea(entity, new Location(startPos, level)));
 
         // Scheduler for Damage
-        ServerScheduler.scheduleForDuration(0, 10, 20 * 30, () -> {
-            AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 25, DamageLookup.lookupDps(3, .75, 10, 20) * multiplier(entity), startPos, true, false, true, 0);
+        double multiplier = multiplier(entity);
+        ServerScheduler.scheduleForDuration(0, 10, 20 * 30* (int) Math.max(multiplier(entity)/4,1), () -> {
+            AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 25, DamageLookup.lookupDps(3, .75, 5, 20) * (int) Math.max(multiplier(entity)/4,1), startPos, true, false, true, 0);
         }, null, (ServerLevel) level, () -> AbilityUtil.getTimeInArea(entity, new Location(startPos, level)));
     }
 

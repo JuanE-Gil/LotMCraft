@@ -6,7 +6,6 @@ import de.jakob.lotm.util.scheduling.ServerScheduler;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
@@ -21,6 +20,14 @@ public class DisabledAbilitiesComponent implements INBTSerializable<CompoundTag>
 
     private final HashMap<String, Integer> hasAllAbilitiesDisabled = new HashMap<>();
     private final HashMap<String, List<DisabledAbility>> disabledAbilities = new HashMap<>();
+
+    public List<DisabledAbility> getAllDisabledAbilities() {
+        List<DisabledAbility> all = new ArrayList<>();
+        for (List<DisabledAbility> list : disabledAbilities.values()) {
+            all.addAll(list);
+        }
+        return all;
+    }
 
     public void disableAbilityUsage(String cause) {
         hasAllAbilitiesDisabled.put(cause, 1);

@@ -1,9 +1,12 @@
 package de.jakob.lotm.entity.custom.ability_entities.red_priest_pathway;
 
+import de.jakob.lotm.attachments.ModAttachments;
+import de.jakob.lotm.attachments.SanityComponent;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.data.Location;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.ParticleUtil;
+import net.minecraft.world.entity.LivingEntity;
 import de.jakob.lotm.util.scheduling.ServerScheduler;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -54,7 +57,8 @@ public class WarBannerEntity extends Entity {
         if(getRadius() <= 0)
             setRadius(25);
 
-        ParticleUtil.createParticleSpirals(ParticleTypes.FLAME, new Location(position(), level()), 3, 3, 5.5, .35, 5, 20 * 30, 15, 8);
+        if (!skipEffects)
+            ParticleUtil.createParticleSpirals(ParticleTypes.FLAME, new Location(position(), level()), 3, 3, 5.5, .35, 5, 20 * 30, 15, 8);
     }
 
     public WarBannerEntity(EntityType<?> entityType, Level level, int ticks, UUID casterUUID) {
@@ -63,6 +67,13 @@ public class WarBannerEntity extends Entity {
         this.noCulling = true;
         this.setDuration(ticks);
         this.setCasterUUID(casterUUID);
+    }
+
+    private boolean skipEffects = false;
+
+    public WarBannerEntity(EntityType<?> entityType, Level level, int ticks, UUID casterUUID, boolean skipEffects) {
+        this(entityType, level, ticks, casterUUID);
+        this.skipEffects = skipEffects;
     }
 
     int lifetime = 0;
@@ -82,21 +93,29 @@ public class WarBannerEntity extends Entity {
             return;
         }
 
-        spawnParticles();
+        if (!skipEffects) spawnParticles();
+
+        if (skipEffects) return;
+
+        Entity casterEntity = getCasterEntity();
 
         AbilityUtil.getNearbyEntities(null, (ServerLevel) level(), position(), getRadius()).forEach(e -> {
             ParticleUtil.spawnParticles((ServerLevel) level(), ParticleTypes.FLAME, e.position().add(0, e.getBbHeight() / 2, 0), 1, .4, 1, .4, 0);
             ParticleUtil.spawnParticles((ServerLevel) level(), dust, e.position().add(0, e.getBbHeight() / 2, 0), 7, .4, 1, .4, 0);
 
-            if(e.getUUID().equals(getCasterUUID())) {
-                BeyonderData.addModifier(e, "war_song", 1.5f);
+            boolean isCaster = e.getUUID().equals(getCasterUUID());
+            boolean isAlly = !isCaster && casterEntity instanceof LivingEntity livingCaster && !AbilityUtil.mayTarget(livingCaster, e);
+
+            if(isCaster || isAlly) {
+                BeyonderData.addModifier(e, "war_song", 1.05f);
 
                 ServerScheduler.scheduleDelayed(20, () -> {
                     if(e.level() != level() || e.isDeadOrDying() || e.distanceTo(this) > getRadius()) {
                         BeyonderData.removeModifier(e, "war_song");
                     }
                 });
-
+                SanityComponent sanityComponent = e.getData(ModAttachments.SANITY_COMPONENT);
+                sanityComponent.increaseSanityAndSync(0.0006f, e);
                 e.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 20, 7, false, false, false));
                 e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 20, 7, false, false, false));
                 return;
@@ -109,9 +128,10 @@ public class WarBannerEntity extends Entity {
                     BeyonderData.removeModifier(e, "war_song");
                 }
             });
-
-            e.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 20, 4, false, false, false));
-            e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, 4, false, false, false));
+            if(!isAlly) {
+                e.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 20, 4, false, false, false));
+                e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, 4, false, false, false));
+            };
         });
     }
 

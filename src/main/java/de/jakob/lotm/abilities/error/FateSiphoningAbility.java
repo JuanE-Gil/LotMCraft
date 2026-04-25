@@ -2,6 +2,7 @@ package de.jakob.lotm.abilities.error;
 
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.Ability;
+import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.damage.ModDamageTypes;
 import de.jakob.lotm.rendering.effectRendering.DirectionalEffectManager;
 import de.jakob.lotm.util.BeyonderData;
@@ -36,8 +37,9 @@ public class FateSiphoningAbility extends Ability {
     private static final HashMap<UUID, UUID> linkedEntities = new HashMap<>();
 
     public FateSiphoningAbility(String id) {
-        super(id, 25);
+        super(id, 20);
         canBeCopied = false;
+        canBeShared = false;
     }
 
     @Override
@@ -47,7 +49,7 @@ public class FateSiphoningAbility extends Ability {
 
     @Override
     public float getSpiritualityCost() {
-        return 1000;
+        return 4000;
     }
 
     @Override
@@ -56,7 +58,7 @@ public class FateSiphoningAbility extends Ability {
             return;
         }
 
-        LivingEntity target = AbilityUtil.getTargetEntity(entity, 30, 2);
+        LivingEntity target = AbilityUtil.getTargetEntity(entity, 30*(int) Math.max(multiplier(entity)/4,1), 2);
         if(target == null) {
             AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.fate_siphoning.no_target").withColor(0x6d32a8));
             return;
@@ -68,13 +70,15 @@ public class FateSiphoningAbility extends Ability {
             return;
         }
 
-        if(BeyonderData.getPathway(target).equals("error") && BeyonderData.getSequence(target) < BeyonderData.getSequence(entity)){
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+
+        if(BeyonderData.getPathway(target).equals("error") && BeyonderData.getSequence(target) < entitySeq){
             AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.fate_siphoning.resisted").withColor(0x6d32a8));
             return;
         }
 
         // High-sequence opponents may outright resist the fate link being established
-        double failureChance = AbilityUtil.getSequenceFailureChance(entity, target);
+        double failureChance = AbilityUtil.getSequenceFailureChance(entitySeq, BeyonderData.getSequence(target));
         if (ThreadLocalRandom.current().nextDouble() < failureChance) {
             AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.fate_siphoning.resisted").withColor(0x6d32a8));
             return;
@@ -87,7 +91,7 @@ public class FateSiphoningAbility extends Ability {
                 entity);
 
         linkedEntities.put(entity.getUUID(), target.getUUID());
-        ServerScheduler.scheduleDelayed(20 * 14, () -> linkedEntities.remove(entity.getUUID()));
+        ServerScheduler.scheduleDelayed(20 * 7*(int) Math.max(multiplier(entity)/4,1), () -> linkedEntities.remove(entity.getUUID()));
     }
 
     @SubscribeEvent
@@ -139,13 +143,12 @@ public class FateSiphoningAbility extends Ability {
         if(!(target instanceof LivingEntity targetLiving))
             return;
 
-        ArrayList<MobEffectInstance> effects = new ArrayList<>(player.getActiveEffects());
-        for(var effect : effects){
-            if (effect.getEffect().value().isBeneficial()) continue;
+        var luck = entity.getData(ModAttachments.LUCK_COMPONENT.get());
+        var luckTarget = target.getData(ModAttachments.LUCK_COMPONENT.get());
 
-            player.removeEffect(effect.getEffect());
-
-            targetLiving.addEffect(new MobEffectInstance(effect));
+        if(luck.getLuck() < 0) {
+            luckTarget.setLuck(luckTarget.getLuck() + luck.getLuck());
+            luck.setLuck(0);
         }
     }
 

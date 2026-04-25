@@ -1,5 +1,7 @@
 package de.jakob.lotm.util.helper;
 
+import de.jakob.lotm.LOTMCraft;
+import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.abilities.error.DeceitAbility;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.attachments.ParasitationComponent;
@@ -60,37 +62,43 @@ public class AbilityUtil {
             return 10 - BeyonderData.getSequence(target);
         }
 
-        return BeyonderData.getSequence(target) - BeyonderData.getSequence(source);
+        return getSequenceDifference(BeyonderData.getSequence(target), BeyonderData.getSequence(source));
+    }
+
+    public static int getSequenceDifference(int sourceSeq, int targetSeq){
+        return targetSeq - sourceSeq;
     }
 
     public static boolean isTargetSignificantlyWeaker(LivingEntity source, LivingEntity target) {
-        if (!BeyonderData.isBeyonder(source)) {
+        return isTargetSignificantlyWeaker(BeyonderData.getSequence(source), BeyonderData.getSequence(target));
+    }
+
+    public static boolean isTargetSignificantlyWeaker(int sourceSeq, int targetSeq) {
+        if (sourceSeq == LOTMCraft.NON_BEYONDER_SEQ) {
             return false;
         }
 
-        if (!BeyonderData.isBeyonder(target)) {
+        if (targetSeq == LOTMCraft.NON_BEYONDER_SEQ) {
             return true;
         }
 
-        int sourceSequence = BeyonderData.getSequence(source);
-        int targetSequence = BeyonderData.getSequence(target);
-
-        return isSequenceSignificantlyHigher(targetSequence, sourceSequence);
+        return isSequenceSignificantlyHigher(targetSeq, sourceSeq);
     }
 
     public static boolean isTargetSignificantlyStronger(LivingEntity source, LivingEntity target) {
-        if (!BeyonderData.isBeyonder(target)) {
+        return isTargetSignificantlyStronger(BeyonderData.getSequence(source), BeyonderData.getSequence(target));
+    }
+
+    public static boolean isTargetSignificantlyStronger(int sourceSeq, int targetSeq) {
+        if (targetSeq == LOTMCraft.NON_BEYONDER_SEQ) {
             return false;
         }
 
-        if (!BeyonderData.isBeyonder(source)) {
+        if (sourceSeq == LOTMCraft.NON_BEYONDER_SEQ) {
             return true;
         }
 
-        int sourceSequence = BeyonderData.getSequence(source);
-        int targetSequence = BeyonderData.getSequence(target);
-
-        return isSequenceSignificantlyHigher(sourceSequence, targetSequence);
+        return isSequenceSignificantlyHigher(sourceSeq, targetSeq);
     }
 
     private static boolean isSequenceSignificantlyHigher(int higher, int lower) {
@@ -126,6 +134,10 @@ public class AbilityUtil {
         int casterSeq = (caster != null && BeyonderData.isBeyonder(caster)) ? BeyonderData.getSequence(caster) : 10;
         int opponentSeq = BeyonderData.getSequence(opponent);
 
+        return getSequenceResistanceFactor(casterSeq, opponentSeq);
+    }
+
+    public static double getSequenceResistanceFactor(int casterSeq, int opponentSeq) {
         // Opponent weaker or same sequence: no resistance
         if (opponentSeq >= casterSeq) return 0.0;
 
@@ -154,9 +166,13 @@ public class AbilityUtil {
     public static double getSequenceFailureChance(LivingEntity caster, LivingEntity opponent) {
         if (opponent == null || !BeyonderData.isBeyonder(opponent)) return 0.0;
 
-        int casterSeq = (caster != null && BeyonderData.isBeyonder(caster)) ? BeyonderData.getSequence(caster) : 10;
+        int casterSeq = (caster != null && BeyonderData.isBeyonder(caster)) ? BeyonderData.getSequence(caster) : LOTMCraft.NON_BEYONDER_SEQ;
         int opponentSeq = BeyonderData.getSequence(opponent);
 
+        return getSequenceFailureChance(casterSeq, opponentSeq);
+    }
+
+    public static double getSequenceFailureChance(int casterSeq, int opponentSeq){
         if (opponentSeq >= casterSeq) return 0.0;
 
         int casterCat = getSequenceCategory(casterSeq);
@@ -1207,5 +1223,43 @@ public class AbilityUtil {
         }
         ClientboundSetActionBarTextPacket packet = new ClientboundSetActionBarTextPacket(message);
         player.connection.send(packet);
+    }
+
+    public static void setArtifactScaling(LivingEntity entity, String path, int seq){
+        entity.getData(ModAttachments.SKILL_SCALING_COMPONENT.get())
+                .setScalingToSkill(true)
+                .setSeq(seq)
+                .setPath(path)
+                .Sync(entity);
+    }
+
+    public static void removeArtifactScaling(LivingEntity entity){
+        entity.getData(ModAttachments.SKILL_SCALING_COMPONENT.get())
+                .setScalingToSkill(false)
+                .setSeq(LOTMCraft.NON_BEYONDER_SEQ)
+                .setPath("none")
+                .Sync(entity);
+    }
+
+    public static boolean hasArtifactScaling(LivingEntity entity){
+        return entity.getData(ModAttachments.SKILL_SCALING_COMPONENT.get()).getScaleToSkill();
+    }
+
+    public static String getArtifactScalingPath(LivingEntity entity){
+        return entity.getData(ModAttachments.SKILL_SCALING_COMPONENT.get()).getPath();
+    }
+
+    public static int getArtifactScalingSeq(LivingEntity entity){
+        return entity.getData(ModAttachments.SKILL_SCALING_COMPONENT.get()).getSeq();
+    }
+
+    public static int getSeqWithArt(LivingEntity entity, Ability ability){
+        if(entity == null) return LOTMCraft.NON_BEYONDER_SEQ;
+        return ability.artifactScalingMap.containsKey(entity.getUUID()) ?
+                ability.artifactScalingMap.get(entity.getUUID()) : BeyonderData.getSequence(entity);
+    }
+
+    public static double getMultiplierWithArt(LivingEntity entity, Ability ability){
+        return ability.artifactScalingMap.containsKey(entity.getUUID()) ? 1 : BeyonderData.getMultiplier(entity);
     }
 }

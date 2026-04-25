@@ -19,6 +19,7 @@ import org.joml.Vector3f;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
 
 public class MindFogAbility extends ToggleAbility {
     private final Random random = new Random();
@@ -27,10 +28,12 @@ public class MindFogAbility extends ToggleAbility {
     private final DustParticleOptions fogDustStrong = new DustParticleOptions(new Vector3f(0.88f, 0.9f, 1.0f), 1.5f);
 
     public MindFogAbility(String id) {
-        super(id);
+        super(id, "fog");
         canBeUsedByNPC = false;
         this.canBeCopied = false;
         this.canBeReplicated = false;
+        autoClear = false;
+        interactionRadius = 20;
     }
 
     @Override
@@ -53,7 +56,9 @@ public class MindFogAbility extends ToggleAbility {
         if (level.isClientSide) return;
 
         ServerLevel serverLevel = (ServerLevel) level;
-        double fogRadius = 20;
+        double fogRadius = 20* (int) Math.max(multiplier(entity)/2,1);
+
+        int seq = AbilityUtil.getSeqWithArt(entity, this);
 
         for (int i = 0; i < 8; i++) {
             double angle = random.nextDouble() * Math.PI * 2;
@@ -64,8 +69,9 @@ public class MindFogAbility extends ToggleAbility {
             ParticleUtil.spawnParticles(serverLevel, particle, new Vec3(x, entity.getY() + 1, z), 1, 0.2, 0.02);
         }
 
-        if (InteractionHandler.isInteractionPossible(new Location(entity.position(), level), "purification", BeyonderData.getSequence(entity)) ||
-            InteractionHandler.isInteractionPossible(new Location(entity.position(), level), "calming", BeyonderData.getSequence(entity))) {
+        if (InteractionHandler.isInteractionPossible(new Location(entity.position(), level), "purification", seq) ||
+            InteractionHandler.isInteractionPossible(new Location(entity.position(), level), "calming", seq) ||
+                InteractionHandler.isInteractionPossible(new Location(entity.position(), level), "sealing", seq)) {
             cancel(serverLevel, entity);
             return;
         }
@@ -76,7 +82,7 @@ public class MindFogAbility extends ToggleAbility {
                 .forEach(target -> {
                     if (target.hasData(ModAttachments.SANITY_COMPONENT)) {
                         target.getData(ModAttachments.SANITY_COMPONENT)
-                                .increaseSanityAndSync(-0.05f, target);
+                                .decreaseSanityWithSequenceDifference((float) (0.0125* (int) Math.max(multiplier(entity)/2,1)), target, AbilityUtil.getSeqWithArt(entity, this), BeyonderData.getSequence(target));
                     }
 
                     if (random.nextInt(5) == 0) {
@@ -90,6 +96,8 @@ public class MindFogAbility extends ToggleAbility {
     @Override
     public void stop(Level level, LivingEntity entity) {
         if (level.isClientSide) return;
+
+        clearArtifactScaling(entity);
     }
 
     private void applyRandomNegativeEffect(LivingEntity entity) {

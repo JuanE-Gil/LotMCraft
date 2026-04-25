@@ -56,15 +56,17 @@ public class ToxicSmokeAbility extends Ability {
         Vec3 pos = entity.getEyePosition();
 
         final UUID[] taskIdHolder = new UUID[1];
-        taskIdHolder[0] = ServerScheduler.scheduleForDuration(0, 6, 20 * 5, () -> {
+        taskIdHolder[0] = ServerScheduler.scheduleForDuration(0, 6, 20 * 5* (int) multiplier(entity), () -> {
             // Toxic smoke is completely cancelled by purification and will explode with burning interaction
             Location smokeLoc = new Location(pos, level);
-            int seq = BeyonderData.getSequence(entity);
+            int seq = AbilityUtil.getSeqWithArt(entity, this);
+
             if(InteractionHandler.isInteractionPossible(smokeLoc, "burning", seq)) {
                 AbilityUtil.damageNearbyEntities((ServerLevel) level,
                         null,
                         9,
-                        DamageLookup.lookupDamage(8, 1.2) * multiplier(entity),
+                        DamageLookup.lookupDamage(8, 1.2) *
+                                multiplier(entity),
                         pos,
                         true,
                         false,
@@ -72,8 +74,9 @@ public class ToxicSmokeAbility extends Ability {
                         0,
                         ModDamageTypes.source(level, ModDamageTypes.BEYONDER_GENERIC, entity)
                 );
-                ParticleUtil.spawnParticles((ServerLevel) level, ParticleTypes.EXPLOSION, pos, 75, 84, .02);
-                ParticleUtil.spawnParticles((ServerLevel) level, ParticleTypes.FLAME, pos, 75, 84, .02);
+                ParticleUtil.spawnParticles((ServerLevel) level, ParticleTypes.EXPLOSION_EMITTER, pos, 50, 7, .02);
+                ParticleUtil.spawnParticles((ServerLevel) level, ParticleTypes.LARGE_SMOKE, pos, 175, 7, .02);
+                ParticleUtil.spawnParticles((ServerLevel) level, ParticleTypes.FLAME, pos, 250, 7, .02);
                 level.playSound(null, pos.x, pos.y, pos.z, SoundEvents.GENERIC_EXPLODE, SoundSource.BLOCKS, 1, 1);
                 if(taskIdHolder[0] != null) ServerScheduler.cancel(taskIdHolder[0]);
                 return;
@@ -86,7 +89,7 @@ public class ToxicSmokeAbility extends Ability {
 
             AbilityUtil.damageNearbyEntities((ServerLevel) level,
                     entity,
-                    6.5,
+                    6.5* (int) multiplier(entity),
                     DamageLookup.lookupDps(8, .8, 6, 20) * multiplier(entity),
                     pos,
                     true,

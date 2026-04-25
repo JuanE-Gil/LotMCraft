@@ -5,17 +5,10 @@ import de.jakob.lotm.entity.custom.BeyonderNPCEntity;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.Config;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.biome.Biome;
-import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.config.ModConfig;
-import net.neoforged.neoforge.common.NeoForgeConfig;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
-import net.neoforged.neoforge.event.entity.living.MobDespawnEvent;
 import net.neoforged.neoforge.event.entity.living.MobSpawnEvent;
 
 @EventBusSubscriber(modid = LOTMCraft.MOD_ID)
@@ -38,11 +31,9 @@ public class MobEvents {
                  event.setResult(MobSpawnEvent.PositionCheck.Result.FAIL);
             }
         }
-        else if(!BeyonderData.beyonderMap.check(npc.getPathway(), npc.getSequence())){
+        else if(!BeyonderData.playerMap.check(npc.getPathway(), npc.getSequence())){
             event.setResult(MobSpawnEvent.PositionCheck.Result.FAIL);
         }
-        else if(pos.getY() >= 130 || pos.getY() <= 30)
-            event.setResult(MobSpawnEvent.PositionCheck.Result.FAIL);
 
     }
 
@@ -55,11 +46,9 @@ public class MobEvents {
 
         BlockPos pos = npc.getOnPos();
 
-        if(!BeyonderData.beyonderMap.check(npc.getPathway(), npc.getSequence())){
+        if(!BeyonderData.playerMap.check(npc.getPathway(), npc.getSequence())){
             event.setCanceled(true);
         }
-        else if(pos.getY() >= 130 || pos.getY() <= 30)
-            event.setCanceled(true);
     }
 
 }

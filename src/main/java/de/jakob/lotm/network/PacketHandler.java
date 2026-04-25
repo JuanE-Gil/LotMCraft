@@ -44,6 +44,12 @@ public class PacketHandler {
         );
 
         registrar.playToClient(
+                SyncApotheosisPacket.TYPE,
+                SyncApotheosisPacket.STREAM_CODEC,
+                SyncApotheosisPacket::handle
+        );
+
+        registrar.playToClient(
                 DisableAbilityUsageForTimePacket.TYPE,
                 DisableAbilityUsageForTimePacket.STREAM_CODEC,
                 DisableAbilityUsageForTimePacket::handle
@@ -140,6 +146,18 @@ public class PacketHandler {
                 SyncIntrospectMenuPacket.TYPE,
                 SyncIntrospectMenuPacket.STREAM_CODEC,
                 SyncIntrospectMenuPacket::handle
+        );
+
+        registrar.playToClient(
+                SyncKillCountPacket.TYPE,
+                SyncKillCountPacket.STREAM_CODEC,
+                SyncKillCountPacket::handle
+        );
+
+        registrar.playToClient(
+                SyncSacrificeDurationPacket.TYPE,
+                SyncSacrificeDurationPacket.STREAM_CODEC,
+                SyncSacrificeDurationPacket::handle
         );
 
         registrar.playToClient(
@@ -269,6 +287,12 @@ public class PacketHandler {
         );
 
         registrar.playToClient(
+                SyncEyeOfDeathAbilityPacket.TYPE,
+                SyncEyeOfDeathAbilityPacket.STREAM_CODEC,
+                SyncEyeOfDeathAbilityPacket::handle
+        );
+
+        registrar.playToClient(
                 RingEffectPacket.TYPE,
                 RingEffectPacket.STREAM_CODEC,
                 RingEffectPacket::handle
@@ -283,12 +307,6 @@ public class PacketHandler {
                 SyncGriefingStatePacket.TYPE,
                 SyncGriefingStatePacket.STREAM_CODEC,
                 SyncGriefingStatePacket::handle
-        );
-
-        registrar.playToClient(
-                SkinDataPacket.TYPE,
-                SkinDataPacket.STREAM_CODEC,
-                SkinDataPacket::handle
         );
 
         registrar.playToClient(
@@ -307,6 +325,18 @@ public class PacketHandler {
                 PendingAllyRequestPacket.TYPE,
                 PendingAllyRequestPacket.STREAM_CODEC,
                 PendingAllyRequestPacket::handle
+        );
+
+        registrar.playToClient(
+                PendingTeamInvitePacket.TYPE,
+                PendingTeamInvitePacket.STREAM_CODEC,
+                PendingTeamInvitePacket::handle
+        );
+
+        registrar.playToClient(
+                SyncSharedAbilitiesDataPacket.TYPE,
+                SyncSharedAbilitiesDataPacket.STREAM_CODEC,
+                SyncSharedAbilitiesDataPacket::handle
         );
 
         registrar.playToClient(
@@ -365,15 +395,33 @@ public class PacketHandler {
         );
 
         registrar.playToClient(
+                OpenBiomeDivinationScreenPacket.TYPE,
+                OpenBiomeDivinationScreenPacket.STREAM_CODEC,
+                OpenBiomeDivinationScreenPacket::handle
+        );
+
+        registrar.playToClient(
                 OpenShapeShiftingScreenPacket.TYPE,
                 OpenShapeShiftingScreenPacket.STREAM_CODEC,
                 OpenShapeShiftingScreenPacket::handle
         );
 
         registrar.playToClient(
+                OpenHistoricalVoidBorrowingScreenPacket.TYPE,
+                OpenHistoricalVoidBorrowingScreenPacket.STREAM_CODEC,
+                OpenHistoricalVoidBorrowingScreenPacket::handle
+        );
+
+        registrar.playToClient(
                 SyncPlayerTeleportationPlayerNamesPacket.TYPE,
                 SyncPlayerTeleportationPlayerNamesPacket.STREAM_CODEC,
                 SyncPlayerTeleportationPlayerNamesPacket::handle
+        );
+
+        registrar.playToClient(
+                SyncPsychologicalInvisibilityPacket.TYPE,
+                SyncPsychologicalInvisibilityPacket.STREAM_CODEC,
+                SyncPsychologicalInvisibilityPacket::handle
         );
 
         registrar.playToClient(
@@ -401,9 +449,39 @@ public class PacketHandler {
         );
 
         registrar.playToClient(
+                PlayAnimationPacket.TYPE,
+                PlayAnimationPacket.STREAM_CODEC,
+                PlayAnimationPacket::handle
+        );
+
+        registrar.playToClient(
                 SyncOriginalBodyOwnerPacket.TYPE,
                 SyncOriginalBodyOwnerPacket.STREAM_CODEC,
                 SyncOriginalBodyOwnerPacket::handle
+        );
+
+        registrar.playToClient(
+                SyncSkillScalingPacket.TYPE,
+                SyncSkillScalingPacket.STREAM_CODEC,
+                SyncSkillScalingPacket::handle
+        );
+      
+        registrar.playToClient(
+                SyncSpiritChannelingPacket.TYPE,
+                SyncSpiritChannelingPacket.STREAM_CODEC,
+                SyncSpiritChannelingPacket::handle
+        );
+      
+        registrar.playToClient(
+                SyncUniquenessPacket.TYPE,
+                SyncUniquenessPacket.STREAM_CODEC,
+                SyncUniquenessPacket::handle
+        );
+
+        registrar.playToClient(
+                SyncControllingDataPacket.TYPE,
+                SyncControllingDataPacket.STREAM_CODEC,
+                SyncControllingDataPacket::handle
         );
     }
 
@@ -487,6 +565,18 @@ public class PacketHandler {
         );
 
         registrar.playToServer(
+                SyncSharedAbilitiesPacket.TYPE,
+                SyncSharedAbilitiesPacket.STREAM_CODEC,
+                SyncSharedAbilitiesPacket::handle
+        );
+
+        registrar.playToServer(
+                RequestSharedAbilitiesPacket.TYPE,
+                RequestSharedAbilitiesPacket.STREAM_CODEC,
+                RequestSharedAbilitiesPacket::handle
+        );
+
+        registrar.playToServer(
                 UpdateSelectedAbilityPacket.TYPE,
                 UpdateSelectedAbilityPacket.STREAM_CODEC,
                 UpdateSelectedAbilityPacket::handle
@@ -496,6 +586,12 @@ public class PacketHandler {
                 UseSelectedAbilityPacket.TYPE,
                 UseSelectedAbilityPacket.STREAM_CODEC,
                 UseSelectedAbilityPacket::handle
+        );
+
+        registrar.playToServer(
+                UseSharedAbilityPacket.TYPE,
+                UseSharedAbilityPacket.STREAM_CODEC,
+                UseSharedAbilityPacket::handle
         );
 
         registrar.playToServer(
@@ -566,26 +662,10 @@ public class PacketHandler {
         );
 
         registrar.playToServer(
-                SkinChangePacket.TYPE,
-                SkinChangePacket.STREAM_CODEC,
-                SkinChangePacket::handle
-        );
-
-        registrar.playToServer(
-                SkinRestorePacket.TYPE,
-                SkinRestorePacket.STREAM_CODEC,
-                SkinRestorePacket::handle
-        );
-
-        registrar.playToServer(
                 InventoryOpenedPacket.TYPE,
                 InventoryOpenedPacket.STREAM_CODEC,
                 InventoryOpenedPacket::handle);
 
-        registrar.playToServer(
-                OpenMessagePacket.TYPE,
-                OpenMessagePacket.STREAM_CODEC,
-                OpenMessagePacket::handle);
 
         registrar.playToServer(
                 OpenHonorificNamesMenuPacket.TYPE,
@@ -603,11 +683,6 @@ public class PacketHandler {
                 SetHonorificNamePacket::handle);
 
         registrar.playToServer(
-                OpenMessagesMenuPacket.TYPE,
-                OpenMessagesMenuPacket.STREAM_CODEC,
-                OpenMessagesMenuPacket::handle);
-
-        registrar.playToServer(
                 PlayerDivinationSelectedPacket.TYPE,
                 PlayerDivinationSelectedPacket.STREAM_CODEC,
                 PlayerDivinationSelectedPacket::handle);
@@ -616,6 +691,16 @@ public class PacketHandler {
                 StructureDivinationSelectedPacket.TYPE,
                 StructureDivinationSelectedPacket.STREAM_CODEC,
                 StructureDivinationSelectedPacket::handle);
+
+        registrar.playToServer(
+                BiomeDivinationSelectedPacket.TYPE,
+                BiomeDivinationSelectedPacket.STREAM_CODEC,
+                BiomeDivinationSelectedPacket::handle);
+
+        registrar.playToServer(
+                HistoricalVoidBorrowingSelectedPacket.TYPE,
+                HistoricalVoidBorrowingSelectedPacket.STREAM_CODEC,
+                HistoricalVoidBorrowingSelectedPacket::handle);
 
         registrar.playToServer(
                 ShapeShiftingSelectedPacket.TYPE,
@@ -637,6 +722,12 @@ public class PacketHandler {
                 SyncArtifactAbilityWheel.STREAM_CODEC,
                 SyncArtifactAbilityWheel::handle
         );
+
+        registrar.playToServer(
+                RequestUniquenessApotheosisPacket.TYPE,
+                RequestUniquenessApotheosisPacket.STREAM_CODEC,
+                RequestUniquenessApotheosisPacket::handle
+        );
     }
 
     public static void sendToServer(CustomPacketPayload packet) {
@@ -653,8 +744,11 @@ public class PacketHandler {
         float spirituality = BeyonderData.getSpirituality(player);
         boolean griefingEnabled = BeyonderData.isGriefingEnabled(player);
         float digestionProgress = BeyonderData.getDigestionProgress(player);
+        int[] charStacks = BeyonderData.getCharStacks(player);
 
-        SyncBeyonderDataPacket packet = new SyncBeyonderDataPacket(pathway, sequence, spirituality, griefingEnabled, digestionProgress);
+        String[] history = BeyonderData.getPathwayHistory(player);
+
+        SyncBeyonderDataPacket packet = new SyncBeyonderDataPacket(pathway, sequence, spirituality, griefingEnabled, digestionProgress, history, charStacks);
         sendToPlayer(player, packet);
     }
 
@@ -665,7 +759,7 @@ public class PacketHandler {
         int sequence = BeyonderData.getSequence(entity);
 
         SyncLivingEntityBeyonderDataPacket packet =
-                new SyncLivingEntityBeyonderDataPacket(entity.getId(), pathway, sequence, BeyonderData.getMaxSpirituality(sequence));
+                new SyncLivingEntityBeyonderDataPacket(entity.getId(), pathway, sequence, BeyonderData.getMaxSpirituality(pathway, sequence));
 
         sendToAllPlayers(packet);
     }
@@ -680,17 +774,22 @@ public class PacketHandler {
         PacketDistributor.sendToPlayersTrackingEntityAndSelf(entity, payload);
     }
 
-    public static void syncSkinDataToAllPlayers(String playerName, String skinTexture, String skinSignature) {
-        SkinDataPacket packet = new SkinDataPacket(playerName, skinTexture, skinSignature);
-        sendToAllPlayers(packet);
-    }
-
     public static void sendToAllPlayers(CustomPacketPayload payload) {
         PacketDistributor.sendToAllPlayers(payload);
     }
 
     public static void sendToAllPlayersInSameLevel(CustomPacketPayload payload, ServerLevel level) {
         level.players().forEach(player -> sendToPlayer(player, payload));
+    }
+
+    public static void syncUniquenessToPlayer(ServerPlayer player) {
+        de.jakob.lotm.attachments.UniquenessComponent comp = player.getData(de.jakob.lotm.attachments.ModAttachments.UNIQUENESS_COMPONENT);
+        SyncUniquenessPacket packet = new SyncUniquenessPacket(
+                comp.hasUniqueness(),
+                comp.getUniquenessPathway(),
+                comp.getKillCount()
+        );
+        sendToPlayer(player, packet);
     }
 
     // Helper method to sync to all players (useful for when other players need to see beyonder status)
@@ -700,8 +799,9 @@ public class PacketHandler {
         float spirituality = BeyonderData.getSpirituality(targetPlayer);
         boolean griefingEnabled = BeyonderData.isGriefingEnabled(targetPlayer);
         float digestionProgress = BeyonderData.getDigestionProgress(targetPlayer);
+        int[] charStacks = BeyonderData.getCharStacks(targetPlayer);
 
-        SyncBeyonderDataPacket packet = new SyncBeyonderDataPacket(pathway, sequence, spirituality, griefingEnabled, digestionProgress);
+        SyncBeyonderDataPacket packet = new SyncBeyonderDataPacket(pathway, sequence, spirituality, griefingEnabled, digestionProgress, new String[10], charStacks);
 
         targetPlayer.getServer().getPlayerList().getPlayers().forEach(player -> {
             sendToPlayer(player, packet);

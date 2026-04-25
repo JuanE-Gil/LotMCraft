@@ -1,7 +1,7 @@
 package de.jakob.lotm.gui.custom.Introspect;
 
 import de.jakob.lotm.gui.ModMenuTypes;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -22,8 +22,8 @@ public class IntrospectMenu extends AbstractContainerMenu {
     private float sanity;
 
     // Client-side constructor
-    public IntrospectMenu(int containerId, Inventory playerInventory, FriendlyByteBuf ignored) {
-        this(new ArrayList<>(List.of()), containerId, playerInventory, 9, "fool", 0.0f, 1.0f);
+    public IntrospectMenu(int containerId, Inventory playerInventory, RegistryFriendlyByteBuf buf) {
+        this(new ArrayList<>(List.of()), containerId, playerInventory, buf.readInt(), buf.readUtf(), 0.0f, 1.0f);
     }
 
     public void updateData(int sequence, String pathway, float digestionProgress, float sanity) {
@@ -53,10 +53,11 @@ public class IntrospectMenu extends AbstractContainerMenu {
             }
         };
 
+        boolean showKillCount = pathway.equals("red_priest") && sequence <= 3;
+        int slotY = showKillCount ? 188 : 178;
         for (int i = 0; i < 9; i++) {
             int x = 7 + (i * 18);
-            int y = 178;
-            this.addSlot(new SlotItemHandler(itemHandler, i, x, y));
+            this.addSlot(new SlotItemHandler(itemHandler, i, x, slotY));
         }
 
         if(!passiveAbilities.isEmpty()) {

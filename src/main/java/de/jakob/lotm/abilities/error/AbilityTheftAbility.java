@@ -15,9 +15,10 @@ import net.minecraft.world.level.Level;
 import java.util.HashMap;
 import java.util.Map;
 
+
 public class AbilityTheftAbility extends SelectableAbility {
     public AbilityTheftAbility(String id) {
-        super(id, 1.5f);
+        super(id, 3f);
         canBeCopied = false;
         canBeReplicated = false;
     }
@@ -29,7 +30,7 @@ public class AbilityTheftAbility extends SelectableAbility {
 
     @Override
     public float getSpiritualityCost() {
-        return 95;
+        return 200;
     }
 
     @Override
@@ -62,13 +63,13 @@ public class AbilityTheftAbility extends SelectableAbility {
             return;
         }
 
-        LivingEntity target = AbilityUtil.getTargetEntity(entity, 20, 2);
+        LivingEntity target = AbilityUtil.getTargetEntity(entity, (int) (15 * (multiplier(entity) * multiplier(entity))), 2);
         if (target == null) {
             AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.ability_theft.no_target").withColor(0x6d32a8));
             return;
         }
 
-        TheftHandler.performAbilityTheft(level, entity, target, random, true);
+        TheftHandler.performAbilityTheft(level, entity, target, random, false, this);
     }
 
 }

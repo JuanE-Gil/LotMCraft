@@ -2,6 +2,7 @@ package de.jakob.lotm.abilities.common;
 
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.ToggleAbility;
+import de.jakob.lotm.abilities.visionary.PsychologicalInvisibilityAbility;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.effect.ModEffects;
 import de.jakob.lotm.network.PacketHandler;
@@ -30,7 +31,6 @@ import java.util.*;
 
 public class SpiritVisionAbility extends ToggleAbility {
 
-
     public SpiritVisionAbility(String id) {
         super(id);
 
@@ -39,18 +39,29 @@ public class SpiritVisionAbility extends ToggleAbility {
         doesNotIncreaseDigestion = true;
         cannotBeStolen = true;
         canBeReplicated = false;
+        canBeUsedInArtifact = false;
+        autoClear = false;
     }
 
     @Override
     public Map<String, Integer> getRequirements() {
-        return new HashMap<>(Map.of(
-                "fool", 9,
-                "door", 7,
-                "hermit", 9,
-                "demoness", 7,
-                "mother", 8,
-                "wheel_of_fortune", 9
-        ));
+        Map<String, Integer> reqs = new HashMap(
+                Map.of(
+                        "fool", 9,
+                        "door", 7,
+                        "hermit", 9,
+                        "demoness", 7,
+                        "mother", 8,
+                        "wheel_of_fortune", 9,
+                        "darkness", 7,
+                        "abyss",9
+                ));
+
+        for(String pathway : BeyonderData.pathways) {
+            if (!reqs.containsKey(pathway))
+                reqs.put(pathway, 5);
+        }
+        return reqs;
     }
 
     @Override
@@ -74,6 +85,19 @@ public class SpiritVisionAbility extends ToggleAbility {
         if(level.isClientSide()) {
             List<LivingEntity> nearbyEntities = AbilityUtilClient.getNearbyEntities(entity, (ClientLevel) level, entity.getEyePosition(), 30)
                     .stream()
+                    .filter(nearbyEntity -> {
+                        if (PsychologicalInvisibilityAbility.invisiblePlayersClient.containsKey(nearbyEntity.getUUID())) {
+
+                            int targetSeq = PsychologicalInvisibilityAbility.invisiblePlayersClient.get(nearbyEntity.getUUID());
+                            int selfSeq = AbilityUtil.getSeqWithArt(entity, this);
+
+                            if (selfSeq >= targetSeq) {
+                                return false;
+                            }
+                        }
+
+                        return true;
+                    })
                     .toList();
 
             for (LivingEntity nearbyEntity : nearbyEntities) {
@@ -85,8 +109,16 @@ public class SpiritVisionAbility extends ToggleAbility {
                 return;
 
             LivingEntity lookedAt = AbilityUtil.getTargetEntity(entity, 40, 1.2f);
-            PacketHandler.sendToPlayer(player,  new SyncSpiritVisionAbilityPacket(true, lookedAt == null ? -1 : lookedAt.getId()));
 
+            if(lookedAt != null) {
+                if (PsychologicalInvisibilityAbility.invisiblePlayers.containsKey(lookedAt.getUUID())) {
+                    if (AbilityUtil.getSeqWithArt(entity, this) >=
+                            PsychologicalInvisibilityAbility.invisiblePlayers.get(lookedAt.getUUID()))
+                        return;
+                }
+            }
+
+            PacketHandler.sendToPlayer(player,  new SyncSpiritVisionAbilityPacket(true, lookedAt == null ? -1 : lookedAt.getId()));
 
             if(lookedAt != null){
                 if(shouldLooseControl(entity, lookedAt)){
@@ -102,7 +134,21 @@ public class SpiritVisionAbility extends ToggleAbility {
 
             List<LivingEntity> nearbyEntities = AbilityUtil.getNearbyEntities(entity, (ServerLevel) level, entity.getEyePosition(), 30)
                     .stream()
+                    .filter(nearbyEntity -> {
+                        if (PsychologicalInvisibilityAbility.invisiblePlayers.containsKey(nearbyEntity.getUUID())) {
+
+                            int targetSeq = PsychologicalInvisibilityAbility.invisiblePlayers.get(nearbyEntity.getUUID());
+                            int selfSeq = AbilityUtil.getSeqWithArt(entity, this);
+
+                            if (selfSeq >= targetSeq) {
+                                return false;
+                            }
+                        }
+
+                        return true;
+                    })
                     .toList();
+
 
             for (LivingEntity nearbyEntity : nearbyEntities) {
                 setGlowingForPlayer(nearbyEntity, (ServerPlayer) entity, true);
@@ -120,11 +166,12 @@ public class SpiritVisionAbility extends ToggleAbility {
         if(player.getData(ModAttachments.ALLY_COMPONENT.get()).isAlly(target.getUUID()))
             return false;
 
-        return targetSeq <= 4 && playerSeq > targetSeq;
+        return AbilityUtil.isTargetSignificantlyStronger(player, target);
     }
 
     public static void setGlowingForPlayer(Entity entity, ServerPlayer player, boolean glowing) {
         EntityDataAccessor<Byte> FLAGS = EntityAccessor.getSharedFlagsId();
+
 
         // Current flags from the entity
         byte flags = entity.getEntityData().get(FLAGS);
@@ -161,6 +208,8 @@ public class SpiritVisionAbility extends ToggleAbility {
             glowingEntities.remove(entity.getUUID());
 
             PacketHandler.sendToPlayer(player,  new SyncSpiritVisionAbilityPacket(false, -1));
+
+            clearArtifactScaling(entity);
         }
     }
 

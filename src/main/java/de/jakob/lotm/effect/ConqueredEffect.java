@@ -22,18 +22,22 @@ public class ConqueredEffect extends MobEffect {
         super(category, color);
     }
 
-
     @Override
     public boolean applyEffectTick(@NotNull LivingEntity livingEntity, int amplifier) {
-        if( livingEntity.level().isClientSide()) {
+        if(livingEntity.level().isClientSide()) {
             return true;
         }
 
         livingEntity.setDeltaMovement(new Vec3(0, 0, 0));
         livingEntity.hurtMarked = true;
 
-        if(livingEntity.getHealth() > 1)
-            livingEntity.setHealth(1.0F);
+        float maxHealth = livingEntity.getMaxHealth();
+        // amplifier 0 = 5%, amplifier 1 = 10%, amplifier 2 = 15%, etc.
+        float targetHealth = maxHealth *(1 - 0.05f * (amplifier + 1));
+
+        if (livingEntity.getHealth() > targetHealth) {
+            livingEntity.setHealth(targetHealth);
+        }
 
         DisabledAbilitiesComponent component = livingEntity.getData(ModAttachments.DISABLED_ABILITIES_COMPONENT);
         component.disableAbilityUsageForTime("conquered", 20, livingEntity);
@@ -86,10 +90,6 @@ public class ConqueredEffect extends MobEffect {
             }
         }
     }
-
-
-
-
 
     @Override
     public boolean shouldApplyEffectTickThisTick(int duration, int amplifier) {

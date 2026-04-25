@@ -13,6 +13,7 @@ import de.jakob.lotm.util.scheduling.ServerScheduler;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -27,9 +28,13 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.UUID;
 
 public class MundaneConceptualTheft extends SelectableAbility {
+    public static final HashMap<UUID, Integer> stolenDistanceMap = new HashMap<>(80);
+
     public MundaneConceptualTheft(String id) {
         super(id, 1);
     }
@@ -41,7 +46,7 @@ public class MundaneConceptualTheft extends SelectableAbility {
 
     @Override
     protected float getSpiritualityCost() {
-        return 50;
+        return 500;
     }
 
     @Override
@@ -94,32 +99,46 @@ public class MundaneConceptualTheft extends SelectableAbility {
 
         EffectManager.playEffect(EffectManager.Effect.CONCEPTUAL_THEFT, target.getX(), target.getEyeY(), target.getZ(), serverLevel, entity);
 
-        if(BeyonderData.isBeyonder(target) && TheftHandler.doesTheftFail(entity, target, random)) {
+        if(BeyonderData.isBeyonder(target) && TheftHandler.doesTheftFail(entity, target, random, this)) {
             AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.mundane_conceptual_theft.theft_failed").withColor(0x4742c9));
             return;
         }
 
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+        int targetSeq = BeyonderData.getSequence(target);
+
         switch (abilityIndex) {
-            case 0 -> stealWalk(target, getTheftDuration(BeyonderData.getSequence(entity), BeyonderData.getSequence(target)));
-            case 1 -> stealSight(target, getTheftDuration(BeyonderData.getSequence(entity), BeyonderData.getSequence(target)));
+            case 0 -> stealWalk(target, getTheftDuration(entitySeq, targetSeq));
+            case 1 -> stealSight(target, getTheftDuration(entitySeq, targetSeq));
             case 2 -> stealHealth(entity, target);
 
         }
     }
 
     private void stealDistance(ServerLevel level, LivingEntity entity) {
-        if(BeyonderData.getSequence(entity) > 6) return;
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
 
-        Vec3 targetLoc = AbilityUtil.getTargetBlock(entity, (1 << (9 - BeyonderData.getSequence(entity))), true).getCenter().add(0, 1, 0);
+        if(entitySeq > 6) return;
+
+        Vec3 targetLoc = AbilityUtil.getTargetBlock(entity, TheftHandler.getDistancePerSeq(entitySeq), true).getCenter().add(0, 1, 0);
         level.playSound(null, targetLoc.x, targetLoc.y, targetLoc.z, SoundEvents.ENDERMAN_TELEPORT, SoundSource.BLOCKS, .5f, 1);
 
         var validatedPos = TeleportationUtil.clampToBorder(level, targetLoc);
+
+        if(entity instanceof ServerPlayer player) {
+            int distance = (int) player.position().distanceTo(validatedPos);
+            int storedDistance = 0;
+            if(stolenDistanceMap.containsKey(player.getUUID()))
+                storedDistance = stolenDistanceMap.get(player.getUUID());
+
+            stolenDistanceMap.put(player.getUUID(), storedDistance + distance);
+        }
 
         entity.teleportTo(validatedPos.x, validatedPos.y, validatedPos.z);
     }
 
     private void stealHealth(LivingEntity entity, LivingEntity target) {
-        float healthToSteal = (float) (DamageLookup.lookupDamage(5, 1f) * multiplier(entity));
+        float healthToSteal = (float) (DamageLookup.lookupDamage(5, 1f) *(int) Math.max(multiplier(entity)/2,1));
         target.hurt(ModDamageTypes.source(target.level(), ModDamageTypes.BEYONDER_GENERIC, entity), healthToSteal);
         entity.setHealth(Math.min(entity.getMaxHealth(), entity.getHealth() + healthToSteal));
     }

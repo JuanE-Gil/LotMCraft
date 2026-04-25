@@ -12,19 +12,20 @@ import de.jakob.lotm.entity.custom.ability_entities.OriginalBodyEntity;
 import de.jakob.lotm.gui.custom.CoordinateInput.CoordinateInputScreen;
 import de.jakob.lotm.gui.custom.Introspect.IntrospectScreen;
 import de.jakob.lotm.gui.custom.Quest.QuestAcceptanceScreen;
-import de.jakob.lotm.gui.custom.SelectionGui.PlayerSelectionGui;
-import de.jakob.lotm.gui.custom.SelectionGui.ShapeShiftingSelectionGui;
-import de.jakob.lotm.gui.custom.SelectionGui.StructureSelectionGui;
+import de.jakob.lotm.gui.custom.SelectionGui.*;
 import de.jakob.lotm.network.packets.toClient.*;
 import de.jakob.lotm.quest.Quest;
 import de.jakob.lotm.quest.QuestRegistry;
 import de.jakob.lotm.rendering.*;
 import de.jakob.lotm.rendering.effectRendering.impl.VFXRenderer;
 import de.jakob.lotm.util.ClientBeyonderCache;
+import de.jakob.lotm.util.ClientSacrificeCache;
+import de.jakob.lotm.util.helper.AnimationUtil;
 import de.jakob.lotm.util.helper.RingExpansionRenderer;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
@@ -100,6 +101,19 @@ public class ClientHandler {
         }
         else {
             SpiritVisionOverlayRenderer.entitiesLookedAt.remove(player.getUUID());
+        }
+    }
+
+    public static void syncEyeOfDeathAbility(SyncEyeOfDeathAbilityPacket packet, Player player) {
+        if (packet.active()) {
+            Level level = Minecraft.getInstance().level;
+            if (level == null) return;
+
+            Entity entity = packet.entityId() == -1 ? null : level.getEntity(packet.entityId());
+            LivingEntity living = entity instanceof LivingEntity ? (LivingEntity) entity : null;
+            EyeOfDeathOverlayRenderer.entitiesLookedAt.put(player.getUUID(), living);
+        } else {
+            EyeOfDeathOverlayRenderer.entitiesLookedAt.remove(player.getUUID());
         }
     }
 
@@ -189,6 +203,7 @@ public class ClientHandler {
 
         entity.getData(ModAttachments.TRANSFORMATION_COMPONENT.get()).setTransformed(packet.isTransformed());
         entity.getData(ModAttachments.TRANSFORMATION_COMPONENT.get()).setTransformationIndex(packet.transformationIndex());
+        entity.getData(ModAttachments.TRANSFORMATION_COMPONENT.get()).setAdditionalData(packet.additionalData());
     }
 
     public static void changeToThirdPerson(LivingEntity entity) {
@@ -297,6 +312,21 @@ public class ClientHandler {
             return;
         }
         entity.getData(ModAttachments.SANITY_COMPONENT.get()).setSanity(packet.sanity());
+    }
+
+    public static void handleSkillScalingPacket(SyncSkillScalingPacket packet) {
+        ClientLevel level = Minecraft.getInstance().level;
+        if (level == null) return;
+
+        Entity entity = level.getEntity(packet.entityId());
+        if(entity == null) {
+            return;
+        }
+        var component = entity.getData(ModAttachments.SKILL_SCALING_COMPONENT.get());
+
+        component.setScalingToSkill(packet.scaleToSkill())
+                .setPath(packet.path())
+                .setSeq(packet.seq());
     }
 
     public static void handleAllyPacket(SyncAllyDataPacket packet) {
@@ -430,8 +460,16 @@ public class ClientHandler {
         Minecraft.getInstance().setScreen(new StructureSelectionGui(packet.structureIds()));
     }
 
-    public static void handleShapeShiftingScreenPacket(OpenShapeShiftingScreenPacket payload) {
-        Minecraft.getInstance().setScreen(new ShapeShiftingSelectionGui(payload.entityTypes()));
+    public static void handleBiomeDivinationScreenPacket(OpenBiomeDivinationScreenPacket packet) {
+        Minecraft.getInstance().setScreen(new BiomeSelectionGui(packet.biomeIds()));
+    }
+
+    public static void handleShapeShiftingScreenPacket(OpenShapeShiftingScreenPacket packet) {
+        Minecraft.getInstance().setScreen(new ShapeShiftingSelectionGui(packet.entityTypes()));
+    }
+
+    public static void handleHistoricalVoidBorrowingScreenPacket(OpenHistoricalVoidBorrowingScreenPacket packet) {
+        Minecraft.getInstance().setScreen(new HistoricalVoidBorrowingSelectionGui(packet.options()));
     }
 
     public static void handleOriginalBodyOwnerSyncPacket(SyncOriginalBodyOwnerPacket packet) {
@@ -461,6 +499,8 @@ public class ClientHandler {
         if(!(ability instanceof ToggleAbility toggleAbility) || !(entity instanceof LivingEntity living)) {
             return;
         }
+
+        if(entity != Minecraft.getInstance().player) return;
 
         switch (packet.action()) {
             case 0 -> {
@@ -493,5 +533,67 @@ public class ClientHandler {
         if (packet.active()) {
             WeaknessDetectionRenderLayer.activeWeaknessDetection.putAll(packet.targets());
         }
+    }
+
+    public static void handleControllingDataPacket(SyncControllingDataPacket packet) {
+        Entity entity = Minecraft.getInstance().level.getEntity(packet.entityId());
+        if(entity == null) {
+            return;
+        }
+        entity.getData(ModAttachments.CONTROLLING_DATA.get()).setControlling(packet.isControlling());
+        entity.getData(ModAttachments.CONTROLLING_DATA.get()).setBodyEntity(packet.bodyEntity());
+    }
+
+    public static void syncKillCount(int killCount) {
+        ClientSacrificeCache.setKillCount(killCount);
+        if (Minecraft.getInstance().screen instanceof IntrospectScreen screen) {
+            screen.updateKillCount(killCount);
+        }
+    }
+
+    public static void syncSacrificeDuration(int totalTicks) {
+        ClientSacrificeCache.setTotalTicks(totalTicks);
+        ClientSacrificeCache.setRemainingTicks(totalTicks);
+    }
+
+    public static void syncCullAbility(boolean active, UUID playerUUID) {
+        if (active) {
+            CullOverlay.playersWithCullActivated.add(playerUUID);
+        } else {
+            CullOverlay.playersWithCullActivated.remove(playerUUID);
+        }
+    }
+
+    public static void handleSpiritChannelingPacket(de.jakob.lotm.network.packets.toClient.SyncSpiritChannelingPacket packet) {
+        de.jakob.lotm.util.ClientSpiritCache.setSpiritTypeOrdinal(packet.spiritType());
+    }
+
+    public static void handleSyncIntrospectMenuPacket(SyncIntrospectMenuPacket packet, UUID playerUUID) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.screen instanceof IntrospectScreen screen) {
+            screen.updateMenuData(packet.sequence(), packet.pathway(), ClientBeyonderCache.getDigestionProgress(playerUUID), packet.sanity());
+        }
+    }
+    public static void handleApotheosisPacket(SyncApotheosisPacket packet) {
+        ClientLevel level = Minecraft.getInstance().level;
+        if (level == null) return;
+
+        Entity entity = level.getEntity(packet.entityId());
+        if (entity instanceof LivingEntity living) {
+            living.getData(ModAttachments.APOTHEOSIS_COMPONENT).setApotheosisTicksLeft(packet.ticks());
+            living.getData(ModAttachments.APOTHEOSIS_COMPONENT).setPathway(packet.pathway());
+        }
+    }
+
+    public static void playAnimation(PlayAnimationPacket packet) {
+        ClientLevel level = Minecraft.getInstance().level;
+        if (level == null) return;
+
+        Entity entity = level.getEntity(packet.playerId());
+        if(!(entity instanceof AbstractClientPlayer player)) {
+            return;
+        }
+
+        AnimationUtil.playAnimation(player, AnimationUtil.getResourceLocationById(packet.animId()));
     }
 }

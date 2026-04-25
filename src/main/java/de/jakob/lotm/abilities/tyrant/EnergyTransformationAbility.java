@@ -18,11 +18,12 @@ public class EnergyTransformationAbility extends ToggleAbility {
         canBeCopied = false;
         canBeReplicated = false;
         canBeUsedInArtifact = false;
+        canBeShared = false;
     }
 
     @Override
     public float getSpiritualityCost() {
-        return 16;
+        return 220;
     }
 
     @Override
@@ -53,18 +54,18 @@ public class EnergyTransformationAbility extends ToggleAbility {
         if(level.isClientSide) {
             return;
         }
-
+/*
         DisabledFlightComponent disabledFlightComponent = entity.getData(ModAttachments.FLIGHT_DISABLE_COMPONENT);
         if(disabledFlightComponent.getCooldownTicks() > 0) {
             cancel((ServerLevel) level, entity);
             return;
         }
-
+*/
         // Allow Flying
         if(entity instanceof Player player) {
             player.getAbilities().mayfly = true;
             player.getAbilities().flying = true;
-            player.getAbilities().setFlyingSpeed(.75f);
+            player.getAbilities().setFlyingSpeed(.6f);
             player.onUpdateAbilities();
         }
 

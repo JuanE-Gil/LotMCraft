@@ -29,9 +29,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class HolyLightSummoningAbility extends Ability {
     public HolyLightSummoningAbility(String id) {
-        super(id, .9f, "purification", "light_source", "light_weak");
+        super(id, 1.5f, "purification", "light_source", "light_weak");
         postsUsedAbilityEventManually = true;
-        interactionRadius = 3.5;
+        interactionRadius = 8;
     }
 
     @Override
@@ -43,7 +43,7 @@ public class HolyLightSummoningAbility extends Ability {
 
     @Override
     protected float getSpiritualityCost() {
-        return 32;
+        return 64;
     }
 
     final int radius = 40;
@@ -55,41 +55,43 @@ public class HolyLightSummoningAbility extends Ability {
 
     @Override
     public void onAbilityUse(Level level, LivingEntity entity) {
+        if(level.isClientSide) return;
+
         Vec3 initialPos = AbilityUtil.getTargetLocation(entity, radius, 1.5f, true).add(0, 18, 0);
 
         List<BlockPos> lights = new ArrayList<>();
 
-        if (!level.isClientSide) {
-            AtomicReference<Vec3> currentPos = new AtomicReference<>(initialPos);
+        AtomicReference<Vec3> currentPos = new AtomicReference<>(initialPos);
 
-            level.playSound(null, initialPos.x, initialPos.y - 18, initialPos.z, SoundEvents.BEACON_ACTIVATE, entity.getSoundSource(), 3.0f, 1.0f);
+        level.playSound(null, initialPos.x, initialPos.y - 18, initialPos.z, SoundEvents.BEACON_ACTIVATE, entity.getSoundSource(), 3.0f, 1.0f);
 
-            EffectManager.playEffect(EffectManager.Effect.HOLY_LIGHT_SMALL, initialPos.x, initialPos.y - 18, initialPos.z, (ServerLevel) level, entity);
+        EffectManager.playEffect(EffectManager.Effect.HOLY_LIGHT_SMALL, initialPos.x, initialPos.y - 18, initialPos.z, (ServerLevel) level, entity);
 
-            ServerScheduler.scheduleForDuration(0, 1, 22, () -> {
-                Vec3 pos = currentPos.get();
+        double multiplier = multiplier(entity);
 
-                BlockPos blockPos = BlockPos.containing(pos);
-                //Set the light blocks
-                if (level.getBlockState(blockPos).isAir()) {
-                    level.setBlockAndUpdate(blockPos, Blocks.LIGHT.defaultBlockState());
-                    lights.add(blockPos);
-                }
+        ServerScheduler.scheduleForDuration(0, 1, 22, () -> {
+            Vec3 pos = currentPos.get();
 
-                AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 5f, DamageLookup.lookupDamage(7, .8) * multiplier(entity), pos, true, false, false, 10, ModDamageTypes.source(level, ModDamageTypes.PURIFICATION, entity));
+            BlockPos blockPos = BlockPos.containing(pos);
+            //Set the light blocks
+            if (level.getBlockState(blockPos).isAir()) {
+                level.setBlockAndUpdate(blockPos, Blocks.LIGHT.defaultBlockState());
+                lights.add(blockPos);
+            }
 
-                currentPos.set(pos.subtract(0, 1, 0));
-            }, null, (ServerLevel) level, () -> AbilityUtil.getTimeInArea(entity, new Location(entity.position(), level)));
+            AbilityUtil.damageNearbyEntities((ServerLevel) level, entity, 5f* (int) Math.max(multiplier(entity)/4,1), DamageLookup.lookupDamage(7, .8) * (int) Math.max(multiplier(entity)/4,1), pos, true, false, false, 10, ModDamageTypes.source(level, ModDamageTypes.PURIFICATION, entity));
 
-            ServerScheduler.scheduleDelayed(22, () -> {
-                NeoForge.EVENT_BUS.post(new AbilityUsedEvent((ServerLevel) level, initialPos.subtract(0, 18, 0), entity, this, interactionFlags, interactionRadius, interactionCacheTicks));
-            }, (ServerLevel) level, () -> AbilityUtil.getTimeInArea(entity, new Location(entity.position(), level)));
+            currentPos.set(pos.subtract(0, 2.5, 0));
+        }, null, (ServerLevel) level, () -> AbilityUtil.getTimeInArea(entity, new Location(entity.position(), level)));
 
-            ServerScheduler.scheduleDelayed(40, () -> {
-                lights.forEach(l -> level.setBlockAndUpdate(l, Blocks.AIR.defaultBlockState()));
-            }, (ServerLevel) level, () -> AbilityUtil.getTimeInArea(entity, new Location(entity.position(), level)));
-        } else if(entity instanceof Player player) {
-            AnimationUtil.playOpenArmAnimation(player);
-        }
+        ServerScheduler.scheduleDelayed(22, () -> {
+            NeoForge.EVENT_BUS.post(new AbilityUsedEvent((ServerLevel) level, initialPos.subtract(0, 18, 0), entity, this, interactionFlags, interactionRadius, interactionCacheTicks));
+        }, (ServerLevel) level, () -> AbilityUtil.getTimeInArea(entity, new Location(entity.position(), level)));
+
+        ServerScheduler.scheduleDelayed(40, () -> {
+            lights.forEach(l -> level.setBlockAndUpdate(l, Blocks.AIR.defaultBlockState()));
+        }, (ServerLevel) level, () -> AbilityUtil.getTimeInArea(entity, new Location(entity.position(), level)));
+
+        if(entity instanceof Player) AnimationUtil.playOpenArmAnimation((Player) entity);
     }
 }

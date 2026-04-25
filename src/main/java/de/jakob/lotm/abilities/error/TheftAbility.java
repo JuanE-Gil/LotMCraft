@@ -19,8 +19,6 @@ public class TheftAbility extends Ability {
         super(id, 1.75f);
 
         canBeUsedByNPC = false;
-        canBeCopied = false;
-        canBeReplicated = false;
     }
 
     @Override
@@ -30,7 +28,7 @@ public class TheftAbility extends Ability {
 
     @Override
     public float getSpiritualityCost() {
-        return 10.5f;
+        return 400f;
     }
 
     @Override
@@ -45,7 +43,7 @@ public class TheftAbility extends Ability {
             return;
         }
 
-        TheftHandler.stealItemsFromEntity(target, player);
+        TheftHandler.stealItemsFromEntity(target, player, this);
        // PacketHandler.sendToPlayer(player, new SendPassiveTheftEffectPacket(target.getEyePosition().x, target.getEyePosition().y, target.getEyePosition().z));
     }
 }

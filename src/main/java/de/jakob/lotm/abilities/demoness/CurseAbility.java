@@ -33,11 +33,11 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class CurseAbility extends Ability {
     public CurseAbility(String id) {
-        super(id, 1.5f, "curse");
+        super(id, 80f, "curse");
 
         canBeUsedByNPC = false;
         canBeCopied = false;
-        canBeReplicated = false;
+        autoClear = false;
     }
 
     @Override
@@ -84,7 +84,10 @@ public class CurseAbility extends Ability {
             return;
         }
 
-        if(AbilityUtil.isTargetSignificantlyStronger(entity, livingTarget)) {
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+        int livingTargetSeq = BeyonderData.getSequence(livingTarget);
+
+        if(AbilityUtil.isTargetSignificantlyStronger(entitySeq, livingTargetSeq)) {
             entity.addEffect(new MobEffectInstance(ModEffects.LOOSING_CONTROL, 20 * 5, 3));
             entity.hurt(ModDamageTypes.source(entity.level(), ModDamageTypes.DEMONESS_GENERIC), 10);
             return;
@@ -93,7 +96,7 @@ public class CurseAbility extends Ability {
         AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.curse.cursed_target").withColor(0x6d32a8));
         offHandItem.consume(1, player);
 
-        int curseDuration = 20 * 60 * 2;
+        int curseDuration = 20 * 10* (int) Math.max(multiplier(entity)/4,2) ;
 
         AtomicReference<UUID> taskIdRef = new AtomicReference<>(null);
         UUID taskId = ServerScheduler.scheduleForDuration(0, 8, curseDuration, () -> {
@@ -103,14 +106,14 @@ public class CurseAbility extends Ability {
             }
 
             // Curse gets cleansed
-            if (InteractionHandler.isInteractionPossibleForEntity(new Location(target.position(), target.level()), "cleansing", BeyonderData.getSequence(entity), entity)) {
+            if (InteractionHandler.isInteractionPossibleForEntity(new Location(target.position(), target.level()), "cleansing", entitySeq, entity)) {
                 ServerScheduler.cancel(taskIdRef.get());
                 return;
             }
 
             switch(random.nextInt(3)) {
                 case 0 -> {
-                    livingTarget.hurt(ModDamageTypes.source(livingTarget.level(), ModDamageTypes.DEMONESS_GENERIC, entity), (float) (DamageLookup.lookupDamage(4, .6) * multiplier(entity)));
+                    livingTarget.hurt(ModDamageTypes.source(livingTarget.level(), ModDamageTypes.DEMONESS_GENERIC, entity), (float) (DamageLookup.lookupDamage(4, .6) *(int) Math.max(multiplier(entity)/5,1)));
                     ParticleUtil.spawnParticles(serverLevel, ModParticles.BLACK_FLAME.get(), livingTarget.position().add(0, livingTarget.getEyeHeight() / 2, 0), 200, .4, livingTarget.getEyeHeight() / 2, .4, 0.01);
                 }
                 case 1 -> {
@@ -118,7 +121,7 @@ public class CurseAbility extends Ability {
                     livingTarget.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 20 * 2, 3));
                 }
             }
-        }, serverLevel);
+        }, () -> clearArtifactScaling(entity) ,serverLevel);
         taskIdRef.set(taskId);
     }
 }

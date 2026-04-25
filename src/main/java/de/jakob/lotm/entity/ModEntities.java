@@ -3,6 +3,9 @@ package de.jakob.lotm.entity;
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.entity.custom.*;
 import de.jakob.lotm.entity.custom.ability_entities.*;
+import de.jakob.lotm.entity.custom.ability_entities.darkness_pathway.ConcealedDomainEntity;
+import de.jakob.lotm.entity.custom.ability_entities.death_pathway.DeathDivineKingdomEntity;
+import de.jakob.lotm.entity.custom.ability_entities.death_pathway.UnderworldGateEntity;
 import de.jakob.lotm.entity.custom.ability_entities.door_pathway.*;
 import de.jakob.lotm.entity.custom.ability_entities.mother_pathway.BloomingAreaEntity;
 import de.jakob.lotm.entity.custom.ability_entities.mother_pathway.CoffinEntity;
@@ -63,10 +66,26 @@ public class ModEntities {
             ENTITY_TYPES.register("spirit_ball", () -> EntityType.Builder.<SpiritBallEntity>of(SpiritBallEntity::new, MobCategory.MISC)
                     .sized(.55f, .55f).noSave().build("spirit_ball"));
 
+    public static final Supplier<EntityType<SpiritBlockProjectileEntity>> SPIRIT_BLOCK_PROJECTILE =
+            ENTITY_TYPES.register("spirit_block_projectile", () -> EntityType.Builder.<SpiritBlockProjectileEntity>of(SpiritBlockProjectileEntity::new, MobCategory.MISC)
+                    .sized(0.98f, 0.98f).noSave().build("spirit_block_projectile"));
+
     public static final Supplier<EntityType<WindBladeEntity>> WIND_BLADE =
             ENTITY_TYPES.register("wind_blade", () -> EntityType.Builder.<WindBladeEntity>of(WindBladeEntity::new, MobCategory.MISC)
                     .sized(.75f, 2f).noSave().build("wind_blade"));
 
+    // Ability Entities - Death Pathway
+
+    public static final Supplier<EntityType<DeathDivineKingdomEntity>> DEATH_DIVINE_KINGDOM =
+            ENTITY_TYPES.register("death_divine_kingdom", () -> EntityType.Builder.<DeathDivineKingdomEntity>of(DeathDivineKingdomEntity::new, MobCategory.MISC)
+                    .sized(0.5F, 0.5F).clientTrackingRange(64).updateInterval(1).noSummon().noSave().fireImmune().build("death_divine_kingdom"));
+
+    // Ability Entities - Darkness Pathway
+
+    public static final Supplier<EntityType<ConcealedDomainEntity>> CONCEALED_DOMAIN =
+            ENTITY_TYPES.register("concealed_domain", () -> EntityType.Builder.<ConcealedDomainEntity>of(ConcealedDomainEntity::new, MobCategory.MISC)
+                    .sized(0.5F, 0.5F).clientTrackingRange(64).updateInterval(1).noSummon().noSave().fireImmune().build("concealed_domain"));
+    
     // Ability Entities - Door Pathway
 
     public static final Supplier<EntityType<ApprenticeDoorEntity>> APPRENTICE_DOOR =
@@ -305,7 +324,7 @@ public class ModEntities {
 
     public static final Supplier<EntityType<SpiritBaneEntity>> SPIRIT_BANE =
             ENTITY_TYPES.register("spirit_bane", () -> EntityType.Builder.of(SpiritBaneEntity::new, MobCategory.MONSTER)
-                    .sized(1.3f, 2f).build("spirit_bane"));
+                    .sized(1.6f, 3.85f).build("spirit_bane"));
 
     public static final Supplier<EntityType<SpiritMalmouthEntity>> SPIRIT_MALMOUTH =
             ENTITY_TYPES.register("spirit_malmouth", () -> EntityType.Builder.of(SpiritMalmouthEntity::new, MobCategory.MONSTER)
@@ -339,6 +358,14 @@ public class ModEntities {
                     .build("original_body"));
 
     // Utility
+
+    public static final Supplier<EntityType<UnderworldGateEntity>> UNDERWORLD_GATE =
+            ENTITY_TYPES.register("underworld_gate", () -> EntityType.Builder.of(UnderworldGateEntity::new, MobCategory.MISC)
+                    .sized(1.5f, 2.5f).build("underworld_gate"));
+
+    public static final Supplier<EntityType<PlanetEntity>> PLANET =
+            ENTITY_TYPES.register("planet", () -> EntityType.Builder.of(PlanetEntity::new, MobCategory.MISC)
+                    .sized(2.5f, 2.5f).build("planet"));
 
     public static final DeferredHolder<EntityType<?>, EntityType<ReturnPortalEntity>> RETURN_PORTAL =
             ENTITY_TYPES.register("return_portal", () ->
@@ -385,6 +412,16 @@ public class ModEntities {
                     .clientTrackingRange(32)
                     .updateInterval(1)
                     .build("damage_tracker"));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<de.jakob.lotm.entity.custom.uniqueness.UniquenessEntity>> UNIQUENESS_ENTITY =
+            ENTITY_TYPES.register("uniqueness_entity", () ->
+                    EntityType.Builder.<de.jakob.lotm.entity.custom.uniqueness.UniquenessEntity>of(
+                                    de.jakob.lotm.entity.custom.uniqueness.UniquenessEntity::new, MobCategory.MISC)
+                            .sized(0.5F, 0.5F)
+                            .clientTrackingRange(64)
+                            .updateInterval(1)
+                            .build("uniqueness_entity")
+            );
 
     public static void register(IEventBus eventBus) {
         ENTITY_TYPES.register(eventBus);

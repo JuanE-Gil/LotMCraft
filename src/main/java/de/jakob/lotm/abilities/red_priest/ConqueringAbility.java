@@ -3,6 +3,8 @@ package de.jakob.lotm.abilities.red_priest;
 import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.effect.ModEffects;
 import de.jakob.lotm.rendering.effectRendering.EffectManager;
+import de.jakob.lotm.rendering.effectRendering.impl.BaptismEffect;
+import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -18,9 +20,10 @@ import java.util.Map;
 
 public class ConqueringAbility extends Ability {
     public ConqueringAbility(String id) {
-        super(id, 1.5f);
+        super(id, 40, "morale_boost");
         canBeCopied = false;
         canBeReplicated = false;
+        canBeShared = false;
     }
 
     @Override
@@ -30,7 +33,7 @@ public class ConqueringAbility extends Ability {
 
     @Override
     protected float getSpiritualityCost() {
-        return 1900;
+        return 8000;
     }
 
     @Override
@@ -46,10 +49,18 @@ public class ConqueringAbility extends Ability {
 
         EffectManager.playEffect(EffectManager.Effect.CONQUERING, entity.getX(), entity.getY(), entity.getZ(), serverLevel, entity);
 
-        AbilityUtil.getNearbyEntities(entity, (ServerLevel) level, entity.position(), 3.75, false).forEach(e -> {
-            if(AbilityUtil.getSequenceDifference(entity, e) > 0) {
-                e.addEffect(new MobEffectInstance(ModEffects.CONQUERED, 20 * 60 * 60, 7));
-            }
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+
+        double radius = 4*(int) Math.max(multiplier(entity)/4,1);
+
+        AbilityUtil.getNearbyEntities(entity, (ServerLevel) level, entity.position(), radius, false).forEach(e -> {
+            if(entitySeq < BeyonderData.getSequence(e)) {
+                e.addEffect(new MobEffectInstance(ModEffects.CONQUERED, 20 * 30 *(int) Math.max(multiplier(entity)/4,1), 18));
+            }else if (entitySeq > BeyonderData.getSequence(e)){
+                e.addEffect(new MobEffectInstance(ModEffects.CONQUERED, 20, 1));
+            }else{
+                e.addEffect(new MobEffectInstance(ModEffects.CONQUERED, 35*(int) Math.max(multiplier(entity)/4,1)/(int) Math.max(multiplier(e)/4,1), 2));
+            };
         });
     }
 }

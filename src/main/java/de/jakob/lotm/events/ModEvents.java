@@ -1,8 +1,11 @@
 package de.jakob.lotm.events;
 
 import de.jakob.lotm.LOTMCraft;
+import de.jakob.lotm.attachments.ModAttachments;
+import de.jakob.lotm.attachments.TeamComponent;
 import de.jakob.lotm.command.*;
 import de.jakob.lotm.entity.ModEntities;
+import de.jakob.lotm.entity.client.ability_entities.death_pathway.underworld_gate.UnderworldGateModel;
 import de.jakob.lotm.entity.client.ability_entities.door_pathway.travelers_door.TravelersDoorModel;
 import de.jakob.lotm.entity.client.ability_entities.meteor.MeteorModel;
 import de.jakob.lotm.entity.client.ability_entities.mother_pathway.blooming_area.BloomingAreaModel;
@@ -40,17 +43,22 @@ import de.jakob.lotm.entity.client.spirits.translucent_wizard.SpiritTranslucentW
 import de.jakob.lotm.entity.custom.*;
 import de.jakob.lotm.entity.custom.ability_entities.OriginalBodyEntity;
 import de.jakob.lotm.entity.custom.spirits.*;
-import de.jakob.lotm.gamerule.ModGameRules;
-import de.jakob.lotm.rendering.models.DoorMythicalCreatureModel;
-import de.jakob.lotm.rendering.models.TyrantMythicalCreatureModel;
-import de.jakob.lotm.util.BeyonderData;
-import de.jakob.lotm.util.SpiritualityProgressTracker;
-import net.minecraft.nbt.CompoundTag;
+import de.jakob.lotm.network.PacketHandler;
+import de.jakob.lotm.network.packets.toClient.SyncSharedAbilitiesDataPacket;
+import de.jakob.lotm.rendering.models.door.DoorHighMythicalCreatureModel;
+import de.jakob.lotm.rendering.models.fool.FoolMythicalCreatureModel;
+import de.jakob.lotm.rendering.models.red_priest.RedPriestMythicalCreatureModel;
+import de.jakob.lotm.rendering.models.sun.SunMythicalCreatureModel;
+import de.jakob.lotm.rendering.models.wheel_of_fortune.WheelOfFortuneMythicalCreatureModel;
+import de.jakob.lotm.util.helper.TeamUtils;
+import de.jakob.lotm.rendering.models.door.DoorMythicalCreatureModel;
+import de.jakob.lotm.rendering.models.tyrant.TyrantMythicalCreatureModel;
 import net.minecraft.nbt.Tag;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.SpawnPlacementTypes;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -60,11 +68,23 @@ import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
+import de.jakob.lotm.abilities.tyrant.LightningStormAbility;
+import net.neoforged.neoforge.event.ServerChatEvent;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
 import static de.jakob.lotm.abilities.fool.HistoricalVoidSummoningAbility.MARKED_ENTITIES_TAG;
 import static de.jakob.lotm.util.BeyonderData.*;
 
 @EventBusSubscriber(modid = LOTMCraft.MOD_ID)
 public class ModEvents {
+
+    public static final Map<UUID, Integer> leoderoUsesLeft = new ConcurrentHashMap<>();
+    private static final LightningStormAbility LIGHTNING_STORM = new LightningStormAbility("lightning_storm_leodero");
 
     @SubscribeEvent
     public static void registerLayers(EntityRenderersEvent.RegisterLayerDefinitions event) {
@@ -94,6 +114,7 @@ public class ModEvents {
         event.registerLayerDefinition(DesolateAreaModel.LAYER_LOCATION, DesolateAreaModel::createBodyLayer);
         event.registerLayerDefinition(QuestMarkerModel.LAYER_LOCATION, QuestMarkerModel::createBodyLayer);
         event.registerLayerDefinition(CycleOfFateModel.LAYER_LOCATION, CycleOfFateModel::createBodyLayer);
+        event.registerLayerDefinition(UnderworldGateModel.LAYER_LOCATION, UnderworldGateModel::createBodyLayer);
 
         // Spirits
         event.registerLayerDefinition(SpiritDervishModel.LAYER_LOCATION, SpiritDervishModel::createBodyLayer);
@@ -108,6 +129,11 @@ public class ModEvents {
         // Mythical Creature Forms
         event.registerLayerDefinition(TyrantMythicalCreatureModel.LAYER_LOCATION, TyrantMythicalCreatureModel::createBodyLayer);
         event.registerLayerDefinition(DoorMythicalCreatureModel.LAYER_LOCATION, DoorMythicalCreatureModel::createBodyLayer);
+        event.registerLayerDefinition(FoolMythicalCreatureModel.LAYER_LOCATION, FoolMythicalCreatureModel::createBodyLayer);
+        event.registerLayerDefinition(WheelOfFortuneMythicalCreatureModel.LAYER_LOCATION, WheelOfFortuneMythicalCreatureModel::createBodyLayer);
+        event.registerLayerDefinition(RedPriestMythicalCreatureModel.LAYER_LOCATION, RedPriestMythicalCreatureModel::createBodyLayer);
+        event.registerLayerDefinition(SunMythicalCreatureModel.LAYER_LOCATION, SunMythicalCreatureModel::createBodyLayer);
+        event.registerLayerDefinition(DoorHighMythicalCreatureModel.LAYER_LOCATION, DoorHighMythicalCreatureModel::createBodyLayer);
     }
 
     @SubscribeEvent
@@ -125,7 +151,7 @@ public class ModEvents {
         event.put(ModEntities.SPIRIT_GHOST.get(), SpiritGhostEntity.createAttributes().build());
         event.put(ModEntities.SPIRIT_BIZARRO_BANE.get(), SpiritBizarroBaneEntity.createAttributes().build());
         event.put(ModEntities.SPIRIT_BANE.get(), SpiritBaneEntity.createAttributes().build());
-        event.put(ModEntities.SPIRIT_MALMOUTH.get(), SpiritBaneEntity.createAttributes().build());
+        event.put(ModEntities.SPIRIT_MALMOUTH.get(), SpiritMalmouthEntity.createAttributes().build());
     }
 
     @SubscribeEvent
@@ -134,16 +160,7 @@ public class ModEvents {
                 ModEntities.BEYONDER_NPC.get(),
                 SpawnPlacementTypes.ON_GROUND,
                 Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
-                (entityType, level, spawnType, pos, random) -> {
-                    // Get the ServerLevel to access gamerules
-                    ServerLevel serverLevel = level.getLevel();
-                    if (!serverLevel.getGameRules().getBoolean(ModGameRules.ALLOW_BEYONDER_SPAWNING)) {
-                        return false;
-                    }
-
-                    // Then check the normal mob spawn rules
-                    return Mob.checkMobSpawnRules(entityType, level, spawnType, pos, random);
-                },
+                BeyonderNPCEntity::canSpawn,
                 RegisterSpawnPlacementsEvent.Operation.REPLACE
         );
         event.register(
@@ -207,8 +224,9 @@ public class ModEvents {
     @SubscribeEvent
     public static void onRegisterCommands(RegisterCommandsEvent event) {
         BeyonderCommand.register(event.getDispatcher());
-        SkinChangeCommand.register(event.getDispatcher());
+        LuckCheckCommand.register(event.getDispatcher());
         AllyRequestCommands.register(event.getDispatcher());
+        AllyCommand.register(event.getDispatcher());
         SanityCommand.register(event.getDispatcher());
         DigestionCommand.register(event.getDispatcher());
         QuestCommand.register(event.getDispatcher());
@@ -217,35 +235,97 @@ public class ModEvents {
         EnableAbilityCommand.register(event.getDispatcher());
         HonorificNameCommand.register(event.getDispatcher());
         CharacteristicsStackCommand.register(event.getDispatcher());
+        TeamCommand.register(event.getDispatcher());
+        TeamInviteResponseCommand.register(event.getDispatcher());
+        SetBeyonderLogCommand.register(event.getDispatcher());
+        KillCountCommand.register(event.getDispatcher());
+        UniquenessCommand.register(event.getDispatcher());
     }
 
     @SubscribeEvent
-    public static void onPlayerClone(PlayerEvent.Clone event) {
-        Player original = event.getOriginal();
-        Player newPlayer = event.getEntity();
+    public static void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer leavingPlayer)) return;
 
-        // Only copy data if the original player was a beyonder
-        if (isBeyonder(original)) {
-            String pathway = getPathway(original);
-            int sequence = getSequence(original);
-            boolean griefingEnabled = original.getPersistentData().getBoolean(NBT_GRIEFING_ENABLED);
-            Tag markedEntities = original.getPersistentData().get(MARKED_ENTITIES_TAG);
+        TeamComponent team = leavingPlayer.getData(ModAttachments.TEAM_COMPONENT.get());
+        MinecraftServer server = leavingPlayer.getServer();
+        if (server == null) return;
 
-            // Copy the data to the new player
-            CompoundTag newTag = newPlayer.getPersistentData();
-            newTag.putString(NBT_PATHWAY, pathway);
-            newTag.putInt(NBT_SEQUENCE, sequence);
-            newTag.putFloat(NBT_SPIRITUALITY, BeyonderData.getMaxSpirituality(sequence));
-            newTag.putBoolean(NBT_GRIEFING_ENABLED, griefingEnabled);
-            if (markedEntities != null) {
-                newTag.put(MARKED_ENTITIES_TAG, markedEntities.copy());
+        if (team.memberCount() > 0) {
+            // Leaving player is a leader — clear the shared tab for all online members
+            SyncSharedAbilitiesDataPacket clearPacket = new SyncSharedAbilitiesDataPacket(
+                    "", new ArrayList<>(), new ArrayList<>(), new HashMap<>(), 0, 0);
+            for (String memberUUID : team.memberUUIDs()) {
+                ServerPlayer member = server.getPlayerList().getPlayer(
+                        java.util.UUID.fromString(memberUUID));
+                if (member != null) {
+                    PacketHandler.sendToPlayer(member, clearPacket);
+                }
             }
-
-            // Update spirituality progress tracker
-            if (getMaxSpirituality(sequence) > 0) {
-                float progress = 1;
-                SpiritualityProgressTracker.setProgress(newPlayer.getUUID(), progress);
+        } else if (team.isInTeam()) {
+            // Leaving player is a member — re-sync the team so their abilities vanish from the pool
+            ServerPlayer leader = server.getPlayerList().getPlayer(
+                    java.util.UUID.fromString(team.leaderUUID()));
+            if (leader != null) {
+                TeamUtils.syncToTeam(leader);
             }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+
+        MinecraftServer server = player.getServer();
+        if (server == null) return;
+
+        // Sync uniqueness data on login
+        PacketHandler.syncUniquenessToPlayer(player);
+
+        TeamComponent team = player.getData(ModAttachments.TEAM_COMPONENT.get());
+
+        if (team.isInTeam()) {
+            // Player is a member — check if their leader still has them listed
+            ServerPlayer leader = server.getPlayerList().getPlayer(java.util.UUID.fromString(team.leaderUUID()));
+            if (leader != null && !leader.getData(ModAttachments.TEAM_COMPONENT.get()).hasMember(player.getStringUUID())) {
+                // Leader is online but no longer claims this player — clear stale membership
+                player.setData(ModAttachments.TEAM_COMPONENT.get(), team.clearLeader());
+                PacketHandler.sendToPlayer(player, new de.jakob.lotm.network.packets.toClient.SyncSharedAbilitiesDataPacket(
+                        "", new ArrayList<>(), new ArrayList<>(), new java.util.HashMap<>(), 0, 0));
+            }
+        } else if (team.memberCount() > 0) {
+            // Player is a leader — remove any members whose leaderUUID no longer points back to this leader
+            TeamComponent current = team;
+            for (String memberUUID : new ArrayList<>(current.memberUUIDs())) {
+                ServerPlayer member = server.getPlayerList().getPlayer(java.util.UUID.fromString(memberUUID));
+                if (member != null && !member.getData(ModAttachments.TEAM_COMPONENT.get()).leaderUUID().equals(player.getStringUUID())) {
+                    current = current.removeMember(memberUUID);
+                }
+            }
+            if (!current.memberUUIDs().equals(team.memberUUIDs())) {
+                player.setData(ModAttachments.TEAM_COMPONENT.get(), current);
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onServerChat(ServerChatEvent event) {
+        if (!event.getMessage().getString().equalsIgnoreCase("LEODERO!")) return;
+
+        ServerPlayer player = event.getPlayer();
+        UUID uuid = player.getUUID();
+
+        int usesLeft = leoderoUsesLeft.getOrDefault(uuid, 1);
+        if (usesLeft <= 0) return;
+
+        leoderoUsesLeft.put(uuid, usesLeft - 1);
+
+        if (player.level() instanceof ServerLevel serverLevel) {
+            net.minecraft.world.entity.decoration.ArmorStand dummy = new net.minecraft.world.entity.decoration.ArmorStand(serverLevel, player.getX(), player.getY(), player.getZ());
+            dummy.setYRot(player.getYRot());
+            dummy.setXRot(player.getXRot());
+            serverLevel.addFreshEntity(dummy);
+            LIGHTNING_STORM.onAbilityUse(serverLevel, dummy);
+            dummy.discard();
         }
     }
 }

@@ -4,7 +4,7 @@ import com.mojang.datafixers.util.Pair;
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.util.BeyonderData;
-import de.jakob.lotm.util.beyonderMap.PendingPrayer;
+import de.jakob.lotm.util.playerMap.PendingPrayer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
@@ -21,6 +21,10 @@ public class HonorificNamesEventHandler {
     public static HashMap<UUID, UUID> isInTransferring = new HashMap<>();
 
     public static LinkedList<Pair<UUID, UUID>> answerState = new LinkedList<>();
+
+    public static void addPendingPrayer(UUID targetUUID, PendingPrayer prayer) {
+        pendingPrayers.computeIfAbsent(targetUUID, k -> new LinkedList<>()).add(prayer);
+    }
 
     /** Pending prayers per target player UUID: target → list of prayers addressed to them. */
     private static final HashMap<UUID, LinkedList<PendingPrayer>> pendingPrayers = new HashMap<>();
@@ -91,7 +95,7 @@ public class HonorificNamesEventHandler {
                 && input.get(playerUUID).size() >= 3
                 && isHonorificNameLastLine(rawMessage)){
 
-            var targetUUID = BeyonderData.beyonderMap.findCandidate(input.get(playerUUID));
+            var targetUUID = BeyonderData.playerMap.findCandidate(input.get(playerUUID));
 
             if(targetUUID == null){
                 input.remove(playerUUID);
@@ -134,7 +138,7 @@ public class HonorificNamesEventHandler {
     /**
      * Stores the incoming prayer so the target can respond via the Honorific Names menu.
      */
-    private static void storePendingPrayer(LivingEntity sender, LivingEntity target) {
+    public static void storePendingPrayer(LivingEntity sender, LivingEntity target) {
         answerState.add(new Pair<>(target.getUUID(), sender.getUUID()));
 
         PendingPrayer prayer = new PendingPrayer(
@@ -176,14 +180,14 @@ public class HonorificNamesEventHandler {
     }
 
     public static boolean isHonorificNameFirstLine(String str) {
-        return BeyonderData.beyonderMap.containsHonorificNameWithFirstLine(str);
+        return BeyonderData.playerMap.containsHonorificNameWithFirstLine(str);
     }
 
     public static boolean isHonorificNameLastLine(String str) {
-        return BeyonderData.beyonderMap.containsHonorificNameWithLastLine(str);
+        return BeyonderData.playerMap.containsHonorificNameWithLastLine(str);
     }
 
     public static boolean isHonorificNamePart(String str) {
-        return BeyonderData.beyonderMap.containsHonorificNameWithLine(str);
+        return BeyonderData.playerMap.containsHonorificNameWithLine(str);
     }
 }

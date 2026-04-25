@@ -71,9 +71,8 @@ public class DefilingSeedAbility extends Ability {
     );
 
     public DefilingSeedAbility(String id) {
-        super(id, 5);
+        super(id, 7, "corruption");
         this.canBeCopied = false;
-
     }
 
     @Override
@@ -115,13 +114,13 @@ public class DefilingSeedAbility extends Ability {
                 SoundEvents.ITEM_BREAK, SoundSource.BLOCKS, 1f, 1f);
 
         // Capture now — the scheduler lambda must not close over a mutable field
-        final int casterSequence = BeyonderData.getSequence(entity);
-        final float damageMultiplier = (float) multiplier(entity);
+        final int casterSequence = AbilityUtil.getSeqWithArt(entity, this);
+        final float damageMultiplier = multiplier(entity);
 
         UUID taskId = ServerScheduler.scheduleForDuration(
                 0,
                 8,
-                20 * 60 * 2,
+                20 * 20* (int) Math.max(multiplier(entity)/4,1),
                 () -> {
                     switch (random.nextInt(22)) {
                         case 0, 2, 3 -> target.hurt(
@@ -139,8 +138,7 @@ public class DefilingSeedAbility extends Ability {
                 // if purify() cancels before the duration expires.
                 () -> ServerScheduler.scheduleDelayed(
                         20 * 5,
-                        () -> defiledEntities.remove(target.getUUID()),
-                        serverLevel),
+                        () -> defiledEntities.remove(target.getUUID()), serverLevel),
                 serverLevel
         );
 

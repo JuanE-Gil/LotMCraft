@@ -8,6 +8,8 @@ import de.jakob.lotm.attachments.AbilityCooldownComponent;
 import de.jakob.lotm.attachments.DisabledAbilitiesComponent;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.attachments.NewPlayerComponent;
+import de.jakob.lotm.attachments.SacrificeRevertComponent;
+import de.jakob.lotm.entity.custom.ability_entities.darkness_pathway.ConcealedDomainEntity;
 import de.jakob.lotm.gamerule.ModGameRules;
 import de.jakob.lotm.item.ModItems;
 import de.jakob.lotm.network.PacketHandler;
@@ -15,14 +17,11 @@ import de.jakob.lotm.network.packets.toClient.SyncGriefingGamerulePacket;
 import de.jakob.lotm.potions.BeyonderCharacteristicItemHandler;
 import de.jakob.lotm.potions.PotionRecipeItemHandler;
 import de.jakob.lotm.util.BeyonderData;
-import de.jakob.lotm.util.beyonderMap.BeyonderMap;
-import de.jakob.lotm.util.beyonderMap.StoredData;
+import de.jakob.lotm.attachments.AllyComponent;
+import de.jakob.lotm.util.helper.AllyUtil;
 import de.jakob.lotm.util.helper.ExplodingFallingBlockHelper;
 import de.jakob.lotm.util.helper.ParticleUtil;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.components.spectator.SpectatorGui;
-import net.minecraft.client.gui.spectator.SpectatorMenuItem;
-import net.minecraft.client.gui.spectator.SpectatorMenuListener;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
@@ -35,15 +34,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.EntityTeleportEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import org.joml.Vector3f;
 
-import java.util.Optional;
 import java.util.Random;
 
 @EventBusSubscriber(modid = LOTMCraft.MOD_ID)
@@ -54,19 +50,61 @@ public class PlayerEvents {
         if (event.getEntity() instanceof ServerPlayer player) {
             DisabledAbilitiesComponent disabledAbilitiesComponent = player.getData(ModAttachments.DISABLED_ABILITIES_COMPONENT);
             disabledAbilitiesComponent.enableAllAbilities();
+
             AbilityCooldownComponent abilityCooldownComponent = player.getData(ModAttachments.COOLDOWN_COMPONENT);
             abilityCooldownComponent.removeAllCooldowns();
+
             ToggleAbility.cleanUp(player.serverLevel(), player);
             DivinationAbility.cleanupOnLogout(player);
 
+            // Clean up concealed domain entities
+            ConcealedDomainEntity concealedDomainEntity = ConcealedDomainEntity.getActiveForOwner(player.getUUID());
+            if(concealedDomainEntity != null) {
+                concealedDomainEntity.discard();
+            }
+
             if(BeyonderData.isBeyonder(player))
-                BeyonderData.beyonderMap.addLastPosition(player);
+                BeyonderData.playerMap.addLastPosition(player);
+
+            // Retrieve Internal Underworld souls on logout
+            de.jakob.lotm.abilities.death.InternalUnderworldAbility.retrieveSoulsOnLogout(player);
+
+            // Revert sacrifice upgrade if active when logging out
+            SacrificeRevertComponent revert = player.getData(ModAttachments.SACRIFICE_REVERT_COMPONENT);
+            if (revert.isActive()) {
+                if (BeyonderData.isBeyonder(player)
+                        && BeyonderData.getPathway(player).equals(revert.getPathway())
+                        && BeyonderData.getSequence(player) == revert.getRevertToSequence() - 1) {
+                    float digestion = revert.getSavedDigestion();
+                    BeyonderData.setBeyonder(player, revert.getPathway(), revert.getRevertToSequence(), true, false, true, false);
+                    BeyonderData.setDigestionProgress(player, digestion);
+                    // No sync needed on logout — player reads NBT fresh on next login
+                }
+                revert.clear();
+            }
         }
     }
 
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
+            // Prune stale ally entries: remove any ally UUID whose owner no longer lists
+            // this player back (e.g. the player was removed while they were offline).
+            AllyComponent comp = player.getData(ModAttachments.ALLY_COMPONENT.get());
+            for (String uuidStr : new java.util.HashSet<>(comp.allies())) {
+                try {
+                    java.util.UUID allyUUID = java.util.UUID.fromString(uuidStr);
+                    ServerPlayer ally = player.getServer().getPlayerList().getPlayer(allyUUID);
+                    if (ally != null && !AllyUtil.isAlly(ally, player.getUUID())) {
+                        // Ally is online but doesn't have us listed — remove the stale entry
+                        player.setData(ModAttachments.ALLY_COMPONENT.get(),
+                                player.getData(ModAttachments.ALLY_COMPONENT.get()).removeAlly(allyUUID));
+                    }
+                    // If ally is offline we can't check their data, so leave it for the
+                    // next time they log in and this same check runs on their side.
+                } catch (IllegalArgumentException ignored) {}
+            }
+
             PacketHandler.sendToPlayer(player, new SyncGriefingGamerulePacket(player.level().getGameRules().getBoolean(ModGameRules.ALLOW_GRIEFING)));
 
             NewPlayerComponent component = player.getData(ModAttachments.BOOK_COMPONENT);
@@ -89,11 +127,15 @@ public class PlayerEvents {
 
     @SubscribeEvent
     public static void onDeath(LivingDeathEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) {
+            de.jakob.lotm.abilities.death.InternalUnderworldAbility.despawnSoulsOnDeath(player);
+        }
         if(!(event.getEntity().level() instanceof ServerLevel level)) {
             return;
         }
 
         ToggleAbility.cleanUp(level, event.getEntity());
+
     }
 
     private static final Random random = new Random();

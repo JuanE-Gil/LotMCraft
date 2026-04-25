@@ -1,5 +1,6 @@
 package de.jakob.lotm.util.helper;
 
+import de.jakob.lotm.abilities.core.AbilityUsedEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
@@ -8,6 +9,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.common.NeoForge;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -125,6 +127,8 @@ public class ExplodingFallingBlockHelper {
                         data.explosionPower,
                         data.griefing ? Level.ExplosionInteraction.BLOCK : Level.ExplosionInteraction.NONE
                 );
+
+                NeoForge.EVENT_BUS.post(new AbilityUsedEvent((ServerLevel) level, pos.getCenter(), owner, null, new String[]{"explosion", "burning"}, 2, 10));
 
                 // Spawn lava if configured
                 if (data.spawnLava) {

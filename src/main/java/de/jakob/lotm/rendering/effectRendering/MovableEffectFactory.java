@@ -1,8 +1,7 @@
 package de.jakob.lotm.rendering.effectRendering;
 
-import de.jakob.lotm.rendering.effectRendering.impl.FearAuraEffect;
-import de.jakob.lotm.rendering.effectRendering.impl.HorrorAuraEffect;
-import de.jakob.lotm.rendering.effectRendering.impl.LifeAuraEffect;
+import de.jakob.lotm.rendering.effectRendering.impl.*;
+import de.jakob.lotm.util.data.EntityLocation;
 import de.jakob.lotm.util.data.Location;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import net.minecraft.client.Minecraft;
@@ -31,19 +30,25 @@ public class MovableEffectFactory {
     public static ActiveMovableEffect createEffect(int effectIndex, Location location,
                                                    int duration, boolean infinite,
                                                    LivingEntity entity) {
+        if (entity != null) {
+            location = new EntityLocation(entity);
+        }
+
         ActiveMovableEffect effect = switch (effectIndex) {
             case 0 -> new HorrorAuraEffect(location, duration, infinite);
             case 1 -> new LifeAuraEffect(location, duration, infinite);
             case 2 -> new FearAuraEffect(location, duration, infinite);
+            case 3 -> new BeamsOfLightEffect(location, duration);
+            case 4 -> new SpaceTearEffect(location, duration, infinite);
             default -> throw new IllegalArgumentException("Unknown movable effect index: " + effectIndex);
         };
 
         ClientLevel level = Minecraft.getInstance().level;
-        if (level != null) {
-            Vec3 pos = location.getPosition();
+        if (level != null && entity != null) {
+            // Use the live entity reference in the lambda too, not a snapshot Vec3.
             effect.setTimeMultiplier(
                     () -> AbilityUtil.getTimeInArea(entity,
-                            new Location(new Vec3(pos.x, pos.y, pos.z), level))
+                            new Location(entity.position(), level))
             );
         }
 

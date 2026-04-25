@@ -3,7 +3,11 @@ package de.jakob.lotm.entity.custom.ability_entities.door_pathway;
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.dimension.ModDimensions;
 import de.jakob.lotm.dimension.SpiritWorldHandler;
+import de.jakob.lotm.util.helper.ParticleUtil;
+import de.jakob.lotm.util.scheduling.ServerScheduler;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
@@ -19,6 +23,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 
 import java.util.Set;
 
@@ -32,7 +37,7 @@ public class TravelersDoorEntity extends Entity {
      * 1 = spectating
      * 2 = spirit world
      */
-    private int use = 0;
+    private int use;
 
     private static final double TELEPORT_RANGE = 1.0;
 
@@ -104,12 +109,12 @@ public class TravelersDoorEntity extends Entity {
 
     private void spiritWorldHandling() {
         if (this.level() instanceof ServerLevel serverLevel) {
-            for (Entity entity : this.level().getEntities(this, this.getBoundingBox().inflate(TELEPORT_RANGE), e -> e != this && e.isAlive())) {
-                ResourceKey<Level> spiritWorld = ResourceKey.create(Registries.DIMENSION,
-                        ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "spirit_world"));
-                ServerLevel spiritWorldLevel = serverLevel.getServer().getLevel(spiritWorld);
-                if (spiritWorldLevel == null) return;
+            ResourceKey<Level> spiritWorld = ResourceKey.create(Registries.DIMENSION,
+                    ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "spirit_world"));
+            ServerLevel spiritWorldLevel = serverLevel.getServer().getLevel(spiritWorld);
+            if (spiritWorldLevel == null) return;
 
+            for (Entity entity : this.level().getEntities(this, this.getBoundingBox().inflate(TELEPORT_RANGE), e -> e != this && e.isAlive())) {
                 if (!serverLevel.dimension().equals(ModDimensions.SPIRIT_WORLD_DIMENSION_KEY)) {
 
                     Vec3 coords = SpiritWorldHandler.getCoordinatesInSpiritWorld(entity.position(), spiritWorldLevel);
@@ -155,12 +160,45 @@ public class TravelersDoorEntity extends Entity {
 
 
     private void teleportNearbyEntities() {
-        if (!this.level().isClientSide) {
-            for (Entity entity : this.level().getEntities(this, this.getBoundingBox().inflate(TELEPORT_RANGE), e -> e != this && e.isAlive())) {
-                entity.teleportTo(destX, destY, destZ);
+        if (this.level().isClientSide) {
+            return;
+        }
 
-                entity.resetFallDistance();
-            }
+        ServerLevel level = (ServerLevel) this.level();
+        ResourceKey<Level> spiritWorld = ResourceKey.create(Registries.DIMENSION, ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "spirit_world"));
+        ServerLevel spiritWorldLevel = level.getServer().getLevel(spiritWorld);
+        if (spiritWorldLevel == null) return;
+
+        if(level.dimension().equals(ModDimensions.SPIRIT_WORLD_DIMENSION_KEY)) {
+            ParticleUtil.spawnParticles(level, ParticleTypes.END_ROD, position().add(0, .5, 0), 35, .4, .1);
+            ParticleUtil.spawnParticles(level, new DustParticleOptions(
+                    new Vector3f(99 / 255f, 255 / 255f, 250 / 255f),
+                    1
+            ), position().add(0, .5, 0), 35, .4, .1);
+            this.discard();
+            return;
+        }
+
+        Vec3 spiritWorldPos = SpiritWorldHandler.getCoordinatesInSpiritWorld(this.position(), spiritWorldLevel);
+        Vec3 spiritWorldTargetPos = SpiritWorldHandler.getCoordinatesInSpiritWorld(new Vec3(destX, destY, destZ), spiritWorldLevel);
+
+        int dragDuration = (int) (spiritWorldPos.distanceTo(spiritWorldTargetPos));
+
+        Vec3 dir = spiritWorldTargetPos.subtract(spiritWorldPos).normalize();
+
+        for (Entity entity : this.level().getEntities(this, this.getBoundingBox().inflate(TELEPORT_RANGE), e -> e != this && e.isAlive())) {
+            entity.teleportTo(spiritWorldLevel, spiritWorldPos.x(), spiritWorldPos.y(), spiritWorldPos.z(), Set.of(), entity.getYRot(), entity.getXRot());
+            Vec3[] currentEntityPos = new Vec3[]{new Vec3(spiritWorldPos.toVector3f())};
+
+            ServerScheduler.scheduleForDuration(0, 1, dragDuration, () -> {
+                Vec3 nextPos = currentEntityPos[0].add(dir.scale(1.0));
+                entity.teleportTo(nextPos.x(), nextPos.y(), nextPos.z());
+                currentEntityPos[0] = nextPos;
+
+                ParticleUtil.spawnParticles(level, ParticleTypes.END_ROD, currentEntityPos[0].add(0, .5, 0), 35, .4, .1);
+                ParticleUtil.spawnParticles(level, ParticleTypes.PORTAL, currentEntityPos[0].add(0, .5, 0), 35, .7, .1);
+
+            }, () -> entity.teleportTo((ServerLevel) this.level(), destX, destY, destZ, Set.of(), entity.getYRot(), entity.getXRot()), level);
         }
     }
 

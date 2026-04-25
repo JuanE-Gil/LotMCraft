@@ -27,10 +27,11 @@ import java.util.Map;
 
 public class PureWhiteLightAbility extends Ability {
     public PureWhiteLightAbility(String id) {
-        super(id, 4, "purification", "light_source", "light_strong", "light_weak");
-        interactionRadius = 25;
+        super(id, 6, "purification", "light_source", "light_strong", "light_weak", "purification_holy");
+        interactionRadius = 50;
         postsUsedAbilityEventManually = true;
         canBeCopied = false;
+        canBeShared = false;
     }
 
     @Override
@@ -40,26 +41,23 @@ public class PureWhiteLightAbility extends Ability {
 
     @Override
     protected float getSpiritualityCost() {
-        return 2200;
+        return 4000;
     }
 
     @Override
     public void onAbilityUse(Level level, LivingEntity entity) {
         if(!(level instanceof ServerLevel serverLevel)) {
-            if(entity instanceof Player player) {
-                AnimationUtil.playOpenArmAnimation(player);
-            }
             return;
         }
 
-        Vec3 targetLoc = AbilityUtil.getTargetLocation(entity, 50, 4);
+        Vec3 targetLoc = AbilityUtil.getTargetLocation(entity, 50* (int) Math.max(multiplier(entity)/4,1), 4);
         for(int i = 0; i < 50; i++) {
             BlockPos pos = BlockPos.containing(targetLoc);
             BlockState blockState = serverLevel.getBlockState(pos);
             if(blockState.getCollisionShape(serverLevel, pos).isEmpty()) {
-                targetLoc = targetLoc.subtract(0, 1, 0);
+                targetLoc = targetLoc.subtract(0, 24, 0);
             } else {
-                targetLoc = targetLoc.add(0, 1, 0);
+                targetLoc = targetLoc.add(0, 24, 0);
                 break;
             }
         }
@@ -70,7 +68,7 @@ public class PureWhiteLightAbility extends Ability {
         AtomicDouble radius = new AtomicDouble(2);
 
         Vec3 finalTargetLoc = targetLoc;
-        ServerScheduler.scheduleForDuration(29, 2, 110, () -> {
+        ServerScheduler.scheduleForDuration(20, 2, 110, () -> {
             if(BeyonderData.isGriefingEnabled(entity)) {
                 AbilityUtil.getBlocksInSphereRadius(serverLevel, finalTargetLoc, radius.get(), true, true, false).forEach(blockPos -> {
                     if(serverLevel.getBlockState(blockPos).getDestroySpeed(serverLevel, blockPos) >= 0)
@@ -78,7 +76,7 @@ public class PureWhiteLightAbility extends Ability {
                 });
             }
 
-            AbilityUtil.damageNearbyEntities(serverLevel, entity, radius.get(), DamageLookup.lookupDamage(1, .8) * multiplier(entity), finalTargetLoc, true, false, false, 15, ModDamageTypes.source(level, ModDamageTypes.PURIFICATION, entity));
+            AbilityUtil.damageNearbyEntities(serverLevel, entity, radius.get(), DamageLookup.lookupDamage(1, 1.2) * (int) Math.max(multiplier(entity)/4,1), finalTargetLoc, true, false, false, 15, ModDamageTypes.source(level, ModDamageTypes.PURIFICATION, entity));
 
             radius.addAndGet(0.8);
         }, null, (ServerLevel) level, () -> AbilityUtil.getTimeInArea(entity, new Location(entity.position(), level)));
@@ -86,5 +84,7 @@ public class PureWhiteLightAbility extends Ability {
         ServerScheduler.scheduleDelayed(100, () -> {
             NeoForge.EVENT_BUS.post(new AbilityUsedEvent((ServerLevel) level, finalTargetLoc, entity, this, interactionFlags, interactionRadius, interactionCacheTicks));
         }, (ServerLevel) level, () -> AbilityUtil.getTimeInArea(entity, new Location(entity.position(), level)));
+
+        if(entity instanceof Player player) AnimationUtil.playOpenArmAnimation(player);
     }
 }

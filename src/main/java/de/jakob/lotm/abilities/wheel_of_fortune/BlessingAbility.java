@@ -2,6 +2,8 @@ package de.jakob.lotm.abilities.wheel_of_fortune;
 
 import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.abilities.core.AbilityUsedEvent;
+import de.jakob.lotm.attachments.LuckComponent;
+import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.effect.ModEffects;
 import de.jakob.lotm.rendering.effectRendering.EffectManager;
 import de.jakob.lotm.util.helper.AbilityUtil;
@@ -28,6 +30,7 @@ public class BlessingAbility extends Ability {
         postsUsedAbilityEventManually = true;
         interactionRadius = 2;
         canBeCopied = false;
+        canBeShared = false;
     }
 
     @Override
@@ -51,7 +54,7 @@ public class BlessingAbility extends Ability {
             return;
         }
 
-        LivingEntity target = AbilityUtil.getTargetEntity(entity, 20, 2, false, true);
+        LivingEntity target = AbilityUtil.getTargetEntity(entity, (int) (15 * (multiplier(entity) * multiplier(entity))), 2, false, true);
 
         if(target == null) {
             if(entity instanceof ServerPlayer player) {
@@ -68,8 +71,9 @@ public class BlessingAbility extends Ability {
         double eyeHeight = target.getEyeHeight();
         ParticleUtil.spawnParticles(serverLevel, dust, target.position().add(0, eyeHeight / 2, 0), 120, .3, eyeHeight / 2, .3, 0);
 
-        int amplifier = Math.round(multiplier(entity) * 6.25f);
-        target.addEffect(new MobEffectInstance(ModEffects.LUCK, 20 * 60 * 17, amplifier));
+        int amplifier = Math.min(Math.round(multiplier(entity) * 750), 3000);
+        LuckComponent component = target.getData(ModAttachments.LUCK_COMPONENT.get());
+        component.addLuckWithMax(amplifier, 3000);
         NeoForge.EVENT_BUS.post(new AbilityUsedEvent(serverLevel, target.position(), entity, target, this, interactionFlags, interactionRadius, interactionCacheTicks));
     }
 }

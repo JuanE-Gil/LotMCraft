@@ -6,6 +6,7 @@ import de.jakob.lotm.block.ModBlocks;
 import de.jakob.lotm.item.custom.*;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Rarity;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
@@ -27,6 +28,7 @@ public class ModItems {
     public static final DeferredItem<Item> PAPER_FIGURINE_SUBSTITUTE = ITEMS.registerItem("paper_figurine_substitute", Item::new, new Item.Properties().stacksTo(1));
     public static final DeferredItem<Item> MIRROR = ITEMS.registerItem("mirror", Item::new, new Item.Properties().stacksTo(1));
     public static final DeferredItem<Item> BLOOD = ITEMS.registerItem("blood", Item::new, new Item.Properties().stacksTo(1));
+    public static final DeferredItem<Item> STORY_BOOK = ITEMS.registerItem("story_book", StoryBookItem::new, new Item.Properties().stacksTo(1));
 
     public static final Supplier<Item> MARIONETTE_CONTROLLER = ITEMS.register("marionette_controller",
             () -> new MarionetteControllerItem(new Item.Properties().stacksTo(1)));
@@ -78,6 +80,44 @@ public class ModItems {
 
     public static final DeferredItem<BlockItem> MYSTICAL_RING = ITEMS.register("mystical_ring",
             () -> new BlockItem(ModBlocks.MYSTICAL_RING.get(), new Item.Properties())
+    );
+
+    // Uniquenesses (registered, so I can use them in the renderer for the Uniqueness Entity)
+    public static final DeferredItem<Item> RED_PRIEST_UNIQUENESS = ITEMS.register("red_priest_uniqueness",
+            () -> new UniquenessItem(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC), "red_priest")
+    );
+    public static final DeferredItem<Item> TYRANT_UNIQUENESS = ITEMS.register("tyrant_uniqueness",
+            () -> new UniquenessItem(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC), "tyrant")
+    );
+    public static final DeferredItem<Item> SUN_UNIQUENESS = ITEMS.register("sun_uniqueness",
+            () -> new UniquenessItem(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC), "sun")
+    );
+    public static final DeferredItem<Item> FOOL_UNIQUENESS = ITEMS.register("fool_uniqueness",
+            () -> new UniquenessItem(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC), "fool")
+    );
+    public static final DeferredItem<Item> ERROR_UNIQUENESS = ITEMS.register("error_uniqueness",
+            () -> new UniquenessItem(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC), "error")
+    );
+    public static final DeferredItem<Item> VISIONARY_UNIQUENESS = ITEMS.register("visionary_uniqueness",
+            () -> new UniquenessItem(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC), "visionary")
+    );
+    public static final DeferredItem<Item> DOOR_UNIQUENESS = ITEMS.register("door_uniqueness",
+            () -> new UniquenessItem(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC), "door")
+    );
+    public static final DeferredItem<Item> DARKNESS_UNIQUENESS = ITEMS.register("darkness_uniqueness",
+            () -> new UniquenessItem(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC), "darkness")
+    );
+    public static final DeferredItem<Item> WHEEL_OF_FORTUNE_UNIQUENESS = ITEMS.register("wheel_of_fortune_uniqueness",
+            () -> new UniquenessItem(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC), "wheel_of_fortune")
+    );
+    public static final DeferredItem<Item> ABYSS_UNIQUENESS = ITEMS.register("abyss_uniqueness",
+            () -> new UniquenessItem(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC), "abyss")
+    );
+    public static final DeferredItem<Item> MOTHER_UNIQUENESS = ITEMS.register("mother_uniqueness",
+            () -> new UniquenessItem(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC), "mother")
+    );
+    public static final DeferredItem<Item> DEMONESS_UNIQUENESS = ITEMS.register("demoness_uniqueness",
+            () -> new UniquenessItem(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC), "demoness")
     );
 
     public static PotionIngredient selectRandomIngredient(List<PotionIngredient> ingredients, Random random) {

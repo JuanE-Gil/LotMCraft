@@ -1,6 +1,7 @@
 package de.jakob.lotm.abilities.core;
 
 import de.jakob.lotm.LOTMCraft;
+import de.jakob.lotm.abilities.error.ParasitationAbility;
 import de.jakob.lotm.attachments.AbilityCooldownComponent;
 import de.jakob.lotm.attachments.DisabledAbilitiesComponent;
 import de.jakob.lotm.attachments.ModAttachments;
@@ -8,6 +9,7 @@ import de.jakob.lotm.gamerule.ModGameRules;
 import de.jakob.lotm.network.PacketHandler;
 import de.jakob.lotm.network.packets.toClient.UseAbilityPacket;
 import de.jakob.lotm.util.BeyonderData;
+import de.jakob.lotm.util.helper.AbilityUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -22,8 +24,10 @@ import org.jetbrains.annotations.Nullable;
 import de.jakob.lotm.abilities.black_emperor.MausoleumDomainAbility;
 import de.jakob.lotm.util.helper.AbilityUtil;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
 
 public abstract class Ability {
 
@@ -47,6 +51,7 @@ public abstract class Ability {
     public boolean cannotBeStolen = false;
     public boolean canBeUsedInArtifact = true;
     public boolean canBeReplicated = true;
+    public boolean canBeShared = true;
 
     public boolean canAlwaysBeUsed = false;
 
@@ -57,10 +62,15 @@ public abstract class Ability {
     // Utility
     protected final Random random = new Random();
 
+    //Scaling
+    public HashMap<UUID, Integer> artifactScalingMap;
+    protected boolean autoClear = true;
+
     public Ability(String id, float cooldown, String... interactionFlags) {
         this.id = id;
         this.cooldown = Math.round(cooldown * 20);
         this.interactionFlags = interactionFlags;
+        this.artifactScalingMap = new HashMap<>(60);
     }
 
     public void useAbility(ServerLevel serverLevel, LivingEntity entity, boolean consumeSpirituality, boolean hasToHaveAbility, boolean hasToMeetRequirements) {
@@ -99,15 +109,21 @@ public abstract class Ability {
         AbilityCooldownComponent component = newUser.getData(ModAttachments.COOLDOWN_COMPONENT);
         component.setCooldown(id, cooldown);
 
+        if(AbilityUtil.hasArtifactScaling(entity)){
+            artifactScalingMap.put(entity.getUUID(), AbilityUtil.getArtifactScalingSeq(entity));
+            AbilityUtil.removeArtifactScaling(entity);
+        }
+
         // Use ability client and server sided
         onAbilityUse(serverLevel, newUser);
-        PacketHandler.sendToAllPlayersInSameLevel(new UseAbilityPacket(getId(), newUser.getId()), serverLevel);
+        if(entity instanceof ServerPlayer player) PacketHandler.sendToPlayer(player, new UseAbilityPacket(getId(), newUser.getId()));
+
+        if(this.autoClear){
+            clearArtifactScaling(entity);
+        }
 
         // Track ability use for Recording/Replicating detection
         AbilityUseTracker.trackUse(newUser, this, newUser.position(), serverLevel);
-
-        if(entity instanceof ServerPlayer player)
-            LOTMCraft.LOGGER.info("{} used {} on {}", player.getName().toString(), this.id, player.position());
 
         if(!postsUsedAbilityEventManually && !(this instanceof ToggleAbility)) {
             NeoForge.EVENT_BUS.post(new AbilityUsedEvent(serverLevel, newUser.position(), newUser, this, interactionFlags, interactionRadius, interactionCacheTicks));
@@ -118,14 +134,18 @@ public abstract class Ability {
         useAbility(serverLevel, entity, true, true, true);
     }
 
+    public void clearArtifactScaling(LivingEntity entity){
+        artifactScalingMap.remove(entity.getUUID());
+    }
+
     public abstract void onAbilityUse(Level level, LivingEntity entity);
 
     public abstract Map<String, Integer> getRequirements();
 
     protected abstract float getSpiritualityCost();
 
-    protected float multiplier(LivingEntity entity) {
-        return (float) BeyonderData.getMultiplier(entity);
+    public float multiplier(LivingEntity entity) {
+        return (float) AbilityUtil.getMultiplierWithArt(entity, this);
     }
 
     public void onHold(Level level, LivingEntity entity) {
@@ -147,10 +167,35 @@ public abstract class Ability {
             return getRequirements().values().stream().anyMatch(reqSeq -> reqSeq >= sequence);
         }
 
-        if(!getRequirements().containsKey(pathway)) return false;
-        if(getRequirements().get(pathway) < sequence) return false;
+        // Check current pathway
+        if(getRequirements().containsKey(pathway) && getRequirements().get(pathway) >= sequence) {
+            int reqSeq = getRequirements().get(pathway);
+            // Switched pathway players only access seq 9-5 abilities once they have a char stack at seq 4 or stronger
+            if (BeyonderData.hasSwitchedPathway(entity) && reqSeq > 4) {
+                int[] stacks = BeyonderData.getCharStacks(entity);
+                boolean hasStack = false;
+                for (int i = 1; i <= 4; i++) { if (stacks[i] > 0) { hasStack = true; break; } }
+                if (!hasStack) return false;
+            }
+            return true;
+        }
 
-        return true;
+        // Check historical pathways from domain switches — abilities from the previous pathway are
+        // accessible only down to the switch point (e.g. switched at seq 4, so only fool seq 5–9 carry over)
+        if(!entity.level().isClientSide()) {
+            String[] pathwayHistory = BeyonderData.getPathwayHistory(entity);
+            if(pathwayHistory.length < 10) return false;
+            for (int seq = sequence + 1; seq <= 9; seq++) {
+                String historicalPathway = pathwayHistory[seq];
+                if (historicalPathway != null
+                        && getRequirements().containsKey(historicalPathway)
+                        && getRequirements().get(historicalPathway) >= seq) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     public boolean canUse(LivingEntity entity) {
@@ -175,7 +220,7 @@ public abstract class Ability {
 
         if(!(entity instanceof Player) && !canBeUsedByNPC) return false;
 
-        if(entity instanceof Player player && player.isSpectator()) return false;
+        if(entity instanceof Player player && player.isSpectator() && !ParasitationAbility.isConcealed(player.getUUID())) return false;
 
         DisabledAbilitiesComponent disabledComponent = entity.getData(ModAttachments.DISABLED_ABILITIES_COMPONENT);
         if((disabledComponent.isAbilityUsageDisabled() || disabledComponent.isSpecificAbilityDisabled(this.getId())) && !this.canAlwaysBeUsed) return false;
@@ -204,12 +249,16 @@ public abstract class Ability {
 
         int requiredSequence = getRequirements().get(BeyonderData.getPathway(entity));
 
-        // If user's sequence is numerically higher (weaker) → cannot digest at all
         if (sequence > requiredSequence) {
             return 0f;
         }
 
-        return (1f / (100f * Math.max(.5f, ((10 - sequence) * .5f)))) * (entity.level().getGameRules().getInt(ModGameRules.DIGESTION_RATE) / 100f);
+        float cooldownMultiplier = Math.clamp(((float) cooldown) / (20 * 7), .1f, 2.25f);
+
+        float rawDigestion = (1f / (100f * Math.max(.5f, ((10 - requiredSequence) * .5f)))) * cooldownMultiplier;
+        float digestion = rawDigestion * (entity.level().getGameRules().getInt(ModGameRules.DIGESTION_RATE) / 100f);
+
+        return digestion;
     }
 
     public ResourceLocation getTextureLocation() {

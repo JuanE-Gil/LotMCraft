@@ -1,7 +1,11 @@
 package de.jakob.lotm.abilities.black_emperor.passives;
 
 import de.jakob.lotm.abilities.PhysicalEnhancementsAbility;
+import de.jakob.lotm.attachments.ModAttachments;
+import de.jakob.lotm.attachments.SanityComponent;
 import de.jakob.lotm.util.BeyonderData;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
 
 import java.util.HashMap;
 import java.util.List;
@@ -11,6 +15,27 @@ public class PhysicalEnhancementsBlackEmperorAbility extends PhysicalEnhancement
 
     public PhysicalEnhancementsBlackEmperorAbility(Properties properties) {
         super(properties);
+    }
+
+    @Override
+    public void tick(Level level, LivingEntity entity) {
+        super.tick(level, entity);
+
+        if (level.isClientSide() || entity.tickCount % 20 != 0) return;
+
+        int seq = BeyonderData.getSequence(entity);
+        if (seq > 8 || seq < 0) return;
+
+        SanityComponent sanity = entity.getData(ModAttachments.SANITY_COMPONENT);
+        float current = sanity.getSanity();
+        if (current >= 1.0f) return;
+
+        // seq 8 = 10% resistance, seq 0 = 20% resistance
+        float resistance = 0.10f + ((8 - seq) * 0.0125f);
+        // The event handler drains at least 0.00025f/s when sanity is below 1.0;
+        // restore the portion that would have been resisted.
+        float compensation = 0.00025f * resistance;
+        sanity.increaseSanityAndSync(compensation, entity);
     }
 
     @Override

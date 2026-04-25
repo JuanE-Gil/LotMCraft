@@ -26,6 +26,7 @@ public class IlluminateAbility extends Ability {
         canBeUsedByNPC = false;
         postsUsedAbilityEventManually = true;
         interactionCacheTicks = 20 * 20;
+        interactionRadius = 5;
     }
 
     @Override

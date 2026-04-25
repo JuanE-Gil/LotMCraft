@@ -8,6 +8,7 @@ import de.jakob.lotm.item.ModItems;
 import de.jakob.lotm.network.PacketHandler;
 import de.jakob.lotm.network.packets.toServer.InventoryOpenedPacket;
 import de.jakob.lotm.util.BeyonderData;
+import de.jakob.lotm.util.pathways.PathwayInfos;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
@@ -43,6 +44,10 @@ public class ClientEvents {
         LOTMCraft.nextArtifactAbilityKey = new KeyMapping("key.beyonders.next_artifact_ability", GLFW.GLFW_KEY_P, "key.categories.beyonders");
         LOTMCraft.returnToMainBody = new KeyMapping("key.beyonders.return_to_main_body", GLFW.GLFW_KEY_P, "key.categories.beyonders");
         LOTMCraft.openArtifactWheel = new KeyMapping("key.beyonders.openArtifactWheel", GLFW.GLFW_KEY_L, "key.categories.beyonders");
+        LOTMCraft.openSharedAbilityWheelKey = new KeyMapping("key.beyonders.open_shared_ability_wheel", GLFW.GLFW_KEY_H, "key.categories.beyonders");
+        LOTMCraft.useSharedAbilityKey = new KeyMapping("key.beyonders.use_shared_ability", GLFW.GLFW_KEY_N, "key.categories.beyonders");
+        LOTMCraft.nextSharedAbilityKey = new KeyMapping("key.beyonders.next_shared_ability", GLFW.GLFW_KEY_PERIOD, "key.categories.beyonders");
+        LOTMCraft.previousSharedAbilityKey = new KeyMapping("key.beyonders.previous_shared_ability", GLFW.GLFW_KEY_COMMA, "key.categories.beyonders");
 
 
         event.register(LOTMCraft.pathwayInfosKey);
@@ -62,6 +67,10 @@ public class ClientEvents {
         event.register(LOTMCraft.returnToMainBody);
         event.register(LOTMCraft.openArtifactWheel);
         event.register(LOTMCraft.nextArtifactAbilityKey);
+        event.register(LOTMCraft.openSharedAbilityWheelKey);
+        event.register(LOTMCraft.useSharedAbilityKey);
+        event.register(LOTMCraft.nextSharedAbilityKey);
+        event.register(LOTMCraft.previousSharedAbilityKey);
     }
 
     @SubscribeEvent
@@ -83,7 +92,12 @@ public class ClientEvents {
                             String pathway = data.pathway();
                             return BeyonderData.pathwayInfos.get(pathway).color();
                         }
-                        return 0xFFFFFFFF; // white = no tint
+                        // return random color
+                        int randomColor = BeyonderData.pathwayInfos.values().stream()
+                                .map(PathwayInfos::color)
+                                .findAny()
+                                .orElse(0xFFFFFF);
+                        return randomColor;
                     }
                     return -1; // -1 = no tint for this layer
                 },

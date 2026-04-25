@@ -37,6 +37,7 @@ public class MiracleCreationAbility extends SelectableAbility {
     public MiracleCreationAbility(String id) {
         super(id, 5);
         canBeCopied = false;
+        canBeShared = false;
     }
 
     @Override
@@ -46,7 +47,7 @@ public class MiracleCreationAbility extends SelectableAbility {
 
     @Override
     protected float getSpiritualityCost() {
-        return 1200;
+        return 7000;
     }
 
     @Override

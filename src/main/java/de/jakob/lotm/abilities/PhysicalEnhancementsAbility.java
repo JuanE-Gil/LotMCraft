@@ -3,10 +3,8 @@ package de.jakob.lotm.abilities;
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.attachments.ControllingDataComponent;
 import de.jakob.lotm.attachments.ModAttachments;
-import de.jakob.lotm.effect.ModEffects;
 import de.jakob.lotm.gamerule.ModGameRules;
 import de.jakob.lotm.util.BeyonderData;
-import de.jakob.lotm.util.beyonderMap.CharacteristicStack;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -24,6 +22,7 @@ import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
+import net.neoforged.neoforge.event.entity.living.LivingHealEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 
 import java.util.*;
@@ -46,7 +45,16 @@ public abstract class PhysicalEnhancementsAbility extends PassiveAbilityItem {
     private static final Map<UUID, Map<EnhancementType, Integer>> entityEnhancements = new ConcurrentHashMap<>();
     private static final Map<UUID, Map<String, TemporaryEnhancement>> temporaryEnhancements = new ConcurrentHashMap<>();
     private static final Map<UUID, Map<String, EnhancementBoost>> enhancementBoosts = new ConcurrentHashMap<>();
-    private static final Map<UUID, Long> reducedRegen = new ConcurrentHashMap<>();
+    public static final Map<UUID, Long> reducedRegen = new ConcurrentHashMap<>();
+
+    /** Suppresses passive regen for the given entity for the specified duration in milliseconds. */
+    public static void suppressRegen(LivingEntity entity, long durationMs) {
+        long expiry = System.currentTimeMillis() + durationMs;
+        if (!reducedRegen.containsKey(entity.getUUID()) || reducedRegen.get(entity.getUUID()) < expiry) {
+            reducedRegen.put(entity.getUUID(), expiry);
+        }
+        entity.removeEffect(MobEffects.REGENERATION);
+    }
 
     // FIX 2: Track the last known sequence level per entity so that attribute modifiers
     // (health, speed, strength, etc.) are only removed/re-added when the sequence actually
@@ -94,7 +102,6 @@ public abstract class PhysicalEnhancementsAbility extends PassiveAbilityItem {
 
         applyNightVision(entity, enhancements, temps);
         applyConduit(entity, enhancements, temps);
-        applyLuck(entity, enhancements, temps, boosts);
         applyDolphinsGrace(entity, enhancements, temps);
         applySaturation(entity, enhancements, temps);
         applyWaterBreathing(entity, enhancements, temps);
@@ -119,13 +126,13 @@ public abstract class PhysicalEnhancementsAbility extends PassiveAbilityItem {
         List<PhysicalEnhancement> currentEnhancements = getEnhancementsForSequence(sequenceLevel, entity);
 
         if(entity instanceof ServerPlayer player){
-            var dataOp = BeyonderData.beyonderMap.get(entity);
+            var dataOp = BeyonderData.playerMap.get(entity);
 
             if(dataOp.isPresent()) {
                 var data = dataOp.get();
 
                 ControllingDataComponent controllingData = player.getData(ModAttachments.CONTROLLING_DATA);
-                if (data.charStack().isUsed() && controllingData.getTargetUUID() == null) {
+                if (Arrays.stream(data.charStack()).anyMatch(i -> i > 0) && controllingData.getTargetUUID() == null && !controllingData.isControlling()) {
 
                     if (sequenceLevel < 9) {
                         currentEnhancements = currentEnhancements.stream()
@@ -153,19 +160,19 @@ public abstract class PhysicalEnhancementsAbility extends PassiveAbilityItem {
         return BeyonderData.getSequence(entity);
     }
 
-    protected int recalculateHealthLevelWithStacks(int seq, int prevLevel, CharacteristicStack stack){
+    protected int recalculateHealthLevelWithStacks(int seq, int prevLevel, int[] stack){
         int result = prevLevel;
 
         for(int i = 9; i >= seq; i--){
-            int buff = stack.get(i);
+            int buff = stack[i];
+
+            buff = (i == 1 && buff >= 0) ? buff : (buff > 0) ? 1 : 0;
 
             switch (i){
                 case 8 -> result += buff;
                 case 7 -> result += buff * 2;
-                case 6 -> result += buff * 3;
-                case 5 -> result += buff * 3;
-                case 4 -> result += buff * 5;
-                case 3 -> result += buff * 5;
+                case 6, 5 -> result += buff * 3;
+                case 4, 3 -> result += buff * 5;
                 case 2 -> result += buff * 7;
                 case 1 -> result += buff * 7;
             }
@@ -221,37 +228,6 @@ public abstract class PhysicalEnhancementsAbility extends PassiveAbilityItem {
         if (hasFireRes) {
             entity.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 300, 0, false, false, false));
         }
-    }
-
-    private void applyLuck(LivingEntity entity,
-                           Map<EnhancementType, Integer> enhancements,
-                           Map<String, TemporaryEnhancement> temps,
-                           Map<String, EnhancementBoost> boosts) {
-        int luckLevel = 0;
-
-        if (enhancements != null && enhancements.containsKey(EnhancementType.LUCK)) {
-            luckLevel = enhancements.get(EnhancementType.LUCK);
-        }
-
-        if (temps != null) {
-            for (TemporaryEnhancement temp : temps.values()) {
-                if (temp.enhancement.getType() == EnhancementType.LUCK) {
-                    luckLevel += temp.enhancement.getLevel();
-                }
-            }
-        }
-
-        if (boosts != null) {
-            for (EnhancementBoost boost : boosts.values()) {
-                if (boost.enhancement.getType() == EnhancementType.LUCK) {
-                    luckLevel += boost.amount;
-                }
-            }
-        }
-
-        if (luckLevel <= 0) return;
-
-        entity.addEffect(new MobEffectInstance(ModEffects.LUCK, 300, luckLevel - 1, false, false, false));
     }
 
     private void applyConduit(LivingEntity entity,
@@ -615,6 +591,18 @@ public abstract class PhysicalEnhancementsAbility extends PassiveAbilityItem {
         }
 
         @SubscribeEvent
+        public static void onLivingHeal(LivingHealEvent event) {
+            UUID uuid = event.getEntity().getUUID();
+            Long expiry = reducedRegen.get(uuid);
+            if (expiry == null) return;
+            if (System.currentTimeMillis() >= expiry) {
+                reducedRegen.remove(uuid);
+                return;
+            }
+            event.setCanceled(true);
+        }
+
+        @SubscribeEvent
         public static void onLivingDamagePost(LivingDamageEvent.Post event) {
             if (!(event.getEntity().level() instanceof ServerLevel serverLevel)) return;
             if (!serverLevel.getGameRules().getBoolean(ModGameRules.REDUCE_REGEN_IN_BEYONDER_FIGHT)) return;
@@ -674,6 +662,7 @@ public abstract class PhysicalEnhancementsAbility extends PassiveAbilityItem {
         STRENGTH(Attributes.ATTACK_DAMAGE, AttributeModifier.Operation.ADD_VALUE, 3.0),
         SPEED(Attributes.MOVEMENT_SPEED, AttributeModifier.Operation.ADD_VALUE, 0.02),
         HEALTH(Attributes.MAX_HEALTH, AttributeModifier.Operation.ADD_VALUE, 4.0),
+        MINING_EFFICIENCY(Attributes.MINING_EFFICIENCY,AttributeModifier.Operation.ADD_VALUE,1.0),
         KNOCKBACK_RESISTANCE(Attributes.KNOCKBACK_RESISTANCE, AttributeModifier.Operation.ADD_VALUE, 0.05),
         ATTACK_SPEED(Attributes.ATTACK_SPEED, AttributeModifier.Operation.ADD_MULTIPLIED_BASE, 0.05),
         RESISTANCE(null, null, 0),
@@ -682,7 +671,8 @@ public abstract class PhysicalEnhancementsAbility extends PassiveAbilityItem {
         LUCK(null, null, 0),
         REGENERATION(null, null, 0),
         CONDUIT(null, null, 0),
-        DOLPHINS_GRACE(null, null, 0),
+        DOLPHINS_GRACE(Attributes.WATER_MOVEMENT_EFFICIENCY, AttributeModifier.Operation.ADD_VALUE, 1),
+        OXYGEN_BONUS(Attributes.OXYGEN_BONUS, AttributeModifier.Operation.ADD_VALUE, 1),
         UNDERWATER_BREATHING(null, null, 0),
         SATURATION(null, null, 0);
 

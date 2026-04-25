@@ -16,9 +16,10 @@ import java.util.Map;
 
 public class SpearOfLightAbility extends Ability {
     public SpearOfLightAbility(String id) {
-        super(id, 1, "purification", "light_source", "light_strong", "light_weak");
+        super(id, 2.5f, "purification", "light_source", "light_strong", "light_weak");
         postsUsedAbilityEventManually = true;
         canBeCopied = false;
+        canBeShared = false;
     }
 
     @Override
@@ -28,7 +29,7 @@ public class SpearOfLightAbility extends Ability {
 
     @Override
     protected float getSpiritualityCost() {
-        return 150;
+        return 1250;
     }
 
     @Override
@@ -37,13 +38,13 @@ public class SpearOfLightAbility extends Ability {
             return;
 
         Vec3 startPos = VectorUtil.getRelativePosition(entity.getEyePosition().add(entity.getLookAngle().normalize()), entity.getLookAngle().normalize(), 0, random.nextDouble(4.5f, 8f), random.nextDouble(-.1, .6));
-        Vec3 direction = AbilityUtil.getTargetLocation(entity, 50, 1.4f).subtract(startPos).normalize();
+        Vec3 direction = AbilityUtil.getTargetLocation(entity, 50* (int) Math.max(multiplier(entity)/4,1), 1.4f).subtract(startPos).normalize();
 
         level.playSound(null, startPos.x, startPos.y, startPos.z, SoundEvents.BEACON_ACTIVATE, entity.getSoundSource(), 1.0f, 1.0f);
 
-        SpearOfLightProjectileEntity spear = new SpearOfLightProjectileEntity(level, entity, DamageLookup.lookupDamage(2, .75) * multiplier(entity), BeyonderData.isGriefingEnabled(entity), this);
+        SpearOfLightProjectileEntity spear = new SpearOfLightProjectileEntity(level, entity, DamageLookup.lookupDamage(2, .75) * (int) Math.max(multiplier(entity)/4,1), BeyonderData.isGriefingEnabled(entity), this);
         spear.setPos(startPos.x, startPos.y, startPos.z); // Set initial position
-        spear.shoot(direction.x, direction.y, direction.z, 3f, 0);
+        spear.shoot(direction.x, direction.y, direction.z, 9f* (int) Math.max(multiplier(entity)/4,1), 0);
         level.addFreshEntity(spear);
     }
 }
