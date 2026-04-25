@@ -172,7 +172,7 @@ public class BeyonderData {
                 playerMap.removeHonorificName(player);
 
             if(clearCharStack) playerMap.clearStack(player);
-            else playerMap.setStack(player, sequence, sequence);
+            else if(sequence != LOTMCraft.NON_BEYONDER_SEQ) playerMap.setStack(player, sequence, sequence);
         }
 
         if(Objects.equals(sequence, LOTMCraft.NON_BEYONDER_SEQ)
