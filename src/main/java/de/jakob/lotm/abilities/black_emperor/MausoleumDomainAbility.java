@@ -1,7 +1,8 @@
 package de.jakob.lotm.abilities.black_emperor;
 
 import de.jakob.lotm.LOTMCraft;
-import de.jakob.lotm.abilities.core.SelectableAbility;
+import de.jakob.lotm.abilities.core.Ability;
+import de.jakob.lotm.abilities.core.ToggleAbility;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import net.minecraft.core.BlockPos;
@@ -16,8 +17,11 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
@@ -31,16 +35,16 @@ import java.util.Set;
 import java.util.UUID;
 
 @EventBusSubscriber(modid = LOTMCraft.MOD_ID)
-public final class MausoleumDomainAbility extends SelectableAbility {
+public final class MausoleumDomainAbility extends Ability {
 
     private static final ResourceKey<Level> MAUSOLEUM_DIMENSION = ResourceKey.create(
             Registries.DIMENSION,
             ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "mausoleum")
     );
 
-    private static final BlockPos MAUSOLEUM_SPAWN = new BlockPos(0, 77, 0);
-    private static final int ROOM_HALF_XZ = 10;
-    private static final int ROOM_HALF_Y = 6;
+    private static final BlockPos MAUSOLEUM_SPAWN = new BlockPos(75, 1, 75);
+    private static final int ROOM_HALF_XZ = 75;
+    private static final int ROOM_HALF_Y = 32;
     private static final double CAST_RANGE = 25.0D;
 
     private static final Map<BlockPos, BlockState> ROOM_SNAPSHOT = new HashMap<>();
@@ -72,7 +76,7 @@ public final class MausoleumDomainAbility extends SelectableAbility {
     }
 
     public MausoleumDomainAbility(String id) {
-        super(id, 120.0f);
+        super(id, 1.0f);
         canBeCopied = false;
         canBeReplicated = false;
     }
@@ -84,19 +88,11 @@ public final class MausoleumDomainAbility extends SelectableAbility {
 
     @Override
     public float getSpiritualityCost() {
-        return 2500;
+        return 0.0f;
     }
 
     @Override
-    protected String[] getAbilityNames() {
-        return new String[] {
-                "ability.lotmcraft.black_emperor.mausoleum_domain"
-        };
-    }
-
-    @Override
-    protected void castSelectedAbility(Level level, LivingEntity entity, int abilityIndex) {
-        if (abilityIndex != 0) return;
+    public void onAbilityUse(Level level, LivingEntity entity) {
         if (!(level instanceof ServerLevel serverLevel)) return;
 
         if (!(entity instanceof ServerPlayer caster)) {
@@ -151,12 +147,16 @@ public final class MausoleumDomainAbility extends SelectableAbility {
 
         teleportGroupIntoMausoleum(mausoleum, caster, targets);
 
+        for (ServerPlayer player : targets) {
+            ToggleAbility.cleanUp(mausoleum, player);
+        }
+
         AbilityUtil.sendActionBar(caster,
                 Component.literal("The mausoleum seals shut.").withColor(0xAA77FF));
     }
 
     private void teleportGroupIntoMausoleum(ServerLevel mausoleum, ServerPlayer caster, Set<ServerPlayer> targets) {
-        Vec3 center = new Vec3(0.5D, 77.0D, 0.5D);
+        Vec3 center = new Vec3(75.5D, 14.0D, 75.5D);
 
         int index = 0;
         int total = Math.max(1, targets.size());
@@ -178,6 +178,16 @@ public final class MausoleumDomainAbility extends SelectableAbility {
 
             teleportPlayer(player, mausoleum, destination);
         }
+    }
+
+    private static double findGroundY(ServerLevel level, int x, int z) {
+        for (int y = level.getMinBuildHeight(); y < level.getMaxBuildHeight(); y++) {
+            BlockPos pos = new BlockPos(x, y, z);
+            if (!level.getBlockState(pos).isAir() && level.getBlockState(pos.above()).isAir()) {
+                return y + 1.0D;
+            }
+        }
+        return 1.0D;
     }
 
     private static void teleportPlayer(ServerPlayer player, ServerLevel targetLevel, Vec3 destination) {
@@ -266,14 +276,8 @@ public final class MausoleumDomainAbility extends SelectableAbility {
         }
 
         if (!sp.level().dimension().equals(MAUSOLEUM_DIMENSION)) {
-            Vec3 inside = clampInsideRoom(new Vec3(sp.getX(), sp.getY(), sp.getZ()));
-            teleportPlayer(sp, mausoleum, inside);
+            teleportPlayer(sp, mausoleum, new Vec3(75.5D, findGroundY(mausoleum, 75, 75), 75.5D));
             return;
-        }
-
-        if (!isInsideMausoleum(sp.position())) {
-            Vec3 inside = clampInsideRoom(sp.position());
-            teleportPlayer(sp, mausoleum, inside);
         }
 
         if (mausoleum.getGameTime() % 20 == 0) {
@@ -317,26 +321,58 @@ public final class MausoleumDomainAbility extends SelectableAbility {
         return 0.5f + Math.max(0, playerSeq - session.casterSeq) * 0.15f;
     }
 
+    // Structure is 150x61x150 placed at (0,0,0)
+    private static final int STRUCT_WIDTH = 150;
+    private static final int STRUCT_HEIGHT = 61;
+    private static final int STRUCT_LENGTH = 150;
+
     private static boolean isInsideMausoleum(Vec3 pos) {
-        double dx = Math.abs(pos.x - 0.5D);
-        double dy = Math.abs(pos.y - 77.0D);
-        double dz = Math.abs(pos.z - 0.5D);
-        return dx <= ROOM_HALF_XZ && dy <= ROOM_HALF_Y && dz <= ROOM_HALF_XZ;
+        return pos.x >= 1 && pos.x <= STRUCT_WIDTH - 1
+            && pos.y >= 1 && pos.y <= STRUCT_HEIGHT - 1
+            && pos.z >= 1 && pos.z <= STRUCT_LENGTH - 1;
     }
 
     private static Vec3 clampInsideRoom(Vec3 pos) {
-        double x = Mth.clamp(pos.x, -ROOM_HALF_XZ + 1.0D, ROOM_HALF_XZ - 1.0D);
-        double y = Mth.clamp(pos.y, 77.0D - ROOM_HALF_Y + 1.0D, 77.0D + ROOM_HALF_Y - 1.0D);
-        double z = Mth.clamp(pos.z, -ROOM_HALF_XZ + 1.0D, ROOM_HALF_XZ - 1.0D);
-        return new Vec3(x + 0.5D, y, z + 0.5D);
+        double x = Mth.clamp(pos.x, 1.0D, STRUCT_WIDTH - 1.0D);
+        double y = Mth.clamp(pos.y, 1.0D, STRUCT_HEIGHT - 1.0D);
+        double z = Mth.clamp(pos.z, 1.0D, STRUCT_LENGTH - 1.0D);
+        return new Vec3(x, pos.y, z);
+    }
+
+    private static final ResourceLocation STRUCTURE_ID =
+            ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "mausoleum_room");
+    public static void prePlaceStructure(net.minecraft.server.MinecraftServer server) {
+        ServerLevel mausoleum = server.getLevel(MAUSOLEUM_DIMENSION);
+        if (mausoleum == null) {
+            LOTMCraft.LOGGER.warn("Mausoleum dimension not found on server start.");
+            return;
+        }
+
+        // Check if structure is already placed by testing a known block
+        BlockState check = mausoleum.getBlockState(new BlockPos(75, 0, 75));
+        if (!check.isAir()) {
+            LOTMCraft.LOGGER.info("Mausoleum structure already present, skipping placement.");
+            return;
+        }
+
+        try {
+            StructureTemplate structure = server.getStructureManager().getOrCreate(STRUCTURE_ID);
+            StructurePlaceSettings settings = new StructurePlaceSettings();
+            structure.placeInWorld(mausoleum, BlockPos.ZERO, BlockPos.ZERO, settings, mausoleum.random, 2);
+            LOTMCraft.LOGGER.info("Mausoleum structure pre-placed, saving chunks...");
+            mausoleum.save(null, true, false);
+            LOTMCraft.LOGGER.info("Mausoleum chunks saved.");
+        } catch (Exception e) {
+            LOTMCraft.LOGGER.error("Failed to pre-place mausoleum structure: {}", e.getMessage());
+        }
     }
 
     private static void ensureRoomSnapshot(ServerLevel mausoleum) {
         if (!ROOM_SNAPSHOT.isEmpty()) return;
 
-        for (int x = MAUSOLEUM_SPAWN.getX() - ROOM_HALF_XZ; x <= MAUSOLEUM_SPAWN.getX() + ROOM_HALF_XZ; x++) {
-            for (int y = MAUSOLEUM_SPAWN.getY() - ROOM_HALF_Y; y <= MAUSOLEUM_SPAWN.getY() + ROOM_HALF_Y; y++) {
-                for (int z = MAUSOLEUM_SPAWN.getZ() - ROOM_HALF_XZ; z <= MAUSOLEUM_SPAWN.getZ() + ROOM_HALF_XZ; z++) {
+        for (int x = 0; x < STRUCT_WIDTH; x++) {
+            for (int y = 0; y < STRUCT_HEIGHT; y++) {
+                for (int z = 0; z < STRUCT_LENGTH; z++) {
                     BlockPos pos = new BlockPos(x, y, z);
                     ROOM_SNAPSHOT.put(pos, mausoleum.getBlockState(pos));
                 }
