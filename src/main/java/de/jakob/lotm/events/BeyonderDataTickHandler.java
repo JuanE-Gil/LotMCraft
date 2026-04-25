@@ -7,10 +7,13 @@ import de.jakob.lotm.abilities.PhysicalEnhancementsAbility;
 import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.abilities.core.ToggleAbility;
 import de.jakob.lotm.abilities.door.passives.VoidImmunityAbility;
+import de.jakob.lotm.abilities.visionary.PsychologicalInvisibilityAbility;
 import de.jakob.lotm.abilities.wheel_of_fortune.passives.PassiveLuckAbility;
 import de.jakob.lotm.attachments.*;
 import de.jakob.lotm.effect.FoolingEffect;
 import de.jakob.lotm.effect.ModEffects;
+import de.jakob.lotm.util.helper.AbilityUtil;
+import de.jakob.lotm.util.helper.AllyUtil;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import de.jakob.lotm.item.ModItems;
@@ -88,6 +91,26 @@ public class BeyonderDataTickHandler {
         if(disabledFlightComponent.getCooldownTicks() > 0) {
             disabledFlightComponent.setCooldownTicks(disabledFlightComponent.getCooldownTicks() - 1);
         }
+
+        //seq 0 rule - do not look directly at god
+        var target = AbilityUtil.getTargetEntity(livingEntity, 100, 2f, true, true);
+        if(target != null && BeyonderData.isBeyonder(target)){
+            int targetSeq = BeyonderData.getSequence(target);
+            int entitySeq = BeyonderData.getSequence(livingEntity);
+            boolean areAllies = AllyUtil.areAllies(livingEntity, target);
+
+            if(!target.hasEffect(MobEffects.INVISIBILITY) &&
+                    !PsychologicalInvisibilityAbility.finalInvisiblePlayers.containsKey(target.getUUID())) {
+
+                if (targetSeq == 0) {
+                    if (entitySeq > 0 && !areAllies) {
+                        livingEntity.getData(ModAttachments.SANITY_COMPONENT.get())
+                                .decreaseSanityWithSequenceDifference(0.04168f, livingEntity, targetSeq, entitySeq);
+                    }
+                }
+            }
+        }
+
 
         // Tick Fooling attachment — re-apply a 2-tick cosmetic effect each tick so the HUD always shows it
         if (!livingEntity.level().isClientSide) {
