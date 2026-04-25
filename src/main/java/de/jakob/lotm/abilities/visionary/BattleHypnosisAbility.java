@@ -5,6 +5,7 @@ import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.abilities.core.SelectableAbility;
 import de.jakob.lotm.abilities.core.interaction.InteractionHandler;
 import de.jakob.lotm.abilities.demoness.CharmAbility;
+import de.jakob.lotm.abilities.visionary.passives.MetaAwarenessAbility;
 import de.jakob.lotm.attachments.DisabledAbilitiesComponent;
 import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.network.PacketHandler;
@@ -33,7 +34,7 @@ import java.util.UUID;
 
 public class BattleHypnosisAbility extends SelectableAbility {
     public BattleHypnosisAbility(String id) {
-        super(id, 2);
+        super(id, 4);
     }
 
     @Override
@@ -43,7 +44,7 @@ public class BattleHypnosisAbility extends SelectableAbility {
 
     @Override
     public float getSpiritualityCost() {
-        return 150;
+        return 250;
     }
 
     private final DustParticleOptions dust = new DustParticleOptions(
@@ -70,7 +71,7 @@ public class BattleHypnosisAbility extends SelectableAbility {
     }
 
     private void single(ServerLevel level, LivingEntity entity){
-        LivingEntity target = AbilityUtil.getTargetEntity(entity, 20, 2);
+        LivingEntity target = AbilityUtil.getTargetEntity(entity, 20* (int) Math.max(multiplier(entity)/4,1), 2);
 
         if(target == null) {
             if(entity instanceof ServerPlayer player) {
@@ -84,6 +85,16 @@ public class BattleHypnosisAbility extends SelectableAbility {
         UUID charmCasterUUID = CharmAbility.getCharmed().get(target.getUUID());
 
         int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+        int targetSeq = BeyonderData.getSequence(target);
+        if(BeyonderData.getPathway(target).equals("visionary") && targetSeq < entitySeq){
+            AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.dream_traversal.failed").withColor(0xFFff124d));
+
+            if(targetSeq <= 1 && target instanceof ServerPlayer targetPlayer && entity instanceof ServerPlayer entityPlayer){
+                MetaAwarenessAbility.onDivined(entityPlayer, targetPlayer);
+            }
+
+            return;
+        }
 
         if(charmCasterUUID != null) {
             Entity charmCasterEntity = ((ServerLevel) level).getEntity(charmCasterUUID);
@@ -108,6 +119,16 @@ public class BattleHypnosisAbility extends SelectableAbility {
             UUID charmCasterUUID = CharmAbility.getCharmed().get(target.getUUID());
 
             int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+            int targetSeq = BeyonderData.getSequence(target);
+            if(BeyonderData.getPathway(target).equals("visionary") && targetSeq < entitySeq){
+                AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.dream_traversal.failed").withColor(0xFFff124d));
+
+                if(targetSeq <= 1 && target instanceof ServerPlayer targetPlayer && entity instanceof ServerPlayer entityPlayer){
+                    MetaAwarenessAbility.onDivined(entityPlayer, targetPlayer);
+                }
+
+                return;
+            }
 
             if (charmCasterUUID != null) {
                 Entity charmCasterEntity = ((ServerLevel) level).getEntity(charmCasterUUID);

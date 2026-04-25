@@ -10,7 +10,12 @@ import de.jakob.lotm.abilities.visionary.prophecy.triggers.context.TriggerContex
 import de.jakob.lotm.abilities.visionary.prophecy.triggers.context.TriggerContextEnum;
 import de.jakob.lotm.abilities.visionary.prophecy.triggers.context.implementations.TriggerPositionContext;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -32,15 +37,31 @@ public class PositionTrigger extends TriggerBase {
 
     @Override
     public boolean checkTrigger(Level level, LivingEntity entity) {
-        if (!(context instanceof TriggerPositionContext)) return true;
+        if (!(context instanceof TriggerPositionContext position)) return true;
+        if (!(entity instanceof ServerPlayer serverPlayer)) return true;
 
+        ResourceLocation id = null;
+        if(!position.dimension.isEmpty()){
+            try {
+                id = ResourceLocation.tryParse(position.dimension);
+            }catch (NullPointerException ignored) {}
+        }
+
+        if(id != null) {
+            ResourceKey<Level> dimension = ResourceKey.create(
+                    Registries.DIMENSION,
+                    id
+            );
+
+            if(serverPlayer.level().dimension() != dimension) return false;
+        }
 
         Vec3 pos = entity.position();
-        Vec3 target = ((TriggerPositionContext) context).pos;
+        Vec3 target = position.pos;
 
         double dist = pos.distanceTo(target);
 
-        if (dist <= 5.0) {
+        if (dist <= position.range) {
             action.action(level, entity);
 
             return true;

@@ -24,6 +24,7 @@ public class AngelFlightAbility extends ToggleAbility {
         this.cannotBeStolen = true;
         this.canBeReplicated = false;
         this.canBeUsedInArtifact = false;
+        this.doesNotIncreaseDigestion = true;
     }
 
     @Override

@@ -3,6 +3,7 @@ package de.jakob.lotm.abilities.death;
 import de.jakob.lotm.abilities.common.DivinationAbility;
 import de.jakob.lotm.abilities.core.SelectableAbility;
 import de.jakob.lotm.abilities.core.interaction.InteractionHandler;
+import de.jakob.lotm.util.PlayerSelectionWorkType;
 import de.jakob.lotm.util.data.Location;
 import de.jakob.lotm.network.PacketHandler;
 import de.jakob.lotm.network.packets.toClient.OpenPlayerDivinationScreenPacket;
@@ -111,7 +112,7 @@ public class SpiritCommunicationAbility extends SelectableAbility {
                 .map(p -> new PlayerInfo(p.getUUID(), p.getGameProfile().getName()))
                 .toList();
 
-        PacketDistributor.sendToPlayer(player, new OpenPlayerDivinationScreenPacket(players));
+        PacketDistributor.sendToPlayer(player, new OpenPlayerDivinationScreenPacket(players, PlayerSelectionWorkType.DIVINATION));
     }
 
     private void structureDivination(Level level, Entity entity) {

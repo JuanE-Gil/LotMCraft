@@ -66,11 +66,9 @@ public class PlacateAbility extends SelectableAbility {
             return;
         if (!(entity instanceof ServerPlayer player)) return;
 
-        var target = AbilityUtil.getTargetEntity(entity, 40, 1f, true, true);
-
         int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
 
-        var targetPlayer = AbilityUtil.getTargetEntity(entity, 40,
+        var targetPlayer = AbilityUtil.getTargetEntity(entity, 40* (int) Math.max(multiplier(entity)/4,1),
                 1f, true, true) == null ?
                 entity :  AbilityUtil.getTargetEntity(
                         entity, 40, 1f, true, true);
@@ -118,6 +116,19 @@ public class PlacateAbility extends SelectableAbility {
             case 1 -> 30;
             case 0 -> 60;
             default -> 0;
+        };
+    }
+
+    private static float getSanityPerSeq(int seq){
+        return switch (seq){
+            case 7 -> 0.15f;
+            case 6, 5 -> 0.17f;
+            case 4 -> 0.2f;
+            case 3 -> 0.22f;
+            case 2 -> 0.25f;
+            case 1 -> 0.27f;
+            case 0 -> 0.35f;
+            default -> 0.0f;
         };
     }
 
@@ -189,8 +200,10 @@ public class PlacateAbility extends SelectableAbility {
     }
 
     private void placateEntity(LivingEntity caster, LivingEntity entity) {
-        entity.getData(ModAttachments.SANITY_COMPONENT).increaseSanityWithSequenceDifference(.15f, entity, AbilityUtil.getSeqWithArt(caster, this), BeyonderData.getSequence(entity));
+        int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
+        entity.getData(ModAttachments.SANITY_COMPONENT).increaseSanityWithSequenceDifference(getSanityPerSeq(entitySeq), entity, AbilityUtil.getSeqWithArt(caster, this), BeyonderData.getSequence(entity));
         entity.removeEffect(ModEffects.LOOSING_CONTROL);
+        entity.removeEffect(ModEffects.MENTAL_PLAGUE);
     }
 
     @Override

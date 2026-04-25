@@ -4,7 +4,14 @@ import de.jakob.lotm.abilities.visionary.prophecy.triggers.context.TriggerContex
 import net.minecraft.nbt.CompoundTag;
 
 public enum TriggerEnum {
-    POSITION;
+    POSITION,
+    PICK_UP,
+    INSTANT,
+    HEALTH,
+    SANITY,
+    PLAYER,
+    SEALED
+    ;
 
     public static TriggerEnum  fromNBT(CompoundTag tag, String key) {
         String name = tag.getString(key);

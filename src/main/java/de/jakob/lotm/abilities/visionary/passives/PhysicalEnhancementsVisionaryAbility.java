@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 public class PhysicalEnhancementsVisionaryAbility extends PhysicalEnhancementsAbility {
 
     public PhysicalEnhancementsVisionaryAbility(Properties properties) {
@@ -79,7 +78,8 @@ public class PhysicalEnhancementsVisionaryAbility extends PhysicalEnhancementsAb
                     new PhysicalEnhancement(EnhancementType.SPEED, 4),
                     new PhysicalEnhancement(EnhancementType.HEALTH, 15),
                     new PhysicalEnhancement(EnhancementType.REGENERATION, 2),
-                    new PhysicalEnhancement(EnhancementType.NIGHT_VISION, 1)
+                    new PhysicalEnhancement(EnhancementType.NIGHT_VISION, 1),
+                    new PhysicalEnhancement(EnhancementType.CONCEALMENT, 0)
             );
 
             case 2 -> List.of(
@@ -88,25 +88,27 @@ public class PhysicalEnhancementsVisionaryAbility extends PhysicalEnhancementsAb
                     new PhysicalEnhancement(EnhancementType.SPEED, 5),
                     new PhysicalEnhancement(EnhancementType.HEALTH, 23),
                     new PhysicalEnhancement(EnhancementType.REGENERATION, 3),
-                    new PhysicalEnhancement(EnhancementType.NIGHT_VISION, 1)
+                    new PhysicalEnhancement(EnhancementType.NIGHT_VISION, 1),
+                    new PhysicalEnhancement(EnhancementType.CONCEALMENT, 0)
             );
 
             case 1 -> List.of(
-                    new PhysicalEnhancement(EnhancementType.STRENGTH, 5),
-                    new PhysicalEnhancement(EnhancementType.RESISTANCE, 10),
+                    new PhysicalEnhancement(EnhancementType.STRENGTH, 4),
+                    new PhysicalEnhancement(EnhancementType.RESISTANCE, 12),
                     new PhysicalEnhancement(EnhancementType.SPEED, 5),
-                    new PhysicalEnhancement(EnhancementType.HEALTH, 28),
-                    new PhysicalEnhancement(EnhancementType.REGENERATION, 3),
-                    new PhysicalEnhancement(EnhancementType.NIGHT_VISION, 1)
+                    new PhysicalEnhancement(EnhancementType.HEALTH, 30),
+                    new PhysicalEnhancement(EnhancementType.REGENERATION, 4),
+                    new PhysicalEnhancement(EnhancementType.FIRE_RESISTANCE, 4),
+                    new PhysicalEnhancement(EnhancementType.CONCEALMENT, 0)
             );
-
             case 0 -> List.of(
                     new PhysicalEnhancement(EnhancementType.STRENGTH, 6),
                     new PhysicalEnhancement(EnhancementType.RESISTANCE, 12),
                     new PhysicalEnhancement(EnhancementType.SPEED, 6),
                     new PhysicalEnhancement(EnhancementType.HEALTH, 40),
                     new PhysicalEnhancement(EnhancementType.REGENERATION, 4),
-                    new PhysicalEnhancement(EnhancementType.NIGHT_VISION, 1)
+                    new PhysicalEnhancement(EnhancementType.NIGHT_VISION, 1),
+                    new PhysicalEnhancement(EnhancementType.CONCEALMENT, 0)
             );
 
             default -> List.of();

@@ -1,10 +1,16 @@
 package de.jakob.lotm.network.packets.toServer;
 
 import de.jakob.lotm.LOTMCraft;
+import de.jakob.lotm.abilities.visionary.DreamTraversalAbility;
+import de.jakob.lotm.abilities.visionary.passives.MetaAwarenessAbility;
 import de.jakob.lotm.effect.ModEffects;
+import de.jakob.lotm.network.packets.toClient.OpenPlayerDivinationScreenPacket;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.DivinationUtil;
+import de.jakob.lotm.util.PlayerSelectionWorkType;
+import de.jakob.lotm.util.helper.AbilityUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
@@ -16,7 +22,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.UUID;
 
-public record PlayerDivinationSelectedPacket(UUID selectedPlayerUuid) implements CustomPacketPayload {
+public record PlayerDivinationSelectedPacket(UUID selectedPlayerUuid, PlayerSelectionWorkType types) implements CustomPacketPayload {
     public static final Type<PlayerDivinationSelectedPacket> TYPE =
             new Type<>(ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "player_divination_selected"));
 
@@ -26,10 +32,18 @@ public record PlayerDivinationSelectedPacket(UUID selectedPlayerUuid) implements
                     (buf) -> buf.readUUID()
             );
 
+    private static final StreamCodec<RegistryFriendlyByteBuf, PlayerSelectionWorkType> TYPE_CODEC =
+            StreamCodec.of(
+                    FriendlyByteBuf::writeEnum,
+                    buf -> buf.readEnum(PlayerSelectionWorkType.class)
+            );
+
     public static final StreamCodec<RegistryFriendlyByteBuf, PlayerDivinationSelectedPacket> STREAM_CODEC =
             StreamCodec.composite(
                     UUID_CODEC,
                     PlayerDivinationSelectedPacket::selectedPlayerUuid,
+                    TYPE_CODEC,
+                    PlayerDivinationSelectedPacket::types,
                     PlayerDivinationSelectedPacket::new
             );
 
@@ -42,16 +56,63 @@ public record PlayerDivinationSelectedPacket(UUID selectedPlayerUuid) implements
         context.enqueueWork(() -> {
             if (!(context.player() instanceof ServerPlayer player)) return;
 
-            ServerPlayer targetPlayer = player.serverLevel().getServer().getPlayerList()
-                    .getPlayer(packet.selectedPlayerUuid);
-
-            if (targetPlayer == null || !(player.level().dimension() == targetPlayer.level().dimension())) {
-                player.sendSystemMessage(Component.literal("§cPlayer not found"));
-                return;
+            switch (packet.types){
+                case DIVINATION -> performDivination(packet, player);
+                case DREAM_TRAVERSAL -> performDreamTraversal(packet, player);
             }
+        });
+    }
 
-            int playerSequence = BeyonderData.getSequence(player);
-            int targetSequence = BeyonderData.getSequence(targetPlayer);
+    private static void performDreamTraversal(PlayerDivinationSelectedPacket packet, ServerPlayer player){
+        ServerPlayer targetPlayer = player.serverLevel().getServer().getPlayerList()
+                .getPlayer(packet.selectedPlayerUuid);
+
+        if (targetPlayer == null || !(player.level().dimension() == targetPlayer.level().dimension())) {
+            player.sendSystemMessage(Component.literal("§cPlayer not found"));
+            return;
+        }
+
+        int playerSeq = BeyonderData.getSequence(player);
+        int targetSeq = BeyonderData.getSequence(targetPlayer);
+        String targetPath = BeyonderData.getPathway(targetPlayer);
+
+        if(targetPath.equals("visionary") && targetSeq < playerSeq){
+            if(targetSeq <= 1)
+                MetaAwarenessAbility.onDivined(player, targetPlayer);
+
+            AbilityUtil.sendActionBar(player, Component.translatable("ability.lotmcraft.dream_traversal.failed").withColor(0xFFff124d));
+            return;
+        }
+
+        if (DreamTraversalAbility.requiresAsleep(player) && !targetPlayer.hasEffect(ModEffects.ASLEEP)) {
+            AbilityUtil.sendActionBar(player, Component.translatable("ability.lotmcraft.dream_traversal.must_be_asleep").withColor(0xFFff124d));
+            return;
+        }
+
+        if(targetPath.equals("door") && (targetSeq <= 2 && playerSeq <= targetSeq-1)){
+            AbilityUtil.sendActionBar(player, Component.translatable("ability.lotmcraft.dream_traversal.failed").withColor(0xFFff124d));
+            return;
+        }
+
+        int distance = (int) player.distanceTo(targetPlayer);
+        if(distance <= DreamTraversalAbility.getRangeBySeq(BeyonderData.getSequence(player))){
+            DreamTraversalAbility.performTeleport(player, targetPlayer);
+        }
+    }
+
+    private static void performDivination(PlayerDivinationSelectedPacket packet, ServerPlayer player){
+        ServerPlayer targetPlayer = player.serverLevel().getServer().getPlayerList()
+                .getPlayer(packet.selectedPlayerUuid);
+
+        MetaAwarenessAbility.onDivined(player, targetPlayer);
+
+        if (targetPlayer == null || !(player.level().dimension() == targetPlayer.level().dimension())) {
+            player.sendSystemMessage(Component.literal("§cPlayer not found"));
+            return;
+        }
+
+        int playerSequence = BeyonderData.getSequence(player);
+        int targetSequence = BeyonderData.getSequence(targetPlayer);
 
             int divinationDifference = 3 + DivinationUtil.getDivinationPower(player) - DivinationUtil.getConcealmentPower(targetPlayer);
             if (divinationDifference <= 0){
@@ -62,13 +123,13 @@ public record PlayerDivinationSelectedPacket(UUID selectedPlayerUuid) implements
                 return;
             }
 
-            BlockPos playerPos = player.blockPosition();
-            BlockPos targetPos = targetPlayer.blockPosition();
+        BlockPos playerPos = player.blockPosition();
+        BlockPos targetPos = targetPlayer.blockPosition();
 
-            int dx = targetPos.getX() - playerPos.getX();
-            int dz = targetPos.getZ() - playerPos.getZ();
+        int dx = targetPos.getX() - playerPos.getX();
+        int dz = targetPos.getZ() - playerPos.getZ();
 
-            int distance = (int) Math.sqrt(dx * dx + dz * dz);
+        int distance = (int) Math.sqrt(dx * dx + dz * dz);
 
             // distance still isn't balanced
             int maxDistance = switch (playerSequence) {
@@ -81,43 +142,41 @@ public record PlayerDivinationSelectedPacket(UUID selectedPlayerUuid) implements
                 default            -> 100;
             };
 
-            if (distance >= maxDistance) {
-                player.sendSystemMessage(Component.literal("§cPlayer is very far from you"));
+        if (distance >= maxDistance) {
+            player.sendSystemMessage(Component.literal("§cPlayer is very far from you"));
+            return;
+        }
+
+        if (divinationDifference < 4){
+            if(playerSequence < 4 && targetSequence > 3){
+                player.sendSystemMessage(Component.literal("§cDivination failed"));
                 return;
             }
+            player.sendSystemMessage(Component.literal(String.format(
+                    "§5You sense §d%s§5 to the §d%s§5",
+                    targetPlayer.getGameProfile().getName(),
+                    getDirection(dx, dz)
+            )));
 
-            if (divinationDifference < 4){
-                if(playerSequence < 4 && targetSequence > 3){
-                    player.sendSystemMessage(Component.literal("§cDivination failed"));
-                    return;
-                }
-                player.sendSystemMessage(Component.literal(String.format(
-                        "§5You sense §d%s§5 to the §d%s§5",
-                        targetPlayer.getGameProfile().getName(),
-                        getDirection(dx, dz)
-                )));
-
-            } else if(divinationDifference < 10) {
-                player.sendSystemMessage(Component.literal(String.format(
-                        "§5You sense §d%s§5 to the §d%s§5, about §d%d blocks §5away...",
-                        targetPlayer.getGameProfile().getName(),
-                        getDirection(dx, dz),
-                        distance
-                )));
-            }
-            else if (divinationDifference >= 10) {
-                player.sendSystemMessage(Component.literal(String.format(
-                        "§5You sense §d%s§5 to the §d%s§5 at cords §d%d, %d, %d§5, about §d%d blocks §5away...",
-                        targetPlayer.getGameProfile().getName(),
-                        getDirection(dx, dz),
-                        targetPlayer.blockPosition().getX(),
-                        targetPlayer.blockPosition().getY(),
-                        targetPlayer.blockPosition().getZ(),
-                        distance
-                )));
-            }     // Trigger MetaAwareness passive if target has it
-            de.jakob.lotm.abilities.visionary.passives.MetaAwarenessAbility.onDivined(player, targetPlayer);
-        });
+        } else if(divinationDifference < 10) {
+            player.sendSystemMessage(Component.literal(String.format(
+                    "§5You sense §d%s§5 to the §d%s§5, about §d%d blocks §5away...",
+                    targetPlayer.getGameProfile().getName(),
+                    getDirection(dx, dz),
+                    distance
+            )));
+        }
+        else if (divinationDifference >= 10) {
+            player.sendSystemMessage(Component.literal(String.format(
+                    "§5You sense §d%s§5 to the §d%s§5 at cords §d%d, %d, %d§5, about §d%d blocks §5away...",
+                    targetPlayer.getGameProfile().getName(),
+                    getDirection(dx, dz),
+                    targetPlayer.blockPosition().getX(),
+                    targetPlayer.blockPosition().getY(),
+                    targetPlayer.blockPosition().getZ(),
+                    distance
+            )));
+        }     // Trigger MetaAwareness passive if target has it
     }
 
     private static String getDirection(int dx, int dz) {
