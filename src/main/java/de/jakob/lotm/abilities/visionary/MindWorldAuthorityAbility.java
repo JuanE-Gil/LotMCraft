@@ -27,6 +27,7 @@ public class MindWorldAuthorityAbility extends SelectableAbility {
         canBeUsedByNPC = false;
         canBeUsedInArtifact = false;
         doesNotIncreaseDigestion = true;
+        canBeShared = false;
 
         envisioningToggle = null;
     }
