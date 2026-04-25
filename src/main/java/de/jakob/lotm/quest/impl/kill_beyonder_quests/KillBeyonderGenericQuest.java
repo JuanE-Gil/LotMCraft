@@ -45,6 +45,6 @@ public class KillBeyonderGenericQuest extends KillBeyonderQuest {
 
     @Override
     public float getDigestionReward() {
-        return .5f;
+        return .2f;
     }
 }
