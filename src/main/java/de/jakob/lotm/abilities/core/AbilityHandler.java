@@ -256,6 +256,7 @@ public class AbilityHandler {
         abilities.add(new AuthorityAbility("authority_ability"));
         abilities.add(new EyeOfOrderAbility("eye_of_order_ability"));
         abilities.add(new ProhibitionAbility("prohibition_ability"));
+        abilities.add(new IllusionaryTortureDevicesAbility("illusionary_torture_devices_ability"));
         abilities.add(new ImprisonAbility("imprison_ability"));
         abilities.add(new ConfinementAbility("confinement_ability"));
         abilities.add(new JusticeLanguageAbility("justice_language_ability"));

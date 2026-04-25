@@ -933,6 +933,19 @@
   "lotmcraft.eye_of_order_ability.description": "highlight the dangers around you making them glow red",
   "ability.lotmcraft.eye_of_order.exhausted": "Your spirituality is exhausted.",
 
+
+  "lotmcraft.illusionary_torture_devices_ability": "Illusionary Torture Devices",
+  "lotmcraft.illusionary_torture_devices_ability.description": "Manifest illusionary torture devices to strike at your foes",
+  "ability.lotmcraft.interrogator.branding_iron": "Branding Iron",
+  "ability.lotmcraft.interrogator.branding_iron.description": "Manifest a Branding Iron in your hand. Each full charge strike deals damage, applies debuffs and drains the target's sanity. Lasts a duration based on your Sequence.",
+  "ability.lotmcraft.interrogator.psychic_lashing": "Psychic Lashing",
+  "ability.lotmcraft.interrogator.psychic_lashing.description": "Enchant your held weapon with Sharpness. Higher Sequences receive a weaker enchantment.",
+  "ability.lotmcraft.interrogator.psychic_piercing": "Psychic Piercing",
+  "ability.lotmcraft.interrogator.psychic_piercing.description": "Assault the target's mind at range, dealing damage and inflicting Slowness, Weakness, and Nausea while draining their sanity.",
+  "ability.lotmcraft.interrogator.whip_of_pain": "Whip of Pain",
+  "ability.lotmcraft.interrogator.whip_of_pain.description": "Lash the target with a psychic whip at close range, dealing damage, applying Weakness, and draining their sanity.",
+
+
   "lotmcraft.prohibition_ability": "Prohibition",
   "lotmcraft.prohibition_ability.description": "Declare a type of activity Prohibited within a 40-block zone. Up to 3 zones per type may be active simultaneously.",
   "ability.lotmcraft.prohibition.beyonder_abilities": "Prohibit Beyonder Abilities",
