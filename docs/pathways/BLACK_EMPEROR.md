@@ -19,11 +19,11 @@
 
 **Behavior inside the mausoleum:**
 - All block breaking and placing is prevented.
-- The room is continuously restored to its original snapshot every tick (prevents any permanent modification).
-- Players who escape the room bounds are clamped back inside every tick.
+- The room is continuously restored to its original snapshot every second (prevents any permanent modification).
+- Players who escape the room bounds are clamped back inside every second.
 - Players who disconnect during a session are queued for death on next login.
 
-**Spirituality Drain (every 20 ticks):**
+**Spirituality Drain (every second):**
 | Target | Drain |
 |--------|-------|
 | Caster | 550 per second |
@@ -39,8 +39,8 @@
 
 ### Entropy *(sub-ability of Disorder)*
 **Sequence Requirement:** 2 *(accessible via Disorder Mode 6)*
-**Duration:** 60 seconds (1200 ticks)
-**Pulse Interval:** Every 400 ticks (3 pulses total)
+**Duration:** 60 seconds
+**Pulse Interval:** Every 20 seconds (3 pulses total)
 **Aura Radius:** 25 blocks
 
 **Scale Multiplier:** `1.0 + (2 − seq) × 0.25` (stronger at lower sequences)
@@ -61,7 +61,7 @@
 
 ### Commanding Orders
 **Sequence Requirement:** 3
-**Spirituality Cost:** 10.0 per tick (toggle)
+**Spirituality Cost:** 10.0 per second (toggle)
 *(Cannot be used by NPCs)*
 
 - **Range:** 25 blocks
@@ -70,11 +70,11 @@
 
 | Command | Effects |
 |---------|---------|
-| `kneel` | Slowness II (50t), Weakness (40t), Confusion (25t), velocity reduced to 20% |
-| `halt` | Slowness III (60t), zeroed velocity, mobs get No-AI for 60t |
-| `retreat` | Slowness (40t), pushed away at 0.65 force with 0.12 upward |
-| `advance` | Slowness (25t), mobs navigate to caster at 1.0 speed, players pulled at 0.35 force |
-| `silence` | Weakness (50t), Confusion (35t), all Beyonder abilities disabled for 280 ticks (14 seconds) |
+| `kneel` | Slowness II (2.5s), Weakness (2s), Confusion (1.25s), velocity reduced to 20% |
+| `halt` | Slowness III (3s), zeroed velocity, mobs get No-AI for 3s |
+| `retreat` | Slowness (2s), pushed away at 0.65 force with 0.12 upward |
+| `advance` | Slowness (1.25s), mobs navigate to caster at 1.0 speed, players pulled at 0.35 force |
+| `silence` | Weakness (2.5s), Confusion (1.75s), all Beyonder abilities disabled for 14 seconds |
 
 **Head Lock:** Targets 2+ sequences weaker have their head locked downward (36–54° based on gap).
 
@@ -84,22 +84,22 @@
 
 ### Commanding Presence
 **Sequence Requirement:** 3
-**Spirituality Cost:** 4.0 per tick (toggle)
+**Spirituality Cost:** 4.0 per second (toggle)
 *(Cannot be used by NPCs)*
 
 - Emits a passive aura affecting all nearby entities weaker than the caster.
 - **Aura Radius:** 22 blocks × scale (scale = `1.0 + (3 − seq) × 0.20`)
 
 **Aura Effects (Seq 3 and below):**
-- **Confusion:** Level 0, 30 ticks — applied every 40 ticks
-- **Reverence messages** sent to players every 100 ticks
+- **Confusion:** Level 0, 1.5 seconds — applied every 2 seconds
+- **Reverence messages** sent to players every 5 seconds
 - Head-down pressure on targets 2+ sequences weaker
 
 **Legacy Version (Seq 5):**
-- **Slowness:** Level 0, 50 ticks — applied every 40 ticks to players
-- **Weakness:** Level 0, 50 ticks — applied every 40 ticks to Beyonders of equal or lower sequence
+- **Slowness:** Level 0, 2.5 seconds — applied every 2 seconds to players
+- **Weakness:** Level 0, 2.5 seconds — applied every 2 seconds to Beyonders of equal or lower sequence
 
-**Combat Spirituality Drain (Seq 5 and below):** Targets in combat with the caster lose `1.0 + (seq_gap × 0.25)` spirituality per tick.
+**Combat Spirituality Drain (Seq 5 and below):** Targets in combat with the caster lose `1.0 + (seq_gap × 0.25)` spirituality per second.
 
 **Damage Reflection:** Same as Commanding Orders — Weakness II + Slowness III to attacker, knockback applied.
 
@@ -108,8 +108,8 @@
 ### Frenzy *(sub-ability of Disorder)*
 **Sequence Requirement:** 3 *(accessible via Disorder Mode 5)*
 **Cooldown:** 60 seconds
-**Duration:** 60 seconds (1200 ticks)
-**Pulse Interval:** Every 400 ticks (3 pulses total)
+**Duration:** 60 seconds
+**Pulse Interval:** Every 20 seconds (3 pulses total)
 **Aura Radius:** 18 blocks
 
 **Caster pulses** (random outcome each pulse):
@@ -121,9 +121,9 @@
 **Target pulses** (outcome varies by sequence gap):
 | Outcome | Effect |
 |---------|--------|
-| Minor Disorder | Slowness (20–80t) + Blindness (40t) + Confusion (40–80t) |
-| Control Loss | Losing Control / Confusion / Weakness for 60–140t |
-| Seal | Slowness III + Weakness + ability seal for 80–140t |
+| Minor Disorder | Slowness (1–4s) + Blindness (2s) + Confusion (2–4s) |
+| Control Loss | Losing Control / Confusion / Weakness for 3–7s |
+| Seal | Slowness III + Weakness + ability seal for 4–7s |
 
 ---
 
@@ -141,25 +141,25 @@ Five selectable modes. Duration of each effect scales with caster sequence (stro
 **Mode 0 — Money Focus**
 - **Duration:** 20–40 seconds (scales with sequence)
 - Pulls the target toward the nearest ore within 192 blocks (iron, gold, diamond).
-- Mobs navigate to ore at 1.0 speed; players are lightly pulled every 5 ticks.
+- Mobs navigate to ore at 1.0 speed; players are lightly pulled every 0.25 seconds.
 - Message: *"Money... ore... treasure..."*
 
 **Mode 1 — Rash**
 - **Duration:** 10–20 seconds (scales with sequence)
-- Applies **Confusion** (30t) + **Slowness II** (20t) every 8 ticks.
-- Causes chaotic movement nudges every tick.
+- Applies **Confusion** (1.5s) + **Slowness II** (1s) every 0.4 seconds.
+- Causes chaotic movement nudges every second.
 - Triggers a random ability cast every 7 seconds.
 - Pulses damage to the nearest entity within 10 blocks every 4 seconds.
 
 **Mode 2 — Sluggish**
 - **Duration:** 12–18 seconds (scales with sequence)
-- Applies **Slowness II** (40t) every 2 seconds.
+- Applies **Slowness II** (2s) every 2 seconds.
 - Drains spirituality every 2.5 seconds.
 - Blocks all ability usage for the duration.
 
 **Mode 3 — Anxiety**
 - **Duration:** 12–20 seconds (scales with sequence)
-- Applies **Losing Control** (Level 3 at Seq 4+) + Confusion (40t) + Weakness (40t) every 20 ticks.
+- Applies **Losing Control** (Level 3 at Seq 4+) + Confusion (2s) + Weakness (2s) every second.
 - Causes natural sanity loss.
 
 **Mode 4 — Will to Fight Seal**
@@ -178,7 +178,7 @@ Five selectable modes. Duration of each effect scales with caster sequence (stro
 Three selectable modes:
 
 **Mode 0 — Flight** *(toggle)*
-- Enables sustained flight. Drains 0.03–0.08 spirituality per tick.
+- Enables sustained flight. Drains 0.03–0.08 spirituality per second.
 - **Flight Speed by Sequence:**
   - Seq 2: 0.12
   - Seq 3: 0.075
@@ -187,13 +187,13 @@ Three selectable modes:
 
 **Mode 1 — Jump Up** *(vertical launch)*
 - Launches the caster straight upward (Y velocity +10.5, horizontal retained at 20%).
-- Additional +3.5 Y boost for 3 ticks.
-- **Fall damage immunity:** 120 ticks.
+- Additional +3.5 Y boost for 0.15 seconds.
+- **Fall damage immunity:** 6 seconds.
 
 **Mode 2 — Jump Forward**
 - Launches the caster forward (look × 10.0 + 25% current horizontal, Y +8.0).
-- Additional look-direction boost for 3 ticks.
-- **Fall damage immunity:** 120 ticks.
+- Additional look-direction boost for 0.15 seconds.
+- **Fall damage immunity:** 6 seconds.
 
 ---
 
@@ -219,7 +219,7 @@ Four selectable modes:
 **Mode 2 — Magnify Grab**
 - **Duration:** 4 seconds
 - Pulls the target toward the caster at variable speed (1.35–3.2 based on distance).
-- On arrival (within 2.1 blocks): Slowness VI (30t) + Weakness II (30t) + Blindness (30t) + Confusion (30t).
+- On arrival (within 2.1 blocks): Slowness VI (1.5s) + Weakness II (1.5s) + Blindness (1.5s) + Confusion (1.5s).
 
 **Mode 3 — Magnify Execution**
 - Deals damage scaled by sequence gap (`target_seq − caster_seq`):
@@ -246,16 +246,16 @@ Seven selectable modes:
 
 **Mode 0 — Disordered Actions**
 - The target's next outgoing hit is redirected to a random nearby entity within 8 blocks (not the attacker or original target).
-- **Duration:** 120 ticks (6 seconds)
+- **Duration:** 6 seconds
 
 **Mode 1 — Disordered Perception**
 - 40% chance per outgoing hit to deal 0 damage.
-- Applies **Confusion** (140t, Level 0).
-- **Duration:** 140 ticks (7 seconds)
+- Applies **Confusion** (7 seconds, Level 0).
+- **Duration:** 7 seconds
 
 **Mode 2 — Defensive Veil** *(self-cast)*
 - Grants the caster a **35% chance to negate any incoming hit**.
-- **Duration:** 160 ticks (8 seconds)
+- **Duration:** 8 seconds
 
 **Mode 3 — Break Bonds** *(no target required)*
 - Cleanses all harmful effects and fire from the chosen entity (self or other).
@@ -275,19 +275,19 @@ Seven selectable modes:
 
 ### Corrosion
 **Sequence Requirement:** 6
-**Spirituality Cost:** 2.0 per tick (toggle)
+**Spirituality Cost:** 2.0 per second (toggle)
 *(Cannot be used by NPCs)*
 
 - **Aura Radius:** 10 blocks
-- Entities in range accumulate exposure ticks. Stronger Beyonders (lower sequence than caster) are fully immune.
+- Entities in range accumulate exposure time. Stronger Beyonders (lower sequence than caster) are fully immune.
 
-**Corruption Stages (by exposure ticks):**
+**Corruption Stages (by exposure duration):**
 
-| Stage | Threshold | Effects (every 40–60 ticks) | Message |
+| Stage | Threshold | Effects (every 2–3 seconds) | Message |
 |-------|-----------|----------------------------|---------|
-| 1 | 60+ ticks | Slowness I; mobs randomly halt navigation (35% chance) | "You feel an inexplicable greed stirring..." |
-| 2 | 160+ ticks | Confusion; mobs randomly retarget nearby entities (50% chance) | "The greed is overwhelming — your thoughts are scattered." |
-| 3 | 300+ ticks | Weakness II; Beyonder targets fire random abilities (60% chance every 60t) | "You can no longer control yourself. Darkness consumes you." |
+| 1 | 3+ seconds | Slowness I; mobs randomly halt navigation (35% chance) | "You feel an inexplicable greed stirring..." |
+| 2 | 8+ seconds | Confusion; mobs randomly retarget nearby entities (50% chance) | "The greed is overwhelming — your thoughts are scattered." |
+| 3 | 15+ seconds | Weakness II; Beyonder targets fire random abilities (60% chance every 3s) | "You can no longer control yourself. Darkness consumes you." |
 
 **Exposure Decay:** Decays at half rate when leaving the aura.
 
@@ -295,7 +295,7 @@ Seven selectable modes:
 
 ### Weakness Detection
 **Sequence Requirement:** 6
-**Spirituality Cost:** 2.5 per tick (toggle)
+**Spirituality Cost:** 2.5 per second (toggle)
 *(Cannot be used by NPCs)*
 
 - **Detection Range:** 20 blocks
@@ -307,13 +307,13 @@ Seven selectable modes:
 - Health below 30% of max
 - Speed above 0.22
 
-**Tier Effects (applied within 12 blocks, every 20 ticks):**
+**Tier Effects (applied within 12 blocks, every second):**
 
 | Tier | Color | Damage Boost | Debuffs |
 |------|-------|-------------|---------|
-| 1 | Yellow | +15% | Slowness I, 40t |
-| 2 | Orange | +30% | Slowness II (40t) + Weakness I (40t) |
-| 3 | Red | +50% | Slowness III (40t) + Weakness II (40t) + 5 direct damage every 20t |
+| 1 | Yellow | +15% | Slowness I, 2s |
+| 2 | Orange | +30% | Slowness II (2s) + Weakness I (2s) |
+| 3 | Red | +50% | Slowness III (2s) + Weakness II (2s) + 5 direct damage every second |
 
 ---
 
@@ -330,22 +330,22 @@ Five selectable modes:
 
 **Mode 0 — Distort Action**
 - Negates the target's next outgoing hit (0 damage).
-- **Duration:** 160 ticks (Seq 5+) / 120 ticks (Seq 6+)
-- **Seq 5+:** Also applies Weakness (60t) + Slowness (40t).
+- **Duration:** 8 seconds (Seq 5+) / 6 seconds (Seq 6+)
+- **Seq 5+:** Also applies Weakness (3s) + Slowness (2s).
 
 **Mode 1 — Distort Intent**
 - Mobs lose target and navigation; retarget a random nearby entity.
-- Players are randomly nudged every 4–5 ticks at 0.18–0.24 force.
-- **Duration:** 100 ticks (Seq 5+) / 80 ticks (Seq 6+)
-- **Seq 5+:** Also applies Confusion (60t) + Weakness (60t); radius extends to 14 blocks.
+- Players are randomly nudged every 0.2–0.25 seconds at 0.18–0.24 force.
+- **Duration:** 5 seconds (Seq 5+) / 4 seconds (Seq 6+)
+- **Seq 5+:** Also applies Confusion (3s) + Weakness (3s); radius extends to 14 blocks.
 
 **Mode 2 — Distort Trajectory**
 - Each projectile the target fires is rotated by 60–120° randomly.
-- **Duration:** 160 ticks (Seq 5+) / 120 ticks (Seq 6+)
+- **Duration:** 8 seconds (Seq 5+) / 6 seconds (Seq 6+)
 - **Charges:** 2 (Seq 5+) / 1 (Seq 6+)
 
 **Mode 3 — Distort Concept** *(Seq 5+ only)*
-- Links caster and target for 160 ticks.
+- Links caster and target for 8 seconds.
 - All damage dealt by either party is split 50/50 between both.
 
 **Mode 4 — Distort Wound** *(Seq 4+ only)*
@@ -366,18 +366,18 @@ Five selectable modes:
 Three selectable modes:
 
 **Mode 0 — Weaken** *(30 seconds)*
-- **Slowness II** (600t) + **Weakness** (600t).
+- **Slowness II** (30s) + **Weakness** (30s).
 - Target's armor reduced by 20%; outgoing damage reduced by 20%.
 
 **Mode 1 — Arrogance** *(30 seconds)*
-- **Confusion** (40t) every 20 ticks.
-- Mobs lose target and navigation; random movement nudges every 20 ticks.
+- **Confusion** (2s) every second.
+- Mobs lose target and navigation; random movement nudges every second.
 - **20% chance per incoming hit** to completely dodge the damage.
-- Triggers a random ability cast every 20 ticks.
+- Triggers a random ability cast every second.
 
 **Mode 2 — Charm** *(10 seconds)*
-- **Slowness III** (20t) every 10 ticks.
-- Mobs lose target and navigation; random movement nudges every 10 ticks.
+- **Slowness III** (1s) every 0.5 seconds.
+- Mobs lose target and navigation; random movement nudges every 0.5 seconds.
 - Charmed target deals **0 damage** to the caster.
 
 ---
@@ -394,7 +394,7 @@ Three selectable modes:
 ---
 ### Law Proficiency
 **Sequence Requirement:** 9 *(superseded by Weakness Detection at Sequence 6 and below)*
-**Spirituality Cost:** 1.5 per tick (toggle)
+**Spirituality Cost:** 1.5 per second (toggle)
 
 **Detection Radius:** 6 blocks
 
@@ -404,8 +404,8 @@ Three selectable modes:
 - Speed above 0.25
 
 **On violation detected:**
-- **Weakness:** Level 1, 40 ticks
-- **Slowness:** Level 0, 40 ticks
+- **Weakness:** Level 1, 2 seconds
+- **Slowness:** Level 0, 2 seconds
 - Outgoing damage against the violator is boosted by **1.5×** within 6 blocks
 
 **Note:** Beyonders of higher sequence (Seq < 9) are ignored entirely.
