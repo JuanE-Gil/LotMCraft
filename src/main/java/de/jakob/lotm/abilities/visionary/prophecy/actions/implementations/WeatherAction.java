@@ -25,7 +25,7 @@ public class WeatherAction extends ActionBase {
 
     @Override
     public int getRequiredSeq() {
-        return 0;
+        return 1;
     }
 
     @Override
