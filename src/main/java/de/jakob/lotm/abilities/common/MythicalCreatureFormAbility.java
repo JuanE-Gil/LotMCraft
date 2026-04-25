@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.UUID;
 
 public class MythicalCreatureFormAbility extends ToggleAbility {
+
     private static final HashMap<UUID, Double> previousScale = new HashMap<>();
 
     public MythicalCreatureFormAbility(String id) {
@@ -112,14 +113,12 @@ public class MythicalCreatureFormAbility extends ToggleAbility {
             scaleAttribute.removeModifier(ResourceLocation.fromNamespaceAndPath(LOTMCraft.MOD_ID, "mythical_creature_form"));
         }
 
-        // Remove buff
         BeyonderData.removeModifier(entity, "mythical_creature_form");
 
         TransformationComponent transformationComponent = entity.getData(ModAttachments.TRANSFORMATION_COMPONENT);
         if(transformationComponent.isTransformed() && transformationComponent.getTransformationIndex() == TransformationComponent.TransformationType.MYTHICAL_CREATURE.getIndex()) {
             transformationComponent.setTransformedAndSync(false, entity);
         }
-
     }
 
     @Override
