@@ -101,7 +101,10 @@ public class EffectManager {
         BLOOD_INFERNO(30),
         FOOLING(31),
         ROTATING_RINGS(32),
-        SPACE_TEARING(33);
+        SPACE_TEARING(33),
+        PROHIBITION(34),
+        IMPRISON(35),
+        ANCIENT_COURT(36);
 
         private final int index;
 
