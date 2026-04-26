@@ -37,7 +37,7 @@ public class ChaosHuntingAbility extends PassiveAbilityItem {
         int casterSeq = BeyonderData.getSequence(entity);
         ServerLevel serverLevel = (ServerLevel) level;
 
-        List<LivingEntity> nearby = AbilityUtil.getNearbyEntities(entity, serverLevel, entity.position(), (int) SCAN_RADIUS);
+        List<LivingEntity> nearby = AbilityUtil.getNearbyEntities(entity, serverLevel, entity.position(), (int) SCAN_RADIUS*BeyonderData.getMultiplier(entity));
 
         Set<Entity> newTargets = new HashSet<>();
         for (LivingEntity candidate : nearby) {

@@ -39,7 +39,7 @@ public class OrderProxyAbility extends SelectableAbility {
     public static final Set<UUID> NO_REVIVAL_ENTITIES = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
     public static final double PROHIBITION_RADIUS = 100.0;
-    public static final double LAW_RADIUS = 30.0;
+    public static final double LAW_RADIUS = 60.0;
 
 
     public OrderProxyAbility(String id) {
@@ -59,7 +59,7 @@ public class OrderProxyAbility extends SelectableAbility {
 
     @Override
     protected float getSpiritualityCost() {
-        return 800;
+        return 200;
     }
 
     @Override

@@ -947,7 +947,7 @@
 
 
   "lotmcraft.prohibition_ability": "Prohibition",
-  "lotmcraft.prohibition_ability.description": "Declare a type of activity Prohibited within a 40-block zone. Up to 3 zones per type may be active simultaneously.",
+  "lotmcraft.prohibition_ability.description": "Declare a type of activity Prohibited within a 80-block zone. Up to 3 zones per type may be active simultaneously.",
   "ability.lotmcraft.prohibition.beyonder_abilities": "Prohibit Beyonder Abilities",
   "ability.lotmcraft.prohibition.combat": "Prohibit Combat",
   "ability.lotmcraft.prohibition.flying": "Prohibit Flying",
