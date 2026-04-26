@@ -2,6 +2,7 @@ package de.jakob.lotm.entity.custom.ability_entities.justiciar_pathway;
 
 import de.jakob.lotm.abilities.core.Ability;
 import de.jakob.lotm.abilities.core.AbilityUsedEvent;
+import de.jakob.lotm.damage.ModDamageTypes;
 import de.jakob.lotm.entity.ModEntities;
 import de.jakob.lotm.network.packets.handlers.ClientHandler;
 import de.jakob.lotm.util.helper.AbilityUtil;
@@ -124,7 +125,8 @@ public class JudgmentSwordEntity extends Entity {
                 ServerLevel serverLevel = (ServerLevel) level();
                 LivingEntity target = getTarget(serverLevel);
                 if (target != null) {
-                    AbilityUtil.damageNearbyEntities((ServerLevel) level(), getOwner((ServerLevel) level()), 3.75f, getDamage(), position(), true, false);
+                    target.setHealth(target.getHealth() - getDamage());
+                    target.hurt(ModDamageTypes.source(serverLevel, ModDamageTypes.BEYONDER_GENERIC, getOwner(serverLevel)), 1);
                 }
 
                 // Gold-white impact ring

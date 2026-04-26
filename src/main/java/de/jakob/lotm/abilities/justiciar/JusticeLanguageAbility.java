@@ -3,6 +3,7 @@ package de.jakob.lotm.abilities.justiciar;
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.AbilityUsedEvent;
 import de.jakob.lotm.abilities.core.SelectableAbility;
+import de.jakob.lotm.damage.ModDamageTypes;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.scheduling.ServerScheduler;
@@ -106,6 +107,7 @@ public class JusticeLanguageAbility extends SelectableAbility {
         }
         Vec3 startPos = caster.getEyePosition().subtract(0, .2, 0).add(caster.getLookAngle().normalize());
         serverLevel.playSound(null, startPos.x, startPos.y, startPos.z, SoundEvents.BLAZE_SHOOT, caster.getSoundSource(), 2.0f, .5f);
+        target.hurt(ModDamageTypes.source(serverLevel, ModDamageTypes.BEYONDER_GENERIC, caster), 1);
         target.setHealth(target.getHealth() - (target.getMaxHealth() / 4f));
         target.hurtMarked = true;
         String targetName = target.getDisplayName().getString();

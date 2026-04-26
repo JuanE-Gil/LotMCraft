@@ -2,6 +2,7 @@ package de.jakob.lotm.abilities.justiciar;
 
 import com.google.common.util.concurrent.AtomicDouble;
 import de.jakob.lotm.abilities.core.Ability;
+import de.jakob.lotm.damage.ModDamageTypes;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.scheduling.ServerScheduler;
@@ -128,6 +129,7 @@ public class ExecutionAbility extends Ability {
                         if (targetSeq<seq) {
                             target.hurt(serverLevel.damageSources().magic(), Float.MAX_VALUE);
                         }else{
+                            target.hurt(ModDamageTypes.source(serverLevel, ModDamageTypes.BEYONDER_GENERIC, entity), 1);
                             target.setHealth(target.getHealth() - (target.getMaxHealth() * 0.7f));
                             target.hurtMarked = true;
                         };
