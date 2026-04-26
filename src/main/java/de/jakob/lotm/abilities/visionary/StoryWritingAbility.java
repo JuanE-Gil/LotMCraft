@@ -39,7 +39,7 @@ public class StoryWritingAbility extends ToggleAbility {
 
     @Override
     public void tick(Level level, LivingEntity entity) {
-        writingMap.putIfAbsent(entity.getUUID(), AbilityUtil.getSeqWithArt(entity, this));
+        writingMap.put(entity.getUUID(), AbilityUtil.getSeqWithArt(entity, this));
     }
 
     @Override

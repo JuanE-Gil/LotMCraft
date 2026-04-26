@@ -41,7 +41,7 @@ public class PsychologicalCueAbility extends ToggleAbility {
 
     @Override
     public void tick(Level level, LivingEntity entity) {
-        map.putIfAbsent(entity.getUUID(), AbilityUtil.getSeqWithArt(entity, this));
+        map.put(entity.getUUID(), AbilityUtil.getSeqWithArt(entity, this));
     }
 
     @Override
