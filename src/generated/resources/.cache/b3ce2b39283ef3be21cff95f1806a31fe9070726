@@ -1,4 +1,4 @@
-// 1.21.1	2026-04-25T20:55:55.8467672	Item Models: lotmcraft
+// 1.21.1	2026-04-26T15:21:14.0663949	Item Models: lotmcraft
 f73b18465ecc4c7209da8e28508db3e3a9a348de assets/lotmcraft/models/item/abyss_demonic_fish_blood.json
 d79ff3aedef37faf54603234b4a98f66afb8991f assets/lotmcraft/models/item/abyss_uniqueness.json
 ff1f40acc559743c518a78f4d8d99df759005e37 assets/lotmcraft/models/item/agate_peacock_egg.json
@@ -218,6 +218,7 @@ a5851523c9f6e597c054270b142883e9a1c91a94 assets/lotmcraft/models/item/judge.json
 a5851523c9f6e597c054270b142883e9a1c91a94 assets/lotmcraft/models/item/justice_mentor.json
 99cff99f102c193420828c35a0e5ec906cc5fbc3 assets/lotmcraft/models/item/justice_mentor_characteristic.json
 088bba6e16fff58d0808852a5d888bfc722d4ddb assets/lotmcraft/models/item/justice_mentor_potion.json
+76ae982581b41cf456e208bde19f0b55efe971fb assets/lotmcraft/models/item/justiciar_uniqueness.json
 a5851523c9f6e597c054270b142883e9a1c91a94 assets/lotmcraft/models/item/key_of_stars.json
 b781850caac670924619db09ac575a21d0b70d39 assets/lotmcraft/models/item/key_of_stars_characteristic.json
 05825e3d0431f5e7a4a80984f3f185e732a32d32 assets/lotmcraft/models/item/key_of_stars_potion.json
