@@ -41,6 +41,6 @@
     }
   },
   "textures": {
-    "layer0": "lotmcraft:item/chaos_hunting_justiciar_ability"
+    "layer0": "lotmcraft:item/chaos_hunting_ability"
   }
 }
