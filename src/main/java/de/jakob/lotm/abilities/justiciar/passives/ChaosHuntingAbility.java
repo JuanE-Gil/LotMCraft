@@ -49,7 +49,6 @@ public class ChaosHuntingAbility extends PassiveAbilityItem {
             boolean disasterPathway = "demoness".equals(pathway);
             if (higherRank || disasterPathway) {
                 newTargets.add(candidate);
-
                 CullAbility.setGlowingForPlayer(candidate, player, true);
             }
         }

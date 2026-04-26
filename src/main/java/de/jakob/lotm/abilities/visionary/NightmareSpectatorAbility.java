@@ -9,6 +9,7 @@ import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.DamageLookup;
 import de.jakob.lotm.util.helper.ParticleUtil;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -47,14 +48,20 @@ public class NightmareSpectatorAbility extends Ability {
 
     @Override
     public void onAbilityUse(Level level, LivingEntity entity) {
-        if(!(level instanceof ServerLevel serverLevel)) {
-            return;
-        }
 
         LivingEntity target = AbilityUtil.getTargetEntity(entity, 200, 2);
 
         if(target == null) {
             AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.frenzy.no_target").withColor(0xFFff124d));
+            return;
+        }
+
+        if(level.isClientSide) {
+            ParticleUtil.spawnSphereParticles((ClientLevel) level, dust, target.getEyePosition(), 2, 50);
+            return;
+        }
+
+        if(!(level instanceof ServerLevel serverLevel)) {
             return;
         }
 

@@ -64,18 +64,14 @@ public class AdvancementUtil {
     public static void advance(LivingEntity entity, String pathway, int sequence) {
         if(playerMap == null) return;
 
-        if (entity instanceof Player player && player.isCreative()) {
-            setBeyonder(entity, pathway, sequence);
-            if (pathway.equals("fool") && sequence <= 2){
-                MiracleOfResurrectionComponent data = entity.getData(ModAttachments.MIRACLE_OF_RESURRECTION);
-                data.setResurrectionAttempts(4);
-            }
-            return;
-        }
-
         ControllingDataComponent data = entity.getData(ModAttachments.CONTROLLING_DATA);
         if (data.isControlling()) {
             entity.hurt(ModDamageTypes.source(entity.level(), ModDamageTypes.LOOSING_CONTROL), Float.MAX_VALUE);
+            return;
+        }
+
+        if (entity instanceof Player player && player.isCreative()) {
+            setBeyonder(entity, pathway, sequence);
             return;
         }
 
@@ -150,10 +146,6 @@ public class AdvancementUtil {
             if (onSuccessPreSet != null) onSuccessPreSet.run();
             setBeyonder(entity, finalPathway, finalSequence);
             sendThirdPersonPacket(entity);
-            if (finalPathway.equals("fool") && finalSequence <= 2){
-                MiracleOfResurrectionComponent data = entity.getData(ModAttachments.MIRACLE_OF_RESURRECTION);
-                data.setResurrectionAttempts(4);
-            }
         });
     }
 

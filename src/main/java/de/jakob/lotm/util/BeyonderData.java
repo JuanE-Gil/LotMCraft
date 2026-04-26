@@ -181,6 +181,12 @@ public class BeyonderData {
             return;
         }
 
+        // resetting the miracle of resurrection attempts
+        if (pathway.equals("fool") && sequence <= 2){
+            MiracleOfResurrectionComponent miracleOfResurrectionComponent = entity.getData(ModAttachments.MIRACLE_OF_RESURRECTION);
+            miracleOfResurrectionComponent.setResurrectionAttempts(4);
+        }
+
         boolean griefing = !BeyonderData.isBeyonder(entity) || BeyonderData.isGriefingEnabled(entity);
 
         BeyonderComponent component = entity.getData(ModAttachments.BEYONDER_COMPONENT);
