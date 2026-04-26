@@ -2,6 +2,7 @@ package de.jakob.lotm.abilities.justiciar.passives;
 
 import de.jakob.lotm.abilities.PassiveAbilityItem;
 import de.jakob.lotm.abilities.red_priest.CullAbility;
+import de.jakob.lotm.abilities.visionary.PsychologicalInvisibilityAbility;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import net.minecraft.server.level.ServerLevel;
@@ -48,6 +49,7 @@ public class ChaosHuntingAbility extends PassiveAbilityItem {
             boolean disasterPathway = "demoness".equals(pathway);
             if (higherRank || disasterPathway) {
                 newTargets.add(candidate);
+
                 CullAbility.setGlowingForPlayer(candidate, player, true);
             }
         }
