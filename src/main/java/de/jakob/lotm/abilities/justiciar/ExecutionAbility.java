@@ -52,9 +52,9 @@ public class ExecutionAbility extends Ability {
         if (targetSeq<seq) {
             failChance = 1;
         } else if (targetSeq == seq) {
-            failChance = 0.65f;
+            failChance = 0.7f;
         } else {
-            failChance = 0.8f;
+            failChance = 0.85f;
         }
         if (random.nextDouble() < failChance) {
             if (caster instanceof ServerPlayer player) {

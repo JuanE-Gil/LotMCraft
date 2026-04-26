@@ -11,7 +11,7 @@ import org.joml.Matrix4f;
 
 public class ProhibitionEffect extends ActiveEffect {
 
-    private static final float MAX_RADIUS = 80f;
+    private static final float MAX_RADIUS = 40f;
     private static final float HEIGHT = 6f;
 
     public ProhibitionEffect(double x, double y, double z) {
