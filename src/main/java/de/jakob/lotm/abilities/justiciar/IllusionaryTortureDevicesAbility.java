@@ -148,8 +148,9 @@ public class IllusionaryTortureDevicesAbility extends SelectableAbility {
         LivingEntity target = AbilityUtil.getTargetEntity(entity, 18* (int) Math.max(multiplier(entity)/4,1), 1.3f);
         if (target == null || target == entity) return;
 
-        double damage = DamageLookup.lookupDamage(7, 0.8) * (int) Math.max(multiplier(entity)/4,1);
-        target.hurt(ModDamageTypes.source(level, ModDamageTypes.BEYONDER_GENERIC, entity), (float) damage);
+        target.hurt(ModDamageTypes.source(level, ModDamageTypes.BEYONDER_GENERIC, entity), 1);
+        float damage = (float) Math.min(multiplier(entity)/100,0.1);
+        target.setHealth(target.getHealth() - (target.getMaxHealth() * damage));
 
         target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 120, 1));
         target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 120, 1));
