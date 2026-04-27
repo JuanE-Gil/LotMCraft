@@ -48,7 +48,7 @@ public class RingEffectManager {
                 center.x, center.y, center.z,
                 maxRadius, duration,
                 red, green, blue, alpha,
-                ringThickness, ringHeight, expansionSpeed, smoothExpansion
+                ringThickness, ringHeight, expansionSpeed, smoothExpansion,true
         );
 
         // Send to all players within 64 blocks using AABB
@@ -62,7 +62,6 @@ public class RingEffectManager {
         createRingForPlayer(center, maxRadius, duration, red, green, blue, alpha,
                 ringThickness, ringHeight, 1.0f, true, level, player);
     }
-
 
     /**
      * Creates a ring effect for all players with expansionSpeed and smoothExpansion (fadeOut defaults to true)
