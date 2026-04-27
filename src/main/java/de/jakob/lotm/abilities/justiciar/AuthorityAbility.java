@@ -27,7 +27,7 @@ public class AuthorityAbility extends SelectableAbility {
     };
 
     public AuthorityAbility(String id) {
-        super(id, 10f, "authority");
+        super(id, 3f, "authority");
         interactionRadius = 15;
         hasOptimalDistance = false;
     }
