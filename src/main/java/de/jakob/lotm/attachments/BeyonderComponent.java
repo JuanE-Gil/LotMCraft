@@ -136,7 +136,6 @@ public class BeyonderComponent implements INBTSerializable<CompoundTag> {
             int index = entry.getInt("index");
             int value = entry.getInt("value");
             this.characteristicStack[index] = value;
-            System.out.println("DESERIALIZE charStack[" + index + "] = " + value);
         }
 
         this.spirituality = compoundTag.getFloat("spirituality");
