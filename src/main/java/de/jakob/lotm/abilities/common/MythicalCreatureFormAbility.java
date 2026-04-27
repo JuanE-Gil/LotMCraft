@@ -63,9 +63,9 @@ public class MythicalCreatureFormAbility extends ToggleAbility {
 
                     if (!entity.getData(ModAttachments.ALLY_COMPONENT.get()).isAlly(e.getUUID())) {
 
-                        if (!e.hasEffect(ModEffects.LOOSING_CONTROL)) {
-                            e.addEffect(new MobEffectInstance(ModEffects.LOOSING_CONTROL, 20 * 4, amplifier));
-                        }
+                        e.getData(ModAttachments.SANITY_COMPONENT.get()).decreaseSanityWithSequenceDifference(
+                                0.04168f, e,
+                                BeyonderData.getSequence(e), BeyonderData.getSequence(entity));
 
                         doPathRelatedEffect(BeyonderData.getPathway(entity), level, entity, e);
                     }

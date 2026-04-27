@@ -92,26 +92,6 @@ public class BeyonderDataTickHandler {
             disabledFlightComponent.setCooldownTicks(disabledFlightComponent.getCooldownTicks() - 1);
         }
 
-        //seq 0 rule - do not look directly at god
-        var target = AbilityUtil.getTargetEntity(livingEntity, 100, 2f, true, true);
-        if(target != null && BeyonderData.isBeyonder(target)){
-            int targetSeq = BeyonderData.getSequence(target);
-            int entitySeq = BeyonderData.getSequence(livingEntity);
-            boolean areAllies = AllyUtil.areAllies(livingEntity, target);
-
-            if(!target.hasEffect(MobEffects.INVISIBILITY) &&
-                    !PsychologicalInvisibilityAbility.finalInvisiblePlayers.containsKey(target.getUUID())) {
-
-                if (targetSeq == 0) {
-                    if (entitySeq > 0 && !areAllies) {
-                        livingEntity.getData(ModAttachments.SANITY_COMPONENT.get())
-                                .decreaseSanityWithSequenceDifference(0.04168f, livingEntity, targetSeq, entitySeq);
-                    }
-                }
-            }
-        }
-
-
         // Tick Fooling attachment — re-apply a 2-tick cosmetic effect each tick so the HUD always shows it
         if (!livingEntity.level().isClientSide) {
             FoolingComponent foolingComponent = livingEntity.getData(ModAttachments.FOOLING_COMPONENT);
