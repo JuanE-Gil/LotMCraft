@@ -233,7 +233,6 @@ public class ModEvents {
         BeyonderMapCommand.register(event.getDispatcher());
         DisableAbilityCommand.register(event.getDispatcher());
         EnableAbilityCommand.register(event.getDispatcher());
-        HonorificNameCommand.register(event.getDispatcher());
         CharacteristicsStackCommand.register(event.getDispatcher());
         TeamCommand.register(event.getDispatcher());
         TeamInviteResponseCommand.register(event.getDispatcher());
