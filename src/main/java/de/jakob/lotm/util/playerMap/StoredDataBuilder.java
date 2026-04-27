@@ -88,7 +88,8 @@ public class StoredDataBuilder {
     }
 
     public StoredDataBuilder charStack(int stack, int sequence) {
-        charStack[sequence] = stack;
+        if(sequence >= 0 && sequence < 10)
+            charStack[sequence] = stack;
         return this;
     }
 
