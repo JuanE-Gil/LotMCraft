@@ -16,6 +16,7 @@ import de.jakob.lotm.network.packets.toClient.SyncPsychologicalInvisibilityPacke
 import de.jakob.lotm.potions.BeyonderCharacteristicItem;
 import de.jakob.lotm.potions.BeyonderCharacteristicItemHandler;
 import de.jakob.lotm.potions.BeyonderPotion;
+import de.jakob.lotm.sefirah.SefirahHandler;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.ClientBeyonderCache;
 import de.jakob.lotm.util.playerMap.StoredData;
@@ -66,6 +67,7 @@ public class BeyonderEventHandler {
                 // Or when marked to do so by server admin
                 if (!BeyonderData.isBeyonder(serverPlayer) || data.modified()) {
                     BeyonderData.setBeyonder(serverPlayer, data.pathway(), data.sequence());
+                    SefirahHandler.claimSefirot(serverPlayer, data.claimedSefirot());
                     playerMap.markModified(serverPlayer, false);
 
                 } else if (playerMap.isDiffPathSeq(serverPlayer)) {
@@ -295,11 +297,14 @@ public class BeyonderEventHandler {
             } else {
                 playerMap.put(player, regressed);
             }
+
             BeyonderData.setDigestionProgress(player, 1.0f);
 
             BeyonderData.recalculateCharStackModifiers(player);
 
             player.getData(ModAttachments.LUCK_COMPONENT.get()).setLuck(0);
+
+            SefirahHandler.unclaimSefirot(player);
 
             if (Objects.equals(data.sequence(), LOTMCraft.NON_BEYONDER_SEQ)) {
                 ClientBeyonderCache.removePlayer(player.getUUID());

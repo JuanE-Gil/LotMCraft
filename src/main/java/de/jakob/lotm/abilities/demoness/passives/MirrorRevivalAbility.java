@@ -67,7 +67,7 @@ public class MirrorRevivalAbility extends PassiveAbilityItem {
         }
         SanityComponent sanity = entity.getData(ModAttachments.SANITY_COMPONENT);
         if (sanity.getSanity() < 0.1) return;
-        LOTMCraft.LOGGER.info("Sanity {}",sanity.getSanity());
+
         event.setCanceled(true);
         entity.setHealth(entity.getMaxHealth());
         sanity.increaseSanityAndSync(-2.2f, entity);

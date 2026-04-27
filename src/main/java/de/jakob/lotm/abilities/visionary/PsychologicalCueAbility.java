@@ -37,6 +37,7 @@ public class PsychologicalCueAbility extends ToggleAbility {
         canBeReplicated = false;
         cannotBeStolen = true;
         autoClear = false;
+        canBeShared = false;
     }
 
     @Override
