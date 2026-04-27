@@ -47,7 +47,7 @@ public class DreamMazeAbility extends SelectableAbility {
         super(id, 7);
         this.canBeCopied = false;
         this.canBeUsedByNPC = false;
-
+        canBeShared = false;
     }
 
     @Override

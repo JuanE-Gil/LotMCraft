@@ -3,6 +3,7 @@ package de.jakob.lotm.abilities.visionary;
 import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.core.SelectableAbility;
 import de.jakob.lotm.abilities.visionary.passives.MetaAwarenessAbility;
+import de.jakob.lotm.attachments.ModAttachments;
 import de.jakob.lotm.effect.ModEffects;
 import de.jakob.lotm.entity.ModEntities;
 import de.jakob.lotm.entity.custom.BeyonderNPCEntity;
@@ -13,6 +14,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -73,6 +75,10 @@ public class DreamWeaveAbility extends SelectableAbility {
         // No target set yet — mob is passive until harmed
 
         serverLevel.addFreshEntity(mob);
+
+        if (target instanceof Mob targetMob) {
+            targetMob.setTarget(mob);
+        }
 
         VICTIM_MOBS.computeIfAbsent(target.getUUID(), k -> new ArrayList<>()).add(mob);
         MOB_TO_VICTIM.put(mob.getId(), target.getUUID());
@@ -164,8 +170,8 @@ public class DreamWeaveAbility extends SelectableAbility {
             removeAllMobs(target.getUUID(), mobs);
         });
     }
-    
- 
+
+
     @SubscribeEvent
     public static void onMobHurt(LivingDamageEvent.Pre event) {
         LivingEntity damagedEntity = event.getEntity();
@@ -176,13 +182,13 @@ public class DreamWeaveAbility extends SelectableAbility {
         net.minecraft.world.entity.Entity attacker = event.getSource().getEntity();
         if (attacker == null) return;
 
-        // Only trigger when the designated victim is the one dealing damage
         if (!attacker.getUUID().equals(victimUUID)) return;
 
-        // Turn hostile and target the attacker
         if (!mob.isHostile() && attacker instanceof LivingEntity livingAttacker) {
             mob.setHostile(true);
             mob.setTarget(livingAttacker);
+
+            mob.getData(ModAttachments.SANITY_COMPONENT).decreaseSanityWithSequenceDifference(.23f, livingAttacker, 2, BeyonderData.getSequence(livingAttacker));
         }
     }
     

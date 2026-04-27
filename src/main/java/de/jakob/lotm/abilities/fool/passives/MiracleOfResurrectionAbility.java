@@ -16,7 +16,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -45,16 +45,22 @@ public class MiracleOfResurrectionAbility extends PassiveAbilityItem {
     static Random random = new Random();
 
     @SubscribeEvent
-    public static void onRightClickWithPaper(LivingDeathEvent event) {
+    public static void beforePlayerDies(LivingIncomingDamageEvent event) {
         Entity entity = event.getEntity();
         Level level = entity.level();
+
         if(level.isClientSide)
             return;
+
         if (entity instanceof ServerPlayer serverPlayer) {
+
+            if (!(event.getAmount() >= serverPlayer.getHealth())) return;
+
             MiracleOfResurrectionComponent data = serverPlayer.getData(ModAttachments.MIRACLE_OF_RESURRECTION);
             if (data.getResurrectionAttempts() > 0) {
                 data.setResurrectionAttempts(data.getResurrectionAttempts() - 1);
                 // cancel the death
+
                 event.setCanceled(true);
 
                 // drop the inventory
