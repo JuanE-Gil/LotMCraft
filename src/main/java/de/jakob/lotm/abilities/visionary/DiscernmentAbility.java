@@ -42,6 +42,7 @@ public class DiscernmentAbility extends SelectableAbility {
         cannotBeStolen = true;
         canBeReplicated = false;
         canBeUsedInArtifact = false;
+        canBeShared = false;
     }
 
     @Override

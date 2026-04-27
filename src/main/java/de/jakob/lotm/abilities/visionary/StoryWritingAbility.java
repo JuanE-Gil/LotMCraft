@@ -35,6 +35,7 @@ public class StoryWritingAbility extends ToggleAbility {
         canBeReplicated = false;
         cannotBeStolen = true;
         autoClear = false;
+        canBeShared = false;
     }
 
     @Override
