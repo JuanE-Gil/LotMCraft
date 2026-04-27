@@ -50,6 +50,7 @@ import de.jakob.lotm.rendering.models.fool.FoolMythicalCreatureModel;
 import de.jakob.lotm.rendering.models.red_priest.RedPriestMythicalCreatureModel;
 import de.jakob.lotm.rendering.models.sun.SunMythicalCreatureModel;
 import de.jakob.lotm.rendering.models.wheel_of_fortune.WheelOfFortuneMythicalCreatureModel;
+import de.jakob.lotm.sefirah.SefirahHandler;
 import de.jakob.lotm.util.helper.TeamUtils;
 import de.jakob.lotm.rendering.models.door.DoorMythicalCreatureModel;
 import de.jakob.lotm.rendering.models.tyrant.TyrantMythicalCreatureModel;
@@ -239,6 +240,7 @@ public class ModEvents {
         SetBeyonderLogCommand.register(event.getDispatcher());
         KillCountCommand.register(event.getDispatcher());
         UniquenessCommand.register(event.getDispatcher());
+        SefirotCommand.register(event.getDispatcher());
     }
 
     @SubscribeEvent
