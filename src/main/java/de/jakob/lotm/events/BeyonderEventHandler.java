@@ -23,6 +23,7 @@ import de.jakob.lotm.util.playerMap.StoredData;
 import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.TeamUtils;
 import de.jakob.lotm.util.scheduling.ServerScheduler;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
@@ -34,9 +35,11 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.EntityTravelToDimensionEvent;
 import net.neoforged.neoforge.event.entity.living.*;
 import net.neoforged.neoforge.event.entity.player.PlayerContainerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
@@ -566,5 +569,24 @@ public class BeyonderEventHandler {
         }
     }
 
+    @SubscribeEvent
+    public static void onTravel(EntityTravelToDimensionEvent event) {
+        if(!(event.getEntity() instanceof LivingEntity entity)) return;
 
+        ResourceKey<Level> target = event.getDimension();
+
+        int seq = BeyonderData.getSequence(entity);
+        String path =  BeyonderData.getPathway(entity);
+
+
+        if (target == Level.NETHER && seq > 5){
+            event.setCanceled(true);
+        }
+        else if (target == Level.END){
+            if(path.equals("door") && seq > 3)
+                event.setCanceled(true);
+            else if(seq > 2)
+                event.setCanceled(true);
+        }
+    }
 }
