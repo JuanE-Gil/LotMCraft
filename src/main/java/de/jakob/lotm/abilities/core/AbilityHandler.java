@@ -234,7 +234,7 @@ public class AbilityHandler {
         abilities.add(new DiscernmentAbility("discernment_ability"));
         abilities.add(new DisasterFantasiaAbility("disaster_fantasia_ability"));
         abilities.add(new StoryWritingAbility("story_writing_ability"));
-        //abilities.add(new EnvisionPositionAbility("envision_position_ability"));
+        abilities.add(new EnvisionPositionAbility("envision_position_ability"));
 
 
         // WHEEL OF FORTUNE PATHWAY
@@ -249,6 +249,7 @@ public class AbilityHandler {
         abilities.add(new WordsOfMisfortuneAbility("words_of_misfortune_ability"));
         abilities.add(new ProphecyAbility("prophecy_ability"));
         abilities.add(new CycleOfFateAbility("cycle_of_fate_ability"));
+
 
         // ERROR PATHWAY
         abilities.add(new TheftAbility("theft_ability"));
