@@ -4,6 +4,7 @@ import de.jakob.lotm.LOTMCraft;
 import de.jakob.lotm.abilities.PassiveAbilityItem;
 import de.jakob.lotm.abilities.core.ToggleAbility;
 import de.jakob.lotm.abilities.fool.HistoricalVoidHidingAbility;
+import de.jakob.lotm.abilities.justiciar.LawAbility;
 import de.jakob.lotm.attachments.DisabledAbilitiesComponent;
 import de.jakob.lotm.attachments.MiracleOfResurrectionComponent;
 import de.jakob.lotm.attachments.ModAttachments;
@@ -56,6 +57,7 @@ public class MiracleOfResurrectionAbility extends PassiveAbilityItem {
 
             if (!(event.getAmount() >= serverPlayer.getHealth())) return;
 
+            if (LawAbility.SOLACE_KILLED.contains(entity.getUUID())) return;
             MiracleOfResurrectionComponent data = serverPlayer.getData(ModAttachments.MIRACLE_OF_RESURRECTION);
             if (data.getResurrectionAttempts() > 0) {
                 data.setResurrectionAttempts(data.getResurrectionAttempts() - 1);

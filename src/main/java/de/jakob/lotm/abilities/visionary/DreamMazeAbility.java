@@ -57,7 +57,7 @@ public class DreamMazeAbility extends SelectableAbility {
 
     @Override
     public float getSpiritualityCost() {
-        return 1000;
+        return 4000;
     }
 
     @Override

@@ -68,7 +68,7 @@ public class PlacateAbility extends SelectableAbility {
 
         int entitySeq = AbilityUtil.getSeqWithArt(entity, this);
 
-        var targetPlayer = AbilityUtil.getTargetEntity(entity, 40,
+        var targetPlayer = AbilityUtil.getTargetEntity(entity, 40* (int) Math.max(multiplier(entity)/4,1),
                 1f, true, true) == null ?
                 entity :  AbilityUtil.getTargetEntity(
                         entity, 40, 1f, true, true);
