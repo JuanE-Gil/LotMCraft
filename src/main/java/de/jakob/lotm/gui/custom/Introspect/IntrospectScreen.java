@@ -146,6 +146,12 @@ public class IntrospectScreen extends AbstractContainerScreen<IntrospectMenu> {
             availableAbilities.addAll(abilitySet);
         }
 
+        // Deduplicate: abilities like Cogitation/Ally match all pathways and can be added
+        // twice when a pathway history entry exists (once for current pathway, once for historical).
+        List<Ability> unique = availableAbilities.stream().distinct().toList();
+        availableAbilities.clear();
+        availableAbilities.addAll(unique);
+
         availableAbilities.removeIf(Ability::getShouldBeHidden);
 
         // Calculate max scroll

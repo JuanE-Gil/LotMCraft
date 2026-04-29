@@ -39,7 +39,7 @@ public class DragonScalesAbility extends ToggleAbility {
 
     @Override
     public float getSpiritualityCost() {
-        return 2;
+        return 15;
     }
 
     @Override
