@@ -11,6 +11,7 @@ The Justiciar pathway focuses on law enforcement, restriction, and judgment. Jus
 ### Ancient Court of Judgment
 - **Sequence Required:** 0
 - **Spirituality Cost:** 10,000
+- **Cooldown:** 2 minutes
 - **Zone Radius:** 120 blocks | **Duration:** 2 minutes
 - **Cannot be copied, replicated, or used by NPCs**
 
@@ -52,6 +53,7 @@ Summon the Ancient Court of Judgment, a massive permanent tribunal zone. Every 1
 ### World Judgment
 - **Sequence Required:** 0
 - **Spirituality Cost:** 20,000
+- **Cooldown:** 45 seconds
 - **Interaction Radius:** 30 blocks
 - **Cannot be copied, replicated, or used by NPCs**
 
@@ -72,6 +74,7 @@ Designate a single target for World Judgment. Each time the designated target vi
 ### Order Proxy
 - **Sequence Required:** 1
 - **Spirituality Cost:** 200
+- **Cooldown:** 20 seconds
 - **Interaction Radius:** 50 blocks
 - **Type:** Selectable (choose one variant per cast)
 
@@ -93,6 +96,7 @@ Re-casting while standing inside an existing zone of the same type removes it. P
 ### Individual Balance
 - **Sequence Required:** 2
 - **Spirituality Cost:** 2,000
+- **Cooldown:** 40 seconds
 - **Interaction Radius:** 20 blocks (optimal: 10 blocks)
 - **Duration:** 60 sec (1200 ticks)
 
@@ -103,6 +107,7 @@ Impose individual balance on a single Beyonder target. The target's abilities ar
 ### Exile of Balance
 - **Sequence Required:** 2
 - **Spirituality Cost:** 1,200
+- **Cooldown:** 60 seconds
 - **Interaction Radius:** 40 blocks
 
 Assess the power balance between all nearby Beyonders and forcibly exile members of the dominant side until both sides are within 10% of each other in total power (measured as the sum of (10 − sequence) per Beyonder).
@@ -114,6 +119,7 @@ Exiled entities are removed from active participation for a random duration betw
 ### Sword of Judgment
 - **Sequence Required:** 3
 - **Spirituality Cost:** 400
+- **Cooldown:** 5 seconds
 - **Interaction Radius:** 20 blocks (optimal: 10 blocks)
 
 Issue a direct Judgment that cannot be avoided. Spawns a JudgmentSwordEntity 15 blocks above the target, which falls and deals **50% of the target's max health** on impact.
@@ -126,6 +132,7 @@ On a successful hit, the target's Prohibition resistance count is cleared. Creat
 ### Delivering Judgment
 - **Sequence Required:** 3
 - **Spirituality Cost:** 300
+- **Cooldown:** 5 seconds
 
 Teleport instantly to the entity that has resisted your Prohibition abilities the most times. Requires at least one entity to have previously resisted a Prohibition zone. Uses a waypoint visual effect on arrival.
 
@@ -134,6 +141,7 @@ Teleport instantly to the entity that has resisted your Prohibition abilities th
 ### Balancing
 - **Sequence Required:** 3
 - **Spirituality Cost:** 1,600
+- **Cooldown:** 30 seconds
 - **Zone Radius:** 120 blocks | **Duration:** 3 minutes
 
 Declare Balance over the lands. Within the zone, all Beyonders' ability multipliers are equalized toward the target value of 2.625 every 5 ticks — both buffs and penalties are neutralized. Broadcasts a message to all nearby players when declared.
@@ -143,6 +151,7 @@ Declare Balance over the lands. Within the zone, all Beyonders' ability multipli
 ### Law
 - **Sequence Required:** 4
 - **Spirituality Cost:** 400
+- **Cooldown:** 5 seconds
 - **Interaction Radius:** 40 blocks
 - **Type:** Selectable (choose one variant per cast)
 
@@ -160,6 +169,7 @@ Declare a Law that reshapes the rules of engagement. Choose one effect:
 ### Execution
 - **Sequence Required:** 4
 - **Spirituality Cost:** 1,200
+- **Cooldown:** 40 seconds
 - **Interaction Radius:** 20 blocks
 - **Fail Chance:** Varies by sequence difference
 
@@ -176,6 +186,7 @@ Execute a target from afar via guillotine animation. If successful, the target i
 ### Punishment
 - **Sequence Required:** 5
 - **Spirituality Cost:** 150
+- **Cooldown:** 5 seconds
 - **Interaction Radius:** 20 blocks
 - **Duration:** 5 minutes
 
@@ -197,6 +208,7 @@ Mark a target for Punishment (caster gains Glowing while active). Re-cast to can
 ### Prohibition
 - **Sequence Required:** 6
 - **Spirituality Cost:** 800
+- **Cooldown:** 15 seconds
 - **Interaction Radius:** 40 blocks
 - **Zone Radius:** 40 blocks | **Zone Duration:** 3 minutes | **Max Zones:** 3 per type
 
@@ -224,6 +236,7 @@ The available variants are gated by sequence rank. Higher-rank Justiciars (lower
 ### Imprison
 - **Sequence Required:** 6
 - **Spirituality Cost:** 50 (initial) + 300 per 4 sec (ongoing drain)
+- **Cooldown:** 3 seconds
 - **Interaction Radius:** 15 blocks
 
 Freeze a single target completely in place. While active, the caster continuously drains spirituality. Re-cast to release the target early.
@@ -233,6 +246,7 @@ Freeze a single target completely in place. While active, the caster continuousl
 ### Confinement
 - **Sequence Required:** 6
 - **Spirituality Cost:** 600
+- **Cooldown:** 30 seconds
 - **Interaction Radius:** 15 blocks
 - **Cage Radius:** 6 blocks (hollow cube) | **Duration:** 60 sec
 
@@ -243,6 +257,7 @@ Erect invisible barrier walls forming a hollow cage around a targeted location. 
 ### Justice Language
 - **Sequence Required:** 6
 - **Spirituality Cost:** 100
+- **Cooldown:** 4 seconds
 - **Interaction Radius:** 20 blocks
 - **Type:** Selectable (choose one variant per cast)
 
@@ -259,6 +274,7 @@ Speak verdicts in the Language of Justice. Choose one effect:
 ### Verdict: Exile
 - **Sequence Required:** 6
 - **Spirituality Cost:** 200
+- **Cooldown:** 12 seconds
 - **Interaction Radius:** 25 blocks
 
 Launch a target upward with a burst of force (+3.5 Y velocity), applying Slow Falling for 10 sec. Accompanied by cone-shaped Holy Flame and Golden Note particle effects.
@@ -330,6 +346,7 @@ Entities are also made visible (invisibility stripped). Gold, red, and black dus
 ### Authority
 - **Sequence Required:** 9
 - **Spirituality Cost:** 30
+- **Cooldown:** 3 seconds
 - **Interaction Radius:** 15 blocks
 - **Type:** Selectable (choose one variant per cast)
 
