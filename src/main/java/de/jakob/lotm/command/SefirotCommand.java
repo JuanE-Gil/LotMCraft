@@ -95,6 +95,7 @@ public class SefirotCommand {
                 .requires(source -> source.hasPermission(2))
                 .then(check())
                 .then(set())
+                .then(clear())
         );
     }
 }
