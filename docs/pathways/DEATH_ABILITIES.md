@@ -63,7 +63,7 @@ Spirituality regenerates at **0.06% of max per tick** (1.2% per second) passivel
 **Cooldown:** 3 minutes  
 *(Cannot be copied, replicated, or stolen)*
 
-- **Radius:** 15 blocks
+- **Radius:** `15 × max(multiplier/4, 1)` blocks (scales with multiplier)
 - **Duration:** 1 minute 40 seconds (2,000 ticks)
 - **Effect Interval:** Every tick; damage every 20 ticks (once per second)
 
@@ -106,11 +106,11 @@ Spirituality regenerates at **0.06% of max per tick** (1.2% per second) passivel
 
 **Damage:**
 - Target is **2+ sequences weaker**: instant kill.
-- Target is **1 sequence weaker**: deals **70%** of target's max HP.
-- Target is **same sequence**: deals **50%** of target's max HP.
-- Target is **stronger** (lower sequence number): deals **50% − (20% × sequence difference)** of target's max HP.
-  - 1 sequence stronger → 30%
-  - 2+ sequences stronger → 0% (no damage; "too strong" message)
+- Target is **1 sequence weaker**: deals **0%** of target's max HP (no damage).
+- Target is **same sequence**: deals **40%** of target's max HP.
+- Target is **stronger** (lower sequence number): deals **40% + (40% × sequence difference)** of target's max HP.
+  - 1 sequence stronger → 80%
+  - 2+ sequences stronger → capped / instant kill threshold
 
 **Visual:**
 - A layered beam of black/void dust particles and soul particles fired from the caster's eye to the target, persisting for 10 ticks.
@@ -256,7 +256,7 @@ Applies the **Spirit Called** custom effect (Level 0) to the target for 10 secon
 Two selectable modes:
 
 **Summon**
-- Summons **10 Skeletons** and **10 Zombies** near the caster (within a 4-block radius), each wearing a full set of iron armour (no drop chance).
+- Summons up to **`8 × max(multiplier/4, 1)`** Skeletons and the same number of Zombies near the caster (within a 4-block radius), each wearing a full set of iron armour (no drop chance).
 - All summoned mobs are registered as subordinates of the caster.
 
 **Release**

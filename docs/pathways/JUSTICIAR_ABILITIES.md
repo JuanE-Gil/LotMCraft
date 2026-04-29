@@ -10,7 +10,7 @@ The Justiciar pathway focuses on law enforcement, restriction, and judgment. Jus
 
 ### Ancient Court of Judgment
 - **Sequence Required:** 0
-- **Spirituality Cost:** 3000
+- **Spirituality Cost:** 10,000
 - **Zone Radius:** 120 blocks | **Duration:** 2 minutes
 - **Cannot be copied, replicated, or used by NPCs**
 
@@ -51,7 +51,7 @@ Summon the Ancient Court of Judgment, a massive permanent tribunal zone. Every 1
 
 ### World Judgment
 - **Sequence Required:** 0
-- **Spirituality Cost:** 500
+- **Spirituality Cost:** 20,000
 - **Interaction Radius:** 30 blocks
 - **Cannot be copied, replicated, or used by NPCs**
 
@@ -71,7 +71,7 @@ Designate a single target for World Judgment. Each time the designated target vi
 
 ### Order Proxy
 - **Sequence Required:** 1
-- **Spirituality Cost:** 800
+- **Spirituality Cost:** 200
 - **Interaction Radius:** 50 blocks
 - **Type:** Selectable (choose one variant per cast)
 
@@ -92,7 +92,7 @@ Re-casting while standing inside an existing zone of the same type removes it. P
 
 ### Individual Balance
 - **Sequence Required:** 2
-- **Spirituality Cost:** 1000
+- **Spirituality Cost:** 2,000
 - **Interaction Radius:** 20 blocks (optimal: 10 blocks)
 - **Duration:** 60 sec (1200 ticks)
 
@@ -102,18 +102,18 @@ Impose individual balance on a single Beyonder target. The target's abilities ar
 
 ### Exile of Balance
 - **Sequence Required:** 2
-- **Spirituality Cost:** 600
+- **Spirituality Cost:** 1,200
 - **Interaction Radius:** 40 blocks
 
 Assess the power balance between all nearby Beyonders and forcibly exile members of the dominant side until both sides are within 10% of each other in total power (measured as the sum of (10 − sequence) per Beyonder).
 
-Exiled entities are removed from active participation for a random duration between **10 seconds and 2 minutes**. The caster can never be exiled by this ability. Enemies are sorted by power, with the strongest exiled first. If both sides are already balanced (within 10%), the ability fizzles. Broadcasts a pale blue ring effect on activation.
+Exiled entities are removed from active participation for a random duration between **2 minutes and 4 minutes**. The caster can never be exiled by this ability. Enemies are sorted by power, with the strongest exiled first. If both sides are already balanced (within 10%), the ability fizzles. Broadcasts a pale blue ring effect on activation.
 
 ---
 
 ### Sword of Judgment
 - **Sequence Required:** 3
-- **Spirituality Cost:** 200
+- **Spirituality Cost:** 400
 - **Interaction Radius:** 20 blocks (optimal: 10 blocks)
 
 Issue a direct Judgment that cannot be avoided. Spawns a JudgmentSwordEntity 15 blocks above the target, which falls and deals **50% of the target's max health** on impact.
@@ -125,7 +125,7 @@ On a successful hit, the target's Prohibition resistance count is cleared. Creat
 
 ### Delivering Judgment
 - **Sequence Required:** 3
-- **Spirituality Cost:** 100
+- **Spirituality Cost:** 300
 
 Teleport instantly to the entity that has resisted your Prohibition abilities the most times. Requires at least one entity to have previously resisted a Prohibition zone. Uses a waypoint visual effect on arrival.
 
@@ -133,8 +133,8 @@ Teleport instantly to the entity that has resisted your Prohibition abilities th
 
 ### Balancing
 - **Sequence Required:** 3
-- **Spirituality Cost:** 800
-- **Zone Radius:** 60 blocks | **Duration:** 3 minutes
+- **Spirituality Cost:** 1,600
+- **Zone Radius:** 120 blocks | **Duration:** 3 minutes
 
 Declare Balance over the lands. Within the zone, all Beyonders' ability multipliers are equalized toward the target value of 2.625 every 5 ticks — both buffs and penalties are neutralized. Broadcasts a message to all nearby players when declared.
 
@@ -153,17 +153,23 @@ Declare a Law that reshapes the rules of engagement. Choose one effect:
 | Weaken Mysticism, Enhance Reality | All Beyonders' (including caster's) ability multiplier reduced to 0.25× for 30 sec |
 | Weaken Reality, Enhance Mysticism | All Beyonders' (including caster's) ability multiplier increased to 2.5× for 60 sec |
 | Solace | Instantly kills all undead entities within 40 blocks (bypasses revival) |
-| Law of Sealing | Seals the target's last used ability for 30 sec |
+| Law of Sealing | Seals the target's last used ability for 2 minutes (scales with multiplier) |
 
 ---
 
 ### Execution
 - **Sequence Required:** 4
-- **Spirituality Cost:** 600
+- **Spirituality Cost:** 1,200
 - **Interaction Radius:** 20 blocks
-- **Fail Chance:** 70%
+- **Fail Chance:** Varies by sequence difference
 
-Execute a target from afar via guillotine animation. If successful, the target is instantly killed and cannot be revived. Despite the high fail chance, success bypasses all defenses.
+Execute a target from afar via guillotine animation. If successful, the target is instantly killed and cannot be revived. Success bypasses all defenses.
+
+| Situation | Fail Chance |
+|---|---|
+| Target is weaker (higher seq number) | 0% (always succeeds) |
+| Same sequence | 70% |
+| Target is stronger (lower seq number) | 85% |
 
 ---
 
@@ -256,6 +262,48 @@ Speak verdicts in the Language of Justice. Choose one effect:
 - **Interaction Radius:** 25 blocks
 
 Launch a target upward with a burst of force (+3.5 Y velocity), applying Slow Falling for 10 sec. Accompanied by cone-shaped Holy Flame and Golden Note particle effects.
+
+---
+
+### Illusionary Torture Devices
+- **Sequence Required:** 7
+- **Spirituality Cost:** 100
+- **Cooldown:** 1.5 seconds
+- **Type:** Selectable (choose one variant per cast)
+
+Employ illusionary torture instruments to punish and weaken targets. Choose one effect:
+
+| Variant | Effect |
+|---|---|
+| Branding Iron | Places a Branding Iron (iron sword) in the caster's hand. On a fully-charged swing within `4×multiplier` blocks, deals `DamageLookup(7, 0.6)×multiplier` damage + Weakness I (10 sec) + 0.12 sanity drain. Lasts 3–15 sec depending on sequence (seq 7→3s, scales down to seq 0→15s), then vanishes. |
+| Psychic Lashing | Enchants the held weapon with Sharpness V (seq ≤ 4) or Sharpness III (seq > 4). |
+| Psychic Piercing | Ranged attack within `18×multiplier` blocks. Deals `DamageLookup(7, 0.8)` + up to 0.1% of target's max HP (scales with multiplier). Applies Slowness II + Weakness II (6 sec) and Confusion (5 sec). Drains 0.20 sanity. |
+| Whip of Pain | Ranged attack within `12×multiplier` blocks. Deals `DamageLookup(7, 0.6)×multiplier` damage + Weakness I (4 sec). Drains 0.15 sanity. |
+
+---
+
+### Recognition
+- **Sequence Required:** 8
+- **Spirituality Cost:** 0
+- **Type:** Toggle (re-cast to deactivate)
+- **Can be used in artifacts**
+
+While active, scan for a target within `40×multiplier` blocks every 10 ticks. Displays the target's name, pathway, and sequence on the action bar. Information is hidden if the target is a fellow Justiciar of equal or higher sequence, or if the caster is weaker than the target (higher sequence number).
+
+---
+
+### Jurisdiction
+- **Sequence Required:** 8
+- **Spirituality Cost:** 0
+- **Type:** Toggle (re-cast to dismiss)
+
+Establish a Jurisdiction zone with a radius of `300×multiplier` blocks centered on the caster's position. While active:
+- The boundary is marked with glow particles every 10 ticks.
+- The caster is notified when any player enters or leaves the zone (checked every 5 ticks).
+- Eye of Order radius is **doubled** while the caster is inside their own Jurisdiction.
+- Eye of Order remains passively active (no spirituality drain) while inside the Jurisdiction.
+
+Re-casting dismisses the active zone.
 
 ---
 
@@ -377,5 +425,6 @@ Several abilities interact with shared state:
 | 4 | Law, Execution |
 | 5 | Punishment, Enhanced Mental Attributes |
 | 6 | Prohibition, Imprison, Confinement, Justice Language, Verdict: Exile |
-| 8 | Eye of Order |
+| 7 | Illusionary Torture Devices |
+| 8 | Recognition, Jurisdiction, Eye of Order |
 | 9 | Authority, Physical Enhancements, Order |
