@@ -184,11 +184,33 @@ Three selectable sub-abilities:
 ### Undying Seal
 **Sequence Requirement:** 4  
 **Spirituality Cost:** 350  
-**Cooldown:** 2 minutes
+**Cooldown:** 80 seconds
 
 - **Duration:** 60 seconds
 
 While active, suppresses all negative artifact effects on the caster for the duration.
+
+---
+
+### Death Spells
+**Sequence Requirement:** 4  
+**Spirituality Cost:** 750  
+**Cooldown:** 3 seconds
+
+Two selectable modes:
+
+**Withering Wind**
+- Fires a slow-moving wind projectile forward from the caster's eye level, traveling 0.5 blocks/tick for **4 seconds (80 ticks)**.
+- Every tick, deals `DamageLookup(4, 0.8) × multiplier` damage to all entities within a **9-block radius** of the projectile's current position.
+- If griefing is enabled, converts blocks in an **8-block sphere** around the projectile's path into Soul Soil or Basalt (~80% chance per block, skipping indestructible/Soul Soil/Basalt blocks).
+- Ends early if the caster leaves their current area.
+
+**Soul Siphon**
+- Targets an entity within **20 blocks** (line-of-sight).
+- Drains the target over **3 seconds (60 ticks)**:
+  - Every 4 ticks: deals `DamageLookup(4, 0.6) × multiplier` damage to the target; on hit, heals the caster for **1.5 HP**.
+- Breaks if the target moves more than **25 blocks** away or either party dies.
+- Ends early if the caster leaves their current area.
 
 ---
 
@@ -214,10 +236,10 @@ Two selectable modes:
 ### Death Envoy
 **Sequence Requirement:** 5  
 **Spirituality Cost:** 800  
-**Cooldown:** 90 seconds  
+**Cooldown:** 10 seconds  
 *(Cannot be copied or stolen)*
 
-- **Radius:** 10 blocks
+- **Radius:** 5 blocks
 - **Effect Duration:** 20 seconds on all affected entities
 
 Applies the following to all nearby non-allied entities on use. Entities **2+ sequences stronger** than the caster are unaffected:
@@ -249,8 +271,8 @@ Applies the **Spirit Called** custom effect (Level 0) to the target for 10 secon
 
 ### Restruction
 **Sequence Requirement:** 6  
-**Spirituality Cost:** 500  
-**Cooldown:** 10 seconds (Release bypasses cooldown)  
+**Spirituality Cost:** 1,500  
+**Cooldown:** 20 seconds (Release bypasses cooldown)  
 *(Cannot be copied or stolen)*
 
 Two selectable modes:
