@@ -35,7 +35,7 @@ public class BlinkAbility extends Ability {
 
     @Override
     public float getSpiritualityCost() {
-        return 400;
+        return 300;
     }
 
     private final DustParticleOptions dust = new DustParticleOptions(
