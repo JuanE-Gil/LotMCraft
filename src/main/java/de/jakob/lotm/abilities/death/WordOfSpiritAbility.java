@@ -6,7 +6,10 @@ import de.jakob.lotm.effect.ModEffects;
 import de.jakob.lotm.util.data.Location;
 import de.jakob.lotm.util.BeyonderData;
 import de.jakob.lotm.util.helper.AbilityUtil;
+import de.jakob.lotm.util.helper.ParticleUtil;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
@@ -52,6 +55,7 @@ public class WordOfSpiritAbility extends Ability {
         }
 
         target.addEffect(new MobEffectInstance(ModEffects.SPIRIT_CALLED, DURATION_TICKS, 0, false, true, true));
+        ParticleUtil.spawnParticles((ServerLevel) level, ParticleTypes.SOUL, target.getEyePosition(), 60, 0.5, 0.5, 0.5, 0.1);
         AbilityUtil.sendActionBar(entity, Component.translatable("ability.lotmcraft.word_of_spirit.applied").withColor(0xFF334f23));
     }
 }
