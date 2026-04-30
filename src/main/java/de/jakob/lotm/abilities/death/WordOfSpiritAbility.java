@@ -39,7 +39,7 @@ public class WordOfSpiritAbility extends Ability {
     public void onAbilityUse(Level level, LivingEntity entity) {
         if (level.isClientSide) return;
 
-        if (InteractionHandler.isInteractionPossibleStrictlyHigher(new Location(entity.position(), (net.minecraft.server.level.ServerLevel) level), "purification", BeyonderData.getSequence(entity), -1)) return;
+        if (InteractionHandler.isInteractionPossibleStrictlyHigher(new Location(entity.position(), level), "purification", BeyonderData.getSequence(entity), -1)) return;
 
         LivingEntity target = AbilityUtil.getTargetEntity(entity, 25*(int) Math.max(multiplier(entity)/4,1), 1.5f);
         if (target == null) {

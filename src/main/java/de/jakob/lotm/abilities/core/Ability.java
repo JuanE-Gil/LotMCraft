@@ -306,4 +306,12 @@ public abstract class Ability {
     public boolean getShouldBeHidden(){
         return shouldBeHidden;
     }
+
+    public int getCooldown() {
+        return cooldown;
+    }
+
+    public float spiritualityCost() {
+        return getSpiritualityCost();
+    }
 }
