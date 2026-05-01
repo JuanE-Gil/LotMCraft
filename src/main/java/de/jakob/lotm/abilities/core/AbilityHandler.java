@@ -253,26 +253,28 @@ public class AbilityHandler {
 
         // JUSTICIAR PATHWAY
         abilities.add(new AuthorityAbility("authority_ability"));
-        abilities.add(new EyeOfOrderAbility("eye_of_order_ability"));
-        abilities.add(new ProhibitionAbility("prohibition_ability"));
-        abilities.add(new IllusionaryTortureDevicesAbility("illusionary_torture_devices_ability"));
-        abilities.add(new ImprisonAbility("imprison_ability"));
-        abilities.add(new ConfinementAbility("confinement_ability"));
-        abilities.add(new JusticeLanguageAbility("justice_language_ability"));
-        abilities.add(new VerdictExileAbility("verdict_exile_ability"));
-        abilities.add(new PunishmentAbility("punishment_ability"));
-        abilities.add(new LawAbility("law_ability"));
-        abilities.add(new ExecutionAbility("execution_ability"));
-        abilities.add(new BalancingAbility("balancing_ability"));
-        abilities.add(new SwordOfJudgmentAbility("sword_of_judgment_ability"));
-        abilities.add(new DeliveringJudgmentAbility("delivering_judgment_ability"));
-        abilities.add(new ExileOfBalanceAbility("exile_of_balance_ability"));
-        abilities.add(new IndividualBalanceAbility("individual_balance_ability"));
-        abilities.add(new OrderProxyAbility("order_proxy_ability"));
-        abilities.add(new AncientCourtOfJudgmentAbility("ancient_court_of_judgment_ability"));
-        abilities.add(new WorldJudgmentAbility("world_judgment_ability"));
         abilities.add(new RecognitionAbility("recognition_ability"));
         abilities.add(new JurisdictionAbility("jurisdiction_ability"));
+        abilities.add(new EyeOfOrderAbility("eye_of_order_ability"));
+        abilities.add(new IllusionaryTortureDevicesAbility("illusionary_torture_devices_ability"));
+        abilities.add(new VerdictExileAbility("verdict_exile_ability"));
+        abilities.add(new ProhibitionAbility("prohibition_ability"));
+        abilities.add(new ImprisonAbility("imprison_ability"));
+        abilities.add(new JusticeLanguageAbility("justice_language_ability"));
+        abilities.add(new ConfinementAbility("confinement_ability"));
+        abilities.add(new PunishmentAbility("punishment_ability"));
+
+
+//        abilities.add(new LawAbility("law_ability"));
+//        abilities.add(new ExecutionAbility("execution_ability"));
+//        abilities.add(new BalancingAbility("balancing_ability"));
+//        abilities.add(new SwordOfJudgmentAbility("sword_of_judgment_ability"));
+//        abilities.add(new DeliveringJudgmentAbility("delivering_judgment_ability"));
+//        abilities.add(new ExileOfBalanceAbility("exile_of_balance_ability"));
+//        abilities.add(new IndividualBalanceAbility("individual_balance_ability"));
+//        abilities.add(new OrderProxyAbility("order_proxy_ability"));
+//        abilities.add(new AncientCourtOfJudgmentAbility("ancient_court_of_judgment_ability"));
+//        abilities.add(new WorldJudgmentAbility("world_judgment_ability"));
 
 
         // ERROR PATHWAY
@@ -297,6 +299,7 @@ public class AbilityHandler {
         abilities.add(new ZombieDisguiseAbility("zombie_disguise_ability"));
         abilities.add(new SpiritChannelingAbility("spirit_channeling_ability"));
         abilities.add(new RestructionAbility("restruction_ability"));
+        abilities.add(new WordOfSpiritAbility("word_of_spirit_ability"));
         abilities.add(new DoorToTheUnderworldAbility("door_to_the_underworld_ability"));
         abilities.add(new InternalUnderworldAbility("internal_underworld_ability"));
         abilities.add(new DeathEnvoyAbility("death_envoy_ability"));
@@ -305,11 +308,10 @@ public class AbilityHandler {
         abilities.add(new DeathSpellsAbility("death_spells_ability"));
         abilities.add(new PaleEyeAbility("pale_eye_ability"));
         abilities.add(new HandOfDeathAbility("hand_of_death_ability"));
-
         abilities.add(new DeathFlameAbility("death_flame_ability"));
-        abilities.add(new DivineKingdomAbility("divine_kingdom_ability"));
         abilities.add(new NationOfTheDeadAbility("nation_of_the_dead_ability"));
-        abilities.add(new WordOfSpiritAbility("word_of_spirit_ability"));
+
+        //abilities.add(new DivineKingdomAbility("divine_kingdom_ability"));
     }
 
     public HashSet<Ability> getAbilities() {
@@ -326,6 +328,15 @@ public class AbilityHandler {
                 .filter(ability ->
                         ability.getRequirements().containsKey(pathway) && ability.getRequirements().get(pathway) == sequence)
                 .collect(Collectors.toCollection(HashSet::new));
+    }
+
+    public ArrayList<Ability> getByPathwayAndSequenceExactOrdered(String pathway, int sequence) {
+        return abilities
+                .stream()
+                .filter(ability ->
+                        ability.getRequirements().containsKey(pathway) && ability.getRequirements().get(pathway) == sequence)
+                .sorted(Comparator.comparing(Ability::getId))
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     public HashSet<Ability> getByPathwayAndSequence(String pathway, int sequence) {

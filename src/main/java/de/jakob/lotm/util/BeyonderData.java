@@ -202,6 +202,9 @@ public class BeyonderData {
 
         if(clearPathwayHistory) {
             component.setPathwayHistory(new String[10]);
+            for(int i = sequence; i < 10; i++) {
+                component.getPathwayHistory()[i] = pathway;
+            }
         }
         if(addToPathwayHistory) {
             component.getPathwayHistory()[sequence] = pathway;
