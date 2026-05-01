@@ -125,52 +125,72 @@ public class JusticeLanguageAbility extends SelectableAbility {
             return;
         }
 
-        serverLevel.playSound(null, caster.blockPosition(), SoundEvents.ENDER_DRAGON_GROWL, SoundSource.PLAYERS, 1.5f, 1.2f);
+        serverLevel.playSound(null, caster.blockPosition(), SoundEvents.ELDER_GUARDIAN_CURSE, SoundSource.PLAYERS, 1.5f, 1.2f);
         serverLevel.playSound(null, caster.blockPosition(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.8f, 1.8f);
 
         ParticleUtil.spawnSphereParticles(serverLevel, DUST_GOLD, caster.position().add(0, 1, 0), 0.6, 16);
         ParticleUtil.spawnCircleParticles(serverLevel, DUST_RED, caster.position().add(0, 0.05, 0), 0.5, 14);
+        if (seq<=5) {
+            Vec3 startPos = caster.getEyePosition().subtract(0, .2, 0).add(caster.getLookAngle().normalize());
+            serverLevel.playSound(null, startPos.x, startPos.y, startPos.z, SoundEvents.BLAZE_SHOOT, caster.getSoundSource(), 2.0f, .5f);
+            target.hurt(ModDamageTypes.source(serverLevel, ModDamageTypes.BEYONDER_GENERIC, caster),
+                    (float) DamageLookup.lookupDamage(5, 1.2) * (int )Math.max (multiplier(caster)/4,1));
+            target.hurtMarked = true;
+            String targetName = target.getDisplayName().getString();
+            spawnWordBeam(serverLevel, caster, target, DUST_DARK);
+            ServerScheduler.scheduleForDuration(0, 4, 30, () -> {
+                ParticleUtil.spawnSphereParticles(serverLevel, DUST_GOLD, target.getEyePosition(), 0.6, 8);
+                ParticleUtil.spawnParticles(serverLevel, ParticleTypes.SMOKE, target.getEyePosition(), 4, 0.3);
+            }, serverLevel);
 
-        AtomicBoolean done = new AtomicBoolean(false);
-        AtomicInteger ticks = new AtomicInteger(0);
+            serverLevel.playSound(null, target.blockPosition(), SoundEvents.PLAYER_HURT, SoundSource.PLAYERS, 1.0f, 0.6f);
 
-        ServerScheduler.scheduleUntil(serverLevel, () -> {
-            if (ticks.incrementAndGet() >= 30) {
-                done.set(true);
-                return;
+            if (caster instanceof ServerPlayer sp) {
+                sp.sendSystemMessage(Component.translatable("ability.lotmcraft.justice_language.death_declared",
+                                Component.literal(targetName).withStyle(ChatFormatting.WHITE))
+                        .withStyle(ChatFormatting.DARK_RED));
             }
+        }else {
+            AtomicBoolean done = new AtomicBoolean(false);
+            AtomicInteger ticks = new AtomicInteger(0);
 
-            Vec3 casterCenter = caster.position().add(0, 0.5, 0);
-            Vec3 targetCenter = target.position().add(0, 0.5, 0);
-            Vec3 dir = targetCenter.subtract(casterCenter).normalize();
-            double dist = casterCenter.distanceTo(targetCenter);
+            ServerScheduler.scheduleUntil(serverLevel, () -> {
+                if (ticks.incrementAndGet() >= 30) {
+                    done.set(true);
+                    return;
+                }
 
-            Vec3 trail = caster.position().add(0, 1, 0);
-            serverLevel.sendParticles(DUST_GOLD, trail.x, trail.y, trail.z, 3, 0.08, 0.12, 0.08, 0);
-            serverLevel.sendParticles(DUST_PALE, trail.x, trail.y, trail.z, 2, 0.05, 0.08, 0.05, 0);
-            serverLevel.sendParticles(ParticleTypes.ENCHANT, trail.x, trail.y, trail.z, 2, 0.1, 0.2, 0.1, 0.06);
+                Vec3 casterCenter = caster.position().add(0, 0.5, 0);
+                Vec3 targetCenter = target.position().add(0, 0.5, 0);
+                Vec3 dir = targetCenter.subtract(casterCenter).normalize();
+                double dist = casterCenter.distanceTo(targetCenter);
 
-            Vec3 behind = caster.position().add(0, 1, 0).subtract(dir.scale(0.8));
-            serverLevel.sendParticles(DUST_GOLD, behind.x, behind.y, behind.z, 2, 0.06, 0.06, 0.06, 0);
+                Vec3 trail = caster.position().add(0, 1, 0);
+                serverLevel.sendParticles(DUST_GOLD, trail.x, trail.y, trail.z, 3, 0.08, 0.12, 0.08, 0);
+                serverLevel.sendParticles(DUST_PALE, trail.x, trail.y, trail.z, 2, 0.05, 0.08, 0.05, 0);
+                serverLevel.sendParticles(ParticleTypes.ENCHANT, trail.x, trail.y, trail.z, 2, 0.1, 0.2, 0.1, 0.06);
 
-            if (dist <= 1.8) {
-                done.set(true);
-                spawnDeathImpact(serverLevel, caster, target, dir);
-                return;
-            }
+                Vec3 behind = caster.position().add(0, 1, 0).subtract(dir.scale(0.8));
+                serverLevel.sendParticles(DUST_GOLD, behind.x, behind.y, behind.z, 2, 0.06, 0.06, 0.06, 0);
 
-            caster.setDeltaMovement(dir.scale(1.5));
-            caster.hurtMarked = true;
-            caster.hasImpulse = true;
+                if (dist <= 1.8) {
+                    done.set(true);
+                    spawnDeathImpact(serverLevel, caster, target, dir);
+                    return;
+                }
 
-        }, 1, null, done, () -> AbilityUtil.getTimeInArea(caster, new de.jakob.lotm.util.data.Location(caster.position(), serverLevel)));
+                caster.setDeltaMovement(dir.scale(1.5));
+                caster.hurtMarked = true;
+                caster.hasImpulse = true;
 
+            }, 1, null, done, () -> AbilityUtil.getTimeInArea(caster, new de.jakob.lotm.util.data.Location(caster.position(), serverLevel)));
+        };
         NeoForge.EVENT_BUS.post(new AbilityUsedEvent(serverLevel, caster.position(), caster, this, interactionFlags, 20, 20 * 2));
     }
 
     private void spawnDeathImpact(ServerLevel serverLevel, LivingEntity caster, LivingEntity target, Vec3 dir) {
         target.hurt(ModDamageTypes.source(serverLevel, ModDamageTypes.BEYONDER_GENERIC, caster),
-                (float) DamageLookup.lookupDamage(6, 0.9) * multiplier(caster));
+                (float) DamageLookup.lookupDamage(6, 0.9) * (int )Math.max (multiplier(caster)/4,1));
         target.setDeltaMovement(dir.x * 2.2, 0.45, dir.z * 2.2);
         target.hurtMarked = true;
 
