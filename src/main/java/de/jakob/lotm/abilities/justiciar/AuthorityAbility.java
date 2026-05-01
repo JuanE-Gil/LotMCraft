@@ -8,6 +8,7 @@ import de.jakob.lotm.util.helper.AbilityUtil;
 import de.jakob.lotm.util.helper.ParticleUtil;
 import de.jakob.lotm.util.scheduling.ServerScheduler;
 import net.minecraft.core.Holder;
+import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -22,6 +23,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.NeoForge;
+import org.joml.Vector3f;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -37,6 +39,8 @@ public class AuthorityAbility extends SelectableAbility {
         interactionRadius = 15;
         hasOptimalDistance = false;
     }
+
+    private static final DustParticleOptions GOLD_DUST      = new DustParticleOptions(new Vector3f(1.0f, 0.78f, 0.0f), 1.4f);
 
     @Override
     public Map<String, Integer> getRequirements() {
@@ -85,15 +89,16 @@ public class AuthorityAbility extends SelectableAbility {
         Location loc = new Location(center, level);
 
         ParticleUtil.createParticleSpirals(
-                ParticleTypes.FLAME, loc,
+                ParticleTypes.END_ROD, loc,
                 0.5, radius, 3.0, 1.8, 1.5,
-                25, 3, 4
+                30, 3, 4
         );
 
         ServerScheduler.scheduleForDuration(0, 2, 25, () -> {
-            ParticleUtil.spawnCircleParticles(level, ParticleTypes.FLAME, center, radius, 48);
-            ParticleUtil.spawnCircleParticles(level, ParticleTypes.END_ROD, center, radius * 0.6, 24);
-            ParticleUtil.spawnSphereParticles(level, ParticleTypes.FLAME, center, radius * 0.3, 6);
+            ParticleUtil.spawnCircleParticles(level, ParticleTypes.END_ROD,   center, radius,        64);
+            ParticleUtil.spawnCircleParticles(level, GOLD_DUST, center, radius * 0.65, 40);
+            ParticleUtil.spawnSphereParticles(level, GOLD_DUST, center, radius * 0.25, 12);
+            ParticleUtil.spawnSphereParticles(level, ParticleTypes.END_ROD,   center, radius * 0.1,   6);
         }, level);
     }
 
@@ -117,10 +122,12 @@ public class AuthorityAbility extends SelectableAbility {
             target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 20 * 8 * scale, 0));
             applyStunIfEnhanced(entity, target);
 
+            // Glowing golden cage effect around stripped targets
             Vec3 targetPos = target.position().add(0, 1, 0);
-            ServerScheduler.scheduleForDuration(0, 3, 20, () ->
-                            ParticleUtil.spawnSphereParticles(serverLevel, ParticleTypes.FLAME, targetPos, 0.8, 4),
-                    serverLevel);
+            ServerScheduler.scheduleForDuration(0, 3, 20, () -> {
+                ParticleUtil.spawnSphereParticles(serverLevel, GOLD_DUST, targetPos, 0.9, 6);
+                ParticleUtil.spawnSphereParticles(serverLevel, ParticleTypes.END_ROD,   targetPos, 0.5, 3);
+            }, serverLevel);
         });
 
         NeoForge.EVENT_BUS.post(new AbilityUsedEvent(serverLevel, center, entity, this, interactionFlags, radius, 20 * 2));
@@ -141,11 +148,17 @@ public class AuthorityAbility extends SelectableAbility {
             target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 20 * 8 * scale, 0));
             applyStunIfEnhanced(entity, target);
 
+            // Tight golden spiral rising from each slowed target — chains of authority
             Location targetLoc = new Location(target.position().add(0, 0.1, 0), serverLevel);
             ParticleUtil.createParticleSpirals(
-                    ParticleTypes.FLAME, targetLoc,
-                    0.3, 0.8, 2.0, 1.0, 1.2,
-                    30, 2, 3
+                    GOLD_DUST, targetLoc,
+                    0.3, 0.9, 2.2, 1.0, 1.2,
+                    35, 2, 3
+            );
+            ParticleUtil.createParticleSpirals(
+                    ParticleTypes.END_ROD, targetLoc,
+                    0.15, 0.9, 2.2, 1.0, 1.4,
+                    20, 2, 3
             );
         });
 
@@ -185,8 +198,9 @@ public class AuthorityAbility extends SelectableAbility {
 
                 Vec3 targetPos = target.position().add(0, 1, 0);
                 ServerScheduler.scheduleForDuration(0, 2, 15, () -> {
-                    ParticleUtil.spawnCircleParticles(serverLevel, ParticleTypes.FLAME, targetPos, 0.6, 12);
-                    ParticleUtil.spawnParticles(serverLevel, ParticleTypes.LAVA, targetPos, 3, 0.4);
+                    ParticleUtil.spawnCircleParticles(serverLevel, GOLD_DUST, targetPos, 0.7, 16);
+                    ParticleUtil.spawnCircleParticles(serverLevel, ParticleTypes.END_ROD,   targetPos, 0.4,  8);
+                    ParticleUtil.spawnSphereParticles(serverLevel, GOLD_DUST, targetPos, 0.3,  5);
                 }, serverLevel);
             }
         });

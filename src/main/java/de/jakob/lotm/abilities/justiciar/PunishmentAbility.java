@@ -252,7 +252,7 @@ public class PunishmentAbility extends Ability {
 
         LivingEntity user      = event.getEntity();
         if(user == null) return;
-        UUID         casterUUID = TARGET_TO_CASTER.get(user.getUUID());
+        UUID casterUUID = TARGET_TO_CASTER.get(user.getUUID());
         if (casterUUID == null) return;
 
         ServerPlayer casterPlayer = serverLevel.getServer().getPlayerList().getPlayer(casterUUID);
@@ -274,7 +274,7 @@ public class PunishmentAbility extends Ability {
     public static void onEntityKilled(LivingDeathEvent event) {
         if (event.getEntity().level().isClientSide) return;
         if (!(event.getEntity().level() instanceof ServerLevel serverLevel)) return;
-        if(event.getSource().getEntity() == null || !(event.getSource().getEntity() instanceof LivingEntity)) return;
+        if(!(event.getSource().getEntity() instanceof LivingEntity)) return;
 
         UUID deadUUID = event.getEntity().getUUID();
 

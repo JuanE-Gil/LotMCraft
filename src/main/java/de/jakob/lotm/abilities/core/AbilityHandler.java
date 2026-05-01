@@ -263,18 +263,16 @@ public class AbilityHandler {
         abilities.add(new JusticeLanguageAbility("justice_language_ability"));
         abilities.add(new ConfinementAbility("confinement_ability"));
         abilities.add(new PunishmentAbility("punishment_ability"));
-
-
-//        abilities.add(new LawAbility("law_ability"));
-//        abilities.add(new ExecutionAbility("execution_ability"));
-//        abilities.add(new BalancingAbility("balancing_ability"));
-//        abilities.add(new SwordOfJudgmentAbility("sword_of_judgment_ability"));
-//        abilities.add(new DeliveringJudgmentAbility("delivering_judgment_ability"));
-//        abilities.add(new ExileOfBalanceAbility("exile_of_balance_ability"));
-//        abilities.add(new IndividualBalanceAbility("individual_balance_ability"));
-//        abilities.add(new OrderProxyAbility("order_proxy_ability"));
-//        abilities.add(new AncientCourtOfJudgmentAbility("ancient_court_of_judgment_ability"));
-//        abilities.add(new WorldJudgmentAbility("world_judgment_ability"));
+        abilities.add(new LawAbility("law_ability"));
+        abilities.add(new ExecutionAbility("execution_ability"));
+        abilities.add(new BalancingAbility("balancing_ability"));
+        abilities.add(new SwordOfJudgmentAbility("sword_of_judgment_ability"));
+        abilities.add(new DeliveringJudgmentAbility("delivering_judgment_ability"));
+        abilities.add(new ExileOfBalanceAbility("exile_of_balance_ability"));
+        abilities.add(new IndividualBalanceAbility("individual_balance_ability"));
+        abilities.add(new OrderProxyAbility("order_proxy_ability"));
+        abilities.add(new AncientCourtOfJudgmentAbility("ancient_court_of_judgment_ability"));
+        abilities.add(new WorldJudgmentAbility("world_judgment_ability"));
 
 
         // ERROR PATHWAY
