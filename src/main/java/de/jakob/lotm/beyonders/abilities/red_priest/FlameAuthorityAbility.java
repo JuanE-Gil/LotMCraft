@@ -128,7 +128,7 @@ public class FlameAuthorityAbility extends SelectableAbility {
         SpearOfDestructionProjectileEntity spear = new SpearOfDestructionProjectileEntity(serverLevel, entity, damage, BeyonderData.isGriefingEnabled(entity));
 
         spear.setPos(startPos.x, startPos.y, startPos.z);
-        spear.shoot(direction.x, direction.y, direction.z, 3f, 0);
+        spear.shoot(direction.x, direction.y, direction.z, 6f, 0);
         serverLevel.addFreshEntity(spear);
     }
 }
