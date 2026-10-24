@@ -42,7 +42,6 @@ public final class Authentication {
 
     private static ItemStack heldStack(ServerPlayer p) {
         ItemStack main = p.getMainHandItem();
-        // the seal itself is the casting focus, so look at the other hand
         if (main.isEmpty() || main.getItem() instanceof NotarySealItem) return p.getOffhandItem();
         return main;
     }

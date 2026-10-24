@@ -3,7 +3,6 @@ package de.jakob.lotm.beyonders.abilities.sun.notarization.contract;
 import net.minecraft.network.chat.Component;
 
 public enum ContractAction {
-    /** Duration is a DEADLINE: party A must drop the item beside party B before it runs out. */
     DROP_ITEM("drop_item", true, 5, 10, 15, 30, 60, 120, 300),
     NOT_KILL("not_kill", false, 30, 60, 300, 600, 1800, 3600),
     NOT_DAMAGE("not_damage", false, 30, 60, 300, 600, 1800, 3600),

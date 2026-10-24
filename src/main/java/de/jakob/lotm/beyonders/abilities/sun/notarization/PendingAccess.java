@@ -24,7 +24,6 @@ public final class PendingAccess {
         }
     }
 
-    /** True if the player is a party of this contract and has not answered yet. */
     public static boolean needsAnswer(Contract c, UUID player) {
         return c.involves(player) && !(player.equals(c.partyA) ? c.confirmedA : c.confirmedB);
     }

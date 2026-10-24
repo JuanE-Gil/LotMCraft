@@ -26,13 +26,13 @@ public final class BreachPenalty {
         int ticks = (30 + level * 30) * 20;
         add(p, MobEffects.WEAKNESS, ticks, level / 3);
         add(p, MobEffects.MOVEMENT_SLOWDOWN, ticks, level / 3);
-        add(p, MobEffects.GLOWING, ticks, 0); // branded in sunlight
+        add(p, MobEffects.GLOWING, ticks, 0);
         if (level >= 3) add(p, MobEffects.DIG_SLOWDOWN, ticks, level / 4);
         if (level >= 4) add(p, MobEffects.HUNGER, ticks, level / 2);
         if (level >= 5) add(p, MobEffects.CONFUSION, ticks / 4, 0);
         if (level >= 6) add(p, MobEffects.BLINDNESS, ticks / 5, 0);
         if (level >= 8) add(p, MobEffects.DARKNESS, ticks / 3, 0);
-        float dmg = Math.min(level * 1.5f, p.getHealth() - 1f); // never lethal
+        float dmg = Math.min(level * 1.5f, p.getHealth() - 1f);
         if (dmg > 0) { p.invulnerableTime = 0; p.hurt(p.damageSources().magic(), dmg); }
         ContractSavedData.get(p.server).seal(p.getUUID(), now + ticks);
         ContractFx.judgment(p, level);
@@ -52,15 +52,5 @@ public final class BreachPenalty {
         ContractSavedData.get(p.server).setEmpowered(p.getUUID(), now + ticks, level);
         ContractFx.blessing(p);
         p.sendSystemMessage(Component.translatable("contractnotary.msg.blessing", level).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
-    }
-
-    /** For your ability system: true while the player is barred from using abilities after a breach. */
-    public static boolean isSealed(ServerPlayer p) {
-        return ContractSavedData.get(p.server).isSealed(p.getUUID(), p.server.overworld().getGameTime());
-    }
-
-    /** For your ability system: 0 if none, else 1..10 while a notary empowerment is active. Scale your powers with it. */
-    public static int empowermentLevel(ServerPlayer p) {
-        return ContractSavedData.get(p.server).empowermentLevel(p.getUUID(), p.server.overworld().getGameTime());
     }
 }

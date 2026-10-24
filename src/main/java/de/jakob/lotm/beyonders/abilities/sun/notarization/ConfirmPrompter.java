@@ -53,7 +53,6 @@ public final class ConfirmPrompter {
     @SubscribeEvent
     public static void onStopped(ServerStoppedEvent e) { PROMPTED.clear(); }
 
-    /** /contractmenu reopens the menu if you closed it by accident. */
     @SubscribeEvent
     public static void onCommands(RegisterCommandsEvent e) {
         e.getDispatcher().register(Commands.literal("contractmenu").executes(ctx -> {
