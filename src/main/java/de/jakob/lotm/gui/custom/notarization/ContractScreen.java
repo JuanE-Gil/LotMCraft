@@ -147,14 +147,13 @@ public class ContractScreen extends AbstractContainerScreen<ContractMenu> {
             int idx = pageStart() + i;
             boolean sel = drop && idx == selSlot;
             g.blit(WIDGETS, x, iy, sel ? 154 : 136, 0, 18, 18, 256, 64);
-            if (minecraft != null && minecraft.player != null) {
-                ItemStack st = minecraft.player.getInventory().getItem(idx);
-                g.renderItem(st, x + 1, iy + 1);
-                g.renderItemDecorations(font, st, x + 1, iy + 1);
-                if (drop && inside(mx, my, x, iy, 18, 18)) {
-                    g.fill(x + 1, iy + 1, x + 17, iy + 17, 0x80FFFFFF);
-                    if (!st.isEmpty()) hoverStack = st;
-                }
+            Candidate a = candidates.get(selA);
+            ItemStack st = a.inventory().get(idx);
+            g.renderItem(st, x + 1, iy + 1);
+            g.renderItemDecorations(font, st, x + 1, iy + 1);
+            if (drop && inside(mx, my, x, iy, 18, 18)) {
+                g.fill(x + 1, iy + 1, x + 17, iy + 17, 0x80FFFFFF);
+                if (!st.isEmpty()) hoverStack = st;
             }
         }
         g.drawString(font, (invPage + 1) + "/4", left + 208, iy + 5, 0x3B2A14, false);

@@ -54,7 +54,7 @@ public final class ContractManager {
         List<Candidate> out = new ArrayList<>();
         for (ServerPlayer p : caster.server.getPlayerList().getPlayers())
             if (isSelectable(caster, p))
-                out.add(new Candidate(p.getUUID(), p.getGameProfile().getName(), SequenceApi.sequenceOf(p)));
+                out.add(new Candidate(p.getUUID(), p.getGameProfile().getName(), SequenceApi.sequenceOf(p), p.getInventory().items));
         return out;
     }
 
