@@ -65,10 +65,13 @@ public abstract class SelectableAbility extends Ability {
     }
 
     public void nextAbility(LivingEntity entity) {
-        int sequence = entity instanceof Player player && player.hasPermissions(2) ?
-                0 : BeyonderData.getSequence(entity);
+        int sequence = BeyonderData.getSequence(entity);
         if(getSequenceDependantAbilityNames(sequence).length == 0)
             return;
+
+        for (String sequenceDependantAbilityName : getSequenceDependantAbilityNames(sequence)) {
+            System.out.println("ABILITY: " + sequenceDependantAbilityName);
+        }
 
         if(!selectedAbilities.containsKey(entity.getUUID())) {
             selectedAbilities.put(entity.getUUID(), 0);
@@ -84,8 +87,7 @@ public abstract class SelectableAbility extends Ability {
     }
 
     public String getSelectedAbility(LivingEntity entity) {
-        int sequence = entity instanceof Player player && player.hasPermissions(2) ?
-                0 : BeyonderData.getSequence(entity);
+        int sequence = BeyonderData.getSequence(entity);
 
         if(getSequenceDependantAbilityNames(sequence).length == 0)
             return "";
@@ -105,9 +107,7 @@ public abstract class SelectableAbility extends Ability {
     }
 
     public void setSelectedAbility(ServerPlayer player, int selectedAbility) {
-        int sequence = player.hasPermissions(2) ?
-                0 : BeyonderData.getSequence(player);
-
+        int sequence = BeyonderData.getSequence(player);
         if(getSequenceDependantAbilityNames(sequence).length == 0)
             return;
 
@@ -115,12 +115,6 @@ public abstract class SelectableAbility extends Ability {
             return;
 
         selectedAbilities.put(player.getUUID(), selectedAbility);
-    }
-
-    public void setSelectedAbilityClient(UUID uuid, int selectedAbility) {
-        if(selectedAbility < 0 || selectedAbility >= getAllAbilityNames().length)
-            return;
-        selectedAbilities.put(uuid, selectedAbility);
     }
 
     public void previousAbility(LivingEntity entity) {
