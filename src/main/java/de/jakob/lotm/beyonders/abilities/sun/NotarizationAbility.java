@@ -30,7 +30,7 @@ public class NotarizationAbility extends SelectableAbility {
     }
 
     @Override
-    protected String[] getAbilityNames() {
+    protected String[] getAllAbilityNames() {
         return new String[]{"ability.lotmcraft.notarization.contract", "ability.lotmcraft.notarization.investigate"};
     }
 

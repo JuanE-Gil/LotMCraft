@@ -2,6 +2,7 @@ package de.jakob.lotm.beyonders.abilities.core;
 
 import de.jakob.lotm.network.PacketHandler;
 import de.jakob.lotm.network.packets.toServer.AbilitySelectionPacket;
+import de.jakob.lotm.util.BeyonderData;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -23,10 +24,14 @@ public abstract class SelectableAbility extends Ability {
         return selectedAbilities.getOrDefault(uuid, 0);
     }
 
-    protected abstract String[] getAbilityNames();
+    protected abstract String[] getAllAbilityNames();
+
+    public String[] getSequenceDependantAbilityNames(int sequence) {
+        return getAllAbilityNames();
+    }
 
     public String[] getAbilityNamesCopy() {
-        return getAbilityNames().clone();
+        return getAllAbilityNames().clone();
     }
 
     @Override
@@ -45,6 +50,11 @@ public abstract class SelectableAbility extends Ability {
             selectedAbility = castedSubAbility.get(entity.getUUID());
             castedSubAbility.remove(entity.getUUID());
         }
+
+        if(selectedAbility >= getSequenceDependantAbilityNames(BeyonderData.getSequence(entity)).length) {
+            return;
+        }
+
         castSelectedAbility(level, entity, selectedAbility);
     }
 
@@ -55,7 +65,9 @@ public abstract class SelectableAbility extends Ability {
     }
 
     public void nextAbility(LivingEntity entity) {
-        if(getAbilityNames().length == 0)
+        int sequence = entity instanceof Player player && player.hasPermissions(2) ?
+                0 : BeyonderData.getSequence(entity);
+        if(getSequenceDependantAbilityNames(sequence).length == 0)
             return;
 
         if(!selectedAbilities.containsKey(entity.getUUID())) {
@@ -64,7 +76,7 @@ public abstract class SelectableAbility extends Ability {
 
         int selectedAbility = selectedAbilities.get(entity.getUUID());
         selectedAbility++;
-        if(selectedAbility >= getAbilityNames().length) {
+        if(selectedAbility >= getSequenceDependantAbilityNames(sequence).length) {
             selectedAbility = 0;
         }
         selectedAbilities.put(entity.getUUID(), selectedAbility);
@@ -72,7 +84,10 @@ public abstract class SelectableAbility extends Ability {
     }
 
     public String getSelectedAbility(LivingEntity entity) {
-        if(getAbilityNames().length == 0)
+        int sequence = entity instanceof Player player && player.hasPermissions(2) ?
+                0 : BeyonderData.getSequence(entity);
+
+        if(getSequenceDependantAbilityNames(sequence).length == 0)
             return "";
 
         if(!selectedAbilities.containsKey(entity.getUUID())) {
@@ -80,27 +95,39 @@ public abstract class SelectableAbility extends Ability {
         }
 
         int selectedAbility = selectedAbilities.get(entity.getUUID());
-        return getAbilityNames()[selectedAbility];
+
+        if(selectedAbility >= getSequenceDependantAbilityNames(sequence).length) {
+            selectedAbility = getSequenceDependantAbilityNames(sequence).length -1;
+            selectedAbilities.put(entity.getUUID(), selectedAbility);
+        }
+
+        return getAllAbilityNames()[selectedAbility];
     }
 
     public void setSelectedAbility(ServerPlayer player, int selectedAbility) {
-        if(getAbilityNames().length == 0)
+        int sequence = player.hasPermissions(2) ?
+                0 : BeyonderData.getSequence(player);
+
+        if(getSequenceDependantAbilityNames(sequence).length == 0)
             return;
 
-        if(selectedAbility < 0 || selectedAbility >= getAbilityNames().length)
+        if(selectedAbility < 0 || selectedAbility >= getSequenceDependantAbilityNames(sequence).length)
             return;
 
         selectedAbilities.put(player.getUUID(), selectedAbility);
     }
 
-    public void setSelectedAbilityClient(java.util.UUID uuid, int selectedAbility) {
-        if(selectedAbility < 0 || selectedAbility >= getAbilityNames().length)
+    public void setSelectedAbilityClient(UUID uuid, int selectedAbility) {
+        if(selectedAbility < 0 || selectedAbility >= getAllAbilityNames().length)
             return;
         selectedAbilities.put(uuid, selectedAbility);
     }
 
     public void previousAbility(LivingEntity entity) {
-        if(getAbilityNames().length == 0)
+        int sequence = entity instanceof Player player && player.hasPermissions(2) ?
+                0 : BeyonderData.getSequence(entity);
+
+        if(getSequenceDependantAbilityNames(sequence).length == 0)
             return;
 
         if(!selectedAbilities.containsKey(entity.getUUID())) {
@@ -110,13 +137,13 @@ public abstract class SelectableAbility extends Ability {
         int selectedAbility = selectedAbilities.get(entity.getUUID());
         selectedAbility--;
         if(selectedAbility <= -1) {
-            selectedAbility = getAbilityNames().length - 1;
+            selectedAbility = getSequenceDependantAbilityNames(sequence).length - 1;
         }
         selectedAbilities.put(entity.getUUID(), selectedAbility);
         PacketHandler.sendToServer(new AbilitySelectionPacket(getId(), selectedAbility));
     }
 
     public int getNPCSelectedAbility(LivingEntity entity, Level level) {
-        return random.nextInt(getAbilityNames().length);
+        return random.nextInt(getSequenceDependantAbilityNames(BeyonderData.getSequence(entity)).length);
     }
 }

@@ -52,7 +52,7 @@ public class FlameAuthorityAbility extends SelectableAbility {
     }
 
     @Override
-    protected String[] getAbilityNames() {
+    protected String[] getAllAbilityNames() {
         return new String[]{"ability.lotmcraft.flame_authority.destruction_spear", "ability.lotmcraft.flame_authority.inferno", "ability.lotmcraft.flame_authority.vortex"};
     }
 
